@@ -1,0 +1,49 @@
+name: transaction_mobile_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.4 <4.0.0'
+
+dependencies:
+  device_preview: ^1.2.0
+  flutter:
+    sdk: flutter
+  flutter_contacts: ^1.1.9+2
+  go_router: ^14.2.3
+  permission_handler: ^11.3.1
+  responsive_builder: ^0.7.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    
+
+  fonts:
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/open_sans/OpenSans-Bold.ttf
+        - asset: assets/fonts/open_sans/OpenSans-BoldItalic.ttf
+        - asset: assets/fonts/open_sans/OpenSans-ExtraBold.ttf
+        - asset: assets/fonts/open_sans/OpenSans-ExtraBoldItalic.ttf
+        - asset: assets/fonts/open_sans/OpenSans-Italic.ttf
+        - asset: assets/fonts/open_sans/OpenSans-Light.ttf
+        - asset: assets/fonts/open_sans/OpenSans-LightItalic.ttf
+        - asset: assets/fonts/open_sans/OpenSans-Medium.ttf
+        - asset: assets/fonts/open_sans/OpenSans-MediumItalic.ttf
+        - asset: assets/fonts/open_sans/OpenSans-Regular.ttf
+        - asset: assets/fonts/open_sans/OpenSans-SemiBold.ttf
+        - asset: assets/fonts/open_sans/OpenSans-SemiBoldItalic.ttf
+
+flutter_gen:
+  colors:
+    inputs:
+      - assets/colors/color_pallet.xml
