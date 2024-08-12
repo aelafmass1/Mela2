@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
-import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab.dart';
 
 import '../presentation/screens/home_screen/home_screen.dart';
 
@@ -13,12 +13,12 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
       name: RouteName.splash,
-      builder: (context, state) => const SplashScreen(),
+      builder: (context, state) => const HomeTab(),
     ),
     GoRoute(
       path: '/home',

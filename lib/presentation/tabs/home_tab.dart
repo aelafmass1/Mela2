@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/currency_rate/currency_rate_bloc.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  @override
+  void initState() {
+    context.read<CurrencyRateBloc>().add(FetchCurrencyRate());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,56 +128,33 @@ class HomeTab extends StatelessWidget {
                         ),
                       ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildBankTile(
-                                bankName: 'CBE',
-                                buyingAmount: '95.6931',
-                                imagePath: Assets.images.cbeLogo.path,
-                                tipAmount: '-40%',
-                              ),
-                              _buildBankTile(
-                                bankName: 'Abyssinia Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.abysiniaLogo.path,
-                                tipAmount: '+40%',
-                                tipColor: ColorName.green,
-                              ),
-                              _buildBankTile(
-                                bankName: 'Amhara Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.amaraBankLogo.path,
-                                tipAmount: '+40%',
-                              ),
-                              _buildBankTile(
-                                bankName: 'Ahadu Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.ahaduLogo.path,
-                                tipAmount: '-40%',
-                              ),
-                              _buildBankTile(
-                                bankName: 'Coop Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.bankOfOromo.path,
-                                tipAmount: '+40%',
-                                tipColor: ColorName.green,
-                              ),
-                              _buildBankTile(
-                                bankName: 'Bunk Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.bunaBank.path,
-                                tipAmount: '+40%',
-                                tipColor: ColorName.green,
-                              ),
-                              _buildBankTile(
-                                bankName: 'Awash Bank',
-                                buyingAmount: '95.6931 ',
-                                imagePath: Assets.images.awashBank.path,
-                                tipAmount: '+40%',
-                              ),
-                            ],
-                          ),
+                        child: BlocBuilder<CurrencyRateBloc, CurrencyRateState>(
+                          builder: (context, state) {
+                            if (state is CurrencyRateLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (state is CurrencyRateSuccess) {
+                              return ListView.builder(
+                                itemCount: state.rates.length,
+                                itemBuilder: (context, index) => _buildBankTile(
+                                  bankName: state.rates[index].bankName,
+                                  imagePath: Assets.images.cbeLogo.path,
+                                  buyingAmount:
+                                      state.rates[index].buyingRate.toString(),
+                                  tipAmount:
+                                      state.rates[index].incrementPercentage,
+                                  tipColor: (double.parse(state.rates[index]
+                                              .incrementPercentage) >=
+                                          0)
+                                      ? ColorName.green
+                                      : ColorName.red,
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          },
                         ),
                       )
                     ],
@@ -224,7 +214,7 @@ class HomeTab extends StatelessWidget {
                 right: 0,
                 top: 0,
                 child: TextWidget(
-                  text: tipAmount,
+                  text: '$tipAmount %',
                   color: tipColor ?? ColorName.red,
                   fontSize: 7,
                 ),
