@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/currency_rate/currency_rate_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -140,7 +141,8 @@ class _HomeTabState extends State<HomeTab> {
                                 itemCount: state.rates.length,
                                 itemBuilder: (context, index) => _buildBankTile(
                                   bankName: state.rates[index].bankName,
-                                  imagePath: Assets.images.cbeLogo.path,
+                                  imagePath: getBankImagePath(
+                                      state.rates[index].bankName),
                                   buyingAmount:
                                       state.rates[index].buyingRate.toString(),
                                   tipAmount:
