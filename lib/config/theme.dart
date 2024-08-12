@@ -8,6 +8,11 @@ themeData() {
     fontFamily: FontFamily.openSans,
     colorSchemeSeed: ColorName.primaryColor,
     colorScheme: ColorScheme.fromSeed(seedColor: ColorName.primaryColor),
+    appBarTheme: const AppBarTheme(
+      toolbarHeight: 0,
+      backgroundColor: ColorName.backgroundColor,
+      surfaceTintColor: ColorName.backgroundColor,
+    ),
     textTheme: const TextTheme(
         displaySmall: TextStyle(
           fontWeight: FontWeight.w600,

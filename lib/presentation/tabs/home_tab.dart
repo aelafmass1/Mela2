@@ -51,7 +51,7 @@ class HomeTab extends StatelessWidget {
                   const SizedBox(width: 10),
                   SizedBox(
                     width: 100,
-                    height: 40,
+                    height: 50,
                     child: ButtonWidget(
                       borderRadius: BorderRadius.circular(10),
                       child: const TextWidget(
@@ -234,6 +234,7 @@ class HomeTab extends StatelessWidget {
           ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
+                  vertical: 0,
                   horizontal: 15,
                 ),
                 shape: ContinuousRectangleBorder(

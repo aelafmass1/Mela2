@@ -22,13 +22,14 @@ class ButtonWidget extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.only(top: topPadding ?? 0),
         child: SizedBox(
+          height: 55,
           width: ResponsiveUtil.forScreen(
               sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
                 backgroundColor: ColorName.primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 17),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
                   borderRadius: borderRadius ?? BorderRadius.circular(15),
                 )),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -15,11 +16,10 @@ class SentTab extends StatefulWidget {
 }
 
 class _SentTabState extends State<SentTab> {
-  bool showBankSelection = false;
-  bool showTransaction = false;
   int selectedBankIndex = 0;
   String selectedBanks = '';
   double sliderWidth = 0;
+  int selectedPaymentMethodIndex = -1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +34,74 @@ class _SentTabState extends State<SentTab> {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: ButtonWidget(
+            child: TextWidget(
+              text: selectedBankIndex == 2 ? 'CONFIRM TRANSACTION' : 'Next',
+              color: Colors.white,
+              type: TextType.small,
+            ),
+            onPressed: () {
+              if (selectedBankIndex == 0) {
+                setState(() {
+                  selectedBankIndex = 1;
+                  sliderWidth = 50.sw;
+                });
+              } else if (selectedBankIndex == 1) {
+                setState(() {
+                  selectedBankIndex = 2;
+                  sliderWidth = 100.sw;
+                });
+              } else if (selectedBankIndex == 2) {
+                showDialog(
+                  context: context,
+                  builder: (_) => Dialog(
+                    insetPadding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 100.sw,
+                          width: 100.sh,
+                          decoration: BoxDecoration(
+                            color: ColorName.backgroundColor,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Assets.images.checkedLogo.image(),
+                              const SizedBox(height: 20),
+                              const TextWidget(
+                                text: 'Transaction Successful',
+                                color: Color(0xFF4D4D4D),
+                              )
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                            top: 10,
+                            right: 10,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Color(0xFF4D4D4D),
+                              ),
+                              onPressed: () {
+                                context.pop();
+                              },
+                            ))
+                      ],
+                    ),
+                  ),
+                );
+              }
+              //
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
         Stack(
           children: [
             Container(
@@ -95,8 +163,8 @@ class _SentTabState extends State<SentTab> {
                     ),
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.only(
-                          top: 12,
-                          bottom: 12,
+                          top: 10,
+                          bottom: 10,
                           left: 22,
                         ),
                         border: OutlineInputBorder(
@@ -181,8 +249,8 @@ class _SentTabState extends State<SentTab> {
                     ),
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.only(
-                          top: 12,
-                          bottom: 12,
+                          top: 10,
+                          bottom: 10,
                           left: 22,
                         ),
                         border: OutlineInputBorder(
@@ -205,7 +273,7 @@ class _SentTabState extends State<SentTab> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
               child: Column(
                 children: [
                   Row(
@@ -254,21 +322,6 @@ class _SentTabState extends State<SentTab> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: ButtonWidget(
-                  child: const TextWidget(
-                    text: 'Next',
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      selectedBankIndex = 1;
-                      sliderWidth = 50.sw;
-                    });
-                  }),
-            ),
           ],
         ),
       ),
@@ -283,7 +336,7 @@ class _SentTabState extends State<SentTab> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -315,8 +368,8 @@ class _SentTabState extends State<SentTab> {
                 ),
                 decoration: InputDecoration(
                     contentPadding: const EdgeInsets.only(
-                      top: 12,
-                      bottom: 12,
+                      top: 10,
+                      bottom: 10,
                       left: 22,
                     ),
                     border: OutlineInputBorder(
@@ -338,7 +391,7 @@ class _SentTabState extends State<SentTab> {
               const SizedBox(height: 30),
               Container(
                 width: 100.sh,
-                height: 55,
+                height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
@@ -460,27 +513,14 @@ class _SentTabState extends State<SentTab> {
                     fontWeight: FontWeight.w300,
                   ),
                   contentPadding: const EdgeInsets.only(
-                    top: 12,
-                    bottom: 12,
+                    top: 10,
+                    bottom: 10,
                     left: 22,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-              ),
-              const SizedBox(height: 50),
-              ButtonWidget(
-                child: const TextWidget(
-                  text: 'Next',
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    selectedBankIndex = 2;
-                    sliderWidth = 100.sw;
-                  });
-                },
               ),
             ],
           ),
@@ -498,7 +538,7 @@ class _SentTabState extends State<SentTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               BackButtonWidget(
                 padding: EdgeInsets.zero,
                 onPressed: () {
@@ -530,43 +570,69 @@ class _SentTabState extends State<SentTab> {
                       type: TextType.small,
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      height: 50,
-                      width: 100.sw,
-                      padding: const EdgeInsets.only(left: 20),
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                          // color: Colors.amber,
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: Colors.black54,
-                          )),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextWidget(
-                          text: 'Bank Account',
-                          fontSize: 15,
-                          color: const Color(0xFF4D4D4D).withOpacity(0.7),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedPaymentMethodIndex = 0;
+                        });
+                      },
+                      child: Container(
+                        height: 55,
+                        width: 100.sw,
+                        padding: const EdgeInsets.only(left: 20),
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                            color: selectedPaymentMethodIndex == 0
+                                ? ColorName.primaryColor
+                                : null,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: selectedPaymentMethodIndex == 0
+                                  ? ColorName.primaryColor
+                                  : Colors.black54,
+                            )),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextWidget(
+                            text: 'Bank Account',
+                            fontSize: 15,
+                            color: selectedPaymentMethodIndex == 0
+                                ? Colors.white
+                                : const Color(0xFF4D4D4D).withOpacity(0.7),
+                          ),
                         ),
                       ),
                     ),
-                    Container(
-                      height: 50,
-                      width: 100.sw,
-                      padding: const EdgeInsets.only(left: 20),
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                          // color: Colors.amber,
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: Colors.black54,
-                          )),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextWidget(
-                          text: 'Debit Card',
-                          fontSize: 15,
-                          color: const Color(0xFF4D4D4D).withOpacity(0.7),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedPaymentMethodIndex = 1;
+                        });
+                      },
+                      child: Container(
+                        height: 55,
+                        width: 100.sw,
+                        padding: const EdgeInsets.only(left: 20),
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                            color: selectedPaymentMethodIndex == 1
+                                ? ColorName.primaryColor
+                                : null,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: selectedPaymentMethodIndex == 1
+                                  ? ColorName.primaryColor
+                                  : Colors.black54,
+                            )),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextWidget(
+                            text: 'Debit Card',
+                            fontSize: 15,
+                            color: selectedPaymentMethodIndex == 1
+                                ? ColorName.white
+                                : const Color(0xFF4D4D4D).withOpacity(0.7),
+                          ),
                         ),
                       ),
                     ),
@@ -575,7 +641,7 @@ class _SentTabState extends State<SentTab> {
               ),
               Container(
                 width: 100.sw,
-                margin: const EdgeInsets.only(top: 15),
+                margin: const EdgeInsets.only(top: 20),
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
@@ -653,15 +719,6 @@ class _SentTabState extends State<SentTab> {
                   ],
                 ),
               ),
-              SizedBox(height: 15),
-              ButtonWidget(
-                  child: const TextWidget(
-                    text: 'CONFIRM TRANSACTION',
-                    color: Colors.white,
-                    type: TextType.small,
-                  ),
-                  onPressed: () {}),
-              SizedBox(height: 15),
             ],
           ),
         ),

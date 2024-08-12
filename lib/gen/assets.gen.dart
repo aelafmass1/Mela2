@@ -44,6 +44,10 @@ class $AssetsImagesGen {
   AssetGenImage get cbeLogo =>
       const AssetGenImage('assets/images/cbe_logo.png');
 
+  /// File path: assets/images/checked_logo.png
+  AssetGenImage get checkedLogo =>
+      const AssetGenImage('assets/images/checked_logo.png');
+
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
 
@@ -81,6 +85,7 @@ class $AssetsImagesGen {
         bankOfOromo,
         bunaBank,
         cbeLogo,
+        checkedLogo,
         dollar,
         ethiopianFlag,
         newsBackground,

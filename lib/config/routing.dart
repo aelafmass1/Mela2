@@ -13,7 +13,7 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/home',
   routes: [
     GoRoute(
       path: '/',

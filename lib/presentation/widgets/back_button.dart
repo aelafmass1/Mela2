@@ -10,7 +10,7 @@ class BackButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? const EdgeInsets.only(top: 50, bottom: 30),
+      padding: padding ?? const EdgeInsets.only(top: 20, bottom: 30),
       child: GestureDetector(
         onTap: onPressed ??
             () {
