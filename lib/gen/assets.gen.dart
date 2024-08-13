@@ -12,6 +12,10 @@ import 'package:flutter/widgets.dart';
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  /// File path: assets/images/abay_bank_logo.png
+  AssetGenImage get abayBankLogo =>
+      const AssetGenImage('assets/images/abay_bank_logo.png');
+
   /// File path: assets/images/abysinia_logo.png
   AssetGenImage get abysiniaLogo =>
       const AssetGenImage('assets/images/abysinia_logo.png');
@@ -36,6 +40,10 @@ class $AssetsImagesGen {
   AssetGenImage get bankOfOromo =>
       const AssetGenImage('assets/images/bank_of_oromo.png');
 
+  /// File path: assets/images/birhan_bank_logo.png
+  AssetGenImage get birhanBankLogo =>
+      const AssetGenImage('assets/images/birhan_bank_logo.png');
+
   /// File path: assets/images/buna_bank.png
   AssetGenImage get bunaBank =>
       const AssetGenImage('assets/images/buna_bank.png');
@@ -48,12 +56,36 @@ class $AssetsImagesGen {
   AssetGenImage get checkedLogo =>
       const AssetGenImage('assets/images/checked_logo.png');
 
+  /// File path: assets/images/dashn_bank_logo.png
+  AssetGenImage get dashnBankLogo =>
+      const AssetGenImage('assets/images/dashn_bank_logo.png');
+
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
+
+  /// File path: assets/images/enat_bank_logo.png
+  AssetGenImage get enatBankLogo =>
+      const AssetGenImage('assets/images/enat_bank_logo.png');
 
   /// File path: assets/images/ethiopian_flag.png
   AssetGenImage get ethiopianFlag =>
       const AssetGenImage('assets/images/ethiopian_flag.png');
+
+  /// File path: assets/images/geda_bank_logo.png
+  AssetGenImage get gedaBankLogo =>
+      const AssetGenImage('assets/images/geda_bank_logo.png');
+
+  /// File path: assets/images/global_bank_logo.png
+  AssetGenImage get globalBankLogo =>
+      const AssetGenImage('assets/images/global_bank_logo.png');
+
+  /// File path: assets/images/hibret_bank_logo.png
+  AssetGenImage get hibretBankLogo =>
+      const AssetGenImage('assets/images/hibret_bank_logo.png');
+
+  /// File path: assets/images/hijra_bank_logo.png
+  AssetGenImage get hijraBankLogo =>
+      const AssetGenImage('assets/images/hijra_bank_logo.png');
 
   /// File path: assets/images/news_background.png
   AssetGenImage get newsBackground =>
@@ -63,36 +95,79 @@ class $AssetsImagesGen {
   AssetGenImage get nextArrow =>
       const AssetGenImage('assets/images/next_arrow.png');
 
+  /// File path: assets/images/nib_bank_logo.png
+  AssetGenImage get nibBankLogo =>
+      const AssetGenImage('assets/images/nib_bank_logo.png');
+
+  /// File path: assets/images/oromia_bank_logo.png
+  AssetGenImage get oromiaBankLogo =>
+      const AssetGenImage('assets/images/oromia_bank_logo.png');
+
   /// File path: assets/images/profile_image.png
   AssetGenImage get profileImage =>
       const AssetGenImage('assets/images/profile_image.png');
+
+  /// File path: assets/images/sinqe_bank_logo.png
+  AssetGenImage get sinqeBankLogo =>
+      const AssetGenImage('assets/images/sinqe_bank_logo.png');
 
   /// File path: assets/images/splash_logo.png
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
 
+  /// File path: assets/images/tsedey_bank_logo.png
+  AssetGenImage get tsedeyBankLogo =>
+      const AssetGenImage('assets/images/tsedey_bank_logo.png');
+
+  /// File path: assets/images/tsehay_bank_logo.png
+  AssetGenImage get tsehayBankLogo =>
+      const AssetGenImage('assets/images/tsehay_bank_logo.png');
+
   /// File path: assets/images/usa_flag.png
   AssetGenImage get usaFlag =>
       const AssetGenImage('assets/images/usa_flag.png');
 
+  /// File path: assets/images/wegagen_bank_logo.png
+  AssetGenImage get wegagenBankLogo =>
+      const AssetGenImage('assets/images/wegagen_bank_logo.png');
+
+  /// File path: assets/images/zemen_bank_logo.png
+  AssetGenImage get zemenBankLogo =>
+      const AssetGenImage('assets/images/zemen_bank_logo.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
+        abayBankLogo,
         abysiniaLogo,
         ahaduLogo,
         amaraBankLogo,
         awashBank,
         backArrow,
         bankOfOromo,
+        birhanBankLogo,
         bunaBank,
         cbeLogo,
         checkedLogo,
+        dashnBankLogo,
         dollar,
+        enatBankLogo,
         ethiopianFlag,
+        gedaBankLogo,
+        globalBankLogo,
+        hibretBankLogo,
+        hijraBankLogo,
         newsBackground,
         nextArrow,
+        nibBankLogo,
+        oromiaBankLogo,
         profileImage,
+        sinqeBankLogo,
         splashLogo,
-        usaFlag
+        tsedeyBankLogo,
+        tsehayBankLogo,
+        usaFlag,
+        wegagenBankLogo,
+        zemenBankLogo
       ];
 }
 
