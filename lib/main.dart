@@ -1,14 +1,40 @@
+import 'dart:async';
+
 import 'package:device_preview/device_preview.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/currency_rate/currency_rate_bloc.dart';
 import 'config/routing.dart';
 
-void main() {
-  runApp(
-    DevicePreview(enabled: false, builder: (_) => const MainApp()),
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  //Firebase analtics
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+  await analytics.setAnalyticsCollectionEnabled(true);
+  await analytics.logAppOpen();
+  //Firebase Crashlytics
+  FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
+
+  FlutterError.onError = crashlytics.recordFlutterError;
+
+  runZonedGuarded<Future<void>>(
+    () async {
+      runApp(
+        DevicePreview(enabled: false, builder: (_) => const MainApp()),
+      );
+    },
+    FirebaseCrashlytics.instance.recordError,
   );
 }
 

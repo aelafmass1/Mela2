@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
@@ -44,6 +45,22 @@ class _HomeScreenState extends State<HomeScreen>
           indicator: const BoxDecoration(),
           labelColor: Colors.white,
           unselectedLabelColor: const Color(0xFFF0F0F3).withOpacity(0.5),
+          onTap: (value) {
+            FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+            if (value == 0) {
+              analytics.logEvent(name: 'Home Tab Clicked');
+            } else if (value == 1) {
+              analytics.logEvent(name: 'Equb Tab Clicked');
+            } else if (value == 2) {
+              analytics.logEvent(name: 'Send Tab Clicked');
+            } else if (value == 2) {
+              analytics.logEvent(name: 'Send Tab Clicked');
+            } else if (value == 3) {
+              analytics.logEvent(name: 'News Tab Clicked');
+            } else if (value == 4) {
+              analytics.logEvent(name: 'Account Tab Clicked');
+            }
+          },
           tabs: const [
             Tab(
               icon: Icon(
