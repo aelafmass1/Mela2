@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:responsive_builder/responsive_builder.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_selection_dialog.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_card.dart';
+import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../bloc/equb/equb_bloc.dart';
 
 class EqubTab extends StatefulWidget {
   const EqubTab({super.key});
@@ -19,149 +24,78 @@ class _EqubTabState extends State<EqubTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.only(top: 50),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextWidget(
-              text: 'Term',
-              type: TextType.small,
-              weight: FontWeight.w300,
-            ),
-            DropdownButtonFormField(
-              padding: const EdgeInsets.only(left: 10),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              value: selectedTerm,
-              icon: const Padding(
-                padding: EdgeInsets.only(right: 10),
-                child: Icon(
-                  Icons.keyboard_arrow_down,
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'daily',
-                  child: TextWidget(
-                    text: 'Daily',
-                    type: TextType.small,
-                    weight: FontWeight.w400,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'weekly',
-                  child: TextWidget(
-                    text: 'Weekly',
-                    type: TextType.small,
-                    weight: FontWeight.w400,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'bi-weekly',
-                  child: TextWidget(
-                    text: 'Bi Weekly',
-                    type: TextType.small,
-                    weight: FontWeight.w400,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'monthly',
-                  child: TextWidget(
-                    text: 'Monthly',
-                    type: TextType.small,
-                    weight: FontWeight.w400,
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    selectedTerm = value;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: const InputDecoration(
-                hintText: 'Amount per Term',
-                suffix: Icon(Icons.attach_money),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: () async {
-                selectedContacts = await showDialog<List<Contact>>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return ContactSelectionDialog();
-                      },
-                    ) ??
-                    selectedContacts;
-
-                setState(() {
-                  selectedContacts = selectedContacts;
-                });
-              },
-              child: const Row(
+      appBar: AppBar(
+        toolbarHeight: 30,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+        ),
+        child: BlocBuilder<EqubBloc, EqubState>(
+          builder: (context, state) {
+            if (state.equbList.isEmpty) {
+              return Column(
                 children: [
-                  Icon(
-                    Icons.perm_contact_cal,
-                    color: ColorName.primaryColor,
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextWidget(text: 'Equb'),
                   ),
-                  SizedBox(width: 10),
-                  TextWidget(
-                    text: 'Add Participants',
+                  const SizedBox(height: 20),
+                  Assets.images.equbImage.image(),
+                  const SizedBox(height: 20),
+                  const TextWidget(
+                    text: 'oops, You don’t have any Equb.',
                     type: TextType.small,
-                    color: ColorName.primaryColor,
+                    weight: FontWeight.w500,
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: selectedContacts.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Row(
-                    children: [
-                      TextWidget(
-                        text: selectedContacts[index].displayName,
-                      ),
-                    ],
-                  ),
-                  subtitle: TextWidget(
-                    text: selectedContacts[index].phones.first.number,
-                    type: TextType.small,
+                  const SizedBox(height: 10),
+                  const TextWidget(
+                    text:
+                        'Please create new Equb or you’ll see your active Equb when someone added you as a member',
+                    fontSize: 12,
                     weight: FontWeight.w300,
+                    textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 35),
+                  ButtonWidget(
+                      child: const TextWidget(
+                        text: 'Create Equb',
+                        color: Colors.white,
+                        type: TextType.small,
+                        weight: FontWeight.w500,
+                      ),
+                      onPressed: () {
+                        context.pushNamed(RouteName.equbCreation);
+                      })
+                ],
+              );
+            }
+            return Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const TextWidget(text: 'Equb'),
+                    SizedBox(
+                      width: 110,
+                      height: 45,
+                      child: ButtonWidget(
+                          child: const TextWidget(
+                            text: 'Create New',
+                            fontSize: 14,
+                            color: ColorName.white,
+                          ),
+                          onPressed: () {
+                            context.pushNamed(RouteName.equbCreation);
+                          }),
+                    )
+                  ],
                 ),
-              ),
-            ),
-            SizedBox(
-              width: 100.sh,
-              height: 50,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        side: const BorderSide(
-                          color: ColorName.primaryColor,
-                        ))),
-                child: const TextWidget(
-                  text: 'Create Equb',
-                  color: ColorName.primaryColor,
-                ),
-                onPressed: () {},
-              ),
-            )
-          ],
+                const SizedBox(height: 25),
+                for (var equb in state.equbList) EqubCard(equb: equb),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -67,6 +67,14 @@ class $AssetsImagesGen {
   AssetGenImage get enatBankLogo =>
       const AssetGenImage('assets/images/enat_bank_logo.png');
 
+  /// File path: assets/images/equb_icon.png
+  AssetGenImage get equbIcon =>
+      const AssetGenImage('assets/images/equb_icon.png');
+
+  /// File path: assets/images/equb_image.png
+  AssetGenImage get equbImage =>
+      const AssetGenImage('assets/images/equb_image.png');
+
   /// File path: assets/images/ethiopian_flag.png
   AssetGenImage get ethiopianFlag =>
       const AssetGenImage('assets/images/ethiopian_flag.png');
@@ -86,6 +94,22 @@ class $AssetsImagesGen {
   /// File path: assets/images/hijra_bank_logo.png
   AssetGenImage get hijraBankLogo =>
       const AssetGenImage('assets/images/hijra_bank_logo.png');
+
+  /// File path: assets/images/history_icon.png
+  AssetGenImage get historyIcon =>
+      const AssetGenImage('assets/images/history_icon.png');
+
+  /// File path: assets/images/home_icon.png
+  AssetGenImage get homeIcon =>
+      const AssetGenImage('assets/images/home_icon.png');
+
+  /// File path: assets/images/increase_arrow.png
+  AssetGenImage get increaseArrow =>
+      const AssetGenImage('assets/images/increase_arrow.png');
+
+  /// File path: assets/images/mastered_card.png
+  AssetGenImage get masteredCard =>
+      const AssetGenImage('assets/images/mastered_card.png');
 
   /// File path: assets/images/news_background.png
   AssetGenImage get newsBackground =>
@@ -107,6 +131,10 @@ class $AssetsImagesGen {
   AssetGenImage get profileImage =>
       const AssetGenImage('assets/images/profile_image.png');
 
+  /// File path: assets/images/send_icon.png
+  AssetGenImage get sendIcon =>
+      const AssetGenImage('assets/images/send_icon.png');
+
   /// File path: assets/images/sinqe_bank_logo.png
   AssetGenImage get sinqeBankLogo =>
       const AssetGenImage('assets/images/sinqe_bank_logo.png');
@@ -114,6 +142,14 @@ class $AssetsImagesGen {
   /// File path: assets/images/splash_logo.png
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
+
+  /// File path: assets/images/success_image.png
+  AssetGenImage get successImage =>
+      const AssetGenImage('assets/images/success_image.png');
+
+  /// File path: assets/images/transaction_icon.png
+  AssetGenImage get transactionIcon =>
+      const AssetGenImage('assets/images/transaction_icon.png');
 
   /// File path: assets/images/tsedey_bank_logo.png
   AssetGenImage get tsedeyBankLogo =>
@@ -126,6 +162,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/usa_flag.png
   AssetGenImage get usaFlag =>
       const AssetGenImage('assets/images/usa_flag.png');
+
+  /// File path: assets/images/visa_card.png
+  AssetGenImage get visaCard =>
+      const AssetGenImage('assets/images/visa_card.png');
 
   /// File path: assets/images/wegagen_bank_logo.png
   AssetGenImage get wegagenBankLogo =>
@@ -151,21 +191,31 @@ class $AssetsImagesGen {
         dashnBankLogo,
         dollar,
         enatBankLogo,
+        equbIcon,
+        equbImage,
         ethiopianFlag,
         gedaBankLogo,
         globalBankLogo,
         hibretBankLogo,
         hijraBankLogo,
+        historyIcon,
+        homeIcon,
+        increaseArrow,
+        masteredCard,
         newsBackground,
         nextArrow,
         nibBankLogo,
         oromiaBankLogo,
         profileImage,
+        sendIcon,
         sinqeBankLogo,
         splashLogo,
+        successImage,
+        transactionIcon,
         tsedeyBankLogo,
         tsehayBankLogo,
         usaFlag,
+        visaCard,
         wegagenBankLogo,
         zemenBankLogo
       ];

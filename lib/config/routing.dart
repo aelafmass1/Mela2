@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
@@ -10,6 +11,7 @@ class RouteName {
   static const home = 'home_screen';
   static const login = 'login_screen';
   static const signup = 'signup_screen';
+  static const equbCreation = 'equb_creation_screen';
 }
 
 final goRouting = GoRouter(
@@ -21,10 +23,16 @@ final goRouting = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-      path: '/home',
-      name: RouteName.home,
-      builder: (context, state) => const HomeScreen(),
-    ),
+        path: '/home',
+        name: RouteName.home,
+        builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'equb_creation',
+            name: RouteName.equbCreation,
+            builder: (context, state) => const EqubCreationScreen(),
+          )
+        ]),
     GoRoute(
       path: '/login',
       name: RouteName.login,

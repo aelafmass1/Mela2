@@ -6,7 +6,7 @@ import '../../core/utils/responsive_util.dart';
 
 class ButtonWidget extends StatelessWidget {
   final Widget child;
-  final Function() onPressed;
+  final Function()? onPressed;
   final double? topPadding;
   final BorderRadius? borderRadius;
   const ButtonWidget(
@@ -31,7 +31,7 @@ class ButtonWidget extends StatelessWidget {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
-                  borderRadius: borderRadius ?? BorderRadius.circular(15),
+                  borderRadius: borderRadius ?? BorderRadius.circular(30),
                 )),
             onPressed: onPressed,
             child: child,

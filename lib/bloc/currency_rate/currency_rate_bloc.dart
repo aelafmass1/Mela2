@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/models/bank_rate.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
@@ -17,6 +19,7 @@ class CurrencyRateBloc extends Bloc<CurrencyRateEvent, CurrencyRateState> {
       final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
       emit(CurrencyRateSuccess(rates: rates));
     } catch (error) {
+      log(error.toString());
       emit(CurrencyRateFail(reason: error.toString()));
     }
   }

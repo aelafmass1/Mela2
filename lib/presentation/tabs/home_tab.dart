@@ -26,19 +26,30 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 10,
+      ),
       body: Padding(
-          padding: const EdgeInsets.only(top: 50, left: 15, right: 15),
+          padding: const EdgeInsets.only(top: 0, left: 15, right: 15),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const TextWidget(
-                text: 'Good Morning',
-                fontSize: 14,
-              ),
-              const TextWidget(
-                text: 'Amanuel',
-                fontSize: 24,
-                weight: FontWeight.w700,
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const TextWidget(
+                      text: 'Good Morning',
+                      fontSize: 14,
+                    ),
+                    const TextWidget(
+                      text: 'Amanuel',
+                      fontSize: 24,
+                      weight: FontWeight.w700,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
               Row(
@@ -137,21 +148,29 @@ class _HomeTabState extends State<HomeTab> {
                               );
                             }
                             if (state is CurrencyRateSuccess) {
-                              return ListView.builder(
-                                itemCount: state.rates.length,
-                                itemBuilder: (context, index) => _buildBankTile(
-                                  bankName: state.rates[index].bankName,
-                                  imagePath: getBankImagePath(
-                                      state.rates[index].bankName),
-                                  buyingAmount:
-                                      state.rates[index].buyingRate.toString(),
-                                  tipAmount:
-                                      state.rates[index].incrementPercentage,
-                                  tipColor: (double.parse(state.rates[index]
-                                              .incrementPercentage) >=
-                                          0)
-                                      ? ColorName.green
-                                      : ColorName.red,
+                              return RefreshIndicator(
+                                onRefresh: () async {
+                                  context
+                                      .read<CurrencyRateBloc>()
+                                      .add(FetchCurrencyRate());
+                                },
+                                child: ListView.builder(
+                                  itemCount: state.rates.length,
+                                  itemBuilder: (context, index) =>
+                                      _buildBankTile(
+                                    bankName: state.rates[index].bankName,
+                                    imagePath: getBankImagePath(
+                                        state.rates[index].bankName),
+                                    buyingAmount: state.rates[index].buyingRate
+                                        .toString(),
+                                    tipAmount:
+                                        state.rates[index].incrementPercentage,
+                                    tipColor: (double.parse(state.rates[index]
+                                                .incrementPercentage) >=
+                                            0)
+                                        ? ColorName.green
+                                        : ColorName.red,
+                                  ),
                                 ),
                               );
                             }

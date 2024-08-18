@@ -1,17 +1,16 @@
 import 'dart:convert';
 
-import 'package:firebase_performance/firebase_performance.dart';
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 
 class CurrencyRateRepository {
   static Future<List> fetchCurrencyRate() async {
-    HttpMetric metric = FirebasePerformance.instance
-        .newHttpMetric('$baseUrl/currency/latest', HttpMethod.Get);
-    metric.start();
+    // HttpMetric metric = FirebasePerformance.instance
+    //     .newHttpMetric('$baseUrl/currency/latest', HttpMethod.Get);
+    // metric.start();
 
     final res = await http.get(Uri.parse('$baseUrl/currency/latest'));
-    metric.stop();
+    // metric.stop();
 
     if (res.statusCode == 200) {
       List rates = jsonDecode(res.body)[0]['rates'];
