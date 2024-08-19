@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
@@ -23,10 +24,15 @@ class RouteName {
   static const craeteAccount = 'create_account_screen';
 }
 
-final _auth = FirebaseAuth.instance;
-
 final goRouting = GoRouter(
-  initialLocation: _auth.currentUser == null ? '/' : '/home',
+  initialLocation: '/',
+  // redirect: (context, state) async {
+  //   bool isFirst = await isFirstTime();
+  //   if (isFirst) {
+  //     return '/';
+  //   }
+  //   return '/home';
+  // },
   routes: [
     GoRoute(
       path: '/',

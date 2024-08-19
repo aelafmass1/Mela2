@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -245,6 +246,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         title: 'Success',
                         description: 'Account Created',
                       );
+                      setFirstTime(false);
                       context.goNamed(RouteName.home);
                     }
                   },
