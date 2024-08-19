@@ -153,13 +153,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    sendOTP(phoneNumberController.text);
-                    // context.pushNamed(
-                    //   RouteName.otp,
-                    //   extra: UserModel(
-                    //     phoneNumber: phoneNumberController.text,
-                    //   ),
-                    // );
+                    // sendOTP(phoneNumberController.text);
+                    context.pushNamed(
+                      RouteName.otp,
+                      extra: UserModel(
+                        phoneNumber: phoneNumberController.text,
+                      ),
+                    );
                   }
                 },
               ),

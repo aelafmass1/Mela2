@@ -7,7 +7,8 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class PhoneNumberBox extends StatefulWidget {
   final TextEditingController controller;
-  const PhoneNumberBox({super.key, required this.controller});
+  final Function(String value)? onChange;
+  const PhoneNumberBox({super.key, required this.controller, this.onChange});
 
   @override
   State<PhoneNumberBox> createState() => _PhoneNumberBoxState();
@@ -98,6 +99,9 @@ class _PhoneNumberBoxState extends State<PhoneNumberBox> {
                       setState(() {
                         countryCode = '+251';
                       });
+                    }
+                    if (widget.onChange != null) {
+                      widget.onChange!(countryCode);
                     }
                   }
                 }),

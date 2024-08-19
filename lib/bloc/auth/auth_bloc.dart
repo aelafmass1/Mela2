@@ -37,8 +37,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.userModel.password!,
       );
       if (userCredential.credential?.accessToken != null) {
-        FirebaseFirestore _firestore = FirebaseFirestore.instance;
-        await _firestore.collection('users').doc(userCredential.user?.uid).set(
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        await firestore.collection('users').doc(userCredential.user?.uid).set(
               event.userModel.toMap(),
             );
       }

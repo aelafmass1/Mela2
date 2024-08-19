@@ -22,13 +22,12 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   getToken() async {
     final res = await FirebaseAuth.instance.currentUser!.getIdToken();
-    log(res.toString());
+    log('Token -> ${res.toString()}');
   }
 
   @override
   void initState() {
     getToken();
-    log(FirebaseAuth.instance.currentUser.toString());
     context.read<CurrencyRateBloc>().add(FetchCurrencyRate());
     super.initState();
   }
@@ -261,7 +260,7 @@ class _HomeTabState extends State<HomeTab> {
                 shape: ContinuousRectangleBorder(
                   side: const BorderSide(
                     width: 1,
-                    color: ColorName.borderColor,
+                    color: ColorName.primaryColor,
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -272,7 +271,7 @@ class _HomeTabState extends State<HomeTab> {
               child: const TextWidget(
                 text: 'Send',
                 type: TextType.small,
-                color: ColorName.borderColor,
+                color: ColorName.primaryColor,
               ))
         ],
       ),
