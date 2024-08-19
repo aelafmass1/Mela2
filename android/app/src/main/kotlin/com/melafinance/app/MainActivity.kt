@@ -1,4 +1,4 @@
-package com.ethiolab.transaction_mobile_app
+package com.melafinance.app
 
 import io.flutter.embedding.android.FlutterActivity
 

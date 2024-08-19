@@ -687,13 +687,9 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                           ),
                         ),
                       );
-                  showDialog(
+                  showBottomSheet(
                     context: context,
-                    builder: (_) => const Dialog(
-                      shape: RoundedRectangleBorder(),
-                      insetPadding: EdgeInsets.zero,
-                      child: CompletePage(),
-                    ),
+                    builder: (_) => const CompletePage(),
                   );
                 })
           ],

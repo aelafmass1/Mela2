@@ -4,10 +4,9 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/receit_page.dart';
+import 'package:transaction_mobile_app/presentation/widgets/receipt_page.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class SentTab extends StatefulWidget {
@@ -873,15 +872,13 @@ class _SentTabState extends State<SentTab> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  showDialog(
+                  showBottomSheet(
                     context: context,
-                    builder: (_) => const Dialog(
-                      elevation: 0,
-                      shape: BeveledRectangleBorder(),
-                      insetPadding: EdgeInsets.zero,
-                      child: ReceitPage(),
-                    ),
+                    builder: (_) => const ReceiptPage(),
                   );
+                  setState(() {
+                    index = 0;
+                  });
                 })
           ],
         ),

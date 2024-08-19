@@ -95,6 +95,33 @@ class ColorName {
   );
 
   /// MaterialColor:
+  ///   50: #FFEDEDED
+  ///   100: #FFD3D3D3
+  ///   200: #FFB6B6B6
+  ///   300: #FF999999
+  ///   400: #FF838383
+  ///   500: #FF6D6D6D
+  ///   600: #FF656565
+  ///   700: #FF5A5A5A
+  ///   800: #FF505050
+  ///   900: #FF3E3E3E
+  static const MaterialColor grey = MaterialColor(
+    0xFF6D6D6D,
+    <int, Color>{
+      50: Color(0xFFEDEDED),
+      100: Color(0xFFD3D3D3),
+      200: Color(0xFFB6B6B6),
+      300: Color(0xFF999999),
+      400: Color(0xFF838383),
+      500: Color(0xFF6D6D6D),
+      600: Color(0xFF656565),
+      700: Color(0xFF5A5A5A),
+      800: Color(0xFF505050),
+      900: Color(0xFF3E3E3E),
+    },
+  );
+
+  /// MaterialColor:
   ///   50: #FFEAEAA33
   ///   100: #FFCACA1802
   ///   200: #FFA6A62759

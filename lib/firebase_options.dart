@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -46,19 +49,9 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDjD_3kJC94l6z5kpiY28Yg81tsAp58UsE',
-    appId: '1:997344617329:web:1afdad80defe2ade66ccd0',
-    messagingSenderId: '997344617329',
-    projectId: 'mela-finance',
-    authDomain: 'mela-finance.firebaseapp.com',
-    storageBucket: 'mela-finance.appspot.com',
-    measurementId: 'G-PYRH99789Y',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCZjxc40VAuMUENC8T18Ndg8tXkD0k3pT8',
-    appId: '1:997344617329:android:86258e73df37bcdd66ccd0',
+    appId: '1:997344617329:android:4055e4068cb5c47b66ccd0',
     messagingSenderId: '997344617329',
     projectId: 'mela-finance',
     storageBucket: 'mela-finance.appspot.com',
@@ -66,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCuRpPQXsdhK8kjZC_20AaJwkQlRn0GMP0',
-    appId: '1:997344617329:ios:d520d776fbb2fd9f66ccd0',
+    appId: '1:997344617329:ios:a8e3f805c2652c6466ccd0',
     messagingSenderId: '997344617329',
     projectId: 'mela-finance',
     storageBucket: 'mela-finance.appspot.com',
-    iosBundleId: 'com.ethiolab.transactionMobileApp',
+    iosBundleId: 'com.melafinance.app',
   );
 }

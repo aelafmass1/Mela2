@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
@@ -24,7 +25,6 @@ void main() async {
   await analytics.logAppOpen();
   //Firebase Crashlytics
   FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
-
   FlutterError.onError = crashlytics.recordFlutterError;
 
   runApp(
@@ -44,6 +44,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => EqubBloc(),
+        ),
+        BlocProvider(
+          create: (context) => AuthBloc(),
         ),
       ],
       child: ResponsiveApp(

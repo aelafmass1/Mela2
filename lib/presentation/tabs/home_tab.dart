@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,8 +20,15 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  getToken() async {
+    final res = await FirebaseAuth.instance.currentUser!.getIdToken();
+    log(res.toString());
+  }
+
   @override
   void initState() {
+    getToken();
+    log(FirebaseAuth.instance.currentUser.toString());
     context.read<CurrencyRateBloc>().add(FetchCurrencyRate());
     super.initState();
   }

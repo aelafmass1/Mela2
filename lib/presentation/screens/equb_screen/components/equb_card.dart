@@ -156,11 +156,11 @@ class EqubCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    color: Colors.blue,
-                  )
+                  // Container(
+                  //   width: 40,
+                  //   height: 40,
+                  //   color: Colors.blue,
+                  // )
                 ],
               )
             ],

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:997344617329:android:86258e73df37bcdd66ccd0",
+        "mobilesdk_app_id": "1:997344617329:android:4055e4068cb5c47b66ccd0",
         "android_client_info": {
-          "package_name": "melafinance.com.app"
+          "package_name": "com.melafinance.app"
         }
       },
       "oauth_client": [],

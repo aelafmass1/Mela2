@@ -6,8 +6,10 @@ themeData() {
   return ThemeData(
     scaffoldBackgroundColor: ColorName.backgroundColor,
     fontFamily: FontFamily.openSans,
-    colorSchemeSeed: ColorName.primaryColor,
-    colorScheme: ColorScheme.fromSeed(seedColor: ColorName.primaryColor),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: ColorName.primaryColor,
+      primary: ColorName.primaryColor,
+    ),
     appBarTheme: const AppBarTheme(
       toolbarHeight: 0,
       backgroundColor: ColorName.backgroundColor,

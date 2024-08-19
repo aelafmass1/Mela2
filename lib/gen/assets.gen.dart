@@ -63,6 +63,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
 
+  /// File path: assets/images/doodles.png
+  AssetGenImage get doodles => const AssetGenImage('assets/images/doodles.png');
+
   /// File path: assets/images/enat_bank_logo.png
   AssetGenImage get enatBankLogo =>
       const AssetGenImage('assets/images/enat_bank_logo.png');
@@ -131,6 +134,9 @@ class $AssetsImagesGen {
   AssetGenImage get profileImage =>
       const AssetGenImage('assets/images/profile_image.png');
 
+  /// File path: assets/images/receipt.png
+  AssetGenImage get receipt => const AssetGenImage('assets/images/receipt.png');
+
   /// File path: assets/images/send_icon.png
   AssetGenImage get sendIcon =>
       const AssetGenImage('assets/images/send_icon.png');
@@ -146,6 +152,8 @@ class $AssetsImagesGen {
   /// File path: assets/images/success_image.png
   AssetGenImage get successImage =>
       const AssetGenImage('assets/images/success_image.png');
+
+  $AssetsImagesSvgsGen get svgs => const $AssetsImagesSvgsGen();
 
   /// File path: assets/images/transaction_icon.png
   AssetGenImage get transactionIcon =>
@@ -190,6 +198,7 @@ class $AssetsImagesGen {
         checkedLogo,
         dashnBankLogo,
         dollar,
+        doodles,
         enatBankLogo,
         equbIcon,
         equbImage,
@@ -207,6 +216,7 @@ class $AssetsImagesGen {
         nibBankLogo,
         oromiaBankLogo,
         profileImage,
+        receipt,
         sendIcon,
         sinqeBankLogo,
         splashLogo,
@@ -219,6 +229,26 @@ class $AssetsImagesGen {
         wegagenBankLogo,
         zemenBankLogo
       ];
+}
+
+class $AssetsImagesSvgsGen {
+  const $AssetsImagesSvgsGen();
+
+  /// File path: assets/images/svgs/face_id.svg
+  String get faceId => 'assets/images/svgs/face_id.svg';
+
+  /// File path: assets/images/svgs/hi_emoji.svg
+  String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
+
+  /// File path: assets/images/svgs/horizontal_mela_logo.svg
+  String get horizontalMelaLogo =>
+      'assets/images/svgs/horizontal_mela_logo.svg';
+
+  /// File path: assets/images/svgs/mela_logo.svg
+  String get melaLogo => 'assets/images/svgs/mela_logo.svg';
+
+  /// List of all assets
+  List<String> get values => [faceId, hiEmoji, horizontalMelaLogo, melaLogo];
 }
 
 class Assets {

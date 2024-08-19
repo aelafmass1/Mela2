@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -68,6 +70,7 @@ class AccountTab extends StatelessWidget {
             title: 'Logout',
             isLogout: true,
             onTab: () {
+              FirebaseAuth.instance.signOut();
               context.goNamed(RouteName.login);
             },
           ),
