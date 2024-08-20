@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
@@ -29,13 +30,16 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TabBarView(controller: tabController, children: const [
-        HomeTab(),
-        EqubTab(),
-        SentTab(),
-        NewsTab(),
-        AccountTab(),
-      ]),
+      body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: tabController,
+          children: const [
+            HomeTab(),
+            EqubTab(),
+            SentTab(),
+            NewsTab(),
+            AccountTab(),
+          ]),
       bottomNavigationBar: Container(
         height: 68,
         decoration: const BoxDecoration(
@@ -75,14 +79,14 @@ class _HomeScreenState extends State<HomeScreen>
           },
           tabs: [
             _buildTab(
-                text: 'Home', iconPath: Assets.images.homeIcon.path, id: 0),
+                text: 'Home', iconPath: Assets.images.svgs.homeIcon, id: 0),
             _buildTab(
-                text: 'Equb', iconPath: Assets.images.equbIcon.path, id: 1),
+                text: 'Equb', iconPath: Assets.images.svgs.equbIcon, id: 1),
             _buildTab(
-                text: 'Send', iconPath: Assets.images.sendIcon.path, id: 2),
+                text: 'Send', iconPath: Assets.images.svgs.sendIcon, id: 2),
             _buildTab(
                 text: 'History',
-                iconPath: Assets.images.historyIcon.path,
+                iconPath: Assets.images.svgs.historyIcon,
                 id: 3),
             _buildTab(
                 text: 'Account',
@@ -106,10 +110,11 @@ class _HomeScreenState extends State<HomeScreen>
               radius: 13,
               backgroundImage: AssetImage(iconPath),
             )
-          : Image.asset(
+          : SvgPicture.asset(
               iconPath,
               width: isAccountTab ? 24 : null,
               height: isAccountTab ? 24 : null,
+              // ignore: deprecated_member_use
               color: selectedIndex == id ? ColorName.primaryColor : null,
             ),
       iconMargin: const EdgeInsets.only(bottom: 5),

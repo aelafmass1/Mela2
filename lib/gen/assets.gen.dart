@@ -234,11 +234,20 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/equb_icon.svg
+  String get equbIcon => 'assets/images/svgs/equb_icon.svg';
+
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
 
   /// File path: assets/images/svgs/hi_emoji.svg
   String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
+
+  /// File path: assets/images/svgs/history_icon.svg
+  String get historyIcon => 'assets/images/svgs/history_icon.svg';
+
+  /// File path: assets/images/svgs/home_icon.svg
+  String get homeIcon => 'assets/images/svgs/home_icon.svg';
 
   /// File path: assets/images/svgs/horizontal_mela_logo.svg
   String get horizontalMelaLogo =>
@@ -247,8 +256,20 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/send_icon.svg
+  String get sendIcon => 'assets/images/svgs/send_icon.svg';
+
   /// List of all assets
-  List<String> get values => [faceId, hiEmoji, horizontalMelaLogo, melaLogo];
+  List<String> get values => [
+        equbIcon,
+        faceId,
+        hiEmoji,
+        historyIcon,
+        homeIcon,
+        horizontalMelaLogo,
+        melaLogo,
+        sendIcon
+      ];
 }
 
 class Assets {

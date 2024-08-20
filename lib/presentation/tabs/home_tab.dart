@@ -25,6 +25,19 @@ class _HomeTabState extends State<HomeTab> {
     log('Token -> ${res.toString()}');
   }
 
+  String getGreeting() {
+    DateTime now = DateTime.now();
+    int hour = now.hour;
+
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
+  }
+
   @override
   void initState() {
     getToken();
@@ -36,24 +49,25 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 10,
+        toolbarHeight: 30,
       ),
       body: Padding(
           padding: const EdgeInsets.only(top: 0, left: 15, right: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const TextWidget(
-                      text: 'Good Morning',
+                    TextWidget(
+                      text: getGreeting(),
                       fontSize: 14,
                     ),
-                    const TextWidget(
-                      text: 'Amanuel',
+                    TextWidget(
+                      text: FirebaseAuth.instance.currentUser?.displayName ??
+                          'Amanulel',
                       fontSize: 24,
                       weight: FontWeight.w700,
                     ),

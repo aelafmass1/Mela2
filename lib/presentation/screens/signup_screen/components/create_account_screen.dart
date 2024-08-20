@@ -214,6 +214,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        keyboardType: TextInputType.emailAddress,
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'Email is empty';
