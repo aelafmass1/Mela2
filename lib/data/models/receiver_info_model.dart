@@ -8,6 +8,8 @@ class ReceiverInfo {
   final String receiverBankName;
   final String receiverAccountNumber;
   final double amount;
+  final String? serviceChargePayer;
+  final DateTime? trasactionDate;
   ReceiverInfo({
     required this.senderUserId,
     required this.receiverName,
@@ -15,6 +17,8 @@ class ReceiverInfo {
     required this.receiverBankName,
     required this.receiverAccountNumber,
     required this.amount,
+    this.serviceChargePayer,
+    this.trasactionDate,
   });
 
   ReceiverInfo copyWith({
@@ -24,6 +28,8 @@ class ReceiverInfo {
     String? receiverBankName,
     String? receiverAccountNumber,
     double? amount,
+    String? serviceChargePayer,
+    DateTime? trasactionDate,
   }) {
     return ReceiverInfo(
       senderUserId: senderUserId ?? this.senderUserId,
@@ -33,6 +39,8 @@ class ReceiverInfo {
       receiverAccountNumber:
           receiverAccountNumber ?? this.receiverAccountNumber,
       amount: amount ?? this.amount,
+      serviceChargePayer: serviceChargePayer ?? this.serviceChargePayer,
+      trasactionDate: trasactionDate ?? this.trasactionDate,
     );
   }
 
@@ -44,6 +52,8 @@ class ReceiverInfo {
       'receiverBankName': receiverBankName,
       'receiverAccountNumber': receiverAccountNumber,
       'amount': amount,
+      'serviceChargePayer': serviceChargePayer,
+      'trasactionDate': trasactionDate?.millisecondsSinceEpoch,
     };
   }
 
@@ -52,9 +62,15 @@ class ReceiverInfo {
       senderUserId: map['senderUserId'] as String,
       receiverName: map['receiverName'] as String,
       receiverPhoneNumber: map['receiverPhoneNumber'] as String,
-      receiverBankName: map['receiverBankName'] as String,
+      receiverBankName: map['receiverBank']['name'] as String,
       receiverAccountNumber: map['receiverAccountNumber'] as String,
       amount: map['amount'] as double,
+      serviceChargePayer: map['serviceChargePayer'] != null
+          ? map['serviceChargePayer'] as String
+          : null,
+      trasactionDate: map["transactionDate"] != null
+          ? DateTime.parse(map["transactionDate"])
+          : null,
     );
   }
 
@@ -65,7 +81,7 @@ class ReceiverInfo {
 
   @override
   String toString() {
-    return 'ReceiverInfoModel(senderUserId: $senderUserId, receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount)';
+    return 'ReceiverInfo(senderUserId: $senderUserId, receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate)';
   }
 
   @override
@@ -77,7 +93,9 @@ class ReceiverInfo {
         other.receiverPhoneNumber == receiverPhoneNumber &&
         other.receiverBankName == receiverBankName &&
         other.receiverAccountNumber == receiverAccountNumber &&
-        other.amount == amount;
+        other.amount == amount &&
+        other.serviceChargePayer == serviceChargePayer &&
+        other.trasactionDate == trasactionDate;
   }
 
   @override
@@ -87,6 +105,8 @@ class ReceiverInfo {
         receiverPhoneNumber.hashCode ^
         receiverBankName.hashCode ^
         receiverAccountNumber.hashCode ^
-        amount.hashCode;
+        amount.hashCode ^
+        serviceChargePayer.hashCode ^
+        trasactionDate.hashCode;
   }
 }

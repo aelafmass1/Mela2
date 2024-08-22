@@ -79,7 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
         context.pushNamed(
           RouteName.otp,
           extra: UserModel(
-            phoneNumber: phoneNumberController.text,
+            phoneNumber: phoneNumber,
             verificationId: verificationId,
           ),
         );
@@ -198,11 +198,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // sendOTP(phoneNumberController.text);
+                    String phoneCode =
+                        selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                    String phoneNumber = phoneCode + phoneNumberController.text;
+
+                    // sendOTP(phoneNumber);
                     context.pushNamed(
                       RouteName.otp,
                       extra: UserModel(
-                        phoneNumber: phoneNumberController.text,
+                        phoneNumber: phoneNumber,
                       ),
                     );
                   }

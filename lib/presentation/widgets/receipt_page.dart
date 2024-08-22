@@ -48,145 +48,139 @@ class ReceiptPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              Expanded(
-                child: RepaintBoundary(
-                  key: globalKey,
-                  child: Stack(
-                    children: [
-                      Assets.images.receipt.image(
-                        fit: BoxFit.contain,
-                      ),
-                      Positioned(
-                          top: 95,
-                          left: 0,
-                          right: 0,
-                          child: Align(
-                            child: Column(
-                              children: [
-                                TextWidget(
-                                  text: '\$${receiverInfo.amount}',
-                                  color: ColorName.primaryColor,
-                                  weight: FontWeight.w600,
-                                ),
-                                SizedBox(
-                                  width: 45.sw,
-                                  child: TextWidget(
-                                    text:
-                                        'You have sent \$${receiverInfo.amount} to ${receiverInfo.receiverName} Successfully',
-                                    textAlign: TextAlign.center,
-                                    fontSize: 14,
-                                    weight: FontWeight.w400,
-                                  ),
-                                ),
-                                const SizedBox(height: 45),
-                                _buildTransactionDetail(
-                                    key: 'Date',
-                                    value: DateFormat('MMMM dd, yyyy')
-                                        .format(DateTime.now())),
-                                _buildTransactionDetail(
-                                  key: 'To',
-                                  value: receiverInfo.receiverName,
-                                ),
-                                _buildTransactionDetail(
-                                  key: 'From',
-                                  value: '**** **** 0011',
-                                ),
-                                _buildTransactionDetail(
-                                  key: 'Recipient Amount',
-                                  value: '\$${receiverInfo.amount}',
-                                ),
-                                _buildTransactionDetail(
-                                  key: 'Details',
-                                  value: 'Equb Payment',
-                                ),
-                                _buildTransactionDetail(
-                                  key: 'Transaction ID',
-                                  value: '00000111100',
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 20, top: 10),
-                                  child: Row(
-                                    children: [
-                                      Assets.images.masteredCard.image(
-                                        fit: BoxFit.cover,
-                                      ),
-                                      const SizedBox(width: 15),
-                                      const Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          TextWidget(
-                                            text: 'Credit Card',
-                                            fontSize: 16,
-                                          ),
-                                          TextWidget(
-                                            text: 'Mastercard ending   ** 0011',
-                                            fontSize: 10,
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                )
-                              ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        children: [
+          Expanded(
+            child: RepaintBoundary(
+              key: globalKey,
+              child: Stack(
+                children: [
+                  Assets.images.receipt.image(
+                    fit: BoxFit.contain,
+                  ),
+                  Positioned(
+                      top: 95,
+                      left: 0,
+                      right: 0,
+                      child: Align(
+                        child: Column(
+                          children: [
+                            TextWidget(
+                              text: '\$${receiverInfo.amount}',
+                              color: ColorName.primaryColor,
+                              weight: FontWeight.w600,
                             ),
-                          ))
-                    ],
+                            SizedBox(
+                              width: 45.sw,
+                              child: TextWidget(
+                                text:
+                                    'You have sent \$${receiverInfo.amount} to ${receiverInfo.receiverName} Successfully',
+                                textAlign: TextAlign.center,
+                                fontSize: 14,
+                                weight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(height: 45),
+                            _buildTransactionDetail(
+                                key: 'Date',
+                                value: DateFormat('MMMM dd, yyyy')
+                                    .format(DateTime.now())),
+                            _buildTransactionDetail(
+                              key: 'To',
+                              value: receiverInfo.receiverName,
+                            ),
+                            _buildTransactionDetail(
+                              key: 'From',
+                              value: '**** **** 0011',
+                            ),
+                            _buildTransactionDetail(
+                              key: 'Recipient Amount',
+                              value: '\$${receiverInfo.amount}',
+                            ),
+                            _buildTransactionDetail(
+                              key: 'Details',
+                              value: 'Equb Payment',
+                            ),
+                            _buildTransactionDetail(
+                              key: 'Transaction ID',
+                              value: '00000111100',
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20, top: 10),
+                              child: Row(
+                                children: [
+                                  Assets.images.masteredCard.image(
+                                    fit: BoxFit.cover,
+                                  ),
+                                  const SizedBox(width: 15),
+                                  const Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextWidget(
+                                        text: 'Credit Card',
+                                        fontSize: 16,
+                                      ),
+                                      TextWidget(
+                                        text: 'Mastercard ending   ** 0011',
+                                        fontSize: 10,
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ))
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          ButtonWidget(
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Bootstrap.download,
+                    size: 20,
+                  ),
+                  SizedBox(width: 20),
+                  TextWidget(
+                    text: 'Download Receipt',
+                    type: TextType.small,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              onPressed: () {
+                captureAndConvertToPdf(context);
+                context.pop();
+              }),
+          const SizedBox(height: 15),
+          SizedBox(
+            width: 100.sw,
+            height: 55,
+            child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              ButtonWidget(
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Bootstrap.download,
-                        size: 20,
-                      ),
-                      SizedBox(width: 20),
-                      TextWidget(
-                        text: 'Download Receipt',
-                        type: TextType.small,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                  onPressed: () {
-                    captureAndConvertToPdf(context);
-                    context.pop();
-                  }),
-              const SizedBox(height: 15),
-              SizedBox(
-                width: 100.sw,
-                height: 55,
-                child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const TextWidget(
-                      text: 'Finish',
-                      type: TextType.small,
-                      color: ColorName.primaryColor,
-                    ),
-                    onPressed: () {
-                      context.pop();
-                    }),
-              ),
-              const SizedBox(height: 20),
-            ],
+                child: const TextWidget(
+                  text: 'Finish',
+                  type: TextType.small,
+                  color: ColorName.primaryColor,
+                ),
+                onPressed: () {
+                  context.pop();
+                }),
           ),
-        ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }

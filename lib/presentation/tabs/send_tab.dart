@@ -35,7 +35,7 @@ class _SentTabState extends State<SentTab> {
 
   int selectedPaymentMethodIndex = 1;
 
-  String whoPayFee = 'me';
+  String whoPayFee = 'SENDER';
   String selectedBank = '';
 
   List<Contact> contacts = [];
@@ -74,7 +74,7 @@ class _SentTabState extends State<SentTab> {
       isSearching = false;
       showBorder = true;
       selectedPaymentMethodIndex = 1;
-      whoPayFee = 'me';
+      whoPayFee = 'SENDER';
       selectedBank = '';
       contacts = [];
       filteredContacts = [];
@@ -246,7 +246,7 @@ class _SentTabState extends State<SentTab> {
                                       children: [
                                         Radio(
                                             activeColor: ColorName.primaryColor,
-                                            value: 'me',
+                                            value: 'SENDER',
                                             groupValue: whoPayFee,
                                             onChanged: (value) {
                                               if (value != null) {
@@ -267,7 +267,7 @@ class _SentTabState extends State<SentTab> {
                                       children: [
                                         Radio(
                                             activeColor: ColorName.primaryColor,
-                                            value: 'recipient',
+                                            value: 'RECEIVER',
                                             groupValue: whoPayFee,
                                             onChanged: (value) {
                                               if (value != null) {
@@ -1394,6 +1394,7 @@ class _SentTabState extends State<SentTab> {
                           receiverBankName: selectedBank,
                           receiverAccountNumber: bankAcocuntController.text,
                           amount: double.parse(usdController.text),
+                          serviceChargePayer: whoPayFee,
                         );
                         context.read<MoneyTransferBloc>().add(
                               SendMoney(

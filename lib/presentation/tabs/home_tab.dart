@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/currency_rate/currency_rate_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -163,7 +164,17 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       ),
                       Expanded(
-                        child: BlocBuilder<CurrencyRateBloc, CurrencyRateState>(
+                        child:
+                            BlocConsumer<CurrencyRateBloc, CurrencyRateState>(
+                          listener: (context, state) {
+                            if (state is CurrencyRateFail) {
+                              showSnackbar(
+                                context,
+                                title: 'Error',
+                                description: state.reason,
+                              );
+                            }
+                          },
                           builder: (context, state) {
                             if (state is CurrencyRateLoading) {
                               return const Center(

@@ -6,7 +6,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/equb_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab.dart';
-import 'package:transaction_mobile_app/presentation/tabs/news_tab.dart';
+import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/send_tab.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen>
             HomeTab(),
             EqubTab(),
             SentTab(),
-            NewsTab(),
+            HistoryTab(),
             AccountTab(),
           ]),
       bottomNavigationBar: Container(

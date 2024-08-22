@@ -9,6 +9,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/currency_rate/currency_rate_bloc.dart';
@@ -49,6 +50,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => AuthBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TransactionBloc(),
         ),
         BlocProvider(
           create: (context) => MoneyTransferBloc(

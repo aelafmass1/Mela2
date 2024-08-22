@@ -23,7 +23,8 @@ class MoneyTransferRepository {
         "receiverPhoneNumber": receiverInfo.receiverPhoneNumber,
         "receiverBankName": receiverInfo.receiverBankName,
         "receiverAccountNumber": receiverInfo.receiverAccountNumber,
-        "amount": receiverInfo.amount // Converted to string
+        "amount": receiverInfo.amount,
+        "serviceChargePayer": receiverInfo.serviceChargePayer,
       }),
     );
 

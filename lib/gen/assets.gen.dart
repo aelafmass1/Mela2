@@ -240,6 +240,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
 
+  /// File path: assets/images/svgs/filter_icon.svg
+  String get filterIcon => 'assets/images/svgs/filter_icon.svg';
+
   /// File path: assets/images/svgs/hi_emoji.svg
   String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
 
@@ -259,16 +262,21 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
+  /// File path: assets/images/svgs/transaction_icon.svg
+  String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
+
   /// List of all assets
   List<String> get values => [
         equbIcon,
         faceId,
+        filterIcon,
         hiEmoji,
         historyIcon,
         homeIcon,
         horizontalMelaLogo,
         melaLogo,
-        sendIcon
+        sendIcon,
+        transactionIcon
       ];
 }
 
