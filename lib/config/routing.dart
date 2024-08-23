@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
@@ -12,6 +11,7 @@ import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 
 import '../presentation/screens/home_screen/home_screen.dart';
+import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
 
 class RouteName {
@@ -25,6 +25,7 @@ class RouteName {
   static const createPassword = 'create_password_screen';
   static const craeteAccount = 'create_account_screen';
   static const receipt = 'receipt_screen';
+  static const profileUpload = 'profile_upload_screen';
 }
 
 final goRouting = GoRouter(
@@ -95,6 +96,13 @@ final goRouting = GoRouter(
       builder: (context, state) => CreateAccountScreen(
         userModel: state.extra as UserModel,
       ),
-    )
+    ),
+    GoRoute(
+      path: '/profile_upload',
+      name: RouteName.profileUpload,
+      builder: (context, state) => ProfileUploadScreen(
+        userModel: state.extra as UserModel,
+      ),
+    ),
   ],
 );

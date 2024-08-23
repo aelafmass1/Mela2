@@ -19,6 +19,6 @@ class TransactionRepository {
       List data = jsonDecode(res.body);
       return {'success': data};
     }
-    return {"error": res.body};
+    return {"error": res.body.isEmpty ? 'please try again' : res.body};
   }
 }

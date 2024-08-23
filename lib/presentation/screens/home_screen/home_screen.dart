@@ -49,51 +49,54 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
         ),
-        child: TabBar(
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 10,
+        child: ColoredBox(
+          color: Colors.white,
+          child: TabBar(
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 10,
+            ),
+            controller: tabController,
+            indicator: const BoxDecoration(),
+            labelColor: Colors.white,
+            unselectedLabelColor: const Color(0xFFF0F0F3).withOpacity(0.5),
+            onTap: (value) {
+              setState(() {
+                selectedIndex = value;
+              });
+              FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+              if (value == 0) {
+                analytics.logEvent(name: 'Home Tab Clicked');
+              } else if (value == 1) {
+                analytics.logEvent(name: 'Equb Tab Clicked');
+              } else if (value == 2) {
+                analytics.logEvent(name: 'Send Tab Clicked');
+              } else if (value == 2) {
+                analytics.logEvent(name: 'Send Tab Clicked');
+              } else if (value == 3) {
+                analytics.logEvent(name: 'News Tab Clicked');
+              } else if (value == 4) {
+                analytics.logEvent(name: 'Account Tab Clicked');
+              }
+            },
+            tabs: [
+              _buildTab(
+                  text: 'Home', iconPath: Assets.images.svgs.homeIcon, id: 0),
+              _buildTab(
+                  text: 'Equb', iconPath: Assets.images.svgs.equbIcon, id: 1),
+              _buildTab(
+                  text: 'Send', iconPath: Assets.images.svgs.sendIcon, id: 2),
+              _buildTab(
+                  text: 'History',
+                  iconPath: Assets.images.svgs.historyIcon,
+                  id: 3),
+              _buildTab(
+                  text: 'Account',
+                  iconPath: Assets.images.profileImage.path,
+                  isAccountTab: true,
+                  id: 4),
+            ],
           ),
-          controller: tabController,
-          indicator: const BoxDecoration(),
-          labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFFF0F0F3).withOpacity(0.5),
-          onTap: (value) {
-            setState(() {
-              selectedIndex = value;
-            });
-            FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-            if (value == 0) {
-              analytics.logEvent(name: 'Home Tab Clicked');
-            } else if (value == 1) {
-              analytics.logEvent(name: 'Equb Tab Clicked');
-            } else if (value == 2) {
-              analytics.logEvent(name: 'Send Tab Clicked');
-            } else if (value == 2) {
-              analytics.logEvent(name: 'Send Tab Clicked');
-            } else if (value == 3) {
-              analytics.logEvent(name: 'News Tab Clicked');
-            } else if (value == 4) {
-              analytics.logEvent(name: 'Account Tab Clicked');
-            }
-          },
-          tabs: [
-            _buildTab(
-                text: 'Home', iconPath: Assets.images.svgs.homeIcon, id: 0),
-            _buildTab(
-                text: 'Equb', iconPath: Assets.images.svgs.equbIcon, id: 1),
-            _buildTab(
-                text: 'Send', iconPath: Assets.images.svgs.sendIcon, id: 2),
-            _buildTab(
-                text: 'History',
-                iconPath: Assets.images.svgs.historyIcon,
-                id: 3),
-            _buildTab(
-                text: 'Account',
-                iconPath: Assets.images.profileImage.path,
-                isAccountTab: true,
-                id: 4),
-          ],
         ),
       ),
     );

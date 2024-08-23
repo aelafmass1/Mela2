@@ -37,14 +37,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.userModel.password!,
       );
       await _auth.currentUser?.updateDisplayName(
-        '${event.userModel.firstName}${event.userModel.lastName}',
+        '${event.userModel.firstName} ${event.userModel.lastName}',
       );
-      if (userCredential.credential?.accessToken != null) {
-        FirebaseFirestore firestore = FirebaseFirestore.instance;
-        await firestore.collection('users').doc(userCredential.user?.uid).set(
-              event.userModel.toMap(),
-            );
-      }
+
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      await firestore.collection('users').doc(userCredential.user?.uid).set(
+            event.userModel.toMap(),
+          );
+
       emit(AuthSucces());
     } catch (error) {
       emit(AuthFail(reason: error.toString()));

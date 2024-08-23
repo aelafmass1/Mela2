@@ -234,8 +234,14 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/card_pattern.svg
+  String get cardPattern => 'assets/images/svgs/card_pattern.svg';
+
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
+
+  /// File path: assets/images/svgs/exchange_icon.svg
+  String get exchangeIcon => 'assets/images/svgs/exchange_icon.svg';
 
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
@@ -256,6 +262,9 @@ class $AssetsImagesSvgsGen {
   String get horizontalMelaLogo =>
       'assets/images/svgs/horizontal_mela_logo.svg';
 
+  /// File path: assets/images/svgs/increase_arrow.svg
+  String get increaseArrow => 'assets/images/svgs/increase_arrow.svg';
+
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
@@ -267,13 +276,16 @@ class $AssetsImagesSvgsGen {
 
   /// List of all assets
   List<String> get values => [
+        cardPattern,
         equbIcon,
+        exchangeIcon,
         faceId,
         filterIcon,
         hiEmoji,
         historyIcon,
         homeIcon,
         horizontalMelaLogo,
+        increaseArrow,
         melaLogo,
         sendIcon,
         transactionIcon

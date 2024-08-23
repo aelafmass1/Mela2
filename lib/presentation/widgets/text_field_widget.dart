@@ -8,12 +8,12 @@ class TextFieldWidget extends StatelessWidget {
   final String? Function(String? text)? validator;
   final Widget? suffix;
   final Widget? prefix;
-
   final Function()? onTab;
   final TextInputType? keyboardType;
   final bool readOnly;
   final bool enableFocusColor;
   final String? prefixText;
+  final bool obscurePassword;
   const TextFieldWidget({
     super.key,
     required this.controller,
@@ -26,12 +26,14 @@ class TextFieldWidget extends StatelessWidget {
     this.readOnly = false,
     this.prefixText,
     this.enableFocusColor = true,
+    this.obscurePassword = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       onTap: onTab,
+      obscureText: obscurePassword,
       controller: controller,
       validator: validator,
       keyboardType: keyboardType,
@@ -50,7 +52,7 @@ class TextFieldWidget extends StatelessWidget {
           color: Color(0xFF8E8E8E),
           fontWeight: FontWeight.w500,
         ),
-        prefixText: prefixText,
+        prefixText: prefixText != null ? '$prefixText ' : null,
         prefixIcon: prefix,
         suffixIcon: suffix,
         prefixStyle: const TextStyle(

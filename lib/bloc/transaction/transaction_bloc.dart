@@ -26,7 +26,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           auth.currentUser!.uid,
         );
         if (res.containsKey('error')) {
-          emit(TransactionFail(error: res['error']));
+          return emit(TransactionFail(error: res['error']));
         }
         final data = res['success'] as List;
         final transactions = data.map((t) => ReceiverInfo.fromMap(t)).toList();
