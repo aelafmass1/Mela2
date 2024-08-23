@@ -202,13 +202,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         selectedCoutry == 'ethiopia' ? '+251' : '+1';
                     String phoneNumber = phoneCode + phoneNumberController.text;
 
-                    sendOTP(phoneNumber);
-                    // context.pushNamed(
-                    //   RouteName.otp,
-                    //   extra: UserModel(
-                    //     phoneNumber: phoneNumber,
-                    //   ),
-                    // );
+                    // sendOTP(phoneNumber);
+                    context.pushNamed(
+                      RouteName.otp,
+                      extra: UserModel(
+                        phoneNumber: phoneNumber,
+                      ),
+                    );
                   }
                 },
               ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
@@ -15,6 +17,8 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/receipt_page.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../config/routing.dart';
 
 class SentTab extends StatefulWidget {
   const SentTab({super.key});
@@ -41,7 +45,7 @@ class _SentTabState extends State<SentTab> {
   List<Contact> contacts = [];
   List<Contact> filteredContacts = [];
 
-  double dollarToEtb = 101.98;
+  double dollarToEtb = 111.98;
 
   final _exchangeRateFormKey = GlobalKey<FormState>();
   final _recipientSelectionFormKey = GlobalKey<FormState>();
@@ -153,57 +157,147 @@ class _SentTabState extends State<SentTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
+                    SizedBox(
                       width: 100.sw,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFA800),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      height: 120,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 20,
-                              ),
-                              SizedBox(width: 5),
-                              TextWidget(
-                                text: '1 USD = 101.98 ETB',
-                                fontSize: 14,
-                              ),
-                            ],
-                          ),
-                          Container(
-                            width: 84,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                          Expanded(
+                            child: Stack(
                               children: [
-                                Assets.images.increaseArrow.image(
-                                  width: 20,
-                                  height: 20,
+                                Container(
+                                  width: 100.sw,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: ColorName.primaryColor,
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    Assets.images.svgs.cardPattern,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: '+ 2.5%',
-                                  color: ColorName.green,
-                                  type: TextType.small,
-                                )
+                                Positioned(
+                                  left: 10,
+                                  right: 10,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 10),
+                                        child: TextWidget(
+                                          text: 'Our promotional rate',
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 100.sw,
+                                        height: 52,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 12,
+                                                  backgroundImage: Assets
+                                                      .images.usaFlag
+                                                      .provider(),
+                                                ),
+                                                const SizedBox(width: 7),
+                                                const Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    TextWidget(
+                                                      text: 'US Dollar',
+                                                      fontSize: 9,
+                                                      weight: FontWeight.w500,
+                                                      color: ColorName
+                                                          .primaryColor,
+                                                    ),
+                                                    TextWidget(
+                                                      text: '1 USD',
+                                                      fontSize: 14,
+                                                      color: ColorName
+                                                          .primaryColor,
+                                                    )
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                            Container(
+                                              width: 28,
+                                              height: 28,
+                                              padding: const EdgeInsets.all(5),
+                                              decoration: const BoxDecoration(
+                                                color: ColorName.primaryColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: SvgPicture.asset(
+                                                Assets.images.svgs.exchangeIcon,
+                                                // ignore: deprecated_member_use
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 12,
+                                                  backgroundImage: Assets
+                                                      .images.ethiopianFlag
+                                                      .provider(),
+                                                ),
+                                                const SizedBox(width: 7),
+                                                const Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    TextWidget(
+                                                      text: 'ET Birr',
+                                                      fontSize: 9,
+                                                      weight: FontWeight.w500,
+                                                      color: ColorName
+                                                          .primaryColor,
+                                                    ),
+                                                    TextWidget(
+                                                      text: '111.98 ETB',
+                                                      fontSize: 14,
+                                                      color: ColorName
+                                                          .primaryColor,
+                                                    )
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 10),
                     CardWidget(
                       width: 100.sw,
                       padding: const EdgeInsets.all(15),
@@ -1365,12 +1459,16 @@ class _SentTabState extends State<SentTab> {
                     description: state.reason,
                   );
                 } else if (state is MoneyTransferSuccess) {
-                  await showDialog(
-                    context: context,
-                    builder: (_) => ReceiptPage(
-                      receiverInfo: receiverInfo!,
-                    ),
+                  context.pushNamed(
+                    RouteName.receipt,
+                    extra: receiverInfo,
                   );
+                  // await showDialog(
+                  //   context: context,
+                  //   builder: (_) => ReceiptPage(
+                  //     receiverInfo: receiverInfo!,
+                  //   ),
+                  // );
                   clearSendInfo();
                 }
               },

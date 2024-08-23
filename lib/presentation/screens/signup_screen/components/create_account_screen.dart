@@ -254,7 +254,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         child: state is AuthLoading
                             ? const LoadingWidget()
                             : const TextWidget(
-                                text: 'Next',
+                                text: 'Register',
                                 type: TextType.small,
                                 color: Colors.white,
                               ),
@@ -265,10 +265,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               lastName: lastNameController.text,
                               email: emailController.text,
                             );
-                            context.pushNamed(
-                              RouteName.profileUpload,
-                              extra: user,
-                            );
+                            // context.pushNamed(
+                            //   RouteName.profileUpload,
+                            //   extra: user,
+                            // );
+                            context
+                                .read<AuthBloc>()
+                                .add(CreateAccount(userModel: user));
                           }
                         });
                   },

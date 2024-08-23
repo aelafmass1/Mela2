@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/currency_rate/currency_rate_bloc.dart';
+import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -50,7 +50,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     getToken();
-    context.read<CurrencyRateBloc>().add(FetchCurrencyRate());
+    context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     super.initState();
   }
 
@@ -107,7 +107,6 @@ class _HomeTabState extends State<HomeTab> {
                       ))
                 ],
               ),
-              const SizedBox(height: 10),
               Expanded(
                   child: SingleChildScrollView(
                 child: Column(
@@ -362,220 +361,309 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   _buildPromotionalRate() {
-    return SizedBox(
-      width: 100.sw,
-      height: 120,
-      child: Row(
-        children: [
-          Expanded(
-            flex: 6,
-            child: Stack(
-              children: [
-                Container(
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: ColorName.primaryColor,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: SvgPicture.asset(
-                    Assets.images.svgs.cardPattern,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  left: 10,
-                  right: 10,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: TextWidget(
-                          text: 'Today’s Best Rate',
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
+    return Column(
+      children: [
+        SizedBox(
+          width: 100.sw,
+          height: 120,
+          child: Row(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 100.sw,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: ColorName.primaryColor,
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      Container(
-                        width: 100.sw,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 12,
-                                  backgroundImage:
-                                      Assets.images.usaFlag.provider(),
-                                ),
-                                const SizedBox(width: 7),
-                                const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextWidget(
-                                      text: 'US Dollar',
-                                      fontSize: 9,
-                                      weight: FontWeight.w500,
-                                      color: ColorName.primaryColor,
-                                    ),
-                                    TextWidget(
-                                      text: '1 USD',
-                                      fontSize: 14,
-                                      color: ColorName.primaryColor,
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
-                            SvgPicture.asset(Assets.images.svgs.exchangeIcon),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 12,
-                                  backgroundImage:
-                                      Assets.images.ethiopianFlag.provider(),
-                                ),
-                                const SizedBox(width: 7),
-                                const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextWidget(
-                                      text: 'ET Birr',
-                                      fontSize: 9,
-                                      weight: FontWeight.w500,
-                                      color: ColorName.primaryColor,
-                                    ),
-                                    TextWidget(
-                                      text: '111.98 ETB',
-                                      fontSize: 14,
-                                      color: ColorName.primaryColor,
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Container(
-              margin: const EdgeInsets.only(left: 10),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              decoration: BoxDecoration(
-                color: ColorName.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 50,
-                    spreadRadius: 10,
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const TextWidget(
-                    text: 'Promotional rate',
-                    fontSize: 12,
-                    color: ColorName.primaryColor,
-                    weight: FontWeight.w700,
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircleAvatar(
-                              radius: 10,
-                              backgroundImage: Assets.images.usaFlag.provider(),
-                            ),
-                            const SizedBox(width: 7),
-                            const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextWidget(
-                                  text: 'US Dollar',
-                                  fontSize: 8,
-                                  weight: FontWeight.w500,
-                                  color: ColorName.primaryColor,
-                                ),
-                                TextWidget(
-                                  text: '1 USD',
-                                  fontSize: 12,
-                                  color: ColorName.primaryColor,
-                                )
-                              ],
-                            )
-                          ],
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 2),
-                          alignment: Alignment.center,
-                          child: RotatedBox(
-                            quarterTurns: 1,
-                            child: SvgPicture.asset(
-                              Assets.images.svgs.exchangeIcon,
-                              width: 12,
+                      child: SvgPicture.asset(
+                        Assets.images.svgs.cardPattern,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      left: 10,
+                      right: 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: TextWidget(
+                              text: 'Our promotional rate',
+                              color: Colors.white,
+                              fontSize: 15,
                             ),
                           ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircleAvatar(
-                              radius: 10,
-                              backgroundImage:
-                                  Assets.images.ethiopianFlag.provider(),
+                          Container(
+                            width: 100.sw,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            const SizedBox(width: 7),
-                            const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextWidget(
-                                  text: 'ET Birr',
-                                  fontSize: 8,
-                                  weight: FontWeight.w500,
-                                  color: ColorName.primaryColor,
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage:
+                                          Assets.images.usaFlag.provider(),
+                                    ),
+                                    const SizedBox(width: 7),
+                                    const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextWidget(
+                                          text: 'US Dollar',
+                                          fontSize: 9,
+                                          weight: FontWeight.w500,
+                                          color: ColorName.primaryColor,
+                                        ),
+                                        TextWidget(
+                                          text: '1 USD',
+                                          fontSize: 14,
+                                          color: ColorName.primaryColor,
+                                        )
+                                      ],
+                                    )
+                                  ],
                                 ),
-                                TextWidget(
-                                  text: '111.98 ETB',
-                                  fontSize: 12,
-                                  color: ColorName.primaryColor,
-                                )
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: const BoxDecoration(
+                                    color: ColorName.primaryColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SvgPicture.asset(
+                                    Assets.images.svgs.exchangeIcon,
+                                    // ignore: deprecated_member_use
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage: Assets
+                                          .images.ethiopianFlag
+                                          .provider(),
+                                    ),
+                                    const SizedBox(width: 7),
+                                    const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextWidget(
+                                          text: 'ET Birr',
+                                          fontSize: 9,
+                                          weight: FontWeight.w500,
+                                          color: ColorName.primaryColor,
+                                        ),
+                                        TextWidget(
+                                          text: '111.98 ETB',
+                                          fontSize: 14,
+                                          color: ColorName.primaryColor,
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
                               ],
-                            )
-                          ],
-                        ),
-                      ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 8,
+                height: 15,
+                color: const Color(0xFFBFBFBF),
+              ),
+              Container(
+                width: 8,
+                height: 15,
+                color: const Color(0xFFBFBFBF),
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          width: 100.sw,
+          height: 100,
+          child: Row(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 100.sw,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all()),
+                    ),
+                    Positioned(
+                      left: 15,
+                      right: 15,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                child: TextWidget(
+                                  text: 'Today’s best rate',
+                                  color: ColorName.primaryColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 3),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(40),
+                                  border: Border.all(
+                                    color: ColorName.borderColor,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const TextWidget(
+                                      text: 'CBE',
+                                      fontSize: 8,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Assets.images.cbeLogo.image(
+                                      width: 14,
+                                      height: 14,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            width: 100.sw,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage:
+                                          Assets.images.usaFlag.provider(),
+                                    ),
+                                    const SizedBox(width: 7),
+                                    const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextWidget(
+                                          text: 'US Dollar',
+                                          fontSize: 9,
+                                          weight: FontWeight.w500,
+                                          color: ColorName.primaryColor,
+                                        ),
+                                        TextWidget(
+                                          text: '1 USD',
+                                          fontSize: 14,
+                                          color: ColorName.primaryColor,
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: const BoxDecoration(
+                                    color: ColorName.primaryColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SvgPicture.asset(
+                                    Assets.images.svgs.exchangeIcon,
+                                    // ignore: deprecated_member_use
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage: Assets
+                                          .images.ethiopianFlag
+                                          .provider(),
+                                    ),
+                                    const SizedBox(width: 7),
+                                    const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextWidget(
+                                          text: 'ET Birr',
+                                          fontSize: 9,
+                                          weight: FontWeight.w500,
+                                          color: ColorName.primaryColor,
+                                        ),
+                                        TextWidget(
+                                          text: '111.98 ETB',
+                                          fontSize: 14,
+                                          color: ColorName.primaryColor,
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -633,9 +721,9 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ),
-          BlocConsumer<CurrencyRateBloc, CurrencyRateState>(
+          BlocConsumer<BankCurrencyRateBloc, BankCurrencyRateState>(
             listener: (context, state) {
-              if (state is CurrencyRateFail) {
+              if (state is BankCurrencyRateFail) {
                 showSnackbar(
                   context,
                   title: 'Error',
@@ -644,7 +732,7 @@ class _HomeTabState extends State<HomeTab> {
               }
             },
             builder: (context, state) {
-              if (state is CurrencyRateLoading) {
+              if (state is BankCurrencyRateLoading) {
                 return const Column(
                   children: [
                     BankRateShimmer(),
@@ -654,7 +742,7 @@ class _HomeTabState extends State<HomeTab> {
                   ],
                 );
               }
-              if (state is CurrencyRateSuccess) {
+              if (state is BankCurrencyRateSuccess) {
                 return Column(
                   children: [
                     for (var rate in state.rates)

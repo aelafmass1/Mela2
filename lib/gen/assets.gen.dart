@@ -234,6 +234,9 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/camera_icon.svg
+  String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
+
   /// File path: assets/images/svgs/card_pattern.svg
   String get cardPattern => 'assets/images/svgs/card_pattern.svg';
 
@@ -276,6 +279,7 @@ class $AssetsImagesSvgsGen {
 
   /// List of all assets
   List<String> get values => [
+        cameraIcon,
         cardPattern,
         equbIcon,
         exchangeIcon,
