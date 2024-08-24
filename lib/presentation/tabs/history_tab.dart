@@ -9,7 +9,6 @@ import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -154,58 +153,71 @@ class _HistoryTabState extends State<HistoryTab> {
                 color: ColorName.borderColor,
               ),
             ),
-            BlocConsumer<TransactionBloc, TransactionState>(
-              listener: (context, state) {
-                if (state is TransactionFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.error,
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is TransactionLoading) {
-                  return const Center(
-                    child: LoadingWidget(
-                      color: ColorName.primaryColor,
-                    ),
-                  );
-                } else if (state is TransactionSuccess) {
-                  return Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<TransactionBloc>().add(FetchTrasaction());
-                      },
-                      child: ListView.separated(
-                        separatorBuilder: (context, index) => const Divider(
-                          color: ColorName.borderColor,
-                        ),
-                        itemCount: state.data.length,
-                        itemBuilder: (context, index) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextWidget(
-                              text: DateFormat('yyyy-MM-dd')
-                                          .format(DateTime.now()) ==
-                                      state.data.keys.elementAt(index)
-                                  ? 'Today'
-                                  : state.data.keys.elementAt(index),
-                              color: ColorName.primaryColor,
-                              fontSize: 14,
-                              weight: FontWeight.w600,
-                            ),
-                            for (var transaction
-                                in state.data.values.elementAt(index))
-                              _buildTrasactionTile(transaction),
-                          ],
-                        ),
+            Expanded(
+              child: BlocConsumer<TransactionBloc, TransactionState>(
+                listener: (context, state) {
+                  if (state is TransactionFail) {
+                    showSnackbar(
+                      context,
+                      title: 'Error',
+                      description: state.error,
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state is TransactionLoading) {
+                    return const Center(
+                      child: LoadingWidget(
+                        color: ColorName.primaryColor,
                       ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
+                    );
+                  } else if (state is TransactionSuccess) {
+                    if (state.data.isNotEmpty) {
+                      return Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            context
+                                .read<TransactionBloc>()
+                                .add(FetchTrasaction());
+                          },
+                          child: ListView.separated(
+                            separatorBuilder: (context, index) => const Divider(
+                              color: ColorName.borderColor,
+                            ),
+                            itemCount: state.data.length,
+                            itemBuilder: (context, index) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextWidget(
+                                  text: DateFormat('yyyy-MM-dd')
+                                              .format(DateTime.now()) ==
+                                          state.data.keys.elementAt(index)
+                                      ? 'Today'
+                                      : state.data.keys.elementAt(index),
+                                  color: ColorName.primaryColor,
+                                  fontSize: 14,
+                                  weight: FontWeight.w600,
+                                ),
+                                for (var transaction
+                                    in state.data.values.elementAt(index))
+                                  _buildTrasactionTile(transaction),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return Center(
+                      child: TextWidget(
+                        text: 'Transaction history is empty',
+                        type: TextType.small,
+                        weight: FontWeight.w300,
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             )
           ],
         ),

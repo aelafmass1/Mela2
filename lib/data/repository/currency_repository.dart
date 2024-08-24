@@ -22,4 +22,26 @@ class CurrencyRepository {
     }
     return {'error': res.body};
   }
+
+  static Future<List> fetchCurrencies(
+    String accessToken,
+  ) async {
+    final res = await http.get(
+      Uri.parse(
+        '$baseUrl/api/exchange-rates',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+        'currencyCode': '',
+      },
+    );
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body) as List;
+      return data;
+    }
+    return [
+      {'error': res.body}
+    ];
+  }
 }

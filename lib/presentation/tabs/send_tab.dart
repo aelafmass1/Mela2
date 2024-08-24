@@ -15,10 +15,11 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/receipt_page.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../bloc/currency/currency_bloc.dart';
 import '../../config/routing.dart';
+import '../widgets/custom_shimmer.dart';
 
 class SentTab extends StatefulWidget {
   const SentTab({super.key});
@@ -45,7 +46,7 @@ class _SentTabState extends State<SentTab> {
   List<Contact> contacts = [];
   List<Contact> filteredContacts = [];
 
-  double dollarToEtb = 111.98;
+  double exchangeRate = 0;
 
   final _exchangeRateFormKey = GlobalKey<FormState>();
   final _recipientSelectionFormKey = GlobalKey<FormState>();
@@ -69,6 +70,19 @@ class _SentTabState extends State<SentTab> {
     }
   }
 
+  @override
+  void initState() {
+    final state = context.read<CurrencyBloc>().state;
+    if (state is CurrencySuccess) {
+      setState(() {
+        exchangeRate =
+            state.currencies.where((c) => c.currencyCode == 'USD').first.rate;
+      });
+    }
+    context.read<CurrencyBloc>().add(FetchAllCurrencies());
+    super.initState();
+  }
+
   void clearSendInfo() {
     setState(() {
       index = 0;
@@ -88,7 +102,7 @@ class _SentTabState extends State<SentTab> {
       etbController.text = '';
       bankAcocuntController.text = '';
       receiverInfo = null;
-      dollarToEtb = 101.98;
+      exchangeRate = 101.98;
     });
   }
 
@@ -262,24 +276,71 @@ class _SentTabState extends State<SentTab> {
                                                       .provider(),
                                                 ),
                                                 const SizedBox(width: 7),
-                                                const Column(
+                                                Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    TextWidget(
+                                                    const TextWidget(
                                                       text: 'ET Birr',
                                                       fontSize: 9,
                                                       weight: FontWeight.w500,
                                                       color: ColorName
                                                           .primaryColor,
                                                     ),
-                                                    TextWidget(
-                                                      text: '111.98 ETB',
-                                                      fontSize: 14,
-                                                      color: ColorName
-                                                          .primaryColor,
+                                                    BlocConsumer<CurrencyBloc,
+                                                        CurrencyState>(
+                                                      listener:
+                                                          (context, state) {
+                                                        if (state
+                                                            is CurrencySuccess) {
+                                                          setState(() {
+                                                            exchangeRate = state
+                                                                .currencies
+                                                                .where((c) =>
+                                                                    c.currencyCode ==
+                                                                    'USD')
+                                                                .first
+                                                                .rate;
+                                                          });
+                                                        }
+                                                      },
+                                                      builder:
+                                                          (context, state) {
+                                                        if (state
+                                                            is CurrencyLoading) {
+                                                          return const Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    top: 3),
+                                                            child:
+                                                                CustomShimmer(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .zero,
+                                                              width: 67,
+                                                              height: 16,
+                                                            ),
+                                                          );
+                                                        }
+                                                        if (state
+                                                            is CurrencySuccess) {
+                                                          return TextWidget(
+                                                            text:
+                                                                '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                            fontSize: 14,
+                                                            color: ColorName
+                                                                .primaryColor,
+                                                          );
+                                                        }
+                                                        return const TextWidget(
+                                                          text: '--',
+                                                          fontSize: 14,
+                                                          color: ColorName
+                                                              .primaryColor,
+                                                        );
+                                                      },
                                                     )
                                                   ],
                                                 )
@@ -1526,7 +1587,8 @@ class _SentTabState extends State<SentTab> {
               onChanged: (value) {
                 try {
                   final money = double.parse(value);
-                  etbController.text = (money * dollarToEtb).toStringAsFixed(3);
+                  etbController.text =
+                      (money * exchangeRate).toStringAsFixed(3);
                 } catch (error) {
                   etbController.text = '';
                 }
@@ -1633,7 +1695,8 @@ class _SentTabState extends State<SentTab> {
               onChanged: (value) {
                 try {
                   final money = double.parse(value);
-                  usdController.text = (money / dollarToEtb).toStringAsFixed(3);
+                  usdController.text =
+                      (money / exchangeRate).toStringAsFixed(3);
                 } catch (error) {
                   usdController.text = '';
                 }

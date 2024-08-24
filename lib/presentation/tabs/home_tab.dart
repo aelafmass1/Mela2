@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
+import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -51,6 +52,7 @@ class _HomeTabState extends State<HomeTab> {
   void initState() {
     getToken();
     context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
+    context.read<CurrencyBloc>().add(FetchAllCurrencies());
     super.initState();
   }
 
@@ -68,44 +70,48 @@ class _HomeTabState extends State<HomeTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: Assets.images.profileImage.provider(),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextWidget(
-                            text: getGreeting(),
-                            fontSize: 14,
-                            weight: FontWeight.w500,
-                          ),
-                          TextWidget(
-                            text: FirebaseAuth
-                                    .instance.currentUser?.displayName ??
-                                '',
-                            fontSize: 20,
-                            weight: FontWeight.w800,
-                            color: ColorName.primaryColor,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        //
-                      },
-                      icon: const Icon(
-                        Bootstrap.bell,
-                        size: 24,
-                      ))
-                ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundImage:
+                              Assets.images.profileImage.provider(),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidget(
+                              text: getGreeting(),
+                              fontSize: 14,
+                              weight: FontWeight.w500,
+                            ),
+                            TextWidget(
+                              text: FirebaseAuth
+                                      .instance.currentUser?.displayName ??
+                                  '',
+                              fontSize: 20,
+                              weight: FontWeight.w800,
+                              color: ColorName.primaryColor,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          //
+                        },
+                        icon: const Icon(
+                          Bootstrap.bell,
+                          size: 24,
+                        ))
+                  ],
+                ),
               ),
               Expanded(
                   child: SingleChildScrollView(
@@ -460,22 +466,43 @@ class _HomeTabState extends State<HomeTab> {
                                           .provider(),
                                     ),
                                     const SizedBox(width: 7),
-                                    const Column(
+                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        TextWidget(
+                                        const TextWidget(
                                           text: 'ET Birr',
                                           fontSize: 9,
                                           weight: FontWeight.w500,
                                           color: ColorName.primaryColor,
                                         ),
-                                        TextWidget(
-                                          text: '111.98 ETB',
-                                          fontSize: 14,
-                                          color: ColorName.primaryColor,
+                                        BlocBuilder<CurrencyBloc,
+                                            CurrencyState>(
+                                          builder: (context, state) {
+                                            if (state is CurrencyLoading) {
+                                              return const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 3),
+                                                child: CustomShimmer(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                  width: 67,
+                                                  height: 16,
+                                                ),
+                                              );
+                                            }
+                                            if (state is CurrencySuccess) {
+                                              return TextWidget(
+                                                text:
+                                                    '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                fontSize: 14,
+                                                color: ColorName.primaryColor,
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
                                         )
                                       ],
                                     )
@@ -630,22 +657,43 @@ class _HomeTabState extends State<HomeTab> {
                                           .provider(),
                                     ),
                                     const SizedBox(width: 7),
-                                    const Column(
+                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        TextWidget(
+                                        const TextWidget(
                                           text: 'ET Birr',
                                           fontSize: 9,
                                           weight: FontWeight.w500,
                                           color: ColorName.primaryColor,
                                         ),
-                                        TextWidget(
-                                          text: '111.98 ETB',
-                                          fontSize: 14,
-                                          color: ColorName.primaryColor,
+                                        BlocBuilder<CurrencyBloc,
+                                            CurrencyState>(
+                                          builder: (context, state) {
+                                            if (state is CurrencyLoading) {
+                                              return const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 3),
+                                                child: CustomShimmer(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                  width: 67,
+                                                  height: 16,
+                                                ),
+                                              );
+                                            }
+                                            if (state is CurrencySuccess) {
+                                              return TextWidget(
+                                                text:
+                                                    '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                fontSize: 14,
+                                                color: ColorName.primaryColor,
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
                                         )
                                       ],
                                     )

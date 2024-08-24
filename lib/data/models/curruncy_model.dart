@@ -2,28 +2,34 @@
 import 'dart:convert';
 
 class CurrencyModel {
-  final double amount;
+  final double rate;
+  final String currencyCode;
   CurrencyModel({
-    required this.amount,
+    required this.rate,
+    required this.currencyCode,
   });
 
   CurrencyModel copyWith({
-    double? amount,
+    double? rate,
+    String? currencyCode,
   }) {
     return CurrencyModel(
-      amount: amount ?? this.amount,
+      rate: rate ?? this.rate,
+      currencyCode: currencyCode ?? this.currencyCode,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'amount': amount,
+      'rate': rate,
+      'currencyCode': currencyCode,
     };
   }
 
   factory CurrencyModel.fromMap(Map<String, dynamic> map) {
     return CurrencyModel(
-      amount: map['amount'] as double,
+      rate: map['rate'] as double,
+      currencyCode: map['currencyCode'] as String,
     );
   }
 
@@ -33,15 +39,16 @@ class CurrencyModel {
       CurrencyModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'CurruncyModel(amount: $amount)';
+  String toString() =>
+      'CurrencyModel(rate: $rate, currencyCode: $currencyCode)';
 
   @override
   bool operator ==(covariant CurrencyModel other) {
     if (identical(this, other)) return true;
 
-    return other.amount == amount;
+    return other.rate == rate && other.currencyCode == currencyCode;
   }
 
   @override
-  int get hashCode => amount.hashCode;
+  int get hashCode => rate.hashCode ^ currencyCode.hashCode;
 }

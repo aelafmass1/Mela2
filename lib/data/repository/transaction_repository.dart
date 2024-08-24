@@ -15,8 +15,13 @@ class TransactionRepository {
         'Content-Type': 'application/json',
       },
     );
-    if (res.statusCode == 200) {
-      List data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      List data = [];
+      if (res.body.isNotEmpty) {
+        data = jsonDecode(res.body);
+      } else {
+        data = [];
+      }
       return {'success': data};
     }
     return {"error": res.body.isEmpty ? 'please try again' : res.body};
