@@ -51,203 +51,204 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  Assets.images.svgs.horizontalMelaLogo,
-                ),
-              ),
-              const SizedBox(height: 45),
-              Row(
-                children: [
-                  const TextWidget(
-                    text: 'Hello There',
-                    fontSize: 24,
-                    weight: FontWeight.w700,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    Assets.images.svgs.horizontalMelaLogo,
                   ),
-                  const SizedBox(width: 10),
-                  SvgPicture.asset(Assets.images.svgs.hiEmoji),
-                ],
-              ),
-              const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 45),
+                Row(
+                  children: [
+                    const TextWidget(
+                      text: 'Hello There',
+                      fontSize: 24,
+                      weight: FontWeight.w700,
+                    ),
+                    const SizedBox(width: 10),
+                    SvgPicture.asset(Assets.images.svgs.hiEmoji),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-              // ResponsiveBuilder(builder: (context, sizingInfo) {
-              //   return Padding(
-              //     padding: const EdgeInsets.only(top: 99),
-              //     child: SizedBox(
-              //       width: ResponsiveUtil.forScreen(
-              //           sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
-              //       child: const TextWidget(
-              //         text: 'Log in',
-              //         type: TextType.large,
-              //       ),
-              //     ),
-              //   );
-              // }),
-              TextFieldWidget(
-                prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
-                enableFocusColor: false,
-                prefix: Container(
-                  width: 80,
-                  height: 60,
-                  margin: const EdgeInsets.only(right: 10),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: Colors.black54)),
-                  child: Center(
-                    child: DropdownButton(
-                        value: selectedCoutry,
-                        padding: EdgeInsets.zero,
-                        underline: const SizedBox.shrink(),
-                        icon: const Padding(
-                          padding: EdgeInsets.only(left: 5.0),
-                          child: Icon(Icons.keyboard_arrow_down),
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                              alignment: Alignment.center,
-                              value: 'ethiopia',
-                              child: CircleAvatar(
-                                radius: 13,
-                                backgroundImage:
-                                    Assets.images.ethiopianFlag.provider(),
-                              )),
-                          DropdownMenuItem(
-                              alignment: Alignment.center,
-                              value: 'usa',
-                              child: CircleAvatar(
-                                radius: 13,
-                                backgroundImage:
-                                    Assets.images.usaFlag.provider(),
-                              )),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              selectedCoutry = value;
-                            });
-                          }
-                        }),
+                // ResponsiveBuilder(builder: (context, sizingInfo) {
+                //   return Padding(
+                //     padding: const EdgeInsets.only(top: 99),
+                //     child: SizedBox(
+                //       width: ResponsiveUtil.forScreen(
+                //           sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
+                //       child: const TextWidget(
+                //         text: 'Log in',
+                //         type: TextType.large,
+                //       ),
+                //     ),
+                //   );
+                // }),
+                TextFieldWidget(
+                  prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                  enableFocusColor: false,
+                  prefix: Container(
+                    width: 80,
+                    height: 60,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(40),
+                        border: Border.all(color: Colors.black54)),
+                    child: Center(
+                      child: DropdownButton(
+                          value: selectedCoutry,
+                          padding: EdgeInsets.zero,
+                          underline: const SizedBox.shrink(),
+                          icon: const Padding(
+                            padding: EdgeInsets.only(left: 5.0),
+                            child: Icon(Icons.keyboard_arrow_down),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                                alignment: Alignment.center,
+                                value: 'ethiopia',
+                                child: CircleAvatar(
+                                  radius: 13,
+                                  backgroundImage:
+                                      Assets.images.ethiopianFlag.provider(),
+                                )),
+                            DropdownMenuItem(
+                                alignment: Alignment.center,
+                                value: 'usa',
+                                child: CircleAvatar(
+                                  radius: 13,
+                                  backgroundImage:
+                                      Assets.images.usaFlag.provider(),
+                                )),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                selectedCoutry = value;
+                              });
+                            }
+                          }),
+                    ),
                   ),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (text) {
-                  if (text!.isEmpty) {
-                    return 'Phone Number is empty';
-                  }
-                  return null;
-                },
-                controller: phoneNumberController,
-                hintText: 'Phone Number',
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 30),
-                child: TextFieldWidget(
+                  keyboardType: TextInputType.phone,
                   validator: (text) {
                     if (text!.isEmpty) {
-                      return 'password is empty';
+                      return 'Phone Number is empty';
                     }
                     return null;
                   },
-                  obscurePassword: showPassword,
-                  controller: passwordController,
-                  hintText: 'Password',
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: IconButton(
-                      icon: Icon(
-                        showPassword
-                            ? Icons.remove_red_eye
-                            : Icons.remove_red_eye_outlined,
-                        color: ColorName.grey,
+                  controller: phoneNumberController,
+                  hintText: 'Phone Number',
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 30),
+                  child: TextFieldWidget(
+                    validator: (text) {
+                      if (text!.isEmpty) {
+                        return 'password is empty';
+                      }
+                      return null;
+                    },
+                    obscurePassword: showPassword,
+                    controller: passwordController,
+                    hintText: 'Password',
+                    suffix: Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: IconButton(
+                        icon: Icon(
+                          showPassword
+                              ? Icons.remove_red_eye
+                              : Icons.remove_red_eye_outlined,
+                          color: ColorName.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
                       ),
-                      onPressed: () {
-                        setState(() {
-                          showPassword = !showPassword;
-                        });
-                      },
                     ),
                   ),
                 ),
-              ),
-              // PhoneNumberBox(
-              //   onChange: (value) {
-              //     setState(() {
-              //       countryCode = value;
-              //     });
-              //   },
-              //   controller: phoneNumberController,
-              // ),
-              // PasswordBox(
-              //   controller: passwordController,
-              // ),
-              const Expanded(child: SizedBox()),
-              BlocConsumer<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is AuthFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  } else if (state is AuthSucces) {
-                    setFirstTime(false);
-                    context.goNamed(RouteName.home); //
-                  }
-                },
-                builder: (context, state) {
-                  return ButtonWidget(
-                      child: state is AuthLoading
-                          ? const LoadingWidget()
-                          : const TextWidget(
-                              text: 'Log In',
-                              color: Colors.white,
-                            ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          String phoneCode =
-                              selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                          String phoneNumber =
-                              phoneCode + phoneNumberController.text;
-                          log(phoneNumber);
-                          context.read<AuthBloc>().add(
-                                LoginUser(
-                                    phoneNumber: phoneNumber,
-                                    password: passwordController.text),
-                              );
-                        }
-                      });
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const TextWidget(
-                      text: 'Don’t have an account ?',
-                      fontSize: 15,
-                      weight: FontWeight.w300,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.pushNamed(RouteName.signup);
-                      },
-                      child: const TextWidget(
-                        text: 'Sign up',
-                        fontSize: 18,
-                        color: ColorName.primaryColor,
-                        weight: FontWeight.w600,
-                      ),
-                    )
-                  ],
+                // PhoneNumberBox(
+                //   onChange: (value) {
+                //     setState(() {
+                //       countryCode = value;
+                //     });
+                //   },
+                //   controller: phoneNumberController,
+                // ),
+                // PasswordBox(
+                //   controller: passwordController,
+                // ),
+                const SizedBox(height: 30),
+                BlocConsumer<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is AuthSucces) {
+                      setFirstTime(false);
+                      context.goNamed(RouteName.home); //
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        child: state is AuthLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Log In',
+                                color: Colors.white,
+                              ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            String phoneCode =
+                                selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                            String phoneNumber =
+                                phoneCode + phoneNumberController.text;
+                            log(phoneNumber);
+                            context.read<AuthBloc>().add(
+                                  LoginUser(
+                                      phoneNumber: phoneNumber,
+                                      password: passwordController.text),
+                                );
+                          }
+                        });
+                  },
                 ),
-              ),
-              const Expanded(child: SizedBox()),
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const TextWidget(
+                        text: 'Don’t have an account ?',
+                        fontSize: 15,
+                        weight: FontWeight.w300,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.pushNamed(RouteName.signup);
+                        },
+                        child: const TextWidget(
+                          text: 'Sign up',
+                          fontSize: 18,
+                          color: ColorName.primaryColor,
+                          weight: FontWeight.w600,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
