@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,8 +10,10 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -17,6 +21,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../bloc/currency/currency_bloc.dart';
@@ -39,6 +44,7 @@ class _SentTabState extends State<SentTab> {
 
   bool isSearching = false;
   bool showBorder = true;
+  bool isPermissionDenied = false;
 
   int selectedPaymentMethodIndex = 1;
 
@@ -60,15 +66,53 @@ class _SentTabState extends State<SentTab> {
   final usdController = TextEditingController();
   final etbController = TextEditingController();
   final bankAcocuntController = TextEditingController();
+  final phoneNumberController = TextEditingController();
 
   ReceiverInfo? receiverInfo;
 
   Future<void> _fetchContacts() async {
-    if (await FlutterContacts.requestPermission(readonly: true)) {
-      List<Contact> c = await FlutterContacts.getContacts(withProperties: true);
+    if (await isPermissionAsked() == false) {
+      if (await FlutterContacts.requestPermission(readonly: true)) {
+        List<Contact> c =
+            await FlutterContacts.getContacts(withProperties: true);
+        setState(() {
+          contacts = c;
+        });
+      }
+      checkContactPermission();
+    } else {
+      if (contacts.isEmpty) {
+        setState(() {
+          isPermissionDenied = true;
+        });
+      }
+    }
+  }
+
+  void checkContactPermission() async {
+    // Check if the contact permission is already granted
+    PermissionStatus status = await Permission.contacts.status;
+
+    if (status.isGranted) {
+      log("Contact permission granted.");
+    } else if (status.isDenied) {
+      if (await isPermissionAsked() == false) {
+        changePermissionAskedState(true);
+        context.pushNamed(
+          RouteName.contactPermission,
+          extra: checkContactPermission,
+        );
+      } else {
+        setState(() {
+          isPermissionDenied = true;
+        });
+      }
+    } else if (status.isPermanentlyDenied) {
       setState(() {
-        contacts = c;
+        isPermissionDenied = true;
       });
+      log("Contact permission permanently denied.");
+      // await openAppSettings();
     }
   }
 
@@ -645,202 +689,224 @@ class _SentTabState extends State<SentTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const TextWidget(
-                    text: 'To',
+                  TextWidget(
+                    text: isPermissionDenied ? 'Phone Number' : 'To',
                     type: TextType.small,
                   ),
                   const SizedBox(height: 10),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    onEnd: () {
-                      if (contactListHeight != 250) {
-                        setState(() {
-                          showBorder = false;
-                        });
-                      }
-                    },
-                    height: contactListHeight,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        border: showBorder
-                            ? Border.all(
-                                color: ColorName.borderColor,
-                              )
-                            : null),
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'receiver is selected';
-                            }
-                            return null;
-                          },
-                          onChanged: (text) {
-                            if (text.isEmpty) {
+                  Visibility(
+                    visible: isPermissionDenied == false,
+                    replacement: TextFieldWidget(
+                      validator: (text) {
+                        if (isPermissionDenied) {
+                          if (text!.isEmpty) {
+                            return 'Phone number is empty';
+                          }
+                        }
+                        return null;
+                      },
+                      hintText: 'Enter phone number',
+                      controller: phoneNumberController,
+                    ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      onEnd: () {
+                        if (contactListHeight != 250) {
+                          setState(() {
+                            showBorder = false;
+                          });
+                        }
+                      },
+                      height: contactListHeight,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          border: showBorder
+                              ? Border.all(
+                                  color: ColorName.borderColor,
+                                )
+                              : null),
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'receiver is selected';
+                              }
+                              return null;
+                            },
+                            onChanged: (text) {
+                              if (text.isEmpty) {
+                                setState(() {
+                                  isSearching = false;
+                                });
+                              } else {
+                                setState(() {
+                                  isSearching = true;
+                                  filteredContacts = contacts
+                                      .where((contact) => contact.displayName
+                                          .toLowerCase()
+                                          .contains(searchContactController.text
+                                              .toLowerCase()))
+                                      .toList();
+                                });
+                              }
                               setState(() {
-                                isSearching = false;
+                                contactListHeight = 250;
+                                showBorder = true;
                               });
-                            } else {
-                              setState(() {
-                                isSearching = true;
-                                filteredContacts = contacts
-                                    .where((contact) => contact.displayName
-                                        .toLowerCase()
-                                        .contains(searchContactController.text
-                                            .toLowerCase()))
-                                    .toList();
-                              });
-                            }
-                            setState(() {
-                              contactListHeight = 250;
-                              showBorder = true;
-                            });
-                          },
-                          controller: searchContactController,
-                          decoration: InputDecoration(
-                            suffixIcon: searchContactController.text.isNotEmpty
-                                ? IconButton(
-                                    style: IconButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        searchContactController.text = '';
-                                        isSearching = false;
-                                        contactListHeight = 250;
-                                        showBorder = true;
-                                      });
-                                    },
-                                  )
-                                : null,
-                            prefixIcon: const Icon(BoxIcons.bx_search),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.black45),
-                                borderRadius: BorderRadius.circular(40)),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.black45),
-                                borderRadius: BorderRadius.circular(40)),
+                            },
+                            controller: searchContactController,
+                            decoration: InputDecoration(
+                              suffixIcon:
+                                  searchContactController.text.isNotEmpty
+                                      ? IconButton(
+                                          style: IconButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.close,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              searchContactController.text = '';
+                                              isSearching = false;
+                                              contactListHeight = 250;
+                                              showBorder = true;
+                                            });
+                                          },
+                                        )
+                                      : null,
+                              prefixIcon: const Icon(BoxIcons.bx_search),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide:
+                                      const BorderSide(color: Colors.black45),
+                                  borderRadius: BorderRadius.circular(40)),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      const BorderSide(color: Colors.black45),
+                                  borderRadius: BorderRadius.circular(40)),
+                            ),
                           ),
-                        ),
-                        Visibility(
-                          visible: showBorder,
-                          child: Expanded(
-                            child: isSearching
-                                ? ListView.builder(
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        onTap: () {
-                                          searchContactController.text =
-                                              filteredContacts[index]
-                                                  .displayName;
-                                          setState(() {
-                                            selectedContact =
-                                                filteredContacts[index];
-                                            contactListHeight = 58;
-                                          });
-                                        },
-                                        leading: contacts[index].photo == null
-                                            ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                                child: Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  color: ColorName.primaryColor,
-                                                  alignment: Alignment.center,
-                                                  child: TextWidget(
-                                                    text: contacts[index]
-                                                        .displayName[0],
-                                                    color: Colors.white,
+                          Visibility(
+                            visible: showBorder,
+                            child: Expanded(
+                              child: isSearching
+                                  ? ListView.builder(
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          onTap: () {
+                                            searchContactController.text =
+                                                filteredContacts[index]
+                                                    .displayName;
+                                            setState(() {
+                                              selectedContact =
+                                                  filteredContacts[index];
+                                              contactListHeight = 58;
+                                            });
+                                          },
+                                          leading: contacts[index].photo == null
+                                              ? ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  child: Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    color:
+                                                        ColorName.primaryColor,
+                                                    alignment: Alignment.center,
+                                                    child: TextWidget(
+                                                      text: contacts[index]
+                                                          .displayName[0],
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                                child: Image.memory(
-                                                  contacts[index].photo!,
-                                                  width: 36,
-                                                  height: 36,
-                                                  fit: BoxFit.cover,
-                                                )),
-                                        title: TextWidget(
-                                          text: filteredContacts[index]
-                                              .displayName,
-                                          fontSize: 13,
-                                        ),
-                                        subtitle: TextWidget(
-                                          text: filteredContacts[index]
-                                              .phones
-                                              .first
-                                              .number,
-                                          fontSize: 13,
-                                        ),
-                                      );
-                                    },
-                                    itemCount: filteredContacts.length,
-                                  )
-                                : ListView.builder(
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        onTap: () {
-                                          searchContactController.text =
-                                              contacts[index].displayName;
-                                          setState(() {
-                                            selectedContact = contacts[index];
-                                            contactListHeight = 58;
-                                          });
-                                        },
-                                        leading: contacts[index].photo == null
-                                            ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                                child: Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  color: ColorName.primaryColor,
-                                                  alignment: Alignment.center,
-                                                  child: TextWidget(
-                                                    text: contacts[index]
-                                                        .displayName[0],
-                                                    color: Colors.white,
+                                                )
+                                              : ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  child: Image.memory(
+                                                    contacts[index].photo!,
+                                                    width: 36,
+                                                    height: 36,
+                                                    fit: BoxFit.cover,
+                                                  )),
+                                          title: TextWidget(
+                                            text: filteredContacts[index]
+                                                .displayName,
+                                            fontSize: 13,
+                                          ),
+                                          subtitle: TextWidget(
+                                            text: filteredContacts[index]
+                                                .phones
+                                                .first
+                                                .number,
+                                            fontSize: 13,
+                                          ),
+                                        );
+                                      },
+                                      itemCount: filteredContacts.length,
+                                    )
+                                  : ListView.builder(
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          onTap: () {
+                                            searchContactController.text =
+                                                contacts[index].displayName;
+                                            setState(() {
+                                              selectedContact = contacts[index];
+                                              contactListHeight = 58;
+                                            });
+                                          },
+                                          leading: contacts[index].photo == null
+                                              ? ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  child: Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    color:
+                                                        ColorName.primaryColor,
+                                                    alignment: Alignment.center,
+                                                    child: TextWidget(
+                                                      text: contacts[index]
+                                                          .displayName[0],
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                                child: Image.memory(
-                                                  contacts[index].photo!,
-                                                  width: 36,
-                                                  height: 36,
-                                                  fit: BoxFit.cover,
-                                                )),
-                                        title: TextWidget(
-                                          text: contacts[index].displayName,
-                                          fontSize: 13,
-                                        ),
-                                        subtitle: TextWidget(
-                                          text: contacts[index]
-                                              .phones
-                                              .first
-                                              .number,
-                                          fontSize: 13,
-                                        ),
-                                      );
-                                    },
-                                    itemCount: contacts.length,
-                                  ),
-                          ),
-                        )
-                      ],
+                                                )
+                                              : ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  child: Image.memory(
+                                                    contacts[index].photo!,
+                                                    width: 36,
+                                                    height: 36,
+                                                    fit: BoxFit.cover,
+                                                  )),
+                                          title: TextWidget(
+                                            text: contacts[index].displayName,
+                                            fontSize: 13,
+                                          ),
+                                          subtitle: TextWidget(
+                                            text: contacts[index]
+                                                .phones
+                                                .first
+                                                .number,
+                                            fontSize: 13,
+                                          ),
+                                        );
+                                      },
+                                      itemCount: contacts.length,
+                                    ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -1550,8 +1616,9 @@ class _SentTabState extends State<SentTab> {
                         receiverInfo = ReceiverInfo(
                           senderUserId: auth.currentUser!.uid,
                           receiverName: receiverName.text,
-                          receiverPhoneNumber:
-                              selectedContact!.phones.first.number,
+                          receiverPhoneNumber: isPermissionDenied
+                              ? phoneNumberController.text
+                              : selectedContact!.phones.first.number,
                           receiverBankName: selectedBank,
                           receiverAccountNumber: bankAcocuntController.text,
                           amount: double.parse(usdController.text),

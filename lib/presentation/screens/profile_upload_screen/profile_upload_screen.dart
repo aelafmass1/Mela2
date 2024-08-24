@@ -21,7 +21,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
       appBar: AppBar(
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 15),
+            padding: const EdgeInsets.only(right: 15),
             child: SizedBox(
               width: 70,
               height: 28,

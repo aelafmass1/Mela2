@@ -56,6 +56,10 @@ class $AssetsImagesGen {
   AssetGenImage get checkedLogo =>
       const AssetGenImage('assets/images/checked_logo.png');
 
+  /// File path: assets/images/contact_page_image.png
+  AssetGenImage get contactPageImage =>
+      const AssetGenImage('assets/images/contact_page_image.png');
+
   /// File path: assets/images/dashn_bank_logo.png
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
@@ -196,6 +200,7 @@ class $AssetsImagesGen {
         bunaBank,
         cbeLogo,
         checkedLogo,
+        contactPageImage,
         dashnBankLogo,
         dollar,
         doodles,
