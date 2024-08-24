@@ -13,6 +13,7 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
   }
   _onFetchAllCurrencies(FetchAllCurrencies event, Emitter emit) async {
     try {
+      //loading state
       emit(CurrencyLoading());
       final token = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (token != null) {
