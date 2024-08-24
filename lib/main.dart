@@ -1,15 +1,19 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
-import 'bloc/currency_rate/currency_rate_bloc.dart';
+import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'config/routing.dart';
 
 void main() async {
@@ -40,13 +44,24 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => CurrencyRateBloc(),
+          create: (context) => BankCurrencyRateBloc(),
         ),
         BlocProvider(
           create: (context) => EqubBloc(),
         ),
         BlocProvider(
           create: (context) => AuthBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TransactionBloc(),
+        ),
+        BlocProvider(
+          create: (context) => MoneyTransferBloc(
+            auth: FirebaseAuth.instance,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => CurrencyBloc(),
         ),
       ],
       child: ResponsiveApp(

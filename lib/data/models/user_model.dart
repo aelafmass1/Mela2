@@ -49,8 +49,8 @@ class UserModel {
       'password': password,
       'firstName': firstName,
       'lastName': lastName,
-      'gender': gender,
-      'birthDate': birthDate,
+      // 'gender': gender,
+      // 'birthDate': birthDate,
       'email': email,
     };
   }

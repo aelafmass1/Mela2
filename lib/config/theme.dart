@@ -4,7 +4,7 @@ import 'package:transaction_mobile_app/gen/fonts.gen.dart';
 
 themeData() {
   return ThemeData(
-    scaffoldBackgroundColor: ColorName.backgroundColor,
+    scaffoldBackgroundColor: Colors.white,
     fontFamily: FontFamily.openSans,
     colorScheme: ColorScheme.fromSeed(
       seedColor: ColorName.primaryColor,
@@ -12,9 +12,10 @@ themeData() {
     ),
     appBarTheme: const AppBarTheme(
       toolbarHeight: 0,
-      backgroundColor: ColorName.backgroundColor,
-      surfaceTintColor: ColorName.backgroundColor,
+      backgroundColor: Colors.white,
+      surfaceTintColor: ColorName.white,
     ),
+    colorSchemeSeed: ColorName.primaryColor,
     textTheme: const TextTheme(
         displaySmall: TextStyle(
           fontWeight: FontWeight.w600,

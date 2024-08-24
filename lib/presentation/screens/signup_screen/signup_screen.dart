@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
@@ -28,6 +27,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool isLoading = false;
+  String selectedCoutry = 'usa';
 
   Future<void> sendOTP(String phoneNumber) async {
     setState(() {
@@ -79,7 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
         context.pushNamed(
           RouteName.otp,
           extra: UserModel(
-            phoneNumber: phoneNumberController.text,
+            phoneNumber: phoneNumber,
             verificationId: verificationId,
           ),
         );
@@ -132,6 +132,51 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 10),
               TextFieldWidget(
+                prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                enableFocusColor: false,
+                prefix: Container(
+                  width: 80,
+                  height: 60,
+                  margin: const EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(color: Colors.black54)),
+                  child: Center(
+                    child: DropdownButton(
+                        value: selectedCoutry,
+                        padding: EdgeInsets.zero,
+                        underline: const SizedBox.shrink(),
+                        icon: const Padding(
+                          padding: EdgeInsets.only(left: 5.0),
+                          child: Icon(Icons.keyboard_arrow_down),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                              alignment: Alignment.center,
+                              value: 'ethiopia',
+                              child: CircleAvatar(
+                                radius: 13,
+                                backgroundImage:
+                                    Assets.images.ethiopianFlag.provider(),
+                              )),
+                          DropdownMenuItem(
+                              alignment: Alignment.center,
+                              value: 'usa',
+                              child: CircleAvatar(
+                                radius: 13,
+                                backgroundImage:
+                                    Assets.images.usaFlag.provider(),
+                              )),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              selectedCoutry = value;
+                            });
+                          }
+                        }),
+                  ),
+                ),
                 keyboardType: TextInputType.phone,
                 validator: (text) {
                   if (text!.isEmpty) {
@@ -153,11 +198,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // sendOTP(phoneNumberController.text);
+                    String phoneCode =
+                        selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                    String phoneNumber = phoneCode + phoneNumberController.text;
+
+                    // sendOTP(phoneNumber);
                     context.pushNamed(
                       RouteName.otp,
                       extra: UserModel(
-                        phoneNumber: phoneNumberController.text,
+                        phoneNumber: phoneNumber,
                       ),
                     );
                   }
