@@ -10,6 +10,7 @@ import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
@@ -36,9 +37,14 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -62,6 +68,11 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => CurrencyBloc(),
+        ),
+        BlocProvider(
+          create: (context) => NavigationBloc(
+            tabController: TabController(length: 5, vsync: this),
+          ),
         ),
       ],
       child: ResponsiveApp(

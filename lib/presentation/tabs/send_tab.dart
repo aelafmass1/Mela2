@@ -25,6 +25,7 @@ import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.da
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../bloc/currency/currency_bloc.dart';
+import '../../bloc/navigation/navigation_bloc.dart';
 import '../../config/routing.dart';
 import '../widgets/custom_shimmer.dart';
 
@@ -125,6 +126,12 @@ class _SentTabState extends State<SentTab> {
             state.currencies.where((c) => c.currencyCode == 'USD').first.rate;
       });
     }
+    final navState = context.read<NavigationBloc>().state;
+    if (navState.moneyAmount != null) {
+      usdController.text = navState.moneyAmount.toString();
+      etbController.text = (navState.moneyAmount! * exchangeRate).toString();
+    }
+
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     super.initState();
   }
@@ -248,7 +255,7 @@ class _SentTabState extends State<SentTab> {
                                         padding:
                                             EdgeInsets.symmetric(vertical: 10),
                                         child: TextWidget(
-                                          text: 'Our promotional rate',
+                                          text: 'Current Trade rate',
                                           color: Colors.white,
                                           fontSize: 15,
                                         ),
@@ -365,7 +372,7 @@ class _SentTabState extends State<SentTab> {
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .zero,
-                                                              width: 67,
+                                                              width: 60,
                                                               height: 16,
                                                             ),
                                                           );
