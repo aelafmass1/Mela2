@@ -1,10 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../../config/routing.dart';
+import '../../../core/utils/settings.dart';
 
 class ProfileUploadScreen extends StatefulWidget {
   final UserModel userModel;
@@ -15,13 +26,16 @@ class ProfileUploadScreen extends StatefulWidget {
 }
 
 class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
+  XFile? profilePicture;
+  bool isSkipClicked = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 15),
+            padding: const EdgeInsets.only(right: 15),
             child: SizedBox(
               width: 70,
               height: 28,
@@ -36,7 +50,14 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                             color: Color(0xFFD0D0D0),
                           ))),
                   onPressed: () {
-                    //
+                    setState(() {
+                      isSkipClicked = true;
+                    });
+                    context.read<AuthBloc>().add(
+                          CreateAccount(
+                            userModel: widget.userModel,
+                          ),
+                        );
                   },
                   child: const TextWidget(
                     text: 'Skip',
@@ -66,9 +87,19 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                         color: ColorName.primaryColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Center(
-                        child: SvgPicture.asset(Assets.images.svgs.cameraIcon),
-                      ),
+                      child: profilePicture != null
+                          ? ClipOval(
+                              child: Image.file(
+                                File(profilePicture!.path),
+                                fit: BoxFit.cover,
+                                width: 180,
+                                height: 180,
+                              ),
+                            )
+                          : Center(
+                              child: SvgPicture.asset(
+                                  Assets.images.svgs.cameraIcon),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -88,28 +119,76 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
               height: 50,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
+                      backgroundColor: profilePicture != null
+                          ? ColorName.primaryColor
+                          : null,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                           side:
                               const BorderSide(color: ColorName.primaryColor))),
                   onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(40),
-                          topRight: Radius.circular(40),
-                        )),
-                        builder: (_) => _buildBottomModalSheet());
+                    if (profilePicture == null) {
+                      showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(40),
+                            topRight: Radius.circular(40),
+                          )),
+                          builder: (_) => _buildBottomModalSheet());
+                    } else {
+                      context.read<AuthBloc>().add(
+                            CreateAccount(
+                              userModel: widget.userModel,
+                              profilePicture: profilePicture,
+                            ),
+                          );
+                    }
                   },
-                  child: const TextWidget(
-                    text: 'Upload profile',
-                    type: TextType.small,
-                    color: ColorName.primaryColor,
+                  child: BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      if (state is AuthFail) {
+                        showSnackbar(context,
+                            title: 'Error', description: state.reason);
+                      } else if (state is AuthSucces) {
+                        showSnackbar(
+                          context,
+                          title: 'Success',
+                          description: 'Account Created',
+                        );
+                        setFirstTime(false);
+                        context.goNamed(RouteName.home);
+                      } else if (state is AuthLoading && isSkipClicked) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(
+                            child: LoadingWidget(
+                              color: ColorName.white,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is AuthLoading && !isSkipClicked) {
+                        return const Center(child: LoadingWidget());
+                      } else {
+                        return TextWidget(
+                          text: profilePicture == null
+                              ? 'Upload profile'
+                              : 'Register',
+                          type: TextType.small,
+                          color: profilePicture == null
+                              ? ColorName.primaryColor
+                              : Colors.white,
+                        );
+                      }
+                    },
                   )),
             ),
             const SizedBox(
-              height: 10,
+              height: 20,
             )
           ],
         ),
@@ -120,7 +199,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
   _buildBottomModalSheet() {
     return SizedBox(
       width: 100.sw,
-      height: 40.sh,
+      height: 30.sh,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Column(
@@ -143,8 +222,16 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              onTap: () {
-                //
+              onTap: () async {
+                profilePicture =
+                    await ImagePicker().pickImage(source: ImageSource.camera);
+                // ignore: use_build_context_synchronously
+                context.pop();
+                if (profilePicture != null) {
+                  setState(() {
+                    profilePicture = profilePicture;
+                  });
+                }
               },
               leading: Container(
                 width: 34,
@@ -164,9 +251,18 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                 fontSize: 14,
               ),
             ),
+            const SizedBox(height: 5),
             ListTile(
-              onTap: () {
-                //
+              onTap: () async {
+                profilePicture =
+                    await ImagePicker().pickImage(source: ImageSource.gallery);
+                // ignore: use_build_context_synchronously
+                context.pop();
+                if (profilePicture != null) {
+                  setState(() {
+                    profilePicture = profilePicture;
+                  });
+                }
               },
               leading: Container(
                 width: 34,
@@ -177,28 +273,6 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                 ),
                 child: const Icon(
                   Icons.image_outlined,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              title: const TextWidget(
-                text: 'Choose Photo',
-                fontSize: 14,
-              ),
-            ),
-            ListTile(
-              onTap: () {
-                //
-              },
-              leading: Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: ColorName.red,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.delete_outline,
                   color: Colors.white,
                   size: 20,
                 ),

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
+import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
+import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -34,6 +37,9 @@ class _HomeTabState extends State<HomeTab> {
     log('Token -> ${res.toString()}');
   }
 
+  final auth = FirebaseAuth.instance;
+
+  final _formKey = GlobalKey<FormState>();
   String getGreeting() {
     DateTime now = DateTime.now();
     int hour = now.hour;
@@ -51,6 +57,7 @@ class _HomeTabState extends State<HomeTab> {
   void initState() {
     getToken();
     context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
+    context.read<CurrencyBloc>().add(FetchAllCurrencies());
     super.initState();
   }
 
@@ -68,44 +75,64 @@ class _HomeTabState extends State<HomeTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: Assets.images.profileImage.provider(),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextWidget(
-                            text: getGreeting(),
-                            fontSize: 14,
-                            weight: FontWeight.w500,
-                          ),
-                          TextWidget(
-                            text: FirebaseAuth
-                                    .instance.currentUser?.displayName ??
-                                '',
-                            fontSize: 20,
-                            weight: FontWeight.w800,
-                            color: ColorName.primaryColor,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        //
-                      },
-                      icon: const Icon(
-                        Bootstrap.bell,
-                        size: 24,
-                      ))
-                ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        auth.currentUser?.photoURL != null
+                            ? ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: auth.currentUser!.photoURL!,
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) {
+                                    return const SizedBox(
+                                      width: 45,
+                                      height: 45,
+                                    );
+                                  },
+                                  width: 45,
+                                  height: 45,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : CircleAvatar(
+                                backgroundImage:
+                                    Assets.images.profileImage.provider(),
+                              ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidget(
+                              text: getGreeting(),
+                              fontSize: 14,
+                              weight: FontWeight.w500,
+                            ),
+                            TextWidget(
+                              text: FirebaseAuth
+                                      .instance.currentUser?.displayName ??
+                                  '',
+                              fontSize: 20,
+                              weight: FontWeight.w800,
+                              color: ColorName.primaryColor,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          //
+                        },
+                        icon: const Icon(
+                          Bootstrap.bell,
+                          size: 24,
+                        ))
+                  ],
+                ),
               ),
               Expanded(
                   child: SingleChildScrollView(
@@ -131,140 +158,151 @@ class _HomeTabState extends State<HomeTab> {
       child: CardWidget(
         width: 100.sw,
         padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextWidget(
-              text: 'Send Money',
-              fontSize: 14,
-            ),
-            const SizedBox(height: 15),
-            TextFormField(
-              controller: moneyController,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Enter amount';
-                }
-                return null;
-              },
-              style: const TextStyle(
-                fontSize: 18,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TextWidget(
+                text: 'Send Money',
+                fontSize: 14,
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(
-                    RegExp(r'^[0-9]*[.,]?[0-9]*$')),
-              ],
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                hintText: 'Enter amount',
-                hintStyle: const TextStyle(
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: moneyController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'amount is empty';
+                  }
+                  return null;
+                },
+                style: const TextStyle(
                   fontSize: 18,
-                  color: Color(0xFFD0D0D0),
                 ),
-                suffixIcon: Container(
-                  width: 90,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black45,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^[0-9]*[.,]?[0-9]*$')),
+                ],
+                decoration: InputDecoration(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                  hintText: 'Enter amount',
+                  hintStyle: const TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFFD0D0D0),
+                  ),
+                  suffixIcon: Container(
+                    width: 90,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.black45,
+                      ),
+                    ),
+                    child: Center(
+                      child: DropdownButton(
+                          value: 'usd',
+                          elevation: 0,
+                          underline: const SizedBox.shrink(),
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          items: [
+                            DropdownMenuItem(
+                              value: 'usd',
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Assets.images.usaFlag.image(
+                                      width: 20,
+                                      height: 20,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  const TextWidget(
+                                    text: 'USD',
+                                    fontSize: 12,
+                                  )
+                                ],
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'etb',
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Assets.images.ethiopianFlag.image(
+                                      width: 20,
+                                      height: 20,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  const TextWidget(
+                                    text: 'ETB',
+                                    fontSize: 12,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            //
+                          }),
                     ),
                   ),
-                  child: Center(
-                    child: DropdownButton(
-                        value: 'usd',
-                        elevation: 0,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'usd',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.usaFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'USD',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'etb',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.ethiopianFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'ETB',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          //
-                        }),
-                  ),
+                  errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black45),
+                      borderRadius: BorderRadius.circular(40)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black45),
+                      borderRadius: BorderRadius.circular(40)),
+                  border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.black45),
+                      borderRadius: BorderRadius.circular(40)),
                 ),
-                errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
               ),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildMoneyAmount(50),
-                  _buildMoneyAmount(100),
-                  _buildMoneyAmount(125),
-                  _buildMoneyAmount(150),
-                  _buildMoneyAmount(200),
-                  _buildMoneyAmount(250),
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildMoneyAmount(50),
+                    _buildMoneyAmount(100),
+                    _buildMoneyAmount(125),
+                    _buildMoneyAmount(150),
+                    _buildMoneyAmount(200),
+                    _buildMoneyAmount(250),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 45,
-              child: ButtonWidget(
-                  verticalPadding: 0,
-                  child: const TextWidget(
-                    text: 'Next',
-                    type: TextType.small,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    //
-                  }),
-            )
-          ],
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 45,
+                child: ButtonWidget(
+                    verticalPadding: 0,
+                    child: const TextWidget(
+                      text: 'Next',
+                      type: TextType.small,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<NavigationBloc>().add(
+                              NavigateTo(
+                                index: 2,
+                                moneyAmount:
+                                    double.tryParse(moneyController.text),
+                              ),
+                            );
+                      }
+                    }),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -347,7 +385,7 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
                 onPressed: () {
-                  //
+                  context.read<NavigationBloc>().add(NavigateTo(index: 2));
                 },
                 child: const TextWidget(
                   text: 'Send',
@@ -392,7 +430,7 @@ class _HomeTabState extends State<HomeTab> {
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
                             child: TextWidget(
-                              text: 'Our promotional rate',
+                              text: 'Current Trade rate',
                               color: Colors.white,
                               fontSize: 15,
                             ),
@@ -460,22 +498,43 @@ class _HomeTabState extends State<HomeTab> {
                                           .provider(),
                                     ),
                                     const SizedBox(width: 7),
-                                    const Column(
+                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        TextWidget(
+                                        const TextWidget(
                                           text: 'ET Birr',
                                           fontSize: 9,
                                           weight: FontWeight.w500,
                                           color: ColorName.primaryColor,
                                         ),
-                                        TextWidget(
-                                          text: '111.98 ETB',
-                                          fontSize: 14,
-                                          color: ColorName.primaryColor,
+                                        BlocBuilder<CurrencyBloc,
+                                            CurrencyState>(
+                                          builder: (context, state) {
+                                            if (state is CurrencyLoading) {
+                                              return const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 3),
+                                                child: CustomShimmer(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                  width: 60,
+                                                  height: 16,
+                                                ),
+                                              );
+                                            }
+                                            if (state is CurrencySuccess) {
+                                              return TextWidget(
+                                                text:
+                                                    '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                fontSize: 14,
+                                                color: ColorName.primaryColor,
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
                                         )
                                       ],
                                     )
@@ -630,22 +689,43 @@ class _HomeTabState extends State<HomeTab> {
                                           .provider(),
                                     ),
                                     const SizedBox(width: 7),
-                                    const Column(
+                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        TextWidget(
+                                        const TextWidget(
                                           text: 'ET Birr',
                                           fontSize: 9,
                                           weight: FontWeight.w500,
                                           color: ColorName.primaryColor,
                                         ),
-                                        TextWidget(
-                                          text: '111.98 ETB',
-                                          fontSize: 14,
-                                          color: ColorName.primaryColor,
+                                        BlocBuilder<CurrencyBloc,
+                                            CurrencyState>(
+                                          builder: (context, state) {
+                                            if (state is CurrencyLoading) {
+                                              return const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 3),
+                                                child: CustomShimmer(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                  width: 60,
+                                                  height: 16,
+                                                ),
+                                              );
+                                            }
+                                            if (state is CurrencySuccess) {
+                                              return TextWidget(
+                                                text:
+                                                    '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                fontSize: 14,
+                                                color: ColorName.primaryColor,
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
                                         )
                                       ],
                                     )
