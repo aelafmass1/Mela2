@@ -56,6 +56,10 @@ class $AssetsImagesGen {
   AssetGenImage get checkedLogo =>
       const AssetGenImage('assets/images/checked_logo.png');
 
+  /// File path: assets/images/contact_page_image.png
+  AssetGenImage get contactPageImage =>
+      const AssetGenImage('assets/images/contact_page_image.png');
+
   /// File path: assets/images/dashn_bank_logo.png
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
@@ -196,6 +200,7 @@ class $AssetsImagesGen {
         bunaBank,
         cbeLogo,
         checkedLogo,
+        contactPageImage,
         dashnBankLogo,
         dollar,
         doodles,
@@ -234,21 +239,66 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/camera_icon.svg
+  String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
+
+  /// File path: assets/images/svgs/card_pattern.svg
+  String get cardPattern => 'assets/images/svgs/card_pattern.svg';
+
+  /// File path: assets/images/svgs/equb_icon.svg
+  String get equbIcon => 'assets/images/svgs/equb_icon.svg';
+
+  /// File path: assets/images/svgs/exchange_icon.svg
+  String get exchangeIcon => 'assets/images/svgs/exchange_icon.svg';
+
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
 
+  /// File path: assets/images/svgs/filter_icon.svg
+  String get filterIcon => 'assets/images/svgs/filter_icon.svg';
+
   /// File path: assets/images/svgs/hi_emoji.svg
   String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
+
+  /// File path: assets/images/svgs/history_icon.svg
+  String get historyIcon => 'assets/images/svgs/history_icon.svg';
+
+  /// File path: assets/images/svgs/home_icon.svg
+  String get homeIcon => 'assets/images/svgs/home_icon.svg';
 
   /// File path: assets/images/svgs/horizontal_mela_logo.svg
   String get horizontalMelaLogo =>
       'assets/images/svgs/horizontal_mela_logo.svg';
 
+  /// File path: assets/images/svgs/increase_arrow.svg
+  String get increaseArrow => 'assets/images/svgs/increase_arrow.svg';
+
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/send_icon.svg
+  String get sendIcon => 'assets/images/svgs/send_icon.svg';
+
+  /// File path: assets/images/svgs/transaction_icon.svg
+  String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
+
   /// List of all assets
-  List<String> get values => [faceId, hiEmoji, horizontalMelaLogo, melaLogo];
+  List<String> get values => [
+        cameraIcon,
+        cardPattern,
+        equbIcon,
+        exchangeIcon,
+        faceId,
+        filterIcon,
+        hiEmoji,
+        historyIcon,
+        homeIcon,
+        horizontalMelaLogo,
+        increaseArrow,
+        melaLogo,
+        sendIcon,
+        transactionIcon
+      ];
 }
 
 class Assets {

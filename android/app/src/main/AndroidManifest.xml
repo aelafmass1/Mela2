@@ -2,7 +2,7 @@
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
-        android:label="transaction_mobile_app"
+        android:label="Mela Fi"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

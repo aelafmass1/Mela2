@@ -10,8 +10,9 @@ final class SendOTP extends AuthEvent {
 
 final class CreateAccount extends AuthEvent {
   final UserModel userModel;
+  final XFile? profilePicture;
 
-  CreateAccount({required this.userModel});
+  CreateAccount({required this.userModel, this.profilePicture});
 }
 
 final class LoginUser extends AuthEvent {

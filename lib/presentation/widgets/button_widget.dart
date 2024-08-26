@@ -9,12 +9,22 @@ class ButtonWidget extends StatelessWidget {
   final Function()? onPressed;
   final double? topPadding;
   final BorderRadius? borderRadius;
-  const ButtonWidget(
-      {super.key,
-      required this.child,
-      required this.onPressed,
-      this.borderRadius,
-      this.topPadding});
+  final double? verticalPadding;
+  final double? horizontalPadding;
+  final Color? color;
+  final BorderSide borderSide;
+
+  const ButtonWidget({
+    super.key,
+    required this.child,
+    required this.onPressed,
+    this.borderRadius,
+    this.topPadding,
+    this.verticalPadding,
+    this.color,
+    this.borderSide = BorderSide.none,
+    this.horizontalPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +37,14 @@ class ButtonWidget extends StatelessWidget {
               sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: ColorName.primaryColor,
+                backgroundColor: color ?? ColorName.primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 13),
+                padding: EdgeInsets.symmetric(
+                    vertical: verticalPadding ?? 13,
+                    horizontal: horizontalPadding ?? 0),
                 shape: RoundedRectangleBorder(
                   borderRadius: borderRadius ?? BorderRadius.circular(30),
+                  side: borderSide,
                 )),
             onPressed: onPressed,
             child: child,

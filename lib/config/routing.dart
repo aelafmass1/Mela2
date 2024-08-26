@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
+import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
@@ -10,6 +12,8 @@ import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 
 import '../presentation/screens/home_screen/home_screen.dart';
+import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
+import '../presentation/screens/receipt_screen/receipt_screen.dart';
 
 class RouteName {
   static const splash = 'splash_screen';
@@ -21,12 +25,24 @@ class RouteName {
   static const otp = 'otp_screen';
   static const createPassword = 'create_password_screen';
   static const craeteAccount = 'create_account_screen';
+  static const receipt = 'receipt_screen';
+  static const profileUpload = 'profile_upload_screen';
+  static const contactPermission = 'contact_permission_screen';
 }
 
-final _auth = FirebaseAuth.instance;
-
 final goRouting = GoRouter(
-  initialLocation: _auth.currentUser == null ? '/' : '/home',
+  initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
+  // redirect: (context, state) async {
+  //   final auth = FirebaseAuth.instance;
+  //   bool isFirst = await isFirstTime();
+  //   if (isFirst) {
+  //     return '/';
+  //   }
+  //   if (auth.currentUser == null) {
+  //     return null;
+  //   }
+  //   return '/home';
+  // },
   routes: [
     GoRoute(
       path: '/',
@@ -42,7 +58,21 @@ final goRouting = GoRouter(
             path: 'equb_creation',
             name: RouteName.equbCreation,
             builder: (context, state) => const EqubCreationScreen(),
-          )
+          ),
+          GoRoute(
+            path: 'receipt',
+            name: RouteName.receipt,
+            builder: (context, state) => ReceiptScreen(
+              receiverInfo: state.extra as ReceiverInfo,
+            ),
+          ),
+          GoRoute(
+            path: 'contact_permission',
+            name: RouteName.contactPermission,
+            builder: (context, state) => ContactPermissionScreen(
+              checkContactPermission: state.extra as Function(),
+            ),
+          ),
         ]),
     GoRoute(
       path: '/login',
@@ -74,6 +104,13 @@ final goRouting = GoRouter(
       builder: (context, state) => CreateAccountScreen(
         userModel: state.extra as UserModel,
       ),
-    )
+    ),
+    GoRoute(
+      path: '/profile_upload',
+      name: RouteName.profileUpload,
+      builder: (context, state) => ProfileUploadScreen(
+        userModel: state.extra as UserModel,
+      ),
+    ),
   ],
 );

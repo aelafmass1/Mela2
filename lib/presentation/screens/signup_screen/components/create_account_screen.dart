@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -75,7 +74,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           weight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
                       const TextWidget(
                         text: 'First Name *',
                         fontSize: 12,
@@ -110,102 +109,102 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         hintText: 'Enter your last name',
                       ),
                       const SizedBox(height: 15),
-                      const TextWidget(
-                        text: 'Gender *',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      DropdownButtonFormField(
-                        validator: (value) {
-                          if (selectedGender.isEmpty) {
-                            return 'Gender not selected';
-                          }
-                          return null;
-                        },
-                        hint: const TextWidget(
-                          text: 'Select Gender',
-                          fontSize: 14,
-                          color: Color(0xFF8E8E8E),
-                          weight: FontWeight.w500,
-                        ),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 18),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(40),
-                            borderSide: const BorderSide(
-                              color: ColorName.primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'male',
-                            child: TextWidget(
-                              text: 'Male',
-                              type: TextType.small,
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'female',
-                            child: TextWidget(
-                              text: 'Female',
-                              type: TextType.small,
-                            ),
-                          )
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              selectedGender = value;
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 15),
-                      const TextWidget(
-                        text: 'Birthdate *',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      TextFieldWidget(
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return 'birthdate is empty';
-                          }
-                        },
-                        readOnly: true,
-                        onTab: () async {
-                          birthdayDate = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime.now(),
-                          );
-                          if (birthdayDate != null) {
-                            birthDateController.text =
-                                DateFormat('MMMM dd, yyyy')
-                                    .format(birthdayDate!);
-                          }
-                        },
-                        suffix: const Padding(
-                          padding: EdgeInsets.only(right: 20),
-                          child: Icon(
-                            Icons.calendar_month_outlined,
-                            size: 25,
-                            color: ColorName.grey,
-                          ),
-                        ),
-                        controller: birthDateController,
-                        hintText: 'Select your birthdate',
-                      ),
-                      const SizedBox(height: 15),
+                      // const TextWidget(
+                      //   text: 'Gender *',
+                      //   fontSize: 12,
+                      //   weight: FontWeight.w400,
+                      // ),
+                      // const SizedBox(height: 5),
+                      // DropdownButtonFormField(
+                      //   validator: (value) {
+                      //     if (selectedGender.isEmpty) {
+                      //       return 'Gender not selected';
+                      //     }
+                      //     return null;
+                      //   },
+                      //   hint: const TextWidget(
+                      //     text: 'Select Gender',
+                      //     fontSize: 14,
+                      //     color: Color(0xFF8E8E8E),
+                      //     weight: FontWeight.w500,
+                      //   ),
+                      //   icon: const Icon(Icons.keyboard_arrow_down),
+                      //   decoration: InputDecoration(
+                      //     contentPadding: const EdgeInsets.symmetric(
+                      //         horizontal: 20, vertical: 18),
+                      //     border: OutlineInputBorder(
+                      //       borderRadius: BorderRadius.circular(40),
+                      //     ),
+                      //     focusedBorder: OutlineInputBorder(
+                      //       borderRadius: BorderRadius.circular(40),
+                      //       borderSide: const BorderSide(
+                      //         color: ColorName.primaryColor,
+                      //         width: 2,
+                      //       ),
+                      //     ),
+                      //   ),
+                      //   items: const [
+                      //     DropdownMenuItem(
+                      //       value: 'male',
+                      //       child: TextWidget(
+                      //         text: 'Male',
+                      //         type: TextType.small,
+                      //       ),
+                      //     ),
+                      //     DropdownMenuItem(
+                      //       value: 'female',
+                      //       child: TextWidget(
+                      //         text: 'Female',
+                      //         type: TextType.small,
+                      //       ),
+                      //     )
+                      //   ],
+                      //   onChanged: (value) {
+                      //     if (value != null) {
+                      //       setState(() {
+                      //         selectedGender = value;
+                      //       });
+                      //     }
+                      //   },
+                      // ),
+                      // const SizedBox(height: 15),
+                      // const TextWidget(
+                      //   text: 'Birthdate *',
+                      //   fontSize: 12,
+                      //   weight: FontWeight.w400,
+                      // ),
+                      // const SizedBox(height: 5),
+                      // TextFieldWidget(
+                      //   validator: (text) {
+                      //     if (text!.isEmpty) {
+                      //       return 'birthdate is empty';
+                      //     }
+                      //   },
+                      //   readOnly: true,
+                      //   onTab: () async {
+                      //     birthdayDate = await showDatePicker(
+                      //       context: context,
+                      //       firstDate: DateTime(1900),
+                      //       lastDate: DateTime.now(),
+                      //     );
+                      //     if (birthdayDate != null) {
+                      //       birthDateController.text =
+                      //           DateFormat('MMMM dd, yyyy')
+                      //               .format(birthdayDate!);
+                      //     }
+                      //   },
+                      //   suffix: const Padding(
+                      //     padding: EdgeInsets.only(right: 20),
+                      //     child: Icon(
+                      //       Icons.calendar_month_outlined,
+                      //       size: 25,
+                      //       color: ColorName.grey,
+                      //     ),
+                      //   ),
+                      //   controller: birthDateController,
+                      //   hintText: 'Select your birthdate',
+                      // ),
+                      // const SizedBox(height: 15),
                       const TextWidget(
                         text: 'Email *',
                         fontSize: 12,
@@ -213,6 +212,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        keyboardType: TextInputType.emailAddress,
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'Email is empty';
@@ -234,47 +234,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
-                child: BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is AuthFail) {
-                      showSnackbar(context,
-                          title: 'Error', description: state.reason);
-                    } else if (state is AuthSucces) {
-                      showSnackbar(
-                        context,
-                        title: 'Success',
-                        description: 'Account Created',
-                      );
-                      context.goNamed(RouteName.home);
-                    }
-                  },
-                  builder: (context, state) {
-                    return ButtonWidget(
-                        child: state is AuthLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Register',
-                                type: TextType.small,
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            UserModel user = widget.userModel.copyWith(
-                              firstName: firstNameController.text,
-                              lastName: lastNameController.text,
-                              gender: selectedGender,
-                              birthDate: birthDateController.text,
-                              email: emailController.text,
-                            );
-                            context.read<AuthBloc>().add(
-                                  CreateAccount(
-                                    userModel: user,
-                                  ),
-                                );
-                          }
-                        });
-                  },
-                ),
+                child: ButtonWidget(
+                    child: const TextWidget(
+                      text: 'Next',
+                      type: TextType.small,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        UserModel user = widget.userModel.copyWith(
+                          firstName: firstNameController.text,
+                          lastName: lastNameController.text,
+                          email: emailController.text,
+                        );
+                        context.pushNamed(
+                          RouteName.profileUpload,
+                          extra: user,
+                        );
+                      }
+                    }),
               )
             ],
           ),

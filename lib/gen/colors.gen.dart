@@ -14,29 +14,29 @@ class ColorName {
   ColorName._();
 
   /// MaterialColor:
-  ///   50: #FFFEFEFE
-  ///   100: #FFFDFDFD
-  ///   200: #FFFCFCFC
-  ///   300: #FFFBFBFB
-  ///   400: #FFFAFAFA
-  ///   500: #FFF9F9F9
-  ///   600: #FFF8F8F8
-  ///   700: #FFF7F7F7
-  ///   800: #FFF6F6F6
-  ///   900: #FFF5F5F5
+  ///   50: #FFFFFFFF
+  ///   100: #FFFFFFFF
+  ///   200: #FFFFFFFF
+  ///   300: #FFFFFFFF
+  ///   400: #FFFFFFFF
+  ///   500: #FFFFFFFF
+  ///   600: #FFFFFFFF
+  ///   700: #FFFFFFFF
+  ///   800: #FFFFFFFF
+  ///   900: #FFFFFFFF
   static const MaterialColor backgroundColor = MaterialColor(
-    0xFFF9F9F9,
+    0xFFFFFFFF,
     <int, Color>{
-      50: Color(0xFFFEFEFE),
-      100: Color(0xFFFDFDFD),
-      200: Color(0xFFFCFCFC),
-      300: Color(0xFFFBFBFB),
-      400: Color(0xFFFAFAFA),
-      500: Color(0xFFF9F9F9),
-      600: Color(0xFFF8F8F8),
-      700: Color(0xFFF7F7F7),
-      800: Color(0xFFF6F6F6),
-      900: Color(0xFFF5F5F5),
+      50: Color(0xFFFFFFFF),
+      100: Color(0xFFFFFFFF),
+      200: Color(0xFFFFFFFF),
+      300: Color(0xFFFFFFFF),
+      400: Color(0xFFFFFFFF),
+      500: Color(0xFFFFFFFF),
+      600: Color(0xFFFFFFFF),
+      700: Color(0xFFFFFFFF),
+      800: Color(0xFFFFFFFF),
+      900: Color(0xFFFFFFFF),
     },
   );
 
