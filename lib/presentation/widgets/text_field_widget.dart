@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../gen/colors.gen.dart';
 
@@ -14,6 +15,7 @@ class TextFieldWidget extends StatelessWidget {
   final bool enableFocusColor;
   final String? prefixText;
   final bool obscurePassword;
+  final List<TextInputFormatter>? inputFormatters;
   const TextFieldWidget({
     super.key,
     required this.controller,
@@ -27,6 +29,7 @@ class TextFieldWidget extends StatelessWidget {
     this.prefixText,
     this.enableFocusColor = true,
     this.obscurePassword = false,
+    this.inputFormatters,
   });
 
   @override
@@ -43,6 +46,7 @@ class TextFieldWidget extends StatelessWidget {
         fontSize: 15,
         fontWeight: FontWeight.w500,
       ),
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),

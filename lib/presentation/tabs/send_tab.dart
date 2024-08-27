@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:flutter_contacts/properties/address.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -28,6 +30,7 @@ import '../../bloc/currency/currency_bloc.dart';
 import '../../bloc/navigation/navigation_bloc.dart';
 import '../../config/routing.dart';
 import '../widgets/custom_shimmer.dart';
+import '../widgets/payment_bottom_sheet.dart';
 
 class SentTab extends StatefulWidget {
   const SentTab({super.key});
@@ -712,6 +715,11 @@ class _SentTabState extends State<SentTab> {
                         }
                         return null;
                       },
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^[0-9]*[+]?[0-9]*$')),
+                      ],
                       hintText: 'Enter phone number',
                       controller: phoneNumberController,
                     ),
@@ -1335,6 +1343,11 @@ class _SentTabState extends State<SentTab> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^[0-9]*[]?[0-9]*$')),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 17),
@@ -1429,7 +1442,9 @@ class _SentTabState extends State<SentTab> {
                                   shape: const CircleBorder(),
                                   value: selectedPaymentMethodIndex == 0,
                                   onChanged: (value) {
-                                    //
+                                    setState(() {
+                                      selectedPaymentMethodIndex = 0;
+                                    });
                                   },
                                 ),
                                 title: const TextWidget(
@@ -1610,34 +1625,37 @@ class _SentTabState extends State<SentTab> {
               },
               builder: (context, state) {
                 return ButtonWidget(
-                    child: state is MoneyTransferLoading
-                        ? const LoadingWidget()
-                        : const TextWidget(
-                            text: 'Next',
-                            type: TextType.small,
-                            color: Colors.white,
-                          ),
-                    onPressed: () {
-                      final auth = FirebaseAuth.instance;
-                      if (auth.currentUser != null) {
-                        receiverInfo = ReceiverInfo(
-                          senderUserId: auth.currentUser!.uid,
-                          receiverName: receiverName.text,
-                          receiverPhoneNumber: isPermissionDenied
-                              ? phoneNumberController.text
-                              : selectedContact!.phones.first.number,
-                          receiverBankName: selectedBank,
-                          receiverAccountNumber: bankAcocuntController.text,
-                          amount: double.parse(usdController.text),
-                          serviceChargePayer: whoPayFee,
-                        );
-                        context.read<MoneyTransferBloc>().add(
-                              SendMoney(
-                                receiverInfo: receiverInfo!,
-                              ),
-                            );
-                      }
-                    });
+                  child: state is MoneyTransferLoading
+                      ? const LoadingWidget()
+                      : const TextWidget(
+                          text: 'Next',
+                          type: TextType.small,
+                          color: Colors.white,
+                        ),
+                  onPressed: () async {
+                    // showPaymentBottomSheet(context);
+                    final auth = FirebaseAuth.instance;
+                    if (auth.currentUser != null) {
+                      receiverInfo = ReceiverInfo(
+                        senderUserId: auth.currentUser!.uid,
+                        receiverName: receiverName.text,
+                        receiverPhoneNumber: isPermissionDenied
+                            ? phoneNumberController.text
+                            : selectedContact!.phones.first.number,
+                        receiverBankName: selectedBank,
+                        receiverAccountNumber: bankAcocuntController.text,
+                        amount: double.parse(usdController.text),
+                        serviceChargePayer: whoPayFee,
+                      );
+                      context.read<MoneyTransferBloc>().add(
+                            SendMoney(
+                              receiverInfo: receiverInfo!,
+                              paymentId: '',
+                            ),
+                          );
+                    }
+                  },
+                );
               },
             ),
             const SizedBox(height: 10),
@@ -1932,7 +1950,9 @@ class _SentTabState extends State<SentTab> {
               shape: const CircleBorder(),
               value: selectedPaymentMethodIndex == id,
               onChanged: (value) {
-                //
+                setState(() {
+                  selectedPaymentMethodIndex = id;
+                });
               },
             ),
             title: TextWidget(

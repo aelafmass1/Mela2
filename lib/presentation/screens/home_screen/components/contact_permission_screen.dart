@@ -24,7 +24,7 @@ class ContactPermissionScreen extends StatelessWidget {
               padding: const EdgeInsets.only(right: 15),
               child: SizedBox(
                 width: 70,
-                height: 28,
+                height: 32,
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         elevation: 0,
@@ -33,7 +33,7 @@ class ContactPermissionScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30),
                             side: const BorderSide(
                               width: 1,
-                              color: Color(0xFFD0D0D0),
+                              color: Colors.black87,
                             ))),
                     onPressed: () {
                       context.pop();
@@ -42,7 +42,7 @@ class ContactPermissionScreen extends StatelessWidget {
                       text: 'Skip',
                       weight: FontWeight.w500,
                       type: TextType.small,
-                      color: Color(0xFFD0D0D0),
+                      color: Colors.black87,
                     )),
               ),
             ),

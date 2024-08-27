@@ -1,12 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class AccountTab extends StatefulWidget {
@@ -21,68 +26,129 @@ class _AccountTabState extends State<AccountTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 50, bottom: 5),
-            child: ResponsiveBuilder(builder: (context, sizingInfo) {
-              return CircleAvatar(
-                radius: ResponsiveUtil.forScreen(
-                  sizingInfo: sizingInfo,
-                  mobile: 50,
-                  tablet: 80,
-                ),
-                backgroundImage: auth.currentUser?.photoURL != null
-                    ? CachedNetworkImageProvider(auth.currentUser!.photoURL!)
-                    : Assets.images.profileImage.provider(),
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (context.mounted) {
+            if (state is AuthLoading) {
+              showDialog(
+                context: context,
+                builder: (_) => const Align(child: LoadingWidget()),
               );
-            }),
-          ),
-          TextWidget(text: auth.currentUser!.displayName ?? ''),
-          TextWidget(
-            text: 'Customer',
-            fontSize: 15,
-            color: const Color(0xFF4D4D4D).withOpacity(0.75),
-          ),
-          const SizedBox(height: 20),
-          // _buildTab(
-          //   icon: Icons.person_outline,
-          //   title: 'Personal Information',
-          //   onTab: () {
-          //     //
-          //   },
-          // ),
-          // _buildTab(
-          //   icon: Icons.settings_outlined,
-          //   title: 'Account Setting',
-          //   onTab: () {
-          //     //
-          //   },
-          // ),
-          // _buildTab(
-          //   icon: Icons.lock_outlined,
-          //   title: 'Security Setting',
-          //   onTab: () {
-          //     //
-          //   },
-          // ),
-          // _buildTab(
-          //   icon: Icons.edit_outlined,
-          //   title: 'Edit Account',
-          //   onTab: () {
-          //     //
-          //   },
-          // ),
-          _buildTab(
-            icon: Icons.logout,
-            title: 'Logout',
-            isLogout: true,
-            onTab: () {
-              FirebaseAuth.instance.signOut();
+            } else if (state is AuthSuccess) {
               context.goNamed(RouteName.login);
-            },
-          ),
-        ],
+            } else if (state is AuthFail) {
+              context.pop();
+              showSnackbar(
+                context,
+                title: 'Error',
+                description: state.reason,
+              );
+            }
+          }
+        },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 50, bottom: 5),
+              child: ResponsiveBuilder(builder: (context, sizingInfo) {
+                return CircleAvatar(
+                  radius: ResponsiveUtil.forScreen(
+                    sizingInfo: sizingInfo,
+                    mobile: 50,
+                    tablet: 80,
+                  ),
+                  backgroundImage: auth.currentUser?.photoURL != null
+                      ? CachedNetworkImageProvider(auth.currentUser!.photoURL!)
+                      : Assets.images.profileImage.provider(),
+                );
+              }),
+            ),
+            TextWidget(text: auth.currentUser!.displayName ?? ''),
+            TextWidget(
+              text: 'Customer',
+              fontSize: 15,
+              color: const Color(0xFF4D4D4D).withOpacity(0.75),
+            ),
+            const SizedBox(height: 20),
+            // _buildTab(
+            //   icon: Icons.person_outline,
+            //   title: 'Personal Information',
+            //   onTab: () {
+            //     //
+            //   },
+            // ),
+            // _buildTab(
+            //   icon: Icons.settings_outlined,
+            //   title: 'Account Setting',
+            //   onTab: () {
+            //     //
+            //   },
+            // ),
+            // _buildTab(
+            //   icon: Icons.lock_outlined,
+            //   title: 'Security Setting',
+            //   onTab: () {
+            //     //
+            //   },
+            // ),
+            // _buildTab(
+            //   icon: Icons.edit_outlined,
+            //   title: 'Edit Account',
+            //   onTab: () {
+            //     //
+            //   },
+            // ),
+            _buildTab(
+              icon: Bootstrap.trash,
+              title: 'Delete My Profile',
+              isLogout: true,
+              onTab: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const TextWidget(
+                      text: 'Delete User',
+                      type: TextType.small,
+                    ),
+                    content: const TextWidget(
+                      text: 'Are you sure you want to delete your profile?',
+                      fontSize: 15,
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            context.pop();
+                          },
+                          child: const TextWidget(
+                            text: 'cancel',
+                            type: TextType.small,
+                          )),
+                      TextButton(
+                          onPressed: () {
+                            context.pop();
+                            context.read<AuthBloc>().add(DeleteUser());
+                          },
+                          child: const TextWidget(
+                            text: 'ok',
+                            type: TextType.small,
+                            color: ColorName.red,
+                          )),
+                    ],
+                  ),
+                );
+              },
+            ),
+            _buildTab(
+              icon: Icons.logout,
+              title: 'Logout',
+              isLogout: true,
+              onTab: () {
+                FirebaseAuth.instance.signOut();
+                context.goNamed(RouteName.login);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

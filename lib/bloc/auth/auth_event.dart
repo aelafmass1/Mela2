@@ -21,3 +21,5 @@ final class LoginUser extends AuthEvent {
 
   LoginUser({required this.phoneNumber, required this.password});
 }
+
+final class DeleteUser extends AuthEvent {}

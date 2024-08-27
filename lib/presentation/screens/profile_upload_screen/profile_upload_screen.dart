@@ -38,7 +38,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
             padding: const EdgeInsets.only(right: 15),
             child: SizedBox(
               width: 70,
-              height: 28,
+              height: 32,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       elevation: 0,
@@ -47,7 +47,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                           borderRadius: BorderRadius.circular(30),
                           side: const BorderSide(
                             width: 1,
-                            color: Color(0xFFD0D0D0),
+                            color: Colors.black87,
                           ))),
                   onPressed: () {
                     setState(() {
@@ -63,7 +63,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                     text: 'Skip',
                     weight: FontWeight.w500,
                     type: TextType.small,
-                    color: Color(0xFFD0D0D0),
+                    color: Colors.black,
                   )),
             ),
           ),
@@ -150,7 +150,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                       if (state is AuthFail) {
                         showSnackbar(context,
                             title: 'Error', description: state.reason);
-                      } else if (state is AuthSucces) {
+                      } else if (state is AuthSuccess) {
                         showSnackbar(
                           context,
                           title: 'Success',

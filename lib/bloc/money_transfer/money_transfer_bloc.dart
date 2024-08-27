@@ -21,6 +21,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         final res = await MoneyTransferRepository.sendMoney(
           accessToken: token,
           receiverInfo: event.receiverInfo,
+          paymentId: event.paymentId,
         );
         if (res.containsKey('error')) {
           return emit(MoneyTransferFail(reason: res['error']));

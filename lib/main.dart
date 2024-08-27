@@ -1,10 +1,10 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
@@ -19,6 +19,8 @@ import 'config/routing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey =
+      'pk_test_51PqWhhRwVC7iqwp5o0W0CYxLvk7p5KGvQM0KPVKQ57PXaaYboFYGOGKax6TKlN5sdzP46iXtsLOGYGCmKHeIJCKn00LfcSwqQO';
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -33,7 +35,7 @@ void main() async {
   FlutterError.onError = crashlytics.recordFlutterError;
 
   runApp(
-    DevicePreview(enabled: false, builder: (_) => const MainApp()),
+    const MainApp(),
   );
 }
 

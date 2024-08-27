@@ -8,6 +8,7 @@ class MoneyTransferRepository {
   static Future<Map> sendMoney({
     required String accessToken,
     required ReceiverInfo receiverInfo,
+    required String paymentId,
   }) async {
     final res = await http.post(
       Uri.parse(

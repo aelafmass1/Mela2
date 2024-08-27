@@ -194,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         title: 'Error',
                         description: state.reason,
                       );
-                    } else if (state is AuthSucces) {
+                    } else if (state is AuthSuccess) {
                       setFirstTime(false);
                       context.goNamed(RouteName.home); //
                     }

@@ -12,4 +12,4 @@ final class AuthFail extends AuthState {
   AuthFail({required this.reason});
 }
 
-final class AuthSucces extends AuthState {}
+final class AuthSuccess extends AuthState {}

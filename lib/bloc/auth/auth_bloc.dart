@@ -18,7 +18,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SendOTP>(_onSendOTP);
     on<CreateAccount>(_onCreateAccount);
     on<LoginUser>(_onLoginUser);
+    on<DeleteUser>(_onDeleteUser);
   }
+
+  Future<void> _onDeleteUser(DeleteUser event, Emitter emit) async {
+    try {
+      emit(AuthLoading());
+
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        // Delete the user's document from Firestore
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        await firestore.collection('users').doc(currentUser.uid).delete();
+
+        // Check if the user has a profile picture and delete it from Firebase Storage
+        if (currentUser.photoURL != null) {
+          final storageRef = FirebaseStorage.instance.ref();
+          final phoneNumber = currentUser.email!.split('@').first;
+          final imagesRef = storageRef.child('profilePictures/$phoneNumber');
+          await imagesRef.delete();
+        }
+
+        // Delete the user from Firebase Authentication
+        await _auth.currentUser?.reload();
+        await currentUser.delete();
+
+        emit(AuthSuccess());
+      } else {
+        emit(AuthFail(reason: "No user is currently signed in."));
+      }
+    } catch (error) {
+      emit(AuthFail(reason: error.toString()));
+    }
+  }
+
   _onLoginUser(LoginUser event, Emitter emit) async {
     try {
       emit(AuthLoading());
@@ -26,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: '${event.phoneNumber.trim()}@phone.firebase',
         password: event.password.trim(),
       );
-      emit(AuthSucces());
+      emit(AuthSuccess());
     } catch (error) {
       emit(AuthFail(reason: error.toString()));
     }
@@ -49,7 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               event.userModel.toMap(),
             );
 
-        emit(AuthSucces());
+        emit(AuthSuccess());
       } else {
         final userCredential = await _auth.createUserWithEmailAndPassword(
           email: '${event.userModel.phoneNumber}@phone.firebase',
@@ -73,7 +106,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final downloadUrl = await imagesRef.getDownloadURL();
 
         await _auth.currentUser!.updatePhotoURL(downloadUrl);
-        emit(AuthSucces());
+        emit(AuthSuccess());
       }
     } catch (error) {
       emit(AuthFail(reason: error.toString()));
@@ -111,7 +144,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (errorMessge.isNotEmpty) {
         return emit(AuthFail(reason: errorMessge));
       }
-      emit(AuthSucces());
+      emit(AuthSuccess());
     });
   }
 }
