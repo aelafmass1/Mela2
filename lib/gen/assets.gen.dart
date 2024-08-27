@@ -56,6 +56,10 @@ class $AssetsImagesGen {
   AssetGenImage get checkedLogo =>
       const AssetGenImage('assets/images/checked_logo.png');
 
+  /// File path: assets/images/contact_page_image.png
+  AssetGenImage get contactPageImage =>
+      const AssetGenImage('assets/images/contact_page_image.png');
+
   /// File path: assets/images/dashn_bank_logo.png
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
@@ -196,6 +200,7 @@ class $AssetsImagesGen {
         bunaBank,
         cbeLogo,
         checkedLogo,
+        contactPageImage,
         dashnBankLogo,
         dollar,
         doodles,
@@ -233,6 +238,9 @@ class $AssetsImagesGen {
 
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
+
+  /// File path: assets/images/svgs/camera_icon.svg
+  String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
   /// File path: assets/images/svgs/card_pattern.svg
   String get cardPattern => 'assets/images/svgs/card_pattern.svg';
@@ -276,6 +284,7 @@ class $AssetsImagesSvgsGen {
 
   /// List of all assets
   List<String> get values => [
+        cameraIcon,
         cardPattern,
         equbIcon,
         exchangeIcon,

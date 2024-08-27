@@ -234,45 +234,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
-                child: BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is AuthFail) {
-                      showSnackbar(context,
-                          title: 'Error', description: state.reason);
-                    } else if (state is AuthSucces) {
-                      showSnackbar(
-                        context,
-                        title: 'Success',
-                        description: 'Account Created',
-                      );
-                      setFirstTime(false);
-                      context.goNamed(RouteName.home);
-                    }
-                  },
-                  builder: (context, state) {
-                    return ButtonWidget(
-                        child: state is AuthLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Next',
-                                type: TextType.small,
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            UserModel user = widget.userModel.copyWith(
-                              firstName: firstNameController.text,
-                              lastName: lastNameController.text,
-                              email: emailController.text,
-                            );
-                            context.pushNamed(
-                              RouteName.profileUpload,
-                              extra: user,
-                            );
-                          }
-                        });
-                  },
-                ),
+                child: ButtonWidget(
+                    child: const TextWidget(
+                      text: 'Next',
+                      type: TextType.small,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        UserModel user = widget.userModel.copyWith(
+                          firstName: firstNameController.text,
+                          lastName: lastNameController.text,
+                          email: emailController.text,
+                        );
+                        context.pushNamed(
+                          RouteName.profileUpload,
+                          extra: user,
+                        );
+                      }
+                    }),
               )
             ],
           ),

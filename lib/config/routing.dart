@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
+import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
@@ -31,13 +32,13 @@ class RouteName {
   static const profileUpload = 'profile_upload_screen';
 
     static const plaid = 'plaid';
+  static const contactPermission = 'contact_permission_screen';
 }
 
 
 
 final goRouting = GoRouter(
   initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
-
   // redirect: (context, state) async {
   //   final auth = FirebaseAuth.instance;
   //   bool isFirst = await isFirstTime();
@@ -72,13 +73,15 @@ final goRouting = GoRouter(
             builder: (context, state) => ReceiptScreen(
               receiverInfo: state.extra as ReceiverInfo,
             ),
-          )
+          ),
+          GoRoute(
+            path: 'contact_permission',
+            name: RouteName.contactPermission,
+            builder: (context, state) => ContactPermissionScreen(
+              checkContactPermission: state.extra as Function(),
+            ),
+          ),
         ]),
-               GoRoute(
-      path: '/plaid',
-      name: RouteName.plaid,
-      builder: (context, state) =>  PlaidIntegration(),
-    ),
     GoRoute(
       path: '/login',
       name: RouteName.login,

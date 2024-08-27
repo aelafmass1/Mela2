@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -9,9 +9,15 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-class AccountTab extends StatelessWidget {
+class AccountTab extends StatefulWidget {
   const AccountTab({super.key});
 
+  @override
+  State<AccountTab> createState() => _AccountTabState();
+}
+
+class _AccountTabState extends State<AccountTab> {
+  final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -26,11 +32,13 @@ class AccountTab extends StatelessWidget {
                   mobile: 50,
                   tablet: 80,
                 ),
-                backgroundImage: Assets.images.profileImage.provider(),
+                backgroundImage: auth.currentUser?.photoURL != null
+                    ? CachedNetworkImageProvider(auth.currentUser!.photoURL!)
+                    : Assets.images.profileImage.provider(),
               );
             }),
           ),
-          const TextWidget(text: 'Samuel Alebachew'),
+          TextWidget(text: auth.currentUser!.displayName ?? ''),
           TextWidget(
             text: 'Customer',
             fontSize: 15,
