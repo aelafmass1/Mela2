@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/Payment_helper/plaid.dart';
+
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
@@ -26,7 +29,11 @@ class RouteName {
   static const craeteAccount = 'create_account_screen';
   static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
+
+    static const plaid = 'plaid';
 }
+
+
 
 final goRouting = GoRouter(
   initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
@@ -48,6 +55,7 @@ final goRouting = GoRouter(
       name: RouteName.welcome,
       builder: (context, state) => const WelcomeScreen(),
     ),
+ 
     GoRoute(
         path: '/home',
         name: RouteName.home,
@@ -66,6 +74,11 @@ final goRouting = GoRouter(
             ),
           )
         ]),
+               GoRoute(
+      path: '/plaid',
+      name: RouteName.plaid,
+      builder: (context, state) =>  PlaidIntegration(),
+    ),
     GoRoute(
       path: '/login',
       name: RouteName.login,
@@ -76,6 +89,11 @@ final goRouting = GoRouter(
       name: RouteName.signup,
       builder: (context, state) => const SignupScreen(),
     ),
+    //  GoRoute(
+    //         path: 'plaid',
+    //         name: RouteName.plaid,
+    //         builder: (context, state) => Plaidbase_class()
+    //       ),
     GoRoute(
       path: '/otp',
       name: RouteName.otp,

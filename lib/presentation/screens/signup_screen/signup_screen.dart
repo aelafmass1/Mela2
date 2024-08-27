@@ -52,6 +52,9 @@ class _SignupScreenState extends State<SignupScreen> {
             description: 'The provided phone number is not valid.',
           );
         } else {
+
+          print("print");
+          print(e.code);
           showSnackbar(
             context,
             title: 'Error',
@@ -203,12 +206,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     String phoneNumber = phoneCode + phoneNumberController.text;
 
                     sendOTP(phoneNumber);
-                    // context.pushNamed(
-                    //   RouteName.otp,
-                    //   extra: UserModel(
-                    //     phoneNumber: phoneNumber,
-                    //   ),
-                    // );
+                    context.pushNamed(
+                      RouteName.otp,
+                      extra: UserModel(
+                        phoneNumber: phoneNumber,
+                      ),
+                    );
                   }
                 },
               ),
@@ -238,10 +241,16 @@ class _SignupScreenState extends State<SignupScreen> {
               Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.only(bottom: 30),
-                child: const TextWidget(
-                  text: '2024 | All right reserved © Mela Financial inc.',
-                  color: Color(0xFF8D8D8D),
-                  fontSize: 14,
+                child: InkWell(
+                  onTap: () {
+                       context.goNamed(RouteName.plaid);
+                    
+                  },
+                  child: const TextWidget(
+                    text: '2024 | All right reserved © Mela Financial inc.',
+                    color: Color(0xFF8D8D8D),
+                    fontSize: 14,
+                  ),
                 ),
               )
             ],

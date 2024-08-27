@@ -30,6 +30,9 @@ void main() async {
   FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
   FlutterError.onError = crashlytics.recordFlutterError;
 
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+
   runApp(
     DevicePreview(enabled: false, builder: (_) => const MainApp()),
   );
