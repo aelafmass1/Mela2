@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 
 /// Repository class responsible for interacting with payment intent related API endpoints.
 class PaymentIntentRepository {
@@ -17,8 +18,7 @@ class PaymentIntentRepository {
     required String accessToken,
   }) async {
     final res = await http.post(
-      Uri.parse(
-          'https://55f6-71-191-150-39.ngrok-free.app/payment/create-intent'),
+      Uri.parse('$baseUrl/payment/create-intent'),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
