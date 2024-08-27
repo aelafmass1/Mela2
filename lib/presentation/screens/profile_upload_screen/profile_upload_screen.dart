@@ -148,6 +148,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                   child: BlocConsumer<AuthBloc, AuthState>(
                     listener: (context, state) {
                       if (state is AuthFail) {
+                        context.pop();
                         showSnackbar(context,
                             title: 'Error', description: state.reason);
                       } else if (state is AuthSuccess) {

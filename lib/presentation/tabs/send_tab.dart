@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:flutter_contacts/properties/address.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +14,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -30,7 +30,6 @@ import '../../bloc/currency/currency_bloc.dart';
 import '../../bloc/navigation/navigation_bloc.dart';
 import '../../config/routing.dart';
 import '../widgets/custom_shimmer.dart';
-import '../widgets/payment_bottom_sheet.dart';
 
 class SentTab extends StatefulWidget {
   const SentTab({super.key});
@@ -74,8 +73,15 @@ class _SentTabState extends State<SentTab> {
 
   ReceiverInfo? receiverInfo;
 
+  /// Fetches the user's contacts if permission is granted.
+  ///
+  /// If the user has not been asked for contact permission before,
+  /// it requests permission and fetches contacts if granted.
+  /// If permission has been asked before and denied, it sets [isPermissionDenied] to true.
+  /// If permission has been granted, it fetches contacts and updates the [contacts] list.
   Future<void> _fetchContacts() async {
     if (await isPermissionAsked() == false) {
+      // Permission has not been asked before
       if (await FlutterContacts.requestPermission(readonly: true)) {
         List<Contact> c =
             await FlutterContacts.getContacts(withProperties: true);
@@ -85,7 +91,9 @@ class _SentTabState extends State<SentTab> {
       }
       checkContactPermission();
     } else {
+      // Permission has been asked before
       if (contacts.isEmpty) {
+        // Permission was denied
         setState(() {
           isPermissionDenied = true;
         });
@@ -93,6 +101,12 @@ class _SentTabState extends State<SentTab> {
     }
   }
 
+  /// Checks the status of the contact permission and handles different scenarios.
+  ///
+  /// If permission is granted, logs a message.
+  /// If permission is denied and it's the first time asking, navigates to a permission request screen.
+  /// If permission is denied and it's not the first time asking, sets [isPermissionDenied] to true.
+  /// If permission is permanently denied, sets [isPermissionDenied] to true and logs a message.
   void checkContactPermission() async {
     // Check if the contact permission is already granted
     PermissionStatus status = await Permission.contacts.status;
@@ -101,22 +115,95 @@ class _SentTabState extends State<SentTab> {
       log("Contact permission granted.");
     } else if (status.isDenied) {
       if (await isPermissionAsked() == false) {
+        // Permission denied for the first time, navigate to permission request screen
         changePermissionAskedState(true);
         context.pushNamed(
           RouteName.contactPermission,
           extra: checkContactPermission,
         );
       } else {
+        // Permission denied, not the first time
         setState(() {
           isPermissionDenied = true;
         });
       }
     } else if (status.isPermanentlyDenied) {
+      // Permission permanently denied
       setState(() {
         isPermissionDenied = true;
       });
       log("Contact permission permanently denied.");
-      // await openAppSettings();
+    }
+  }
+
+  /// Displays a payment sheet using the Stripe SDK.
+  ///
+  /// If the payment is successful, it creates a [ReceiverInfo] object and adds a [SendMoney] event to the [MoneyTransferBloc].
+  /// If an error occurs during the payment process, it displays an error message using [showSnackbar].
+  displayPaymentSheet() async {
+    try {
+      // Display the Stripe payment sheet
+      await Stripe.instance.presentPaymentSheet();
+
+      // Show a success message if the payment is successful
+      showSnackbar(
+        context,
+        title: 'Success',
+        description: 'Payment Successful!',
+      );
+
+      // Get the current user
+      final auth = FirebaseAuth.instance;
+      if (auth.currentUser != null) {
+        // Create a ReceiverInfo object with the recipient's information
+        receiverInfo = ReceiverInfo(
+          senderUserId: auth.currentUser!.uid,
+          receiverName: receiverName.text,
+          receiverPhoneNumber: isPermissionDenied
+              ? phoneNumberController.text
+              : selectedContact!.phones.first.number,
+          receiverBankName: selectedBank,
+          receiverAccountNumber: bankAcocuntController.text,
+          amount: double.parse(usdController.text),
+          serviceChargePayer: whoPayFee,
+        );
+        // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
+        context.read<MoneyTransferBloc>().add(
+              SendMoney(
+                receiverInfo: receiverInfo!,
+                paymentId: '',
+              ),
+            );
+      }
+    } catch (error) {
+      if (error is StripeException) {
+        // Handle StripeException specifically
+        if (error.error.code == FailureCode.Failed &&
+            error.error.stripeErrorCode == 'resource_missing') {
+          // Handle the specific case of a missing payment intent
+          showSnackbar(
+            context,
+            title: 'Error',
+            description: 'Payment intent not found. Please try again.',
+          );
+        } else {
+          // Handle when payment process cancelled
+          showSnackbar(
+            context,
+            title: 'Error',
+            description: 'Payment not proccessed',
+          );
+        }
+      } else {
+        // Handle other errors
+        log(error.toString());
+        showSnackbar(
+          context,
+          title: 'Error',
+          description: '$error',
+        );
+      }
+      log(error.toString());
     }
   }
 
@@ -1601,62 +1688,72 @@ class _SentTabState extends State<SentTab> {
                 ),
               ),
             ),
-            BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
-              listener: (context, state) async {
-                if (state is MoneyTransferFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.reason,
-                  );
-                } else if (state is MoneyTransferSuccess) {
-                  context.pushNamed(
-                    RouteName.receipt,
-                    extra: receiverInfo,
-                  );
-                  // await showDialog(
-                  //   context: context,
-                  //   builder: (_) => ReceiptPage(
-                  //     receiverInfo: receiverInfo!,
-                  //   ),
-                  // );
-                  clearSendInfo();
+            BlocConsumer<PaymentIntentBloc, PaymentIntentState>(
+              listener: (context, paymentState) async {
+                if (paymentState is PaymentIntentFail) {
+                  showSnackbar(context,
+                      title: 'Error', description: paymentState.reason);
+                } else if (paymentState is PaymentIntentSuccess) {
+                  /// Initializes and presents a Stripe payment sheet for processing a payment.
+                  ///
+                  /// Retrieves the `clientSecret` and `customerId` from the `paymentState`.
+                  /// Initializes the Stripe payment sheet with the retrieved information and merchant display name.
+                  /// Calls `displayPaymentSheet()` to present the payment sheet to the user.
+                  /// Logs any errors encountered during the process.
+                  try {
+                    final clientSecret = paymentState.clientSecret;
+                    await Stripe.instance.initPaymentSheet(
+                      paymentSheetParameters: SetupPaymentSheetParameters(
+                        paymentIntentClientSecret: clientSecret,
+                        customerId: paymentState.customerId,
+                        merchantDisplayName: 'Mela Fi',
+                      ),
+                    );
+
+                    displayPaymentSheet();
+                  } catch (error) {
+                    log(error.toString());
+                  }
                 }
               },
-              builder: (context, state) {
-                return ButtonWidget(
-                  child: state is MoneyTransferLoading
-                      ? const LoadingWidget()
-                      : const TextWidget(
-                          text: 'Next',
-                          type: TextType.small,
-                          color: Colors.white,
-                        ),
-                  onPressed: () async {
-                    // showPaymentBottomSheet(context);
-                    final auth = FirebaseAuth.instance;
-                    if (auth.currentUser != null) {
-                      receiverInfo = ReceiverInfo(
-                        senderUserId: auth.currentUser!.uid,
-                        receiverName: receiverName.text,
-                        receiverPhoneNumber: isPermissionDenied
-                            ? phoneNumberController.text
-                            : selectedContact!.phones.first.number,
-                        receiverBankName: selectedBank,
-                        receiverAccountNumber: bankAcocuntController.text,
-                        amount: double.parse(usdController.text),
-                        serviceChargePayer: whoPayFee,
-                      );
-                      context.read<MoneyTransferBloc>().add(
-                            SendMoney(
-                              receiverInfo: receiverInfo!,
-                              paymentId: '',
-                            ),
+              builder: (context, paymentState) =>
+                  BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
+                listener: (context, state) async {
+                  if (state is MoneyTransferFail) {
+                    showSnackbar(
+                      context,
+                      title: 'Error',
+                      description: state.reason,
+                    );
+                  } else if (state is MoneyTransferSuccess) {
+                    context.pushNamed(
+                      RouteName.receipt,
+                      extra: receiverInfo,
+                    );
+
+                    clearSendInfo();
+                  }
+                },
+                builder: (context, state) {
+                  return ButtonWidget(
+                    child: state is MoneyTransferLoading ||
+                            paymentState is PaymentIntentLoading
+                        ? const LoadingWidget()
+                        : const TextWidget(
+                            text: 'Next',
+                            type: TextType.small,
+                            color: Colors.white,
+                          ),
+                    onPressed: () async {
+                      context.read<PaymentIntentBloc>().add(
+                            FetchClientSecret(
+                                currency: 'USD',
+                                amount: double.parse(usdController.text)),
                           );
-                    }
-                  },
-                );
-              },
+                    },
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 10),
           ],

@@ -11,6 +11,7 @@ import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
@@ -19,18 +20,28 @@ import 'config/routing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set the Stripe publishable key, which is necessary to identify your Stripe account.
   Stripe.publishableKey =
       'pk_test_51PqWhhRwVC7iqwp5o0W0CYxLvk7p5KGvQM0KPVKQ57PXaaYboFYGOGKax6TKlN5sdzP46iXtsLOGYGCmKHeIJCKn00LfcSwqQO';
 
+  // Set the Stripe merchant identifier, which is required for Apple Pay integration.
+  Stripe.merchantIdentifier = 'Mela Fi';
+
+  // Apply Stripe settings to ensure the configuration is set up properly.
+  await Stripe.instance.applySettings();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  //Firebase analtics
+
+  // Initialize Firebase Analytics instance to track user interactions and app events.
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
+  // Enable analytics data collection and log an event for app open.
   await analytics.setAnalyticsCollectionEnabled(true);
   await analytics.logAppOpen();
-  //Firebase Crashlytics
+
+  // Initialize Firebase Crashlytics instance to capture and report crash data.
   FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
   FlutterError.onError = crashlytics.recordFlutterError;
 
@@ -75,6 +86,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
           create: (context) => NavigationBloc(
             tabController: TabController(length: 5, vsync: this),
           ),
+        ),
+        BlocProvider(
+          create: (context) => PaymentIntentBloc(),
         ),
       ],
       child: ResponsiveApp(
