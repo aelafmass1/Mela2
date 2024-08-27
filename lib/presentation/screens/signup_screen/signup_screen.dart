@@ -240,7 +240,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 Container(
                   alignment: Alignment.center,
-                  margin: const EdgeInsets.only(bottom: 30),
+                  margin:  EdgeInsets.only(bottom: 30),
                   child: InkWell(
                     onTap: () {
                  

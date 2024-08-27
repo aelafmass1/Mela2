@@ -31,7 +31,7 @@ class RouteName {
   static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
 
-    static const plaid = 'plaid';
+  static const plaid = 'plaid';
   static const contactPermission = 'contact_permission_screen';
 }
 
@@ -56,6 +56,8 @@ final goRouting = GoRouter(
       name: RouteName.welcome,
       builder: (context, state) => const WelcomeScreen(),
     ),
+
+
  
     GoRoute(
         path: '/home',
@@ -67,6 +69,7 @@ final goRouting = GoRouter(
             name: RouteName.equbCreation,
             builder: (context, state) => const EqubCreationScreen(),
           ),
+
           GoRoute(
             path: 'receipt',
             name: RouteName.receipt,
@@ -124,6 +127,12 @@ final goRouting = GoRouter(
       builder: (context, state) => ProfileUploadScreen(
         userModel: state.extra as UserModel,
       ),
+    ),
+    
+    GoRoute(
+      path: '/plaid',
+      name: RouteName.plaid,
+      builder: (context, state) =>  PlaidIntegration(),
     ),
   ],
 );
