@@ -6,6 +6,8 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_cre
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/profile_screen/password_edit_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/profile_screen/profile_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_password_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
@@ -28,6 +30,8 @@ class RouteName {
   static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
   static const contactPermission = 'contact_permission_screen';
+  static const profileEdit = 'profile_edit_screen';
+  static const passwordEdit = 'password_edit_screen';
 }
 
 final goRouting = GoRouter(
@@ -72,6 +76,16 @@ final goRouting = GoRouter(
             builder: (context, state) => ContactPermissionScreen(
               checkContactPermission: state.extra as Function(),
             ),
+          ),
+          GoRoute(
+            path: 'profile_edit',
+            name: RouteName.profileEdit,
+            builder: (context, state) => const ProfileEditScreen(),
+          ),
+          GoRoute(
+            path: 'password_edit',
+            name: RouteName.passwordEdit,
+            builder: (context, state) => const PasswordEditScreen(),
           ),
         ]),
     GoRoute(

@@ -11,6 +11,7 @@ import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -25,129 +26,239 @@ class _AccountTabState extends State<AccountTab> {
   final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (context.mounted) {
-            if (state is AuthLoading) {
-              showDialog(
-                context: context,
-                builder: (_) => const Align(child: LoadingWidget()),
-              );
-            } else if (state is AuthSuccess) {
-              context.goNamed(RouteName.login);
-            } else if (state is AuthFail) {
-              context.pop();
-              showSnackbar(
-                context,
-                title: 'Error',
-                description: state.reason,
-              );
-            }
-          }
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 50, bottom: 5),
-              child: ResponsiveBuilder(builder: (context, sizingInfo) {
-                return CircleAvatar(
-                  radius: ResponsiveUtil.forScreen(
-                    sizingInfo: sizingInfo,
-                    mobile: 50,
-                    tablet: 80,
-                  ),
-                  backgroundImage: auth.currentUser?.photoURL != null
-                      ? CachedNetworkImageProvider(auth.currentUser!.photoURL!)
-                      : Assets.images.profileImage.provider(),
-                );
-              }),
-            ),
-            TextWidget(text: auth.currentUser!.displayName ?? ''),
-            TextWidget(
-              text: 'Customer',
-              fontSize: 15,
-              color: const Color(0xFF4D4D4D).withOpacity(0.75),
-            ),
-            const SizedBox(height: 20),
-            // _buildTab(
-            //   icon: Icons.person_outline,
-            //   title: 'Personal Information',
-            //   onTab: () {
-            //     //
-            //   },
-            // ),
-            // _buildTab(
-            //   icon: Icons.settings_outlined,
-            //   title: 'Account Setting',
-            //   onTab: () {
-            //     //
-            //   },
-            // ),
-            // _buildTab(
-            //   icon: Icons.lock_outlined,
-            //   title: 'Security Setting',
-            //   onTab: () {
-            //     //
-            //   },
-            // ),
-            // _buildTab(
-            //   icon: Icons.edit_outlined,
-            //   title: 'Edit Account',
-            //   onTab: () {
-            //     //
-            //   },
-            // ),
-            _buildTab(
-              icon: Bootstrap.trash,
-              title: 'Delete My Profile',
-              isLogout: true,
-              onTab: () {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        toolbarHeight: 50,
+        elevation: 0,
+        title: const TextWidget(text: 'Profile'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (context.mounted) {
+              if (state is AuthLoading) {
                 showDialog(
                   context: context,
-                  builder: (_) => AlertDialog(
-                    title: const TextWidget(
-                      text: 'Delete User',
-                      type: TextType.small,
+                  builder: (_) => const Align(child: LoadingWidget()),
+                );
+              } else if (state is AuthSuccess) {
+                context.goNamed(RouteName.login);
+              } else if (state is AuthFail) {
+                context.pop();
+                showSnackbar(
+                  context,
+                  title: 'Error',
+                  description: state.reason,
+                );
+              }
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 10),
+                  child: CardWidget(
+                    width: 100.sw,
+                    padding: const EdgeInsets.all(20),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ResponsiveBuilder(builder: (context, sizingInfo) {
+                          return CircleAvatar(
+                            radius: ResponsiveUtil.forScreen(
+                              sizingInfo: sizingInfo,
+                              mobile: 30,
+                              tablet: 35,
+                            ),
+                            backgroundImage: auth.currentUser?.photoURL != null
+                                ? CachedNetworkImageProvider(
+                                    auth.currentUser!.photoURL!)
+                                : Assets.images.profileImage.provider(),
+                          );
+                        }),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidget(
+                                text: auth.currentUser!.displayName ?? ''),
+                            TextWidget(
+                              text:
+                                  '${FirebaseAuth.instance.currentUser!.email?.split('@').first}',
+                              fontSize: 15,
+                              color: const Color(0xFF4D4D4D).withOpacity(0.75),
+                            ),
+                            Container(
+                              width: 107,
+                              height: 24,
+                              margin: const EdgeInsets.only(top: 5),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 7),
+                              decoration: BoxDecoration(
+                                  color: ColorName.green,
+                                  borderRadius: BorderRadius.circular(30)),
+                              child: const Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Icon(
+                                    Icons.verified_outlined,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  TextWidget(
+                                    text: 'Verified User',
+                                    fontSize: 12,
+                                    weight: FontWeight.w300,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        const Expanded(child: SizedBox()),
+                        Column(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                context.pushNamed(RouteName.profileEdit);
+                              },
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                padding: const EdgeInsets.all(5),
+                                decoration: const BoxDecoration(
+                                  color: ColorName.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            const TextWidget(
+                              text: 'Edit',
+                              fontSize: 12,
+                              weight: FontWeight.w300,
+                            )
+                          ],
+                        ),
+                      ],
                     ),
-                    content: const TextWidget(
-                      text: 'Are you sure you want to delete your profile?',
-                      fontSize: 15,
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            context.pop();
-                          },
-                          child: const TextWidget(
-                            text: 'cancel',
-                            type: TextType.small,
-                          )),
-                      TextButton(
-                          onPressed: () {
-                            context.pop();
-                            context.read<AuthBloc>().add(DeleteUser());
-                          },
-                          child: const TextWidget(
-                            text: 'ok',
-                            type: TextType.small,
-                            color: ColorName.red,
-                          )),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // _buildTab(
+                //   icon: Icons.settings_outlined,
+                //   title: 'Account Setting',
+                //   onTab: () {
+                //     //
+                //   },
+                // ),
+                // _buildTab(
+                //   icon: Icons.lock_outlined,
+                //   title: 'Security Setting',
+                //   onTab: () {
+                //     //
+                //   },
+                // ),
+                // _buildTab(
+                //   icon: Icons.edit_outlined,
+                //   title: 'Edit Account',
+                //   onTab: () {
+                //     //
+                //   },
+                // ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextWidget(
+                    text: 'Account setting',
+                    fontSize: 16,
+                    weight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                CardWidget(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  width: 100.sw,
+                  child: Column(
+                    children: [
+                      _buildTab(
+                        icon: Icons.person_outline,
+                        title: 'Personal Info',
+                        onTab: () {
+                          context.pushNamed(RouteName.profileEdit);
+                        },
+                      ),
+                      _buildTab(
+                        icon: Icons.delete_outline,
+                        title: 'Delete My Profile',
+                        isLogout: false,
+                        onTab: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const TextWidget(
+                                text: 'Delete User',
+                                type: TextType.small,
+                              ),
+                              content: const TextWidget(
+                                text:
+                                    'Are you sure you want to delete your profile?',
+                                fontSize: 15,
+                              ),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      context.pop();
+                                    },
+                                    child: const TextWidget(
+                                      text: 'cancel',
+                                      type: TextType.small,
+                                    )),
+                                TextButton(
+                                    onPressed: () {
+                                      context.pop();
+                                      context
+                                          .read<AuthBloc>()
+                                          .add(DeleteUser());
+                                    },
+                                    child: const TextWidget(
+                                      text: 'ok',
+                                      type: TextType.small,
+                                      color: ColorName.red,
+                                    )),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      _buildTab(
+                        icon: Icons.power_settings_new_outlined,
+                        title: 'Logout',
+                        isLogout: true,
+                        onTab: () {
+                          FirebaseAuth.instance.signOut();
+                          context.goNamed(RouteName.login);
+                        },
+                      ),
                     ],
                   ),
-                );
-              },
+                ),
+              ],
             ),
-            _buildTab(
-              icon: Icons.logout,
-              title: 'Logout',
-              isLogout: true,
-              onTab: () {
-                FirebaseAuth.instance.signOut();
-                context.goNamed(RouteName.login);
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -161,23 +272,12 @@ class _AccountTabState extends State<AccountTab> {
     return GestureDetector(
       onTap: onTab,
       child: ResponsiveBuilder(builder: (context, sizingInfo) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          width: ResponsiveUtil.forScreen(
-              sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: isLogout ? ColorName.red : Colors.black,
-            ),
-          ),
-          child: Row(
+        return ListTile(
+          title: Row(
             children: [
               Icon(
                 icon,
-                size: 24,
+                size: 22,
                 color: isLogout ? ColorName.red : const Color(0xFF666666),
               ),
               const SizedBox(width: 10),
@@ -187,13 +287,12 @@ class _AccountTabState extends State<AccountTab> {
                 color: isLogout ? ColorName.red : const Color(0xFF666666),
                 weight: FontWeight.w400,
               ),
-              const Expanded(child: SizedBox()),
-              Icon(
-                Icons.keyboard_arrow_right,
-                size: 24,
-                color: isLogout ? ColorName.red : const Color(0xFF666666),
-              )
             ],
+          ),
+          trailing: Icon(
+            Icons.keyboard_arrow_right,
+            size: 24,
+            color: isLogout ? ColorName.red : const Color(0xFF666666),
           ),
         );
       }),

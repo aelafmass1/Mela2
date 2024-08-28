@@ -14,6 +14,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -223,6 +224,7 @@ class _SentTabState extends State<SentTab> {
     }
 
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
+    // context.read<PaymentCardBloc>().add(FetchPaymentCards());
     super.initState();
   }
 
@@ -290,14 +292,31 @@ class _SentTabState extends State<SentTab> {
                     )
                   : null,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Stack(
-            children: [
-              _buildExchangeRate(),
-              _buildRecipientSelection(),
-              _builPaymentMethodSelection(),
-            ],
+        body: BlocListener<PaymentCardBloc, PaymentCardState>(
+          listener: (context, state) {
+            if (state is PaymentCardFail) {
+              showSnackbar(
+                context,
+                title: 'Error',
+                description: state.reason,
+              );
+            } else if (state is PaymentCardSuccess) {
+              showSnackbar(
+                context,
+                title: 'Success',
+                description: 'Fetched ${state.paymentCards.length}',
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Stack(
+              children: [
+                _buildExchangeRate(),
+                _buildRecipientSelection(),
+                _builPaymentMethodSelection(),
+              ],
+            ),
           ),
         ));
   }

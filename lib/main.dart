@@ -11,6 +11,7 @@ import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
@@ -89,6 +90,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => PaymentIntentBloc(),
+        ),
+        BlocProvider(
+          create: (context) => PaymentCardBloc(),
         ),
       ],
       child: ResponsiveApp(
