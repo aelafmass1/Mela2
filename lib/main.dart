@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
@@ -21,6 +22,15 @@ import 'config/routing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+    // Load the appropriate .env file
+  if (const bool.fromEnvironment('dart.vm.product')) {
+    print("prod");
+    await dotenv.load(fileName: ".env.production");
+  } else {
+      print("dev");
+    await dotenv.load(fileName: ".env.development");
+  }
 
   // Set the Stripe publishable key, which is necessary to identify your Stripe account.
   Stripe.publishableKey =
