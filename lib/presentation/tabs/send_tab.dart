@@ -50,7 +50,7 @@ class _SentTabState extends State<SentTab> {
   bool showBorder = true;
   bool isPermissionDenied = false;
 
-  int selectedPaymentMethodIndex = 1;
+  int selectedPaymentMethodIndex = 0;
 
   String whoPayFee = 'SENDER';
   String selectedBank = '';
@@ -224,7 +224,7 @@ class _SentTabState extends State<SentTab> {
     }
 
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
-    // context.read<PaymentCardBloc>().add(FetchPaymentCards());
+    context.read<PaymentCardBloc>().add(FetchPaymentCards());
     super.initState();
   }
 
@@ -254,71 +254,55 @@ class _SentTabState extends State<SentTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          leadingWidth: index == 0 ? 200 : null,
-          centerTitle: true,
-          toolbarHeight: 50,
-          titleSpacing: 0,
-          title: index == 1 || index == 2
-              ? TextWidget(
-                  text: index == 1 ? 'Select Recipient' : 'Payment Method',
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leadingWidth: index == 0 ? 200 : null,
+        centerTitle: true,
+        toolbarHeight: 50,
+        titleSpacing: 0,
+        title: index == 1 || index == 2
+            ? TextWidget(
+                text: index == 1 ? 'Select Recipient' : 'Payment Method',
+                fontSize: 20,
+                weight: FontWeight.w700,
+              )
+            : null,
+        leading: index == 0
+            ? const Padding(
+                padding: EdgeInsets.only(left: 15, top: 10),
+                child: TextWidget(
+                  text: 'Send Money',
                   fontSize: 20,
-                  weight: FontWeight.w700,
-                )
-              : null,
-          leading: index == 0
-              ? const Padding(
-                  padding: EdgeInsets.only(left: 15, top: 10),
-                  child: TextWidget(
-                    text: 'Send Money',
-                    fontSize: 20,
-                  ),
-                )
-              : index == 1 || index == 2
-                  ? IconButton(
-                      onPressed: () {
-                        if (index == 1) {
-                          setState(() {
-                            index = 0;
-                          });
-                        } else {
-                          setState(() {
-                            index = 1;
-                          });
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                    )
-                  : null,
+                ),
+              )
+            : index == 1 || index == 2
+                ? IconButton(
+                    onPressed: () {
+                      if (index == 1) {
+                        setState(() {
+                          index = 0;
+                        });
+                      } else {
+                        setState(() {
+                          index = 1;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                  )
+                : null,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: Stack(
+          children: [
+            _buildExchangeRate(),
+            _buildRecipientSelection(),
+            _builPaymentMethodSelection(),
+          ],
         ),
-        body: BlocListener<PaymentCardBloc, PaymentCardState>(
-          listener: (context, state) {
-            if (state is PaymentCardFail) {
-              showSnackbar(
-                context,
-                title: 'Error',
-                description: state.reason,
-              );
-            } else if (state is PaymentCardSuccess) {
-              showSnackbar(
-                context,
-                title: 'Success',
-                description: 'Fetched ${state.paymentCards.length}',
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Stack(
-              children: [
-                _buildExchangeRate(),
-                _buildRecipientSelection(),
-                _builPaymentMethodSelection(),
-              ],
-            ),
-          ),
-        ));
+      ),
+    );
   }
 
   _buildExchangeRate() {
@@ -1505,84 +1489,79 @@ class _SentTabState extends State<SentTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CardWidget(
-                      width: 100.sw,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 30),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const TextWidget(
-                            text: 'Select Payment Method',
-                            type: TextType.small,
-                          ),
-                          const SizedBox(height: 10),
-                          CardWidget(
-                              width: 100.sw,
-                              borderRadius: BorderRadius.circular(14),
-                              child: ListTile(
-                                onTap: () {
-                                  setState(() {
-                                    selectedPaymentMethodIndex = 0;
-                                  });
-                                },
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: ColorName.primaryColor,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: const Center(
-                                    child: TextWidget(
-                                      text: 'B',
-                                      color: ColorName.white,
+                    BlocBuilder<PaymentCardBloc, PaymentCardState>(
+                      builder: (context, state) {
+                        return CardWidget(
+                          width: 100.sw,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 30),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const TextWidget(
+                                text: 'Select Payment Method',
+                                type: TextType.small,
+                              ),
+                              const SizedBox(height: 10),
+                              CardWidget(
+                                  width: 100.sw,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: ListTile(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedPaymentMethodIndex = 0;
+                                      });
+                                    },
+                                    leading: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: ColorName.primaryColor,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: const Center(
+                                        child: TextWidget(
+                                          text: 'B',
+                                          color: ColorName.white,
+                                          weight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    trailing: Checkbox(
+                                      activeColor: ColorName.primaryColor,
+                                      shape: const CircleBorder(),
+                                      value: selectedPaymentMethodIndex == 0,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPaymentMethodIndex = 0;
+                                        });
+                                      },
+                                    ),
+                                    title: const TextWidget(
+                                      text: 'Bank Account',
+                                      fontSize: 15,
+                                    ),
+                                    subtitle: const TextWidget(
+                                      text: 'Free service charge ',
+                                      fontSize: 11,
                                       weight: FontWeight.w400,
                                     ),
-                                  ),
+                                  )),
+                              for (var paymentCard in state.paymentCards)
+                                _buildPaymentMethodTile(
+                                  id: paymentCard.id,
+                                  iconPath: Assets.images.masteredCard.path,
+                                  title: paymentCard.cardBrand,
+                                  subTitle:
+                                      '${paymentCard.cardBrand} ending   ** ${paymentCard.last4Digits}',
                                 ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                trailing: Checkbox(
-                                  activeColor: ColorName.primaryColor,
-                                  shape: const CircleBorder(),
-                                  value: selectedPaymentMethodIndex == 0,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPaymentMethodIndex = 0;
-                                    });
-                                  },
-                                ),
-                                title: const TextWidget(
-                                  text: 'Bank Account',
-                                  fontSize: 15,
-                                ),
-                                subtitle: const TextWidget(
-                                  text: 'Free service charge ',
-                                  fontSize: 11,
-                                  weight: FontWeight.w400,
-                                ),
-                              )),
-                          _buildPaymentMethodTile(
-                            id: 1,
-                            iconPath: Assets.images.masteredCard.path,
-                            title: 'Credit Card',
-                            subTitle: 'Mastercard ending   ** 1100',
+                            ],
                           ),
-                          _buildPaymentMethodTile(
-                            id: 2,
-                            iconPath: Assets.images.masteredCard.path,
-                            title: 'Debit Card',
-                            subTitle: 'Mastercard ending   ** 1100',
-                          ),
-                          _buildPaymentMethodTile(
-                            id: 3,
-                            iconPath: Assets.images.visaCard.path,
-                            title: 'Credit Card',
-                            subTitle: 'Visacard ending   ** 1100',
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 10),
                     CardWidget(
@@ -1721,6 +1700,7 @@ class _SentTabState extends State<SentTab> {
                   /// Logs any errors encountered during the process.
                   try {
                     final clientSecret = paymentState.clientSecret;
+
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
                         paymentIntentClientSecret: clientSecret,

@@ -31,7 +31,8 @@ class PaymentIntentRepository {
       ),
     );
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return jsonDecode(res.body);
+      final data = jsonDecode(res.body);
+      return data;
     }
     return {'error': res.body};
   }

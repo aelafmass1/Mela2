@@ -24,17 +24,25 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       final res = await PaymentCardRepository.fetchPaymentCards(
         accessToken: accessToken!,
       );
-      if (res.first.containsKey('error')) {
-        return emit(PaymentCardFail(
-          reason: res.first['error'],
+      if (res.isNotEmpty) {
+        if (res.first.containsKey('error')) {
+          return emit(PaymentCardFail(
+            reason: res.first['error'],
+            paymentCards: state.paymentCards,
+          ));
+        }
+        final cards = res
+            .map((c) => PaymentCardModel.fromMap(c as Map<String, dynamic>))
+            .toList();
+
+        emit(PaymentCardSuccess(
+          paymentCards: cards,
+        ));
+      } else {
+        emit(PaymentCardSuccess(
           paymentCards: state.paymentCards,
         ));
       }
-      final cards = res.map((c) => PaymentCardModel.fromMap(c)).toList();
-
-      emit(PaymentCardSuccess(
-        paymentCards: cards,
-      ));
     } catch (error) {
       log(error.toString());
       emit(

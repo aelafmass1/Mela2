@@ -26,7 +26,7 @@ class PaymentCardRepository {
     return {'error': res.body};
   }
 
-  static Future<List<Map<String, dynamic>>> fetchPaymentCards({
+  static Future<List> fetchPaymentCards({
     required String accessToken,
   }) async {
     final res = await http.get(
@@ -37,7 +37,8 @@ class PaymentCardRepository {
       },
     );
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return jsonDecode(res.body);
+      List data = jsonDecode(res.body);
+      return data;
     }
     return [
       {'error': res.body}

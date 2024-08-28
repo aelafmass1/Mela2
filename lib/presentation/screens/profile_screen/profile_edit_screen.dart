@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/circlular_dashed_border.dart';
@@ -164,7 +162,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              context.pushNamed(RouteName.passwordEdit);
+                              // context.pushNamed(RouteName.passwordEdit);
                             }),
                       ),
                     ),
