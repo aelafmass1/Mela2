@@ -206,7 +206,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       String phoneNumber =
                           phoneCode + phoneNumberController.text;
 
-                      // sendOTP(phoneNumber);
+                       sendOTP(phoneNumber);
                       context.pushNamed(
                         RouteName.otp,
                         extra: UserModel(
