@@ -37,7 +37,7 @@
 		<true/>
 	</dict>
 	<key>NSContactsUsageDescription</key>
-	<string>We need access to your contacts to select them.</string>
+	<string>Mela Fi needs access to your contacts to enable you to easily send money to recipients using their phone numbers. This allows us to contact the recipient and ensure funds are sent directly and securely.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
