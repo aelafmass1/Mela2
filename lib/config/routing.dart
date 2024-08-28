@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/Payment_helper/plaid.dart';
+
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
@@ -27,8 +30,12 @@ class RouteName {
   static const craeteAccount = 'create_account_screen';
   static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
+
+  static const plaid = 'plaid';
   static const contactPermission = 'contact_permission_screen';
 }
+
+
 
 final goRouting = GoRouter(
   initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
@@ -49,6 +56,9 @@ final goRouting = GoRouter(
       name: RouteName.welcome,
       builder: (context, state) => const WelcomeScreen(),
     ),
+
+
+ 
     GoRoute(
         path: '/home',
         name: RouteName.home,
@@ -59,6 +69,7 @@ final goRouting = GoRouter(
             name: RouteName.equbCreation,
             builder: (context, state) => const EqubCreationScreen(),
           ),
+
           GoRoute(
             path: 'receipt',
             name: RouteName.receipt,
@@ -84,6 +95,11 @@ final goRouting = GoRouter(
       name: RouteName.signup,
       builder: (context, state) => const SignupScreen(),
     ),
+    //  GoRoute(
+    //         path: 'plaid',
+    //         name: RouteName.plaid,
+    //         builder: (context, state) => Plaidbase_class()
+    //       ),
     GoRoute(
       path: '/otp',
       name: RouteName.otp,
@@ -111,6 +127,12 @@ final goRouting = GoRouter(
       builder: (context, state) => ProfileUploadScreen(
         userModel: state.extra as UserModel,
       ),
+    ),
+    
+    GoRoute(
+      path: '/plaid',
+      name: RouteName.plaid,
+      builder: (context, state) =>  PlaidIntegration(),
     ),
   ],
 );

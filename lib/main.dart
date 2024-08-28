@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
@@ -19,6 +20,7 @@ import 'config/routing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -31,6 +33,9 @@ void main() async {
   //Firebase Crashlytics
   FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
   FlutterError.onError = crashlytics.recordFlutterError;
+
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
 
   runApp(
     DevicePreview(enabled: false, builder: (_) => const MainApp()),
