@@ -149,24 +149,24 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       ),
                     ),
                     const SizedBox(height: 25),
-                    Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: 250,
-                        height: 46,
-                        child: ButtonWidget(
-                            verticalPadding: 0,
-                            child: const TextWidget(
-                              text: 'Change Password',
-                              type: TextType.small,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              // context.pushNamed(RouteName.passwordEdit);
-                            }),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: SizedBox(
+                    //     width: 250,
+                    //     height: 46,
+                    //     child: ButtonWidget(
+                    //         verticalPadding: 0,
+                    //         child: const TextWidget(
+                    //           text: 'Change Password',
+                    //           type: TextType.small,
+                    //           color: Colors.white,
+                    //         ),
+                    //         onPressed: () {
+                    //           // context.pushNamed(RouteName.passwordEdit);
+                    //         }),
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 15),
                   ],
                 ),
               ),

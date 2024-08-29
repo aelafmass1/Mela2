@@ -1550,14 +1550,113 @@ class _SentTabState extends State<SentTab> {
                                       weight: FontWeight.w400,
                                     ),
                                   )),
-                              for (var paymentCard in state.paymentCards)
-                                _buildPaymentMethodTile(
-                                  id: paymentCard.id,
-                                  iconPath: Assets.images.masteredCard.path,
-                                  title: paymentCard.cardBrand,
-                                  subTitle:
-                                      '${paymentCard.cardBrand} ending   ** ${paymentCard.last4Digits}',
-                                ),
+                              const SizedBox(height: 15),
+                              CardWidget(
+                                  width: 100.sw,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: ListTile(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedPaymentMethodIndex = 1;
+                                      });
+                                    },
+                                    leading: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: ColorName.primaryColor,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: const Center(
+                                        child: TextWidget(
+                                          text: 'D',
+                                          color: ColorName.white,
+                                          weight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    trailing: Checkbox(
+                                      activeColor: ColorName.primaryColor,
+                                      shape: const CircleBorder(),
+                                      value: selectedPaymentMethodIndex == 1,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPaymentMethodIndex = 1;
+                                        });
+                                      },
+                                    ),
+                                    title: const TextWidget(
+                                      text: 'Debit Card',
+                                      fontSize: 15,
+                                    ),
+                                    subtitle: const TextWidget(
+                                      text: '',
+                                      fontSize: 11,
+                                      weight: FontWeight.w400,
+                                    ),
+                                  )),
+                              const SizedBox(height: 15),
+
+                              CardWidget(
+                                  width: 100.sw,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: ListTile(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedPaymentMethodIndex = 2;
+                                      });
+                                    },
+                                    leading: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: ColorName.primaryColor,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: const Center(
+                                        child: TextWidget(
+                                          text: 'C',
+                                          color: ColorName.white,
+                                          weight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    trailing: Checkbox(
+                                      activeColor: ColorName.primaryColor,
+                                      shape: const CircleBorder(),
+                                      value: selectedPaymentMethodIndex == 2,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPaymentMethodIndex = 2;
+                                        });
+                                      },
+                                    ),
+                                    title: const TextWidget(
+                                      text: 'Credit Card',
+                                      fontSize: 15,
+                                    ),
+                                    subtitle: const TextWidget(
+                                      text: '',
+                                      fontSize: 11,
+                                      weight: FontWeight.w400,
+                                    ),
+                                  )),
+                              // for (int i = 0;
+                              //     i < state.paymentCards.length;
+                              //     i++)
+                              //   _buildPaymentMethodTile(
+                              //     id: 0 + 3,
+                              //     iconPath: Assets.images.masteredCard.path,
+                              //     title: state.paymentCards[i].cardBrand,
+                              //     subTitle:
+                              //         '${state.paymentCards[i].cardBrand} ending   ** ${state.paymentCards[i].last4Digits}',
+                              //   ),
                             ],
                           ),
                         );
@@ -1744,11 +1843,15 @@ class _SentTabState extends State<SentTab> {
                             color: Colors.white,
                           ),
                     onPressed: () async {
-                      context.read<PaymentIntentBloc>().add(
-                            FetchClientSecret(
-                                currency: 'USD',
-                                amount: double.parse(usdController.text)),
-                          );
+                      if (selectedPaymentMethodIndex != 0) {
+                        context.read<PaymentIntentBloc>().add(
+                              FetchClientSecret(
+                                  currency: 'USD',
+                                  amount: double.parse(usdController.text)),
+                            );
+                      } else {
+                        //Plaid integration
+                      }
                     },
                   );
                 },

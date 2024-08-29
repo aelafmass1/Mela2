@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
@@ -21,10 +22,10 @@ import 'config/routing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
   // Set the Stripe publishable key, which is necessary to identify your Stripe account.
-  Stripe.publishableKey =
-      'pk_test_51PqWhhRwVC7iqwp5o0W0CYxLvk7p5KGvQM0KPVKQ57PXaaYboFYGOGKax6TKlN5sdzP46iXtsLOGYGCmKHeIJCKn00LfcSwqQO';
+  Stripe.publishableKey = dotenv.env['PUBLISHABLE_KEY']!;
 
   // Set the Stripe merchant identifier, which is required for Apple Pay integration.
   Stripe.merchantIdentifier = 'Mela Fi';

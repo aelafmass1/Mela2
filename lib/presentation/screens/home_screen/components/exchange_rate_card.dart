@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 
+import '../../../../data/models/curruncy_model.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/text_widget.dart';
 
 class ExchangeRateCard extends StatelessWidget {
-  const ExchangeRateCard({super.key});
+  final CurrencyModel currencyModel;
+  const ExchangeRateCard({super.key, required this.currencyModel});
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +46,18 @@ class ExchangeRateCard extends StatelessWidget {
               backgroundImage: Assets.images.usaFlag.provider(),
             ),
             const SizedBox(width: 7),
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextWidget(
-                  text: 'US Dollar',
+                  text: currencyModel.currencyCode,
                   fontSize: 8,
                   weight: FontWeight.w500,
                   color: ColorName.primaryColor,
                 ),
                 TextWidget(
-                  text: '1 ETB',
+                  text: '1 ${currencyModel.currencyCode}',
                   fontSize: 12,
                   color: ColorName.primaryColor,
                 )
@@ -71,18 +73,18 @@ class ExchangeRateCard extends StatelessWidget {
               backgroundImage: Assets.images.ethiopianFlag.provider(),
             ),
             const SizedBox(width: 7),
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextWidget(
+                const TextWidget(
                   text: 'ET Birr',
                   fontSize: 8,
                   weight: FontWeight.w500,
                   color: ColorName.primaryColor,
                 ),
                 TextWidget(
-                  text: '111.98 ETB',
+                  text: '${currencyModel.rate} ETB',
                   fontSize: 12,
                   color: ColorName.primaryColor,
                 )
@@ -122,7 +124,7 @@ class ExchangeRateCard extends StatelessWidget {
           ),
         ),
         TextWidget(
-          text: '111.98 ETB',
+          text: '${currencyModel.rate} ETB',
           fontSize: 14,
         ),
         Row(

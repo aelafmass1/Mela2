@@ -898,14 +898,24 @@ class _HomeTabState extends State<HomeTab> {
             ],
           ),
           const SizedBox(height: 10),
-          const SingleChildScrollView(
+          SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ExchangeRateCard(),
-                ExchangeRateCard(),
-                ExchangeRateCard(),
-              ],
+            child: BlocBuilder<CurrencyBloc, CurrencyState>(
+              builder: (context, state) {
+                if (state is CurrencySuccess) {
+                  return Row(
+                    children: [
+                      for (var currency in state.currencies)
+                        ExchangeRateCard(
+                          currencyModel: currency,
+                        ),
+                    ],
+                  );
+                }
+                return const SizedBox(
+                  height: 90,
+                );
+              },
             ),
           ),
           SizedBox(height: 10),
