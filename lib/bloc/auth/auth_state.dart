@@ -13,3 +13,13 @@ final class AuthFail extends AuthState {
 }
 
 final class AuthSuccess extends AuthState {}
+
+final class UpdateLoading extends AuthState {}
+
+final class UpdateFail extends AuthState {
+  final String reason;
+
+  UpdateFail({required this.reason});
+}
+
+final class UpdateSuccess extends AuthState {}

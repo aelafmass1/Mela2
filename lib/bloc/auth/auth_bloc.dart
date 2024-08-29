@@ -19,6 +19,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CreateAccount>(_onCreateAccount);
     on<LoginUser>(_onLoginUser);
     on<DeleteUser>(_onDeleteUser);
+    on<UpdateUser>(_onUpdateUser);
+  }
+  _onUpdateUser(UpdateUser event, Emitter emit) async {
+    try {
+      emit(UpdateLoading());
+      final auth = FirebaseAuth.instance;
+      await auth.currentUser?.updateDisplayName(event.fullName);
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      await firestore.collection('users').doc(auth.currentUser?.uid).update({
+        'email': event.email,
+      });
+      emit(UpdateSuccess());
+      //
+    } catch (error) {
+      log(error.toString());
+      emit(UpdateFail(reason: error.toString()));
+    }
   }
 
   Future<void> _onDeleteUser(DeleteUser event, Emitter emit) async {

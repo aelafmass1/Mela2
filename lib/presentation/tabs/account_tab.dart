@@ -38,21 +38,23 @@ class _AccountTabState extends State<AccountTab> {
       body: SingleChildScrollView(
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (context.mounted) {
-              if (state is AuthLoading) {
-                showDialog(
-                  context: context,
-                  builder: (_) => const Align(child: LoadingWidget()),
-                );
-              } else if (state is AuthSuccess) {
-                context.goNamed(RouteName.login);
-              } else if (state is AuthFail) {
-                context.pop();
-                showSnackbar(
-                  context,
-                  title: 'Error',
-                  description: state.reason,
-                );
+            if (mounted) {
+              if (context.mounted) {
+                if (state is AuthLoading) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const Align(child: LoadingWidget()),
+                  );
+                } else if (state is AuthSuccess) {
+                  context.goNamed(RouteName.login);
+                } else if (state is AuthFail) {
+                  context.pop();
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
+                  );
+                }
               }
             }
           },

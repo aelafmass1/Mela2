@@ -36,12 +36,12 @@ class _HistoryTabState extends State<HistoryTab> {
           text: 'Transaction History',
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              //
-            },
-            icon: const Icon(Icons.print_outlined),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     //
+          //   },
+          //   icon: const Icon(Icons.print_outlined),
+          // ),
           IconButton(
             onPressed: () {
               //

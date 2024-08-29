@@ -48,7 +48,7 @@ class WelcomeScreen extends StatelessWidget {
             width: 80.sw,
             child: const TextWidget(
               text:
-                  'Lorem ipsum dolor sit amet consectetur adad aia Convallis nisl quam sapien gravida curabitur enim',
+                  'Empowering the Ethiopian dispora with modern finacial solution',
               textAlign: TextAlign.center,
               fontSize: 14,
               weight: FontWeight.w400,

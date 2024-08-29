@@ -23,3 +23,10 @@ final class LoginUser extends AuthEvent {
 }
 
 final class DeleteUser extends AuthEvent {}
+
+final class UpdateUser extends AuthEvent {
+  final String fullName;
+  final String email;
+
+  UpdateUser({required this.fullName, required this.email});
+}

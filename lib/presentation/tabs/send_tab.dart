@@ -634,12 +634,15 @@ class _SentTabState extends State<SentTab> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const TextWidget(
-                                        text:
-                                            'Connected bank account (ACH) fee',
-                                        color: Color(0xFF7B7B7B),
-                                        fontSize: 13,
-                                        weight: FontWeight.w400,
+                                      SizedBox(
+                                        width: 45.sw,
+                                        child: const TextWidget(
+                                          text:
+                                              'Connected bank account (ACH) fee',
+                                          color: Color(0xFF7B7B7B),
+                                          fontSize: 13,
+                                          weight: FontWeight.w400,
+                                        ),
                                       ),
                                       Row(
                                         children: [
