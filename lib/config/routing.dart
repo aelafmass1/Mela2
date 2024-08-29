@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/Payment_helper/ACH.dart';
 import 'package:transaction_mobile_app/Payment_helper/plaid.dart';
+import 'package:transaction_mobile_app/Payment_helper/str_pla.dart';
 
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -32,6 +34,7 @@ class RouteName {
   static const profileUpload = 'profile_upload_screen';
 
   static const plaid = 'plaid';
+    static const stripe_plaid = 'stripe_plaid';
   static const contactPermission = 'contact_permission_screen';
 }
 
@@ -133,6 +136,11 @@ final goRouting = GoRouter(
       path: '/plaid',
       name: RouteName.plaid,
       builder: (context, state) =>  PlaidIntegration(),
+    ),
+      GoRoute(
+      path: '/stripe_plaid',
+      name: RouteName.stripe_plaid,
+      builder: (context, state) =>  StripeACHPayment(),
     ),
   ],
 );

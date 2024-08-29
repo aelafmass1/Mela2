@@ -2,15 +2,23 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
+import 'package:transaction_mobile_app/core/constants/Credentials.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:stripe_platform_interface/stripe_platform_interface.dart';
 
 class Config {
-  static const String plaidClientId = 'YOUR_PLAID_CLIENT_ID';
+  //static const String plaidClientId = 'YOUR_PLAID_CLIENT_ID';
   static const String plaidSecret = 'YOUR_PLAID_SECRET';
   static const String plaidEnv = 'sandbox'; // Use 'development' or 'production' for live environments
   static const String stripePublishableKey = 'YOUR_STRIPE_PUBLISHABLE_KEY';
   static const String backendUrl = 'YOUR_BACKEND_URL'; // Your server endpoint
+
+  static const String env = 'sandbox';
+  static const String clientName = 'Your App Name';
+  
+
+static String? secret = Credentials.plaid_sandbox;
+static String? plaidClientId = Credentials.Plaid_client;
 }
 
 class PlaidStripeIntegration extends StatefulWidget {

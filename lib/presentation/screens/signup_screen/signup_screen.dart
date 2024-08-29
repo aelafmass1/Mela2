@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/Payment_helper/str_pla.dart';
+import 'package:transaction_mobile_app/Payment_helper/str_pla.dart';
+import 'package:transaction_mobile_app/Payment_helper/str_pla.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -13,6 +16,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 
+import '../../../Payment_helper/str_pla.dart';
 import '../../widgets/text_widget.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -244,7 +248,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: InkWell(
                     onTap: () {
                  
-                       context.goNamed(RouteName.plaid);
+                       context.goNamed(RouteName.stripe_plaid);
               
              
                     },
