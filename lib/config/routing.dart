@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/payment_helper/ACH_integration.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
@@ -32,6 +33,7 @@ class RouteName {
   static const contactPermission = 'contact_permission_screen';
   static const profileEdit = 'profile_edit_screen';
   static const passwordEdit = 'password_edit_screen';
+  static const StripeACHPayment = 'StripeACHPayment';
 }
 
 final goRouting = GoRouter(
@@ -124,6 +126,13 @@ final goRouting = GoRouter(
       name: RouteName.profileUpload,
       builder: (context, state) => ProfileUploadScreen(
         userModel: state.extra as UserModel,
+      ),
+    ),
+        GoRoute(
+      path: '/StripeACHPayment',
+      name: RouteName.profileUpload,
+      builder: (context, state) => StripeACHPayment(
+        
       ),
     ),
   ],

@@ -203,7 +203,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       String phoneNumber =
                           phoneCode + phoneNumberController.text;
 
-                      // sendOTP(phoneNumber);
+                       sendOTP(phoneNumber);
                       context.pushNamed(
                         RouteName.otp,
                         extra: UserModel(
@@ -238,10 +238,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 Container(
                   alignment: Alignment.center,
                   margin: const EdgeInsets.only(bottom: 30),
-                  child: const TextWidget(
-                    text: '2024 | All right reserved © Mela Financial inc.',
-                    color: Color(0xFF8D8D8D),
-                    fontSize: 14,
+                  child: InkWell(
+                    onTap: () {
+                        context.goNamed(RouteName.StripeACHPayment);
+                      
+                    },
+                    child: const TextWidget(
+                      text: '2024 | All right reserved © Mela Financial inc.',
+                      color: Color(0xFF8D8D8D),
+                      fontSize: 14,
+                    ),
                   ),
                 )
               ],
