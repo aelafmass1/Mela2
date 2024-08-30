@@ -66,6 +66,8 @@ class _SentTabState extends State<SentTab> {
 
   Contact? selectedContact;
 
+  double percentageFee = 0;
+
   final searchContactController = TextEditingController();
   final receiverName = TextEditingController();
   final usdController = TextEditingController();
@@ -657,42 +659,104 @@ class _SentTabState extends State<SentTab> {
                                                       children: [
                                                         SizedBox(
                                                           width: 34.sw,
-                                                          child: TextWidget(
-                                                            text: fee.label,
-                                                            color: const Color(
-                                                                0xFF7B7B7B),
-                                                            fontSize: 14,
-                                                            weight:
-                                                                FontWeight.w400,
+                                                          child: Row(
+                                                            children: [
+                                                              TextWidget(
+                                                                text: fee.label,
+                                                                color: const Color(
+                                                                    0xFF7B7B7B),
+                                                                fontSize: 14,
+                                                                weight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                              ),
+                                                              const SizedBox(
+                                                                  width: 5),
+                                                              Visibility(
+                                                                visible: fee
+                                                                        .type ==
+                                                                    'PERCENTAGE',
+                                                                child:
+                                                                    TextWidget(
+                                                                  text:
+                                                                      '${fee.amount == fee.amount.toInt() ? fee.amount.toInt() : fee.amount}%',
+                                                                  color: Colors
+                                                                      .black87,
+                                                                  fontSize: 14,
+                                                                  weight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
-                                                        Row(
-                                                          children: [
-                                                            TextWidget(
-                                                              text:
-                                                                  '\$${fee.amount}',
-                                                              fontSize: 14,
-                                                              weight: FontWeight
-                                                                  .w500,
-                                                            ),
-                                                            IconButton(
-                                                              style: IconButton
-                                                                  .styleFrom(
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .zero,
+                                                        Visibility(
+                                                          visible: fee.type ==
+                                                              'FIXED',
+                                                          replacement: Row(
+                                                            children: [
+                                                              TextWidget(
+                                                                text: usdController
+                                                                        .text
+                                                                        .isEmpty
+                                                                    ? '--'
+                                                                    : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)} ',
+                                                                fontSize: 14,
+                                                                weight:
+                                                                    FontWeight
+                                                                        .w500,
                                                               ),
-                                                              onPressed: () {
-                                                                //
-                                                              },
-                                                              icon: const Icon(
-                                                                Icons
-                                                                    .info_outline,
-                                                                color: Color(
-                                                                    0xFFD0D0D0),
+                                                              IconButton(
+                                                                style: IconButton
+                                                                    .styleFrom(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                ),
+                                                                onPressed: () {
+                                                                  //
+                                                                },
+                                                                icon:
+                                                                    const Icon(
+                                                                  Icons
+                                                                      .info_outline,
+                                                                  color: Color(
+                                                                      0xFFD0D0D0),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                          child: Row(
+                                                            children: [
+                                                              TextWidget(
+                                                                text:
+                                                                    '\$${fee.amount}',
+                                                                fontSize: 14,
+                                                                weight:
+                                                                    FontWeight
+                                                                        .w500,
                                                               ),
-                                                            )
-                                                          ],
+                                                              IconButton(
+                                                                style: IconButton
+                                                                    .styleFrom(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                ),
+                                                                onPressed: () {
+                                                                  //
+                                                                },
+                                                                icon:
+                                                                    const Icon(
+                                                                  Icons
+                                                                      .info_outline,
+                                                                  color: Color(
+                                                                      0xFFD0D0D0),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
                                                         )
                                                       ],
                                                     ),
@@ -726,7 +790,7 @@ class _SentTabState extends State<SentTab> {
                                                 if (state is FeeSuccess)
                                                   TextWidget(
                                                     text:
-                                                        '\$${state.fees.map((f) => f.amount).reduce((value, element) => value + element)}',
+                                                        '\$${(state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w500,
                                                   )
@@ -1898,6 +1962,7 @@ class _SentTabState extends State<SentTab> {
                 } catch (error) {
                   etbController.text = '';
                 }
+                setState(() {});
               },
               style: const TextStyle(
                 fontSize: 22,
