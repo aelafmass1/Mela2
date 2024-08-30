@@ -790,7 +790,7 @@ class _SentTabState extends State<SentTab> {
                                                 if (state is FeeSuccess)
                                                   TextWidget(
                                                     text:
-                                                        '\$${(state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))}',
+                                                        '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w500,
                                                   )
@@ -2071,6 +2071,7 @@ class _SentTabState extends State<SentTab> {
                 } catch (error) {
                   usdController.text = '';
                 }
+                setState(() {});
               },
               style: const TextStyle(
                 fontSize: 22,
