@@ -153,10 +153,6 @@ class $AssetsImagesGen {
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
 
-  /// File path: assets/images/success_image.png
-  AssetGenImage get successImage =>
-      const AssetGenImage('assets/images/success_image.png');
-
   $AssetsImagesSvgsGen get svgs => const $AssetsImagesSvgsGen();
 
   /// File path: assets/images/transaction_icon.png
@@ -225,7 +221,6 @@ class $AssetsImagesGen {
         sendIcon,
         sinqeBankLogo,
         splashLogo,
-        successImage,
         transactionIcon,
         tsedeyBankLogo,
         tsehayBankLogo,
@@ -244,6 +239,9 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/card_pattern.svg
   String get cardPattern => 'assets/images/svgs/card_pattern.svg';
+
+  /// File path: assets/images/svgs/complete_logo.svg
+  String get completeLogo => 'assets/images/svgs/complete_logo.svg';
 
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
@@ -286,6 +284,7 @@ class $AssetsImagesSvgsGen {
   List<String> get values => [
         cameraIcon,
         cardPattern,
+        completeLogo,
         equbIcon,
         exchangeIcon,
         faceId,

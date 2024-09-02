@@ -226,8 +226,9 @@ class _OTPScreenState extends State<OTPScreen> {
         inputFormatters: [
           LengthLimitingTextInputFormatter(1),
         ],
+        keyboardType: TextInputType.phone,
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(vertical: 20),
+          contentPadding: const EdgeInsets.symmetric(vertical: 20),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
           ),

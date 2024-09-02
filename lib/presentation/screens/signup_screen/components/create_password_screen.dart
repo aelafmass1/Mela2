@@ -39,7 +39,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       return 'Password must contain at least one number.';
     }
-    if (!RegExp(r'[@$!%*?&]').hasMatch(password)) {
+    if (!RegExp(r"""[!@#\$%\^&\*\(\)_\+\-=\{\}\[\]:;"\',<>\?\/\\\|~`]""")
+        .hasMatch(password)) {
       return 'Password must contain at least one symbol (e.g., @, #, \$, %, etc.).';
     }
     if (password1Controller.text != password2Controller.text) {

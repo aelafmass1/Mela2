@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
@@ -30,6 +32,7 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../bloc/currency/currency_bloc.dart';
 import '../../bloc/fee/fee_bloc.dart';
 import '../../bloc/navigation/navigation_bloc.dart';
+import '../../bloc/plaid/plaid_bloc.dart';
 import '../../config/routing.dart';
 import '../widgets/custom_shimmer.dart';
 
@@ -76,6 +79,51 @@ class _SentTabState extends State<SentTab> {
   final phoneNumberController = TextEditingController();
 
   ReceiverInfo? receiverInfo;
+
+  LinkConfiguration? _configuration;
+  StreamSubscription<LinkEvent>? _streamEvent;
+  StreamSubscription<LinkExit>? _streamExit;
+  StreamSubscription<LinkSuccess>? _streamSuccess;
+  String? publicToken;
+
+  @override
+  void dispose() {
+    _streamEvent?.cancel();
+    _streamExit?.cancel();
+    _streamSuccess?.cancel();
+    super.dispose();
+  }
+
+  void _createLinkTokenConfiguration(String linkToken) {
+    setState(() {
+      _configuration = LinkTokenConfiguration(
+        token: linkToken,
+      );
+    });
+  }
+
+  void _onEvent(LinkEvent event) {
+    final name = event.name;
+    final metadata = event.metadata.description();
+    log("onEvent: $name, metadata: $metadata");
+  }
+
+  void _onSuccess(LinkSuccess event) {
+    final token = event.publicToken;
+    final metadata = event.metadata.description();
+    log("onSuccess: $token, metadata: $metadata");
+    setState(() => publicToken = event.publicToken);
+
+    context
+        .read<PlaidBloc>()
+        .add(ExchangePublicToken(publicToken: publicToken!));
+  }
+
+  void _onExit(LinkExit event) {
+    final metadata = event.metadata.description();
+    final error = event.error?.description();
+    log("onExit metadata: $metadata, error: $error");
+  }
 
   /// Fetches the user's contacts if permission is granted.
   ///
@@ -213,6 +261,9 @@ class _SentTabState extends State<SentTab> {
 
   @override
   void initState() {
+    _streamEvent = PlaidLink.onEvent.listen(_onEvent);
+    _streamExit = PlaidLink.onExit.listen(_onExit);
+    _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
     final state = context.read<CurrencyBloc>().state;
     if (state is CurrencySuccess) {
       setState(() {
@@ -696,16 +747,25 @@ class _SentTabState extends State<SentTab> {
                                                               'FIXED',
                                                           replacement: Row(
                                                             children: [
-                                                              TextWidget(
-                                                                text: usdController
-                                                                        .text
-                                                                        .isEmpty
-                                                                    ? '--'
-                                                                    : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)} ',
-                                                                fontSize: 14,
-                                                                weight:
-                                                                    FontWeight
-                                                                        .w500,
+                                                              Container(
+                                                                alignment: Alignment
+                                                                    .centerRight,
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .zero,
+                                                                width: 25.sw,
+                                                                child:
+                                                                    TextWidget(
+                                                                  text: usdController
+                                                                          .text
+                                                                          .isEmpty
+                                                                      ? '--'
+                                                                      : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)}',
+                                                                  fontSize: 14,
+                                                                  weight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
                                                               ),
                                                               IconButton(
                                                                 style: IconButton
@@ -1910,25 +1970,64 @@ class _SentTabState extends State<SentTab> {
                   }
                 },
                 builder: (context, state) {
-                  return ButtonWidget(
-                    child: state is MoneyTransferLoading ||
-                            paymentState is PaymentIntentLoading
-                        ? const LoadingWidget()
-                        : const TextWidget(
-                            text: 'Next',
-                            type: TextType.small,
-                            color: Colors.white,
-                          ),
-                    onPressed: () async {
-                      if (selectedPaymentMethodIndex != 0) {
-                        context.read<PaymentIntentBloc>().add(
-                              FetchClientSecret(
-                                  currency: 'USD',
-                                  amount: double.parse(usdController.text)),
-                            );
-                      } else {
-                        //Plaid integration
+                  return BlocConsumer<PlaidBloc, PlaidState>(
+                    listener: (context, state) async {
+                      if (state is PlaidLinkTokenFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is PlaidLinkTokenSuccess) {
+                        _createLinkTokenConfiguration(state.linkToken);
+                        await PlaidLink.open(configuration: _configuration!);
+                      } else if (state is PlaidPublicTokenFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is PlaidPublicTokenSuccess) {
+                        final auth = FirebaseAuth.instance;
+                        receiverInfo = ReceiverInfo(
+                          senderUserId: auth.currentUser!.uid,
+                          receiverName: receiverName.text,
+                          receiverPhoneNumber: isPermissionDenied
+                              ? phoneNumberController.text
+                              : selectedContact!.phones.first.number,
+                          receiverBankName: selectedBank,
+                          receiverAccountNumber: bankAcocuntController.text,
+                          amount: double.parse(usdController.text),
+                          serviceChargePayer: whoPayFee,
+                        );
+                        context.read<MoneyTransferBloc>().add(SendMoney(
+                            receiverInfo: receiverInfo!, paymentId: ''));
                       }
+                    },
+                    builder: (context, plaidState) {
+                      return ButtonWidget(
+                        child: state is MoneyTransferLoading ||
+                                paymentState is PaymentIntentLoading ||
+                                plaidState is PlaidLinkTokenLoading ||
+                                plaidState is PlaidPublicTokenLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Next',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                        onPressed: () async {
+                          if (selectedPaymentMethodIndex != 0) {
+                            context.read<PaymentIntentBloc>().add(
+                                  FetchClientSecret(
+                                      currency: 'USD',
+                                      amount: double.parse(usdController.text)),
+                                );
+                          } else {
+                            context.read<PlaidBloc>().add(CreateLinkToken());
+                          }
+                        },
+                      );
                     },
                   );
                 },
@@ -1967,7 +2066,7 @@ class _SentTabState extends State<SentTab> {
               style: const TextStyle(
                 fontSize: 22,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.phone,
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(
                     RegExp(r'^[0-9]*[.,]?[0-9]*$')),
@@ -2076,7 +2175,7 @@ class _SentTabState extends State<SentTab> {
               style: const TextStyle(
                 fontSize: 22,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.phone,
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(
                     RegExp(r'^[0-9]*[.,]?[0-9]*$')),
