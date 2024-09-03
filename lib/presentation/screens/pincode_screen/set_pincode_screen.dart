@@ -1,22 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
+import '../../../bloc/auth/auth_bloc.dart';
+import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../widgets/button_widget.dart';
+import '../../widgets/loading_widget.dart';
 import '../../widgets/text_widget.dart';
 
-class PinScreen extends StatefulWidget {
-  final Function() onComplete;
-  const PinScreen({super.key, required this.onComplete});
+class SetPincodeScreen extends StatefulWidget {
+  final UserModel user;
+  const SetPincodeScreen({super.key, required this.user});
 
   @override
-  State<PinScreen> createState() => _PinScreenState();
+  State<SetPincodeScreen> createState() => _SetPincodeScreenState();
 }
 
-class _PinScreenState extends State<PinScreen> {
+class _SetPincodeScreenState extends State<SetPincodeScreen> {
+  bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
   final pin3Controller = TextEditingController();
@@ -24,6 +35,9 @@ class _PinScreenState extends State<PinScreen> {
   final pin5Controller = TextEditingController();
   final pin6Controller = TextEditingController();
   bool isValid = false;
+
+  String firstPincode = '';
+
   List<String> getAllPins() {
     String pin1 = pin1Controller.text;
     String pin2 = pin2Controller.text;
@@ -31,7 +45,6 @@ class _PinScreenState extends State<PinScreen> {
     String pin4 = pin4Controller.text;
     String pin5 = pin5Controller.text;
     String pin6 = pin6Controller.text;
-
     if (pin1.isNotEmpty &&
         pin2.isNotEmpty &&
         pin3.isNotEmpty &&
@@ -74,15 +87,15 @@ class _PinScreenState extends State<PinScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const TextWidget(
+            TextWidget(
               text: 'Set a PIN',
               color: ColorName.primaryColor,
               fontSize: 20,
               weight: FontWeight.w700,
             ),
             const SizedBox(height: 5),
-            const TextWidget(
-              text: 'Please enter your PIN code',
+            TextWidget(
+              text: 'Please remember to keep it secure.',
               fontSize: 14,
               color: ColorName.grey,
               weight: FontWeight.w400,
@@ -104,16 +117,22 @@ class _PinScreenState extends State<PinScreen> {
             const SizedBox(height: 20),
             const SizedBox(height: 30),
             ButtonWidget(
-                color: ColorName.primaryColor,
-                child: const TextWidget(
+                color:
+                    isValid ? ColorName.primaryColor : ColorName.grey.shade200,
+                child: TextWidget(
                   text: 'Continue',
                   type: TextType.small,
                   color: Colors.white,
                 ),
                 onPressed: () {
                   if (isValid) {
-                    widget.onComplete();
+                    final pins = getAllPins();
+                    context.pushNamed(RouteName.confirmPinCode, extra: [
+                      widget.user,
+                      pins.join(),
+                    ]);
                   }
+                  //
                 })
           ],
         ),
@@ -141,6 +160,7 @@ class _PinScreenState extends State<PinScreen> {
         inputFormatters: [
           LengthLimitingTextInputFormatter(1),
         ],
+        keyboardType: TextInputType.phone,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
           border: OutlineInputBorder(

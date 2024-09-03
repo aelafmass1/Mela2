@@ -15,6 +15,7 @@ import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.d
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
+import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
@@ -102,6 +103,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => PlaidBloc(),
+        ),
+        BlocProvider(
+          create: (context) => PincodeBloc(),
         ),
       ],
       child: ResponsiveApp(

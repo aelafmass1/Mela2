@@ -6,26 +6,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/gen/assets.gen.dart';
-import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
+import '../../../bloc/auth/auth_bloc.dart';
+import '../../../core/utils/show_snackbar.dart';
+import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
+import '../../widgets/button_widget.dart';
+import '../../widgets/loading_widget.dart';
+import '../../widgets/text_widget.dart';
 
-class OTPScreen extends StatefulWidget {
-  final UserModel userModel;
-  const OTPScreen({super.key, required this.userModel});
+class ConfirmPincodeScreen extends StatefulWidget {
+  final UserModel user;
+  final String pincode;
+  const ConfirmPincodeScreen(
+      {super.key, required this.user, required this.pincode});
 
   @override
-  State<OTPScreen> createState() => _OTPScreenState();
+  State<ConfirmPincodeScreen> createState() => _ConfirmPincodeScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
@@ -34,9 +38,8 @@ class _OTPScreenState extends State<OTPScreen> {
   final pin5Controller = TextEditingController();
   final pin6Controller = TextEditingController();
   bool isValid = false;
-  int minute = 1;
-  int second = 60;
-  Timer? timer;
+
+  String firstPincode = '';
 
   List<String> getAllPins() {
     String pin1 = pin1Controller.text;
@@ -68,56 +71,6 @@ class _OTPScreenState extends State<OTPScreen> {
     return [];
   }
 
-  void startTimer() {
-    if (mounted) {
-      setState(() {
-        showResendButton = false;
-        minute = 1;
-        second = 60;
-      });
-      if (timer?.isActive ?? false) {
-        timer?.cancel();
-      }
-    }
-
-    timer = Timer.periodic(const Duration(seconds: 1), (t) async {
-      if (second == 0) {
-        setState(() {
-          minute--;
-          second = 59;
-        });
-      } else {
-        setState(() {
-          second--;
-        });
-      }
-
-      if (second == 0 && minute == 0) {
-        if (mounted) {
-          setState(() {
-            showResendButton = true;
-          });
-        }
-
-        t.cancel();
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    startTimer();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    if (timer?.isActive ?? false) {
-      timer?.cancel();
-    }
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,15 +90,15 @@ class _OTPScreenState extends State<OTPScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const TextWidget(
-              text: 'OTP Verification',
+            TextWidget(
+              text: 'Confirm your PIN',
               color: ColorName.primaryColor,
               fontSize: 20,
               weight: FontWeight.w700,
             ),
             const SizedBox(height: 5),
-            const TextWidget(
-              text: 'Enter the verification code we just sent you via SMS.',
+            TextWidget(
+              text: 'Please remember to keep it secure.',
               fontSize: 14,
               color: ColorName.grey,
               weight: FontWeight.w400,
@@ -165,62 +118,20 @@ class _OTPScreenState extends State<OTPScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            showResendButton
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const TextWidget(
-                        text: 'Didn’t receive code?',
-                        fontSize: 16,
-                        weight: FontWeight.w400,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(
-                                SendOTP(
-                                    phoneNumber: widget.userModel.phoneNumber!),
-                              );
-                        },
-                        child: const TextWidget(
-                          text: 'Resend',
-                          fontSize: 16,
-                          weight: FontWeight.w500,
-                        ),
-                      )
-                    ],
-                  )
-                : Align(
-                    alignment: Alignment.center,
-                    child: TextWidget(
-                      text:
-                          '${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
-                      fontSize: 16,
-                      weight: FontWeight.w400,
-                      color: ColorName.grey,
-                    ),
-                  ),
             const SizedBox(height: 30),
-            BlocConsumer<AuthBloc, AuthState>(
+            BlocConsumer<PincodeBloc, PincodeState>(
               listener: (context, state) {
-                if (state is OTPVerificationSuccess) {
+                if (state is PinFail) {
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
+                  );
+                } else if (state is PinSuccess) {
                   context.pushNamed(
-                    RouteName.setPinCode,
-                    extra: widget.userModel,
+                    RouteName.profileUpload,
+                    extra: widget.user,
                   );
-                } else if (state is OTPVerificationFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.reason,
-                  );
-                } else if (state is SendOTPFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.reason,
-                  );
-                } else if (state is SendOTPSuccess) {
-                  startTimer();
                 }
               },
               builder: (context, state) {
@@ -228,23 +139,27 @@ class _OTPScreenState extends State<OTPScreen> {
                     color: isValid
                         ? ColorName.primaryColor
                         : ColorName.grey.shade200,
-                    child: state is OTPVerificationLoading
+                    child: state is PinLoading
                         ? LoadingWidget()
-                        : const TextWidget(
-                            text: 'Verify',
+                        : TextWidget(
+                            text: 'Set up PIN',
                             type: TextType.small,
                             color: Colors.white,
                           ),
                     onPressed: () {
-                      final pins = getAllPins();
                       if (isValid) {
-                        context.read<AuthBloc>().add(
-                              VerfiyOTP(
-                                phoneNumber: widget.userModel.phoneNumber!,
-                                code: pins.join(),
-                              ),
-                            );
+                        final pins = getAllPins().join();
+                        if (pins == widget.pincode) {
+                          context.read<PincodeBloc>().add(
+                                SetPinCode(pincode: pins),
+                              );
+                        } else {
+                          showSnackbar(context,
+                              title: 'Error',
+                              description: 'PIN is not the same');
+                        }
                       }
+                      //
                     });
               },
             )
