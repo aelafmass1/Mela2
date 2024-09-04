@@ -30,6 +30,7 @@ dependencies:
   icons_plus: ^5.0.0
   image_picker: ^1.1.2
   intl: ^0.19.0
+  jumio_mobile_sdk_flutter: ^4.11.0
   mockito: ^5.4.4
   mocktail: ^1.0.4
   pdf: ^3.11.1
