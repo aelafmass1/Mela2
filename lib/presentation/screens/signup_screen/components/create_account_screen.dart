@@ -248,30 +248,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: emailController,
                         hintText: 'Enter your email address',
                       ),
-                      SizedBox(height: 20),
-                      const TextWidget(
-                        text: 'Password',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      TextFieldWidget(
-                        validator: strongPasswordValidator,
-                        controller: password1Controller,
-                        hintText: 'Enter your password',
-                      ),
-                      const SizedBox(height: 25),
-                      const TextWidget(
-                        text: 'Confirm Password',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      TextFieldWidget(
-                        validator: strongPasswordValidator,
-                        controller: password2Controller,
-                        hintText: 'Confirm your password',
-                      ),
                       const SizedBox(height: 25),
                       const TextWidget(
                         text: 'Phone Number',
@@ -337,6 +313,31 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: phoneNumberController,
                         hintText: 'Phone Number',
                       ),
+                      const SizedBox(height: 20),
+                      const TextWidget(
+                        text: 'Password',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
+                      TextFieldWidget(
+                        validator: strongPasswordValidator,
+                        controller: password1Controller,
+                        hintText: 'Enter your password',
+                      ),
+                      const SizedBox(height: 25),
+                      const TextWidget(
+                        text: 'Confirm Password',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
+                      TextFieldWidget(
+                        validator: strongPasswordValidator,
+                        controller: password2Controller,
+                        hintText: 'Confirm your password',
+                      ),
+
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
