@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,8 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
+import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
@@ -280,6 +283,9 @@ class _SentTabState extends State<SentTab> {
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     context.read<FeeBloc>().add(FetchFees());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
+    context.read<BanksBloc>().add(FetchBanks());
+    context.read<BankFeeBloc>().add(FetchBankFee());
+
     super.initState();
   }
 
@@ -372,6 +378,8 @@ class _SentTabState extends State<SentTab> {
                 context.read<CurrencyBloc>().add(FetchAllCurrencies());
                 context.read<FeeBloc>().add(FetchFees());
                 context.read<PaymentCardBloc>().add(FetchPaymentCards());
+                context.read<BanksBloc>().add(FetchBanks());
+                context.read<BankFeeBloc>().add(FetchBankFee());
                 await Future.delayed(Durations.extralong1);
                 //
               },
@@ -1157,374 +1165,390 @@ class _SentTabState extends State<SentTab> {
                     type: TextType.small,
                   ),
                   const SizedBox(height: 5),
-                  DropdownButtonFormField(
-                    validator: (value) {
-                      if (selectedBank.isEmpty) {
-                        return 'Bank not selected';
-                      }
-                      return null;
-                    },
-                    value: selectedBank.isEmpty ? null : selectedBank,
-                    isExpanded: true,
-                    hint: const TextWidget(
-                      text: 'Select Bank',
-                      fontSize: 14,
-                      color: Color(0xFF8E8E8E),
-                      weight: FontWeight.w500,
-                    ),
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 18),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                        borderSide: const BorderSide(
-                          color: ColorName.primaryColor,
-                          width: 2,
+                  BlocBuilder<BanksBloc, BanksState>(
+                    builder: (context, state) {
+                      return DropdownButtonFormField(
+                        validator: (value) {
+                          if (selectedBank.isEmpty) {
+                            return 'Bank not selected';
+                          }
+                          return null;
+                        },
+                        value: selectedBank.isEmpty ? null : selectedBank,
+                        isExpanded: true,
+                        hint: const TextWidget(
+                          text: 'Select Bank',
+                          fontSize: 14,
+                          color: Color(0xFF8E8E8E),
+                          weight: FontWeight.w500,
                         ),
-                      ),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'CBE',
-                        child: Row(
-                          children: [
-                            Assets.images.cbeLogo.image(
-                              width: 24,
+                        icon: const Icon(Icons.keyboard_arrow_down),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 18),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(40),
+                            borderSide: const BorderSide(
+                              color: ColorName.primaryColor,
+                              width: 2,
                             ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'CBE',
-                              type: TextType.small,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Abyisinia Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.abysiniaLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Abyisinia Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Ahadu Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.ahaduLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Ahadu Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Abay Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.abayBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Abay Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Amhara Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.amaraBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Amhara Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Bank of Oromia',
-                        child: Row(
-                          children: [
-                            Assets.images.bankOfOromo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Bank of Oromia',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Awash Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.awashBank.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Awash Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Birhan Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.birhanBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Birhan Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Buna Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.bunaBank.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Buna Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Dashen Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.dashnBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Dashen Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Gedda Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.gedaBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Gedda Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Enat Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.enatBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Enat Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Global Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.globalBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Global Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Hibret Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.hibretBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Hibret Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Hijra Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.hijraBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Hijra Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Nib Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.nibBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Nib Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Oromia Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.oromiaBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Oromia Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Sinqe Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.sinqeBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Sinqe Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Tsedey Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.tsedeyBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Tsedey Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Tsehay Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.tsehayBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Tsehay Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Wegagen Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.wegagenBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Wegagen Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Zemen Bank',
-                        child: Row(
-                          children: [
-                            Assets.images.zemenBankLogo.image(
-                              width: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            const TextWidget(
-                              text: 'Zemen Bank',
-                              type: TextType.small,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          selectedBank = value;
-                        });
-                      }
+                        items: [
+                          if (state is BanksSuccess)
+                            for (var bank in state.bankList)
+                              DropdownMenuItem(
+                                value: bank.bankName,
+                                child: Row(
+                                  children: [
+                                    if (bank.bankLogo != null)
+                                      CachedNetworkImage(
+                                        imageUrl: bank.bankLogo!,
+                                      )
+                                    else
+                                      const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                      ),
+                                    // Assets.images.cbeLogo.image(
+                                    //   width: 24,
+                                    // ),
+                                    const SizedBox(width: 10),
+                                    TextWidget(
+                                      text: bank.bankName,
+                                      type: TextType.small,
+                                    ),
+                                  ],
+                                ),
+                              )
+
+                          // DropdownMenuItem(
+                          //   value: 'Abyisinia Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.abysiniaLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Abyisinia Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Ahadu Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.ahaduLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Ahadu Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Abay Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.abayBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Abay Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Amhara Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.amaraBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Amhara Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Bank of Oromia',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.bankOfOromo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Bank of Oromia',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Awash Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.awashBank.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Awash Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Birhan Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.birhanBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Birhan Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Buna Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.bunaBank.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Buna Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Dashen Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.dashnBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Dashen Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Gedda Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.gedaBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Gedda Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Enat Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.enatBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Enat Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Global Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.globalBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Global Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Hibret Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.hibretBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Hibret Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Hijra Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.hijraBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Hijra Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Nib Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.nibBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Nib Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Oromia Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.oromiaBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Oromia Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Sinqe Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.sinqeBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Sinqe Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Tsedey Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.tsedeyBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Tsedey Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Tsehay Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.tsehayBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Tsehay Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Wegagen Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.wegagenBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Wegagen Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // DropdownMenuItem(
+                          //   value: 'Zemen Bank',
+                          //   child: Row(
+                          //     children: [
+                          //       Assets.images.zemenBankLogo.image(
+                          //         width: 24,
+                          //       ),
+                          //       const SizedBox(width: 10),
+                          //       const TextWidget(
+                          //         text: 'Zemen Bank',
+                          //         type: TextType.small,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              selectedBank = value;
+                            });
+                          }
+                        },
+                      );
                     },
                   ),
                   const SizedBox(height: 30),
@@ -1677,9 +1701,29 @@ class _SentTabState extends State<SentTab> {
                                         });
                                       },
                                     ),
-                                    title: const TextWidget(
-                                      text: 'Bank Account',
-                                      fontSize: 15,
+                                    title: Row(
+                                      children: [
+                                        const TextWidget(
+                                          text: 'Bank Account',
+                                          fontSize: 15,
+                                        ),
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 10),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                              color: ColorName.green,
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: const TextWidget(
+                                            text: 'Free',
+                                            fontSize: 11,
+                                            color: ColorName.white,
+                                            weight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     subtitle: const TextWidget(
                                       text: 'Free service charge ',
@@ -1725,9 +1769,41 @@ class _SentTabState extends State<SentTab> {
                                         });
                                       },
                                     ),
-                                    title: const TextWidget(
-                                      text: 'Debit Card',
-                                      fontSize: 15,
+                                    title: Row(
+                                      children: [
+                                        const TextWidget(
+                                          text: 'Debit Card',
+                                          fontSize: 15,
+                                        ),
+                                        BlocBuilder<BankFeeBloc, BankFeeState>(
+                                          builder: (context, state) {
+                                            if (state is BankFeeSuccess) {
+                                              return Container(
+                                                margin: const EdgeInsets.only(
+                                                    left: 10),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 7,
+                                                        vertical: 2),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.4),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                child: TextWidget(
+                                                  text:
+                                                      '+${state.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount}%',
+                                                  fontSize: 11,
+                                                  color: ColorName.primaryColor,
+                                                  weight: FontWeight.w400,
+                                                ),
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
+                                        ),
+                                      ],
                                     ),
                                     subtitle: const TextWidget(
                                       text: '',
@@ -1774,9 +1850,41 @@ class _SentTabState extends State<SentTab> {
                                         });
                                       },
                                     ),
-                                    title: const TextWidget(
-                                      text: 'Credit Card',
-                                      fontSize: 15,
+                                    title: Row(
+                                      children: [
+                                        const TextWidget(
+                                          text: 'Credit Card',
+                                          fontSize: 15,
+                                        ),
+                                        BlocBuilder<BankFeeBloc, BankFeeState>(
+                                          builder: (context, state) {
+                                            if (state is BankFeeSuccess) {
+                                              return Container(
+                                                margin: const EdgeInsets.only(
+                                                    left: 10),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 7,
+                                                        vertical: 2),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.4),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                child: TextWidget(
+                                                  text:
+                                                      '+${state.bankFees.where((bf) => bf.paymentMethod == 'CREDIT').first.amount}%',
+                                                  fontSize: 11,
+                                                  color: ColorName.primaryColor,
+                                                  weight: FontWeight.w400,
+                                                ),
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
+                                        ),
+                                      ],
                                     ),
                                     subtitle: const TextWidget(
                                       text: '',
@@ -1813,107 +1921,136 @@ class _SentTabState extends State<SentTab> {
                             color: ColorName.borderColor,
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 34,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                        child: BlocBuilder<BankFeeBloc, BankFeeState>(
+                          builder: (context, state) {
+                            if (state is BankFeeSuccess) {
+                              return Column(
                                 children: [
-                                  const Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextWidget(
-                                        text: 'Bank fee',
-                                        color: Color(0xFF7B7B7B),
-                                        fontSize: 14,
-                                        weight: FontWeight.w400,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.info_outline,
-                                            color: ColorName.yellow,
-                                            size: 12,
+                                  for (var bankFee in state.bankFees)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 34,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  TextWidget(
+                                                    text: bankFee.label,
+                                                    color:
+                                                        const Color(0xFF7B7B7B),
+                                                    fontSize: 14,
+                                                    weight: FontWeight.w400,
+                                                  ),
+                                                  // const Row(
+                                                  //   children: [
+                                                  //     Icon(
+                                                  //       Icons.info_outline,
+                                                  //       color: ColorName.yellow,
+                                                  //       size: 12,
+                                                  //     ),
+                                                  //     SizedBox(width: 3),
+                                                  //     TextWidget(
+                                                  //       text:
+                                                  //           'Included by the bank',
+                                                  //       fontSize: 9,
+                                                  //       weight: FontWeight.w400,
+                                                  //       color: ColorName.yellow,
+                                                  //     ),
+                                                  //   ],
+                                                  // ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  TextWidget(
+                                                    text:
+                                                        '\$${(double.parse(usdController.text) * (bankFee.amount / 100)).toStringAsFixed(2)}',
+                                                    fontSize: 14,
+                                                    weight: FontWeight.w500,
+                                                  ),
+                                                  IconButton(
+                                                    style: IconButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                    ),
+                                                    onPressed: () {
+                                                      //
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.info_outline,
+                                                      size: 17,
+                                                      color: Color(0xFFD0D0D0),
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
                                           ),
-                                          SizedBox(width: 3),
-                                          TextWidget(
-                                            text: 'Included by the bank',
-                                            fontSize: 9,
-                                            weight: FontWeight.w400,
-                                            color: ColorName.yellow,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                        const Divider(
+                                          color: ColorName.borderColor,
+                                        ),
+                                      ],
+                                    ),
+                                  SizedBox(
+                                    height: 34,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const TextWidget(
+                                          text: 'Total Fee',
+                                          fontSize: 16,
+                                          weight: FontWeight.w500,
+                                        ),
+                                        BlocBuilder<FeeBloc, FeeState>(
+                                          builder: (context, feeState) {
+                                            return Row(
+                                              children: [
+                                                if (feeState is FeeSuccess)
+                                                  TextWidget(
+                                                    text:
+                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (state.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount / 100)) : selectedPaymentMethodIndex == 2 ? (state.bankFees.where((bf) => bf.paymentMethod == 'CREDIT').first.amount) : 0)).toStringAsFixed(2)}',
+                                                    fontSize: 16,
+                                                    weight: FontWeight.w500,
+                                                  )
+                                                else
+                                                  const TextWidget(
+                                                    text: '\$--',
+                                                    fontSize: 16,
+                                                    weight: FontWeight.w500,
+                                                  ),
+                                                IconButton(
+                                                  style: IconButton.styleFrom(
+                                                    padding: EdgeInsets.zero,
+                                                  ),
+                                                  onPressed: () {
+                                                    //
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.info_outline,
+                                                    size: 17,
+                                                    color: Color(0xFFD0D0D0),
+                                                  ),
+                                                )
+                                              ],
+                                            );
+                                          },
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                  Row(
-                                    children: [
-                                      const TextWidget(
-                                        text: '\$82.8',
-                                        fontSize: 14,
-                                        weight: FontWeight.w500,
-                                      ),
-                                      IconButton(
-                                        style: IconButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        onPressed: () {
-                                          //
-                                        },
-                                        icon: const Icon(
-                                          Icons.info_outline,
-                                          size: 17,
-                                          color: Color(0xFFD0D0D0),
-                                        ),
-                                      )
-                                    ],
-                                  )
                                 ],
-                              ),
-                            ),
-                            const Divider(
-                              color: ColorName.borderColor,
-                            ),
-                            SizedBox(
-                              height: 34,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const TextWidget(
-                                    text: 'Total Fee',
-                                    fontSize: 16,
-                                    weight: FontWeight.w500,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const TextWidget(
-                                        text: '\$15.97',
-                                        fontSize: 16,
-                                        weight: FontWeight.w500,
-                                      ),
-                                      IconButton(
-                                        style: IconButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        onPressed: () {
-                                          //
-                                        },
-                                        icon: const Icon(
-                                          Icons.info_outline,
-                                          size: 17,
-                                          color: Color(0xFFD0D0D0),
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
                       ),
                     ),

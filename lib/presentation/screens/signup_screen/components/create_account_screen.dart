@@ -272,7 +272,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: password2Controller,
                         hintText: 'Confirm your password',
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 25),
+                      const TextWidget(
+                        text: 'Phone Number',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
                       TextFieldWidget(
                         prefixText:
                             selectedCoutry == 'ethiopia' ? '+251' : '+1',
@@ -331,7 +337,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: phoneNumberController,
                         hintText: 'Phone Number',
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -381,7 +387,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       .copyWith(
                                         fontSize: 12,
                                       ),
-                                  children: [
+                                  children: const [
                                 TextSpan(
                                     text: 'Term & Conditions',
                                     style: TextStyle(
@@ -407,9 +413,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         description: state.reason,
                       );
                     } else if (state is AuthSuccess) {
+                      String phoneCode =
+                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                      String phoneNumber =
+                          phoneCode + phoneNumberController.text;
                       context.read<AuthBloc>().add(
                             SendOTP(
-                              phoneNumber: widget.userModel.phoneNumber!,
+                              phoneNumber: phoneNumber,
                             ),
                           );
                       //
@@ -420,11 +430,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         description: state.reason,
                       );
                     } else if (state is SendOTPSuccess) {
+                      String phoneCode =
+                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                      String phoneNumber =
+                          phoneCode + phoneNumberController.text;
                       UserModel user = widget.userModel.copyWith(
                         firstName: firstNameController.text,
                         lastName: lastNameController.text,
                         email: emailController.text,
                         password: password1Controller.text,
+                        phoneNumber: phoneNumber,
                       );
                       context.pushNamed(
                         RouteName.otp,
@@ -438,7 +453,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             ? ColorName.primaryColor
                             : Colors.grey.withOpacity(0.5),
                         child: state is AuthLoading || state is SendOTPLoading
-                            ? LoadingWidget()
+                            ? const LoadingWidget()
                             : const TextWidget(
                                 text: 'Next',
                                 type: TextType.small,

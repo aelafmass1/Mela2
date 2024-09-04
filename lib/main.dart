@@ -8,6 +8,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
+import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/fee/fee_bloc.dart';
@@ -106,6 +108,12 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => PincodeBloc(),
+        ),
+        BlocProvider(
+          create: (context) => BanksBloc(),
+        ),
+        BlocProvider(
+          create: (context) => BankFeeBloc(),
         ),
       ],
       child: ResponsiveApp(

@@ -1,18 +1,14 @@
 import 'dart:developer';
 
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/login_screen/components/password_box.dart';
-import 'package:transaction_mobile_app/presentation/screens/login_screen/components/phone_number_box.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -235,7 +231,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          context.pushNamed(RouteName.signup);
+                          context.pushNamed(RouteName.createAccount,
+                              extra: UserModel());
                         },
                         child: const TextWidget(
                           text: 'Sign up',
