@@ -2,21 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
-	<array>
-		<string>A0000002471001</string>
-	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera for ID verification.</string>
-	<key>NSCameraUsageDescription
-	&lt;string&gt;To scan cards&lt;/string&gt;</key>
-	<string>To scan cards</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Mela Fi</string>
+	<string>Mela</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Mela Fi</string>
+	<string>mela_fi_ui</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -35,11 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Mela Fi needs access to your camera to allow you to scan your card for automatic data entry and to take a photo for your profile picture. This enhances your experience by making setup quick and easy. Your photos will only be used for these specific purposes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mela Fi requires access to your photo library to allow you to upload a profile picture, helping personalize your app experience. Your photos will not be used for any other purpose.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Mela Fi needs access to your contacts to enable you to easily send money to recipients using their phone numbers. This allows us to contact the recipient and ensure funds are sent directly and securely.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
