@@ -4,4 +4,3 @@
 -dontwarn com.stripe.android.pushProvisioning.PushProvisioningActivityStarter
 -dontwarn com.stripe.android.pushProvisioning.PushProvisioningEphemeralKeyProvider
 -keep class io.flutter.embedding.android.FlutterActivity
--keep class androidx.constraintlayout.motion.widget.** { *; }

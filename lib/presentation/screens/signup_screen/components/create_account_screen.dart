@@ -32,9 +32,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final birthDateController = TextEditingController();
   final password1Controller = TextEditingController();
   final password2Controller = TextEditingController();
+  final phoneNumberController = TextEditingController();
 
   bool termAndConditionAgreed = false;
   bool enableFaceId = true;
+
+  String selectedCoutry = 'usa';
 
   final _formKey = GlobalKey<FormState>();
 
@@ -270,6 +273,65 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         hintText: 'Confirm your password',
                       ),
                       const SizedBox(height: 20),
+                      TextFieldWidget(
+                        prefixText:
+                            selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                        enableFocusColor: false,
+                        prefix: Container(
+                          width: 80,
+                          height: 60,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(color: Colors.black54)),
+                          child: Center(
+                            child: DropdownButton(
+                                value: selectedCoutry,
+                                padding: EdgeInsets.zero,
+                                underline: const SizedBox.shrink(),
+                                icon: const Padding(
+                                  padding: EdgeInsets.only(left: 5.0),
+                                  child: Icon(Icons.keyboard_arrow_down),
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                      alignment: Alignment.center,
+                                      value: 'ethiopia',
+                                      child: CircleAvatar(
+                                        radius: 13,
+                                        backgroundImage: Assets
+                                            .images.ethiopianFlag
+                                            .provider(),
+                                      )),
+                                  DropdownMenuItem(
+                                      alignment: Alignment.center,
+                                      value: 'usa',
+                                      child: CircleAvatar(
+                                        radius: 13,
+                                        backgroundImage:
+                                            Assets.images.usaFlag.provider(),
+                                      )),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      selectedCoutry = value;
+                                    });
+                                  }
+                                }),
+                          ),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (text) {
+                          if (text!.isEmpty) {
+                            return 'Phone Number is empty';
+                          }
+                          return null;
+                        },
+                        controller: phoneNumberController,
+                        hintText: 'Phone Number',
+                      ),
+                      SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -385,11 +447,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         onPressed: () {
                           if (termAndConditionAgreed) {
                             if (_formKey.currentState!.validate()) {
+                              String phoneCode =
+                                  selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                              String phoneNumber =
+                                  phoneCode + phoneNumberController.text;
                               UserModel user = widget.userModel.copyWith(
                                 firstName: firstNameController.text,
                                 lastName: lastNameController.text,
                                 email: emailController.text,
                                 password: password1Controller.text,
+                                phoneNumber: phoneNumber,
                               );
                               context
                                   .read<AuthBloc>()

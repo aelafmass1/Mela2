@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -65,7 +66,10 @@ class WelcomeScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  context.goNamed(RouteName.signup);
+                  context.goNamed(
+                    RouteName.createAccount,
+                    extra: UserModel(),
+                  );
                 }),
           )
         ],

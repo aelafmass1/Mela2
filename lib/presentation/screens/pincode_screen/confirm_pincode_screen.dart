@@ -128,10 +128,11 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                     description: state.reason,
                   );
                 } else if (state is PinSuccess) {
-                  context.pushNamed(
-                    RouteName.profileUpload,
-                    extra: widget.user,
-                  );
+                  // context.pushNamed(
+                  //   RouteName.profileUpload,
+                  //   extra: widget.user,
+                  // );
+                  context.goNamed(RouteName.home);
                 }
               },
               builder: (context, state) {

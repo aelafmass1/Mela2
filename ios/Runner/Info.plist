@@ -6,11 +6,6 @@
 	<array>
 		<string>A0000002471001</string>
 	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera for ID verification.</string>
-	<key>NSCameraUsageDescription
-	&lt;string&gt;To scan cards&lt;/string&gt;</key>
-	<string>To scan cards</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
