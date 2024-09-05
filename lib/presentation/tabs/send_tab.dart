@@ -2146,7 +2146,9 @@ class _SentTabState extends State<SentTab> {
                         //                 final paymentIntent =
                         // await Stripe.instance.retrievePaymentIntent(clientSecret);
                         context.read<MoneyTransferBloc>().add(SendMoney(
-                            receiverInfo: receiverInfo!, paymentId: ''));
+                              receiverInfo: receiverInfo!,
+                              paymentId: '',
+                            ));
                       }
                     },
                     builder: (context, plaidState) {
