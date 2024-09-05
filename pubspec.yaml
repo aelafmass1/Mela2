@@ -1,7 +1,7 @@
 name: transaction_mobile_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.2
+version: 1.0.7
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
@@ -45,7 +45,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-flutter_lints: ^3.0.0
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -76,3 +77,11 @@ flutter_gen:
   colors:
     inputs:
       - assets/colors/color_pallet.xml
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/icon.png"
+  # adaptive_icon_foreground: "assets/icon/icon-foreground.png"
