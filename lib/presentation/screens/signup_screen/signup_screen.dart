@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jumio_mobile_sdk_flutter/jumio_mobile_sdk_flutter.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -128,18 +129,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     type: TextType.small,
                   ),
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      String phoneCode =
-                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                      String phoneNumber =
-                          phoneCode + phoneNumberController.text;
-                      context.pushNamed(
-                        RouteName.createAccount,
-                        extra: UserModel(
-                          phoneNumber: phoneNumber,
-                        ),
-                      );
-                    }
+                    Jumio.init(
+                        "eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAA_5XOMQ7CMAwF0LtkxpKdOk7MxsjKDRInYWkBiUogIe5O2huw_v_09T-uvU-rOzoSUYka0XNSd3DZ7FxHHqLPFksA7WkCRq1QcmrQEYkbE1lsG98xU4-k5IFMCnDzHcrECFWqEVoVLWngV2__cLu0PvTj_lyXfIP1vlzB8jz7rduHvHRGDAmIMQB7GSeFK0zGOan2ZiG57w9fvJLI7AAAAA.0NpDK192_6kMSYfxFuqHPFkhdsKQBqieRvSqt3XAGLWRe7Y8u0aJalMa8TLEY8eA0XEw4TqRapVLDraRHUz4kQ",
+                        "US");
+                    Jumio.start();
+                    // if (_formKey.currentState!.validate()) {
+                    //   String phoneCode =
+                    //       selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                    //   String phoneNumber =
+                    //       phoneCode + phoneNumberController.text;
+                    //   context.pushNamed(
+                    //     RouteName.createAccount,
+                    //     extra: UserModel(
+                    //       phoneNumber: phoneNumber,
+                    //     ),
+                    //   );
+                    // }
                   },
                 ),
                 const SizedBox(height: 40),
