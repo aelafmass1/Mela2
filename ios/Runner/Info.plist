@@ -3,12 +3,15 @@
 <plist version="1.0">
 <dict>
 <<<<<<< HEAD
+<<<<<<< HEAD
 	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
 	<array>
 		<string>A0000002471001</string>
 	</array>
 =======
 >>>>>>> 3c2fbdc53395015d1d48aab604ac3ff5c0bddde7
+=======
+>>>>>>> 5d69aa84a4cd38d0d208b90e801ceee9e3e7c4a8
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
