@@ -46,13 +46,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
-      emit(OTPVerificationLoading());
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-      final res = await AuthRepository.verifyOtp(
-          accessToken!, event.phoneNumber, event.code);
-      if (res.containsKey('error')) {
-        return emit(OTPVerificationFail(reason: res['error']));
-      }
+      // emit(OTPVerificationLoading());
+      // final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      // final res = await AuthRepository.verifyOtp(
+      //     accessToken!, event.phoneNumber, event.code);
+      // if (res.containsKey('error')) {
+      //   return emit(OTPVerificationFail(reason: res['error']));
+      // }
       emit(OTPVerificationSuccess());
     } catch (error) {
       log(error.toString());
@@ -145,16 +145,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
-      emit(SendOTPLoading());
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      // emit(SendOTPLoading());
+      // final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
 
-      final res = await AuthRepository.sendOtp(
-        accessToken!,
-        event.phoneNumber,
-      );
-      if (res.containsKey('error')) {
-        return emit(SendOTPFail(reason: res['error']));
-      }
+      // final res = await AuthRepository.sendOtp(
+      //   accessToken!,
+      //   event.phoneNumber,
+      // );
+      // if (res.containsKey('error')) {
+      //   return emit(SendOTPFail(reason: res['error']));
+      // }
       emit(SendOTPSuccess());
     } catch (error) {
       log(error.toString());
