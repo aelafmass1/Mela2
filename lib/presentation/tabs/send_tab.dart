@@ -195,10 +195,12 @@ class _SentTabState extends State<SentTab> {
   ///
   /// If the payment is successful, it creates a [ReceiverInfo] object and adds a [SendMoney] event to the [MoneyTransferBloc].
   /// If an error occurs during the payment process, it displays an error message using [showSnackbar].
-  displayPaymentSheet() async {
+  displayPaymentSheet(String clientSecret) async {
     try {
       // Display the Stripe payment sheet
       await Stripe.instance.presentPaymentSheet();
+      final paymentIntent =
+          await Stripe.instance.retrievePaymentIntent(clientSecret);
 
       // Show a success message if the payment is successful
       showSnackbar(
@@ -226,7 +228,7 @@ class _SentTabState extends State<SentTab> {
         context.read<MoneyTransferBloc>().add(
               SendMoney(
                 receiverInfo: receiverInfo!,
-                paymentId: '',
+                paymentId: paymentIntent.id,
               ),
             );
       }
@@ -2076,13 +2078,17 @@ class _SentTabState extends State<SentTab> {
 
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
-                        paymentIntentClientSecret: clientSecret,
-                        customerId: paymentState.customerId,
-                        merchantDisplayName: 'Mela Fi',
-                      ),
+                          paymentIntentClientSecret: clientSecret,
+                          customerId: paymentState.customerId,
+                          merchantDisplayName: 'Mela Fi',
+                          appearance: const PaymentSheetAppearance(
+                            colors: PaymentSheetAppearanceColors(
+                              primary: ColorName.primaryColor,
+                            ),
+                          )),
                     );
 
-                    displayPaymentSheet();
+                    displayPaymentSheet(clientSecret);
                   } catch (error) {
                     log(error.toString());
                   }
