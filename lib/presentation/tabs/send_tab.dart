@@ -2143,6 +2143,8 @@ class _SentTabState extends State<SentTab> {
                           amount: double.parse(usdController.text),
                           serviceChargePayer: whoPayFee,
                         );
+                        //                 final paymentIntent =
+                        // await Stripe.instance.retrievePaymentIntent(clientSecret);
                         context.read<MoneyTransferBloc>().add(SendMoney(
                             receiverInfo: receiverInfo!, paymentId: ''));
                       }
