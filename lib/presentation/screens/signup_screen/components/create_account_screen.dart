@@ -14,6 +14,7 @@ import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart'
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../../gen/assets.gen.dart';
+import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_field_widget.dart';
 
 class CreateAccountScreen extends StatefulWidget {
@@ -29,12 +30,32 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final birthDateController = TextEditingController();
+  final password1Controller = TextEditingController();
+  final password2Controller = TextEditingController();
+  final phoneNumberController = TextEditingController();
+
+  bool termAndConditionAgreed = false;
+  bool enableFaceId = true;
+
+  String selectedCoutry = 'usa';
 
   final _formKey = GlobalKey<FormState>();
 
   String selectedGender = '';
 
   DateTime? birthdayDate;
+
+  String? strongPasswordValidator(password) {
+    if (password!.isEmpty) {
+      return 'password is empty';
+    } else if (password.length < 8) {
+      return 'Password must be at least 8 characters long.';
+    }
+    if (password1Controller.text != password2Controller.text) {
+      return 'Password are not indentical';
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -227,32 +248,240 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: emailController,
                         hintText: 'Enter your email address',
                       ),
+                      const SizedBox(height: 25),
+                      const TextWidget(
+                        text: 'Phone Number',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
+                      TextFieldWidget(
+                        prefixText:
+                            selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                        enableFocusColor: false,
+                        prefix: Container(
+                          width: 80,
+                          height: 60,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(color: Colors.black54)),
+                          child: Center(
+                            child: DropdownButton(
+                                value: selectedCoutry,
+                                padding: EdgeInsets.zero,
+                                underline: const SizedBox.shrink(),
+                                icon: const Padding(
+                                  padding: EdgeInsets.only(left: 5.0),
+                                  child: Icon(Icons.keyboard_arrow_down),
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                      alignment: Alignment.center,
+                                      value: 'ethiopia',
+                                      child: CircleAvatar(
+                                        radius: 13,
+                                        backgroundImage: Assets
+                                            .images.ethiopianFlag
+                                            .provider(),
+                                      )),
+                                  DropdownMenuItem(
+                                      alignment: Alignment.center,
+                                      value: 'usa',
+                                      child: CircleAvatar(
+                                        radius: 13,
+                                        backgroundImage:
+                                            Assets.images.usaFlag.provider(),
+                                      )),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      selectedCoutry = value;
+                                    });
+                                  }
+                                }),
+                          ),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (text) {
+                          if (text!.isEmpty) {
+                            return 'Phone Number is empty';
+                          }
+                          return null;
+                        },
+                        controller: phoneNumberController,
+                        hintText: 'Phone Number',
+                      ),
                       const SizedBox(height: 20),
+                      const TextWidget(
+                        text: 'Password',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
+                      TextFieldWidget(
+                        validator: strongPasswordValidator,
+                        controller: password1Controller,
+                        hintText: 'Enter your password',
+                      ),
+                      const SizedBox(height: 25),
+                      const TextWidget(
+                        text: 'Confirm Password',
+                        fontSize: 12,
+                        weight: FontWeight.w400,
+                      ),
+                      const SizedBox(height: 5),
+                      TextFieldWidget(
+                        validator: strongPasswordValidator,
+                        controller: password2Controller,
+                        hintText: 'Confirm your password',
+                      ),
+
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              SvgPicture.asset(Assets.images.svgs.faceId),
+                              const SizedBox(width: 10),
+                              const TextWidget(
+                                text: 'Enable Face ID',
+                                fontSize: 16,
+                                weight: FontWeight.w400,
+                              ),
+                            ],
+                          ),
+                          Switch(
+                              thumbColor:
+                                  const WidgetStatePropertyAll(Colors.white),
+                              activeColor: ColorName.green,
+                              value: enableFaceId,
+                              onChanged: (value) {
+                                setState(() {
+                                  enableFaceId = value;
+                                });
+                              })
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Checkbox(
+                              activeColor: ColorName.primaryColor,
+                              shape: CircleBorder(),
+                              value: termAndConditionAgreed,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    termAndConditionAgreed = value;
+                                  });
+                                }
+                              }),
+                          RichText(
+                              text: TextSpan(
+                                  text: 'I have read & agree to the ',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        fontSize: 12,
+                                      ),
+                                  children: const [
+                                TextSpan(
+                                    text: 'Term & Conditions',
+                                    style: TextStyle(
+                                      color: ColorName.primaryColor,
+                                    ))
+                              ])),
+                          const SizedBox(height: 20),
+                        ],
+                      )
+                      //
                     ],
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
-                child: ButtonWidget(
-                    child: const TextWidget(
-                      text: 'Next',
-                      type: TextType.small,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        UserModel user = widget.userModel.copyWith(
-                          firstName: firstNameController.text,
-                          lastName: lastNameController.text,
-                          email: emailController.text,
-                        );
-                        context.pushNamed(
-                          RouteName.profileUpload,
-                          extra: user,
-                        );
-                      }
-                    }),
+                child: BlocConsumer<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is AuthSuccess) {
+                      String phoneCode =
+                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                      String phoneNumber =
+                          phoneCode + phoneNumberController.text;
+                      context.read<AuthBloc>().add(
+                            SendOTP(
+                              phoneNumber: phoneNumber,
+                            ),
+                          );
+                      //
+                    } else if (state is SendOTPFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is SendOTPSuccess) {
+                      String phoneCode =
+                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                      String phoneNumber =
+                          phoneCode + phoneNumberController.text;
+                      UserModel user = widget.userModel.copyWith(
+                        firstName: firstNameController.text,
+                        lastName: lastNameController.text,
+                        email: emailController.text,
+                        password: password1Controller.text,
+                        phoneNumber: phoneNumber,
+                      );
+                      context.pushNamed(
+                        RouteName.otp,
+                        extra: user,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        color: termAndConditionAgreed
+                            ? ColorName.primaryColor
+                            : Colors.grey.withOpacity(0.5),
+                        child: state is AuthLoading || state is SendOTPLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Next',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                        onPressed: () {
+                          if (termAndConditionAgreed) {
+                            if (_formKey.currentState!.validate()) {
+                              String phoneCode =
+                                  selectedCoutry == 'ethiopia' ? '+251' : '+1';
+                              String phoneNumber =
+                                  phoneCode + phoneNumberController.text;
+                              UserModel user = widget.userModel.copyWith(
+                                firstName: firstNameController.text,
+                                lastName: lastNameController.text,
+                                email: emailController.text,
+                                password: password1Controller.text,
+                                phoneNumber: phoneNumber,
+                              );
+                              context
+                                  .read<AuthBloc>()
+                                  .add(CreateAccount(userModel: user));
+                            }
+                          }
+                        });
+                  },
+                ),
               )
             ],
           ),

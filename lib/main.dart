@@ -1,4 +1,3 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +8,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
+import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/fee/fee_bloc.dart';
@@ -16,6 +17,8 @@ import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.d
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
+import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
+import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
@@ -99,6 +102,18 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => FeeBloc(),
+        ),
+        BlocProvider(
+          create: (context) => PlaidBloc(),
+        ),
+        BlocProvider(
+          create: (context) => PincodeBloc(),
+        ),
+        BlocProvider(
+          create: (context) => BanksBloc(),
+        ),
+        BlocProvider(
+          create: (context) => BankFeeBloc(),
         ),
       ],
       child: ResponsiveApp(

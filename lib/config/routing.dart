@@ -6,10 +6,11 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_cre
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/pincode_screen/confirm_pincode_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/pincode_screen/set_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/password_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/profile_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
-import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_password_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 
@@ -25,13 +26,15 @@ class RouteName {
   static const equbCreation = 'equb_creation_screen';
   static const welcome = 'welcome_screen';
   static const otp = 'otp_screen';
-  static const createPassword = 'create_password_screen';
-  static const craeteAccount = 'create_account_screen';
+  static const createAccount = 'create_account_screen';
   static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
   static const contactPermission = 'contact_permission_screen';
   static const profileEdit = 'profile_edit_screen';
   static const passwordEdit = 'password_edit_screen';
+  static const setPinCode = 'set_pincode_screen';
+  static const confirmPinCode = 'confirm_pincode_screen';
+  static const pinCode = 'pincode_screen';
 }
 
 final goRouting = GoRouter(
@@ -106,15 +109,25 @@ final goRouting = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/create_password',
-      name: RouteName.createPassword,
-      builder: (context, state) => CreatePasswordScreen(
-        userModel: state.extra as UserModel,
+      path: '/setPincode',
+      name: RouteName.setPinCode,
+      builder: (context, state) => SetPincodeScreen(
+        user: state.extra as UserModel,
       ),
     ),
     GoRoute(
+        path: '/confirmPincode',
+        name: RouteName.confirmPinCode,
+        builder: (context, state) {
+          List data = state.extra as List;
+          return ConfirmPincodeScreen(
+            user: data[0],
+            pincode: data[1],
+          );
+        }),
+    GoRoute(
       path: '/create_account',
-      name: RouteName.craeteAccount,
+      name: RouteName.createAccount,
       builder: (context, state) => CreateAccountScreen(
         userModel: state.extra as UserModel,
       ),

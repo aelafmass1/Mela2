@@ -135,16 +135,24 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
               Expanded(
-                  child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildPromotionalRate(),
-                    _buildSendMoneyCard(),
-                    _buildExchangeRate(),
-                    _buildBankRates(),
-                  ],
+                  child: RefreshIndicator(
+                color: ColorName.primaryColor,
+                onRefresh: () async {
+                  context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
+                  context.read<CurrencyBloc>().add(FetchAllCurrencies());
+                  await Future.delayed(Durations.extralong1);
+                },
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildPromotionalRate(),
+                      _buildSendMoneyCard(),
+                      _buildExchangeRate(),
+                      _buildBankRates(),
+                    ],
+                  ),
                 ),
               ))
             ],
@@ -918,7 +926,7 @@ class _HomeTabState extends State<HomeTab> {
               },
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       ),
     );

@@ -33,6 +33,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   String? selectedFrequency;
   int index = 0;
 
+  final _formKey = GlobalKey<FormState>();
+
   List<Contact> _contacts = [];
   List<Contact> selectedContacts = [];
   List<Contact> filteredContacts = [];
@@ -178,21 +180,23 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                             (index == 2 && agreeToTermAndCondition == false)
                         ? null
                         : () {
-                            if (index == 0) {
-                              _fetchContacts();
-                              setState(() {
-                                index = 1;
-                                sliderWidth = 60.sw;
-                              });
-                            } else if (index == 1) {
-                              setState(() {
-                                index = 2;
-                                sliderWidth = 100.sw;
-                              });
-                            } else if (index == 2) {
-                              setState(() {
-                                index = 3;
-                              });
+                            if (_formKey.currentState!.validate()) {
+                              if (index == 0) {
+                                _fetchContacts();
+                                setState(() {
+                                  index = 1;
+                                  sliderWidth = 60.sw;
+                                });
+                              } else if (index == 1) {
+                                setState(() {
+                                  index = 2;
+                                  sliderWidth = 100.sw;
+                                });
+                              } else if (index == 2) {
+                                setState(() {
+                                  index = 3;
+                                });
+                              }
                             }
                           },
                     child: const TextWidget(
@@ -213,11 +217,20 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
       padding: const EdgeInsets.only(top: 10, bottom: 20),
       child: SizedBox(
         width: 100.sh,
-        child: DropdownMenu(
-          initialSelection: selectedFrequency,
-          hintText: 'Select Fequency of the equb contribution',
-          trailingIcon: const Icon(Icons.keyboard_arrow_down_outlined),
-          inputDecorationTheme: InputDecorationTheme(
+        child: DropdownButtonFormField(
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'frequency not selected';
+            }
+            return null;
+          },
+          hint: const TextWidget(
+            text: 'Select Fequency of the equb contribution',
+            type: TextType.small,
+          ),
+          value: selectedFrequency,
+          decoration: InputDecoration(
+              suffixIcon: const Icon(Icons.keyboard_arrow_down_outlined),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
               hintStyle: const TextStyle(
@@ -227,28 +240,41 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
               )),
-          width: isReviewPage ? 80.sw : 90.sw,
-          onSelected: (value) {
+
+          // width: isReviewPage ? 80.sw : 90.sw,
+          onChanged: (value) {
             setState(() {
               selectedFrequency = value;
             });
           },
-          dropdownMenuEntries: const [
-            DropdownMenuEntry(
+          items: const [
+            DropdownMenuItem(
               value: 'daily',
-              label: 'Daily',
+              child: TextWidget(
+                text: 'Daily',
+                type: TextType.small,
+              ),
             ),
-            DropdownMenuEntry(
+            DropdownMenuItem(
               value: 'weekly',
-              label: 'Weekly',
+              child: TextWidget(
+                text: 'Weekly',
+                type: TextType.small,
+              ),
             ),
-            DropdownMenuEntry(
+            DropdownMenuItem(
               value: 'bi-weekly',
-              label: 'Bi Weekly',
+              child: TextWidget(
+                text: 'Bi Weekly',
+                type: TextType.small,
+              ),
             ),
-            DropdownMenuEntry(
+            DropdownMenuItem(
               value: 'monthly',
-              label: 'Monthly',
+              child: TextWidget(
+                text: 'Monthly',
+                type: TextType.small,
+              ),
             ),
           ],
         ),
@@ -263,10 +289,12 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
     Widget? suffix,
     bool? enabled,
     bool showOnlyNumber = false,
+    String? Function(String? text)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 20),
-      child: TextField(
+      child: TextFormField(
+        validator: validator,
         onTap: onTab,
         controller: controller,
         inputFormatters: showOnlyNumber
@@ -687,7 +715,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                           ),
                         ),
                       );
-                  showBottomSheet(
+                  showDialog(
                     context: context,
                     builder: (_) => const CompletePage(),
                   );
@@ -699,205 +727,232 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   }
 
   _buildEqubTextFeilds({bool isReviewPage = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const TextWidget(
-              text: 'Equb Name',
-              fontSize: 14,
-              weight: FontWeight.w400,
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: isReviewPage,
-              child: const Icon(
-                Icons.edit_outlined,
-                size: 16,
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const TextWidget(
+                text: 'Equb Name',
+                fontSize: 14,
+                weight: FontWeight.w400,
               ),
-            )
-          ],
-        ),
-        _buildTextFeild(
-          controller: nameController,
-          hintText: 'Enter your Equb Group Name',
-        ),
-        Row(
-          children: [
-            const TextWidget(
-              text: 'Set Amount',
-              fontSize: 14,
-              weight: FontWeight.w400,
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: isReviewPage,
-              child: const Icon(
-                Icons.edit_outlined,
-                size: 16,
-              ),
-            )
-          ],
-        ),
-        _buildTextFeild(
-            controller: amountController,
-            showOnlyNumber: true,
-            hintText: 'Enter Equb per-member collections',
-            suffix: Container(
-              width: 105,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                border: const Border(
-                  right: BorderSide(
-                    width: 1,
-                  ),
-                  left: BorderSide(
-                    width: 1,
-                  ),
+              const SizedBox(width: 10),
+              Visibility(
+                visible: isReviewPage,
+                child: const Icon(
+                  Icons.edit_outlined,
+                  size: 16,
                 ),
-              ),
-              child: Center(
-                child: DropdownButton(
-                  padding: EdgeInsets.zero,
-                  elevation: 0,
-                  underline: const SizedBox.shrink(),
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down_outlined,
-                  ),
-                  value: selectedCurrency,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedCurrency = value;
-                      });
-                    }
-                  },
-                  items: [
-                    DropdownMenuItem(
-                      value: 'etb',
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Assets.images.ethiopianFlag.image(
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const TextWidget(
-                            text: 'ETB',
-                            fontSize: 12,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'usd',
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Assets.images.usaFlag.image(
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const TextWidget(
-                            text: 'USD',
-                            fontSize: 12,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-        Row(
-          children: [
-            const TextWidget(
-              text: 'Frequency',
-              fontSize: 14,
-              weight: FontWeight.w400,
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: isReviewPage,
-              child: const Icon(
-                Icons.edit_outlined,
-                size: 16,
-              ),
-            )
-          ],
-        ),
-        _buildDropdownMenu(isReviewPage),
-        Row(
-          children: [
-            const TextWidget(
-              text: 'Number of Members',
-              fontSize: 14,
-              weight: FontWeight.w400,
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: isReviewPage,
-              child: const Icon(
-                Icons.edit_outlined,
-                size: 16,
-              ),
-            )
-          ],
-        ),
-        _buildTextFeild(
-          controller: numberOfMembersController,
-          hintText: 'Enter the number of members',
-          showOnlyNumber: true,
-        ),
-        Row(
-          children: [
-            const TextWidget(
-              text: 'Starting Date',
-              fontSize: 14,
-              weight: FontWeight.w400,
-            ),
-            const SizedBox(width: 10),
-            Visibility(
-              visible: isReviewPage,
-              child: const Icon(
-                Icons.edit_outlined,
-                size: 16,
-              ),
-            )
-          ],
-        ),
-        _buildTextFeild(
-          controller: dateController,
-          hintText: 'Select the Starting date for the Equb.',
-          suffix: const Icon(
-            Icons.date_range,
-            color: Color(0xFF646464),
+              )
+            ],
           ),
-          onTab: () async {
-            startingDate = await showDatePicker(
-              context: context,
-              firstDate: DateTime.now(),
-              lastDate: DateTime(3000),
-            );
-            if (startingDate != null) {
-              setState(() {
-                dateController.text =
-                    '${startingDate!.day}-${startingDate!.month}-${startingDate!.year}';
-              });
-            }
-          },
-        ),
-      ],
+          _buildTextFeild(
+            validator: (text) {
+              if (text!.isEmpty) {
+                return 'Equb Name is empty';
+              }
+              return null;
+            },
+            controller: nameController,
+            hintText: 'Enter your Equb Group Name',
+          ),
+          Row(
+            children: [
+              const TextWidget(
+                text: 'Set Amount',
+                fontSize: 14,
+                weight: FontWeight.w400,
+              ),
+              const SizedBox(width: 10),
+              Visibility(
+                visible: isReviewPage,
+                child: const Icon(
+                  Icons.edit_outlined,
+                  size: 16,
+                ),
+              )
+            ],
+          ),
+          _buildTextFeild(
+              validator: (text) {
+                if (text!.isEmpty) {
+                  return 'amount is empty';
+                }
+                return null;
+              },
+              controller: amountController,
+              showOnlyNumber: true,
+              hintText: 'Enter Equb per-member collections',
+              suffix: Container(
+                width: 105,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  border: const Border(
+                    right: BorderSide(
+                      width: 1,
+                    ),
+                    left: BorderSide(
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: DropdownButton(
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                    underline: const SizedBox.shrink(),
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_outlined,
+                    ),
+                    value: selectedCurrency,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedCurrency = value;
+                        });
+                      }
+                    },
+                    items: [
+                      DropdownMenuItem(
+                        value: 'etb',
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: Assets.images.ethiopianFlag.image(
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const TextWidget(
+                              text: 'ETB',
+                              fontSize: 12,
+                            ),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'usd',
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: Assets.images.usaFlag.image(
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const TextWidget(
+                              text: 'USD',
+                              fontSize: 12,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+          Row(
+            children: [
+              const TextWidget(
+                text: 'Frequency',
+                fontSize: 14,
+                weight: FontWeight.w400,
+              ),
+              const SizedBox(width: 10),
+              Visibility(
+                visible: isReviewPage,
+                child: const Icon(
+                  Icons.edit_outlined,
+                  size: 16,
+                ),
+              )
+            ],
+          ),
+          _buildDropdownMenu(isReviewPage),
+          Row(
+            children: [
+              const TextWidget(
+                text: 'Number of Members',
+                fontSize: 14,
+                weight: FontWeight.w400,
+              ),
+              const SizedBox(width: 10),
+              Visibility(
+                visible: isReviewPage,
+                child: const Icon(
+                  Icons.edit_outlined,
+                  size: 16,
+                ),
+              )
+            ],
+          ),
+          _buildTextFeild(
+            validator: (text) {
+              if (text!.isEmpty) {
+                return 'number of members is empty';
+              }
+              return null;
+            },
+            controller: numberOfMembersController,
+            hintText: 'Enter the number of members',
+            showOnlyNumber: true,
+          ),
+          Row(
+            children: [
+              const TextWidget(
+                text: 'Starting Date',
+                fontSize: 14,
+                weight: FontWeight.w400,
+              ),
+              const SizedBox(width: 10),
+              Visibility(
+                visible: isReviewPage,
+                child: const Icon(
+                  Icons.edit_outlined,
+                  size: 16,
+                ),
+              )
+            ],
+          ),
+          _buildTextFeild(
+            validator: (text) {
+              if (text!.isEmpty) {
+                return 'start date is empty';
+              }
+              return null;
+            },
+            controller: dateController,
+            hintText: 'Select the Starting date for the Equb.',
+            suffix: const Icon(
+              Icons.date_range,
+              color: Color(0xFF646464),
+            ),
+            onTab: () async {
+              startingDate = await showDatePicker(
+                context: context,
+                firstDate: DateTime.now(),
+                lastDate: DateTime(3000),
+              );
+              if (startingDate != null) {
+                setState(() {
+                  dateController.text =
+                      '${startingDate!.day}-${startingDate!.month}-${startingDate!.year}';
+                });
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

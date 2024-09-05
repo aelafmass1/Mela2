@@ -50,14 +50,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                             color: Colors.black87,
                           ))),
                   onPressed: () {
-                    setState(() {
-                      isSkipClicked = true;
-                    });
-                    context.read<AuthBloc>().add(
-                          CreateAccount(
-                            userModel: widget.userModel,
-                          ),
-                        );
+                    context.goNamed(RouteName.home);
                   },
                   child: const TextWidget(
                     text: 'Skip',
@@ -138,53 +131,35 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                           builder: (_) => _buildBottomModalSheet());
                     } else {
                       context.read<AuthBloc>().add(
-                            CreateAccount(
-                              userModel: widget.userModel,
-                              profilePicture: profilePicture,
+                            UploadProfilePicture(
+                              profilePicture: profilePicture!,
+                              phoneNumber: widget.userModel.phoneNumber!,
                             ),
                           );
                     }
                   },
                   child: BlocConsumer<AuthBloc, AuthState>(
                     listener: (context, state) {
-                      if (state is AuthFail) {
-                        context.pop();
+                      if (state is UploadProfileFail) {
                         showSnackbar(context,
                             title: 'Error', description: state.reason);
-                      } else if (state is AuthSuccess) {
-                        showSnackbar(
-                          context,
-                          title: 'Success',
-                          description: 'Account Created',
-                        );
+                      } else if (state is UploadProfileSuccess) {
                         setFirstTime(false);
                         context.goNamed(RouteName.home);
-                      } else if (state is AuthLoading && isSkipClicked) {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) => const Center(
-                            child: LoadingWidget(
-                              color: ColorName.white,
-                            ),
-                          ),
-                        );
                       }
                     },
                     builder: (context, state) {
-                      if (state is AuthLoading && !isSkipClicked) {
-                        return const Center(child: LoadingWidget());
-                      } else {
-                        return TextWidget(
-                          text: profilePicture == null
-                              ? 'Upload profile'
-                              : 'Register',
-                          type: TextType.small,
-                          color: profilePicture == null
-                              ? ColorName.primaryColor
-                              : Colors.white,
-                        );
-                      }
+                      return state is UploadProfileLoading
+                          ? LoadingWidget()
+                          : TextWidget(
+                              text: profilePicture == null
+                                  ? 'Upload profile'
+                                  : 'Register',
+                              type: TextType.small,
+                              color: profilePicture == null
+                                  ? ColorName.primaryColor
+                                  : Colors.white,
+                            );
                     },
                   )),
             ),

@@ -23,3 +23,33 @@ final class UpdateFail extends AuthState {
 }
 
 final class UpdateSuccess extends AuthState {}
+
+final class OTPVerificationLoading extends AuthState {}
+
+final class OTPVerificationFail extends AuthState {
+  final String reason;
+
+  OTPVerificationFail({required this.reason});
+}
+
+final class OTPVerificationSuccess extends AuthState {}
+
+final class SendOTPLoading extends AuthState {}
+
+final class SendOTPFail extends AuthState {
+  final String reason;
+
+  SendOTPFail({required this.reason});
+}
+
+final class SendOTPSuccess extends AuthState {}
+
+final class UploadProfileLoading extends AuthState {}
+
+final class UploadProfileFail extends AuthState {
+  final String reason;
+
+  UploadProfileFail({required this.reason});
+}
+
+final class UploadProfileSuccess extends AuthState {}

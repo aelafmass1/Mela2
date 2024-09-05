@@ -1,14 +1,14 @@
-import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
@@ -25,74 +25,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final phoneNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool isLoading = false;
   String selectedCoutry = 'usa';
-
-  Future<void> sendOTP(String phoneNumber) async {
-    setState(() {
-      isLoading = true;
-    });
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Automatically sign the user in (optional)
-        log('sign in completed');
-        await _auth.signInWithCredential(credential);
-        setState(() {
-          isLoading = false;
-        });
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'invalid-phone-number') {
-          log('The provided phone number is not valid.');
-          showSnackbar(
-            context,
-            title: 'Error',
-            description: 'The provided phone number is not valid.',
-          );
-        } else {
-          showSnackbar(
-            context,
-            title: 'Error',
-            description: 'Failed to verify phone number',
-          );
-          log('Failed to verify phone number: ${e.message}');
-        }
-        setState(() {
-          isLoading = false;
-        });
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        // Save the verificationId to use later for signing in with the OTP
-        // and show an input field for the user to enter the OTP
-        showSnackbar(
-          context,
-          title: 'Success',
-          description: 'OTP has been sent',
-        );
-        log('OTP has been sent. $verificationId');
-        setState(() {
-          isLoading = false;
-        });
-
-        context.pushNamed(
-          RouteName.otp,
-          extra: UserModel(
-            phoneNumber: phoneNumber,
-            verificationId: verificationId,
-          ),
-        );
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Handle timeout (optional)
-        setState(() {
-          isLoading = false;
-        });
-      },
-      timeout: const Duration(seconds: 60), // Optional timeout duration
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,23 +122,19 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 30),
                 ButtonWidget(
-                  child: isLoading
-                      ? const LoadingWidget()
-                      : const TextWidget(
-                          text: 'Next',
-                          color: Colors.white,
-                          type: TextType.small,
-                        ),
+                  child: const TextWidget(
+                    text: 'Next',
+                    color: Colors.white,
+                    type: TextType.small,
+                  ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       String phoneCode =
                           selectedCoutry == 'ethiopia' ? '+251' : '+1';
                       String phoneNumber =
                           phoneCode + phoneNumberController.text;
-
-                      // sendOTP(phoneNumber);
                       context.pushNamed(
-                        RouteName.otp,
+                        RouteName.createAccount,
                         extra: UserModel(
                           phoneNumber: phoneNumber,
                         ),
