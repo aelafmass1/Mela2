@@ -39,17 +39,6 @@ class RouteName {
 
 final goRouting = GoRouter(
   initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
-  // redirect: (context, state) async {
-  //   final auth = FirebaseAuth.instance;
-  //   bool isFirst = await isFirstTime();
-  //   if (isFirst) {
-  //     return '/';
-  //   }
-  //   if (auth.currentUser == null) {
-  //     return null;
-  //   }
-  //   return '/home';
-  // },
   routes: [
     GoRoute(
       path: '/',

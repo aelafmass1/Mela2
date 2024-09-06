@@ -67,6 +67,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 200,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 20, left: 15),
+          child: InkWell(
+              onTap: () {
+                context.goNamed(RouteName.login);
+              },
+              child: const TextWidget(
+                text: 'Login',
+                color: ColorName.primaryColor,
+                fontSize: 15,
+                weight: FontWeight.w300,
+              )),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 15),
