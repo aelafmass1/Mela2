@@ -22,6 +22,7 @@ import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.d
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/core/utils/show_pincode.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -116,7 +117,6 @@ class _SentTabState extends State<SentTab> {
     final metadata = event.metadata.description();
     log("onSuccess: $token, metadata: $metadata");
     setState(() => publicToken = event.publicToken);
-
     context
         .read<PlaidBloc>()
         .add(ExchangePublicToken(publicToken: publicToken!));
@@ -908,7 +908,7 @@ class _SentTabState extends State<SentTab> {
                 type: TextType.small,
                 color: Colors.white,
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (_exchangeRateFormKey.currentState!.validate()) {
                   _fetchContacts();
                   setState(() {
@@ -2164,14 +2164,17 @@ class _SentTabState extends State<SentTab> {
                                 color: Colors.white,
                               ),
                         onPressed: () async {
-                          if (selectedPaymentMethodIndex != 0) {
-                            context.read<PaymentIntentBloc>().add(
-                                  FetchClientSecret(
-                                      currency: 'USD',
-                                      amount: double.parse(usdController.text)),
-                                );
-                          } else {
-                            context.read<PlaidBloc>().add(CreateLinkToken());
+                          if (await showPincode(context)) {
+                            if (selectedPaymentMethodIndex != 0) {
+                              context.read<PaymentIntentBloc>().add(
+                                    FetchClientSecret(
+                                        currency: 'USD',
+                                        amount:
+                                            double.parse(usdController.text)),
+                                  );
+                            } else {
+                              context.read<PlaidBloc>().add(CreateLinkToken());
+                            }
                           }
                         },
                       );

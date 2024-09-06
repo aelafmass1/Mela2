@@ -16,7 +16,8 @@ import '../../widgets/button_widget.dart';
 import '../../widgets/text_widget.dart';
 
 class PincodeScreen extends StatefulWidget {
-  const PincodeScreen({super.key});
+  final Function(bool isValid) result;
+  const PincodeScreen({super.key, required this.result});
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
@@ -31,6 +32,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
   final pin5Controller = TextEditingController();
   final pin6Controller = TextEditingController();
   bool isValid = false;
+  bool isAuthenticated = false;
 
   String firstPincode = '';
 
@@ -66,87 +68,108 @@ class _PincodeScreenState extends State<PincodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: SvgPicture.asset(
-              Assets.images.svgs.horizontalMelaLogo,
-              width: 130,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          widget.result(isAuthenticated);
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            toolbarHeight: 120,
+            leading: IconButton(
+                onPressed: () {
+                  context.pop();
+                },
+                icon: const Icon(
+                  Icons.close,
+                  size: 30,
+                )),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 15),
+                child: SvgPicture.asset(
+                  Assets.images.svgs.horizontalMelaLogo,
+                  width: 130,
+                ),
+              ),
+            ],
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const TextWidget(
+                  text: 'Enter Your Pin',
+                  color: ColorName.primaryColor,
+                  fontSize: 20,
+                  weight: FontWeight.w700,
+                ),
+                const SizedBox(height: 5),
+                const TextWidget(
+                  text: 'Enter your pin to confirm your transaction.',
+                  fontSize: 14,
+                  color: ColorName.grey,
+                  weight: FontWeight.w400,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildPinBox(controller: pin1Controller),
+                      _buildPinBox(controller: pin2Controller),
+                      _buildPinBox(controller: pin3Controller),
+                      _buildPinBox(controller: pin4Controller),
+                      _buildPinBox(controller: pin5Controller),
+                      _buildPinBox(controller: pin6Controller),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const SizedBox(height: 30),
+                BlocConsumer<PincodeBloc, PincodeState>(
+                  listener: (context, state) {
+                    if (state is PinFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is PinSuccess) {
+                      isAuthenticated = true;
+                      context.pop();
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        color: isValid
+                            ? ColorName.primaryColor
+                            : ColorName.grey.shade200,
+                        child: state is PinLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Continue',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                        onPressed: () {
+                          if (isValid) {
+                            final pins = getAllPins();
+                            context.read<PincodeBloc>().add(
+                                  VerifyPincode(pincode: pins.join()),
+                                );
+                          }
+                        });
+                  },
+                )
+              ],
             ),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextWidget(
-              text: 'Enter Your Pin',
-              color: ColorName.primaryColor,
-              fontSize: 20,
-              weight: FontWeight.w700,
-            ),
-            const SizedBox(height: 5),
-            TextWidget(
-              text: 'Enter your pin to confirm your transaction.',
-              fontSize: 14,
-              color: ColorName.grey,
-              weight: FontWeight.w400,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildPinBox(controller: pin1Controller),
-                  _buildPinBox(controller: pin2Controller),
-                  _buildPinBox(controller: pin3Controller),
-                  _buildPinBox(controller: pin4Controller),
-                  _buildPinBox(controller: pin5Controller),
-                  _buildPinBox(controller: pin6Controller),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            const SizedBox(height: 30),
-            BlocConsumer<PincodeBloc, PincodeState>(
-              listener: (context, state) {
-                if (state is PinFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.reason,
-                  );
-                } else if (state is PinSuccess) {
-                  context.pop();
-                }
-              },
-              builder: (context, state) {
-                return ButtonWidget(
-                    color: isValid
-                        ? ColorName.primaryColor
-                        : ColorName.grey.shade200,
-                    child: state is PinLoading
-                        ? LoadingWidget()
-                        : TextWidget(
-                            text: 'Continue',
-                            type: TextType.small,
-                            color: Colors.white,
-                          ),
-                    onPressed: () {
-                      if (isValid) {
-                        final pins = getAllPins();
-                        context.read<PincodeBloc>().add(
-                              VerifyPincode(pincode: pins.join()),
-                            );
-                      }
-                    });
-              },
-            )
-          ],
         ),
       ),
     );
