@@ -1,9 +1,10 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
+
+import '../../core/utils/settings.dart';
 
 part 'payment_card_event.dart';
 part 'payment_card_state.dart';
@@ -20,9 +21,10 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
   _onFetchPaymentCards(FetchPaymentCards event, Emitter emit) async {
     try {
       emit(PaymentCardLoading(paymentCards: state.paymentCards));
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      final token = await getToken();
+
       final res = await PaymentCardRepository.fetchPaymentCards(
-        accessToken: accessToken!,
+        accessToken: token!,
       );
       if (res.isNotEmpty) {
         if (res.first.containsKey('error')) {
@@ -59,9 +61,10 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       List<PaymentCardModel> cards = state.paymentCards;
 
       emit(PaymentCardLoading(paymentCards: state.paymentCards));
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      final token = await getToken();
+
       final res = await PaymentCardRepository.addPaymentCard(
-        accessToken: accessToken!,
+        accessToken: token!,
         token: event.token,
       );
       if (res.containsKey('error')) {

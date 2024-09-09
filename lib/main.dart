@@ -1,5 +1,4 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -82,9 +81,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
           create: (context) => TransactionBloc(),
         ),
         BlocProvider(
-          create: (context) => MoneyTransferBloc(
-            auth: FirebaseAuth.instance,
-          ),
+          create: (context) => MoneyTransferBloc(),
         ),
         BlocProvider(
           create: (context) => CurrencyBloc(),

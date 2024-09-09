@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
@@ -26,6 +25,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   int selectedIndex = 0;
+  String? imageUrl;
+
+  @override
+  void initState() {
+    getImageUrl().then((value) {
+      imageUrl = value;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,10 +136,10 @@ class _HomeScreenState extends State<HomeScreen>
       bool isAccountTab = false}) {
     return Tab(
       icon: isAccountTab
-          ? FirebaseAuth.instance.currentUser?.photoURL != null
+          ? imageUrl != null
               ? ClipOval(
                   child: CachedNetworkImage(
-                    imageUrl: FirebaseAuth.instance.currentUser!.photoURL!,
+                    imageUrl: imageUrl!,
                     progressIndicatorBuilder: (context, url, progress) {
                       return const SizedBox(
                         width: 25,

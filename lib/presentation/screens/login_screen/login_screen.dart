@@ -184,20 +184,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 30),
                 BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    if (state is AuthFail) {
+                    if (state is LoginUserFail) {
                       showSnackbar(
                         context,
                         title: 'Error',
                         description: state.reason,
                       );
-                    } else if (state is AuthSuccess) {
+                    } else if (state is LoginUserSuccess) {
                       setFirstTime(false);
                       context.goNamed(RouteName.home); //
                     }
                   },
                   builder: (context, state) {
                     return ButtonWidget(
-                        child: state is AuthLoading
+                        child: state is LoginUserLoading
                             ? const LoadingWidget()
                             : const TextWidget(
                                 text: 'Log In',
@@ -212,8 +212,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             log(phoneNumber);
                             context.read<AuthBloc>().add(
                                   LoginUser(
-                                      phoneNumber: phoneNumber,
-                                      password: passwordController.text),
+                                    countryCode:
+                                        selectedCoutry == 'ethiopia' ? 251 : 1,
+                                    phoneNumber: phoneNumber,
+                                    password: passwordController.text,
+                                  ),
                                 );
                           }
                         });

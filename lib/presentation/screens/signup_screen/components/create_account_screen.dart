@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -421,13 +420,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    if (state is AuthFail) {
+                    if (state is RegisterUserFail) {
                       showSnackbar(
                         context,
                         title: 'Error',
                         description: state.reason,
                       );
-                    } else if (state is AuthSuccess) {
+                    } else if (state is RegisterUserSuccess) {
                       String phoneCode =
                           selectedCoutry == 'ethiopia' ? '+251' : '+1';
                       String phoneNumber =
@@ -455,6 +454,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         email: emailController.text,
                         password: password1Controller.text,
                         phoneNumber: phoneNumber,
+                        countryCode: selectedCoutry == 'ethiopia' ? 251 : 1,
                       );
                       context.pushNamed(
                         RouteName.otp,
@@ -467,7 +467,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         color: termAndConditionAgreed
                             ? ColorName.primaryColor
                             : Colors.grey.withOpacity(0.5),
-                        child: state is AuthLoading || state is SendOTPLoading
+                        child: state is RegisterUserLoaing ||
+                                state is SendOTPLoading
                             ? const LoadingWidget()
                             : const TextWidget(
                                 text: 'Next',
@@ -487,6 +488,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 email: emailController.text,
                                 password: password1Controller.text,
                                 phoneNumber: phoneNumber,
+                                countryCode:
+                                    selectedCoutry == 'ethiopia' ? 251 : 1,
                               );
                               context
                                   .read<AuthBloc>()

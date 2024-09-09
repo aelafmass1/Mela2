@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -216,28 +215,25 @@ class _SentTabState extends State<SentTab> {
       );
 
       // Get the current user
-      final auth = FirebaseAuth.instance;
-      if (auth.currentUser != null) {
-        // Create a ReceiverInfo object with the recipient's information
-        receiverInfo = ReceiverInfo(
-          senderUserId: auth.currentUser!.uid,
-          receiverName: receiverName.text,
-          receiverPhoneNumber: isPermissionDenied
-              ? phoneNumberController.text
-              : selectedContact!.phones.first.number,
-          receiverBankName: selectedBank,
-          receiverAccountNumber: bankAcocuntController.text,
-          amount: double.parse(usdController.text),
-          serviceChargePayer: whoPayFee,
-        );
-        // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
-        context.read<MoneyTransferBloc>().add(
-              SendMoney(
-                receiverInfo: receiverInfo!,
-                paymentId: paymentIntent.id,
-              ),
-            );
-      }
+
+      // Create a ReceiverInfo object with the recipient's information
+      receiverInfo = ReceiverInfo(
+        receiverName: receiverName.text,
+        receiverPhoneNumber: isPermissionDenied
+            ? phoneNumberController.text
+            : selectedContact!.phones.first.number,
+        receiverBankName: selectedBank,
+        receiverAccountNumber: bankAcocuntController.text,
+        amount: double.parse(usdController.text),
+        serviceChargePayer: whoPayFee,
+      );
+      // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
+      context.read<MoneyTransferBloc>().add(
+            SendMoney(
+              receiverInfo: receiverInfo!,
+              paymentId: paymentIntent.id,
+            ),
+          );
     } catch (error) {
       if (error is StripeException) {
         // Handle StripeException specifically
@@ -2103,9 +2099,7 @@ class _SentTabState extends State<SentTab> {
                         description: state.reason,
                       );
                     } else if (state is PlaidPublicTokenSuccess) {
-                      final auth = FirebaseAuth.instance;
                       receiverInfo = ReceiverInfo(
-                        senderUserId: auth.currentUser!.uid,
                         receiverName: receiverName.text,
                         receiverPhoneNumber: isPermissionDenied
                             ? phoneNumberController.text
@@ -2136,9 +2130,7 @@ class _SentTabState extends State<SentTab> {
                             ),
                       onPressed: () async {
                         if (selectedPaymentMethodIndex != 0) {
-                          final auth = FirebaseAuth.instance;
                           receiverInfo = ReceiverInfo(
-                            senderUserId: auth.currentUser!.uid,
                             receiverName: receiverName.text,
                             receiverPhoneNumber: isPermissionDenied
                                 ? phoneNumberController.text

@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +9,7 @@ import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rat
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -32,12 +30,8 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final moneyController = TextEditingController();
-  getToken() async {
-    final res = await FirebaseAuth.instance.currentUser!.getIdToken();
-    log('Token -> ${res.toString()}');
-  }
-
-  final auth = FirebaseAuth.instance;
+  String? imageUrl;
+  String? displayName;
 
   final _formKey = GlobalKey<FormState>();
   String getGreeting() {
@@ -55,7 +49,16 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   void initState() {
-    getToken();
+    getImageUrl().then((value) {
+      setState(() {
+        imageUrl = value;
+      });
+    });
+    getDisplayName().then((value) {
+      setState(() {
+        displayName = value;
+      });
+    });
     context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     super.initState();
@@ -82,10 +85,10 @@ class _HomeTabState extends State<HomeTab> {
                   children: [
                     Row(
                       children: [
-                        auth.currentUser?.photoURL != null
+                        imageUrl != null
                             ? ClipOval(
                                 child: CachedNetworkImage(
-                                  imageUrl: auth.currentUser!.photoURL!,
+                                  imageUrl: imageUrl!,
                                   progressIndicatorBuilder:
                                       (context, url, progress) {
                                     return const SizedBox(
@@ -112,9 +115,7 @@ class _HomeTabState extends State<HomeTab> {
                               weight: FontWeight.w500,
                             ),
                             TextWidget(
-                              text: FirebaseAuth
-                                      .instance.currentUser?.displayName ??
-                                  '',
+                              text: displayName ?? '',
                               fontSize: 20,
                               weight: FontWeight.w800,
                               color: ColorName.primaryColor,

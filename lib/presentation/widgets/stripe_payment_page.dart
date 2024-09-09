@@ -1,12 +1,10 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
@@ -88,18 +86,15 @@ class StripePaymentPage extends StatelessWidget {
                       );
 
                       // Get the current user
-                      final auth = FirebaseAuth.instance;
-                      if (auth.currentUser != null) {
-                        // Create a ReceiverInfo object with the recipient's information
+                      // Create a ReceiverInfo object with the recipient's information
 
-                        // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
-                        context.read<MoneyTransferBloc>().add(
-                              SendMoney(
-                                receiverInfo: receiverInfo!,
-                                paymentId: paymentIntent.id,
-                              ),
-                            );
-                      }
+                      // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
+                      context.read<MoneyTransferBloc>().add(
+                            SendMoney(
+                              receiverInfo: receiverInfo,
+                              paymentId: paymentIntent.id,
+                            ),
+                          );
                     } on StripeException catch (stripe) {
                       log(stripe.toString());
                       showSnackbar(

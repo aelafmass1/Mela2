@@ -1,9 +1,8 @@
 import 'dart:developer';
 
-import 'package:bcrypt/bcrypt.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
 
 part 'pincode_event.dart';
 part 'pincode_state.dart';
@@ -16,16 +15,16 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
   _onVerifyPincode(VerifyPincode event, Emitter emit) async {
     try {
       emit(PinLoading());
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final snapshot = await firestore.collection('users').doc(userId).get();
-      final hashedPincode = snapshot.get('pincode');
-      final isPincodeCorrect = BCrypt.checkpw(event.pincode, hashedPincode);
-      if (isPincodeCorrect) {
-        emit(PinSuccess());
-      } else {
-        emit(PinFail(reason: 'Incorrect Pincode'));
+      final token = await getToken();
+
+      final res = await AuthRepository.verfiyPincode(
+        token ?? '',
+        event.pincode,
+      );
+      if (res.containsKey('error')) {
+        return emit(PinFail(reason: 'error'));
       }
+      emit(PinSuccess());
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());
@@ -35,15 +34,11 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
   _onSetPincode(SetPinCode event, Emitter emit) async {
     try {
       emit(PinLoading());
-      //hashing pincode
-      String salt = BCrypt.gensalt();
-      String hashedPin = BCrypt.hashpw(event.pincode, salt);
-
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      await firestore.collection('users').doc(userId).update({
-        'pincode': hashedPin,
-      });
+      final token = await getToken();
+      final res = await AuthRepository.setPincode(token ?? '', event.pincode);
+      if (res.containsKey('error')) {
+        return emit(PinFail(reason: 'error'));
+      }
       emit(PinSuccess());
     } catch (error) {
       emit(PinFail(reason: error.toString()));
@@ -51,3 +46,4 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
     }
   }
 }
+//1000625045968

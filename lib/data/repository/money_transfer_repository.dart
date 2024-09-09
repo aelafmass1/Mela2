@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
@@ -20,7 +19,6 @@ class MoneyTransferRepository {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        "senderUserId": receiverInfo.senderUserId,
         "receiverName": receiverInfo.receiverName,
         "receiverPhoneNumber": receiverInfo.receiverPhoneNumber,
         "receiverBankName": receiverInfo.receiverBankName,

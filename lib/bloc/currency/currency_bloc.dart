@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/models/curruncy_model.dart';
 import 'package:transaction_mobile_app/data/repository/currency_repository.dart';
+
+import '../../core/utils/settings.dart';
 
 part 'currency_event.dart';
 part 'currency_state.dart';
@@ -15,7 +16,8 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
     try {
       //loading state
       emit(CurrencyLoading());
-      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      final token = await getToken();
+
       if (token != null) {
         final res = await CurrencyRepository.fetchCurrencies(token);
         if (res.first.containsKey('error')) {
@@ -36,7 +38,8 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
       FetchPromotionalCurrency event, Emitter emit) async {
     try {
       emit(CurrencyLoading());
-      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      final token = await getToken();
+
       if (token != null) {
         final res = await CurrencyRepository.fetchPromotionalCurrency(token);
         if (res.containsKey('error')) {

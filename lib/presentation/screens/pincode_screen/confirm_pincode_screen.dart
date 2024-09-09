@@ -9,9 +9,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
-import '../../../bloc/auth/auth_bloc.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -128,10 +126,6 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                     description: state.reason,
                   );
                 } else if (state is PinSuccess) {
-                  // context.pushNamed(
-                  //   RouteName.profileUpload,
-                  //   extra: widget.user,
-                  // );
                   context.goNamed(RouteName.home);
                 }
               },
@@ -141,8 +135,8 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                         ? ColorName.primaryColor
                         : ColorName.grey.shade200,
                     child: state is PinLoading
-                        ? LoadingWidget()
-                        : TextWidget(
+                        ? const LoadingWidget()
+                        : const TextWidget(
                             text: 'Set up PIN',
                             type: TextType.small,
                             color: Colors.white,

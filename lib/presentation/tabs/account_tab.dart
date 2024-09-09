@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -23,7 +22,30 @@ class AccountTab extends StatefulWidget {
 }
 
 class _AccountTabState extends State<AccountTab> {
-  final auth = FirebaseAuth.instance;
+  String? displayName;
+  String? imageUrl;
+  String? email;
+  String? phoneNumber;
+  @override
+  void initState() {
+    getDisplayName().then((value) {
+      setState(() {
+        displayName = value;
+      });
+    });
+    getImageUrl().then((value) {
+      setState(() {
+        imageUrl = value;
+      });
+    });
+    getPhoneNumber().then((value) {
+      setState(() {
+        phoneNumber = value;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,9 +100,8 @@ class _AccountTabState extends State<AccountTab> {
                               mobile: 30,
                               tablet: 35,
                             ),
-                            backgroundImage: auth.currentUser?.photoURL != null
-                                ? CachedNetworkImageProvider(
-                                    auth.currentUser!.photoURL!)
+                            backgroundImage: imageUrl != null
+                                ? CachedNetworkImageProvider(imageUrl!)
                                 : Assets.images.profileImage.provider(),
                           );
                         }),
@@ -88,11 +109,9 @@ class _AccountTabState extends State<AccountTab> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            TextWidget(text: displayName ?? ''),
                             TextWidget(
-                                text: auth.currentUser!.displayName ?? ''),
-                            TextWidget(
-                              text:
-                                  '${FirebaseAuth.instance.currentUser!.email?.split('@').first}',
+                              text: phoneNumber ?? '',
                               fontSize: 15,
                               color: const Color(0xFF4D4D4D).withOpacity(0.75),
                             ),
@@ -251,7 +270,11 @@ class _AccountTabState extends State<AccountTab> {
                         title: 'Logout',
                         isLogout: true,
                         onTab: () {
-                          FirebaseAuth.instance.signOut();
+                          // FirebaseAuth.instance.signOut();
+                          deleteToken();
+                          deleteDisplayName();
+                          deleteEmail();
+                          deletePhoneNumber();
                           context.goNamed(RouteName.login);
                         },
                       ),

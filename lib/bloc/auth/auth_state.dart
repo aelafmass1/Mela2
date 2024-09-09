@@ -53,3 +53,23 @@ final class UploadProfileFail extends AuthState {
 }
 
 final class UploadProfileSuccess extends AuthState {}
+
+final class RegisterUserLoaing extends AuthState {}
+
+final class RegisterUserFail extends AuthState {
+  final String reason;
+
+  RegisterUserFail({required this.reason});
+}
+
+final class RegisterUserSuccess extends AuthState {}
+
+final class LoginUserLoading extends AuthState {}
+
+final class LoginUserFail extends AuthState {
+  final String reason;
+
+  LoginUserFail({required this.reason});
+}
+
+final class LoginUserSuccess extends AuthState {}

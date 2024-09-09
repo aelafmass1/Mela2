@@ -17,8 +17,12 @@ final class CreateAccount extends AuthEvent {
 final class LoginUser extends AuthEvent {
   final String phoneNumber;
   final String password;
+  final int countryCode;
 
-  LoginUser({required this.phoneNumber, required this.password});
+  LoginUser(
+      {required this.phoneNumber,
+      required this.password,
+      required this.countryCode});
 }
 
 final class DeleteUser extends AuthEvent {}

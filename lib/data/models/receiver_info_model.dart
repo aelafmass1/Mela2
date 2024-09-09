@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 class ReceiverInfo {
-  final String senderUserId;
   final String receiverName;
   final String receiverPhoneNumber;
   final String receiverBankName;
@@ -11,7 +10,6 @@ class ReceiverInfo {
   final String? serviceChargePayer;
   final DateTime? trasactionDate;
   ReceiverInfo({
-    required this.senderUserId,
     required this.receiverName,
     required this.receiverPhoneNumber,
     required this.receiverBankName,
@@ -22,7 +20,6 @@ class ReceiverInfo {
   });
 
   ReceiverInfo copyWith({
-    String? senderUserId,
     String? receiverName,
     String? receiverPhoneNumber,
     String? receiverBankName,
@@ -32,7 +29,6 @@ class ReceiverInfo {
     DateTime? trasactionDate,
   }) {
     return ReceiverInfo(
-      senderUserId: senderUserId ?? this.senderUserId,
       receiverName: receiverName ?? this.receiverName,
       receiverPhoneNumber: receiverPhoneNumber ?? this.receiverPhoneNumber,
       receiverBankName: receiverBankName ?? this.receiverBankName,
@@ -46,7 +42,6 @@ class ReceiverInfo {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'senderUserId': senderUserId,
       'receiverName': receiverName,
       'receiverPhoneNumber': receiverPhoneNumber,
       'receiverBankName': receiverBankName,
@@ -59,17 +54,16 @@ class ReceiverInfo {
 
   factory ReceiverInfo.fromMap(Map<String, dynamic> map) {
     return ReceiverInfo(
-      senderUserId: map['senderUserId'] as String,
       receiverName: map['receiverName'] as String,
       receiverPhoneNumber: map['receiverPhoneNumber'] as String,
-      receiverBankName: map['receiverBank']['name'] as String,
+      receiverBankName: map['receiverBankName'] as String,
       receiverAccountNumber: map['receiverAccountNumber'] as String,
       amount: map['amount'] as double,
       serviceChargePayer: map['serviceChargePayer'] != null
           ? map['serviceChargePayer'] as String
           : null,
-      trasactionDate: map["transactionDate"] != null
-          ? DateTime.parse(map["transactionDate"])
+      trasactionDate: map['trasactionDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['trasactionDate'] as int)
           : null,
     );
   }
@@ -81,15 +75,14 @@ class ReceiverInfo {
 
   @override
   String toString() {
-    return 'ReceiverInfo(senderUserId: $senderUserId, receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate)';
+    return 'ReceiverInfo(receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate)';
   }
 
   @override
   bool operator ==(covariant ReceiverInfo other) {
     if (identical(this, other)) return true;
 
-    return other.senderUserId == senderUserId &&
-        other.receiverName == receiverName &&
+    return other.receiverName == receiverName &&
         other.receiverPhoneNumber == receiverPhoneNumber &&
         other.receiverBankName == receiverBankName &&
         other.receiverAccountNumber == receiverAccountNumber &&
@@ -100,8 +93,7 @@ class ReceiverInfo {
 
   @override
   int get hashCode {
-    return senderUserId.hashCode ^
-        receiverName.hashCode ^
+    return receiverName.hashCode ^
         receiverPhoneNumber.hashCode ^
         receiverBankName.hashCode ^
         receiverAccountNumber.hashCode ^

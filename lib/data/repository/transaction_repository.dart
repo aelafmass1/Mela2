@@ -5,7 +5,7 @@ import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 
 class TransactionRepository {
   static Future<Map<String, dynamic>> fetchTransaction(
-      String accessToken, String uid) async {
+      String accessToken) async {
     final res = await http.get(
       Uri.parse(
         '$baseUrl/api/v1/money-transfer/transactions',

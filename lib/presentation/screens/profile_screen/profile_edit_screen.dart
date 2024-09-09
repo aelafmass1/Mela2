@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -35,26 +35,19 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
-  fetchEmail() async {
-    final auth = FirebaseAuth.instance;
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final data =
-        await firestore.collection('users').doc(auth.currentUser?.uid).get();
-    final email = data.get('email');
-    setState(() {
-      emailNameController.text = email;
-    });
-  }
-
   @override
   void initState() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      fetchEmail();
-      final names = currentUser.displayName?.split(' ') ?? ['', ''];
-      firstNameController.text = names.first;
-      lastNameController.text = names.last;
-    }
+    getEmail().then((value) {
+      emailNameController.text = value ?? '';
+    });
+    getDisplayName().then((name) {
+      if (name != null) {
+        final names = name.split(' ');
+        firstNameController.text = names.first;
+        lastNameController.text = names.last;
+      }
+    });
+
     super.initState();
   }
 

@@ -1,8 +1,9 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
+
+import '../../core/utils/settings.dart';
 
 part 'plaid_event.dart';
 part 'plaid_state.dart';
@@ -15,9 +16,10 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
   _onExchangePublicToken(ExchangePublicToken event, Emitter emit) async {
     try {
       emit(PlaidPublicTokenLoading());
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-      final res = await PlaidRepository.exchangePublicToken(
-          accessToken!, event.publicToken);
+      final token = await getToken();
+
+      final res =
+          await PlaidRepository.exchangePublicToken(token!, event.publicToken);
       if (res.containsKey('error')) {
         return emit(PlaidPublicTokenFail(reason: res['error']));
       }
@@ -31,8 +33,9 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
   _onCreateLinkToken(CreateLinkToken event, Emitter emit) async {
     try {
       emit(PlaidLinkTokenLoading());
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-      final res = await PlaidRepository.createLinkToken(accessToken!);
+      final token = await getToken();
+
+      final res = await PlaidRepository.createLinkToken(token!);
       if (res.containsKey('error')) {
         return emit(PlaidLinkTokenFail(reason: res['error']));
       }

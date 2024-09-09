@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
@@ -38,7 +38,7 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',

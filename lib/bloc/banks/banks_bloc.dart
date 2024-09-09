@@ -1,9 +1,10 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/models/bank_model.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
+
+import '../../core/utils/settings.dart';
 
 part 'banks_event.dart';
 part 'banks_state.dart';
@@ -16,8 +17,9 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
   _onFetchBanks(FetchBanks event, Emitter emit) async {
     try {
       emit(BanksLoading());
-      final accessToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-      final res = await BanksRepository.fetchBanks(accessToken!);
+      final token = await getToken();
+
+      final res = await BanksRepository.fetchBanks(token!);
       if (res.first.containsKey('error')) {
         return emit(BanksFail(reason: res.first['error']));
       }
