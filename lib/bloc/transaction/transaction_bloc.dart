@@ -44,6 +44,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           data: groupedTransactions,
         ));
       }
+      emit(TransactionSuccess(data: groupedTransactions));
     } catch (error) {
       log(error.toString());
       return emit(TransactionFail(error: error.toString()));

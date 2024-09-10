@@ -22,7 +22,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         event.pincode,
       );
       if (res.containsKey('error')) {
-        return emit(PinFail(reason: 'error'));
+        return emit(PinFail(reason: res['error']));
       }
       emit(PinSuccess());
     } catch (error) {
@@ -37,7 +37,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
       final token = await getToken();
       final res = await AuthRepository.setPincode(token ?? '', event.pincode);
       if (res.containsKey('error')) {
-        return emit(PinFail(reason: 'error'));
+        return emit(PinFail(reason: res['error']));
       }
       emit(PinSuccess());
     } catch (error) {

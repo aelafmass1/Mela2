@@ -25,7 +25,9 @@ class MoneyTransferRepository {
         "receiverAccountNumber": receiverInfo.receiverAccountNumber,
         "amount": receiverInfo.amount,
         "serviceChargePayer": receiverInfo.serviceChargePayer,
-        "paymentId": paymentId,
+        "paymentType": receiverInfo.paymentType,
+        "publicToken": receiverInfo.publicToken ?? '',
+        "paymentIntentId": paymentId,
       }),
     );
 

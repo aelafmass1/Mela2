@@ -9,6 +9,8 @@ class ReceiverInfo {
   final double amount;
   final String? serviceChargePayer;
   final DateTime? trasactionDate;
+  final String? publicToken;
+  final String paymentType;
   ReceiverInfo({
     required this.receiverName,
     required this.receiverPhoneNumber,
@@ -17,6 +19,8 @@ class ReceiverInfo {
     required this.amount,
     this.serviceChargePayer,
     this.trasactionDate,
+    this.publicToken,
+    required this.paymentType,
   });
 
   ReceiverInfo copyWith({
@@ -27,6 +31,8 @@ class ReceiverInfo {
     double? amount,
     String? serviceChargePayer,
     DateTime? trasactionDate,
+    String? publicToken,
+    String? paymentType,
   }) {
     return ReceiverInfo(
       receiverName: receiverName ?? this.receiverName,
@@ -37,6 +43,8 @@ class ReceiverInfo {
       amount: amount ?? this.amount,
       serviceChargePayer: serviceChargePayer ?? this.serviceChargePayer,
       trasactionDate: trasactionDate ?? this.trasactionDate,
+      publicToken: publicToken ?? this.publicToken,
+      paymentType: paymentType ?? this.paymentType,
     );
   }
 
@@ -49,6 +57,8 @@ class ReceiverInfo {
       'amount': amount,
       'serviceChargePayer': serviceChargePayer,
       'trasactionDate': trasactionDate?.millisecondsSinceEpoch,
+      'publicToken': publicToken,
+      'paymentType': paymentType,
     };
   }
 
@@ -65,6 +75,9 @@ class ReceiverInfo {
       trasactionDate: map['trasactionDate'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['trasactionDate'] as int)
           : null,
+      publicToken:
+          map['publicToken'] != null ? map['publicToken'] as String : null,
+      paymentType: map['paymentType'] as String,
     );
   }
 
@@ -75,7 +88,7 @@ class ReceiverInfo {
 
   @override
   String toString() {
-    return 'ReceiverInfo(receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate)';
+    return 'ReceiverInfo(receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate, publicToken: $publicToken, paymentType: $paymentType)';
   }
 
   @override
@@ -88,7 +101,9 @@ class ReceiverInfo {
         other.receiverAccountNumber == receiverAccountNumber &&
         other.amount == amount &&
         other.serviceChargePayer == serviceChargePayer &&
-        other.trasactionDate == trasactionDate;
+        other.trasactionDate == trasactionDate &&
+        other.publicToken == publicToken &&
+        other.paymentType == paymentType;
   }
 
   @override
@@ -99,6 +114,8 @@ class ReceiverInfo {
         receiverAccountNumber.hashCode ^
         amount.hashCode ^
         serviceChargePayer.hashCode ^
-        trasactionDate.hashCode;
+        trasactionDate.hashCode ^
+        publicToken.hashCode ^
+        paymentType.hashCode;
   }
 }

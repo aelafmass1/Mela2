@@ -86,11 +86,11 @@ class AuthRepository {
         "pin": pincode,
       }),
     );
+    final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      final data = jsonDecode(res.body);
       return data;
     }
-    return {'error': res.body};
+    return {'error': data['message']};
   }
 
   static Future<Map> sendOtp(String accessToken, String phoneNumber) async {

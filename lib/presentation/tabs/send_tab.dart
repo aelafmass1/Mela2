@@ -29,7 +29,6 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/stripe_payment_page.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -81,8 +80,6 @@ class _SentTabState extends State<SentTab> {
   final etbController = TextEditingController();
   final bankAcocuntController = TextEditingController();
   final phoneNumberController = TextEditingController();
-
-  final CardFormEditController _controller = CardFormEditController();
 
   ReceiverInfo? receiverInfo;
 
@@ -199,24 +196,21 @@ class _SentTabState extends State<SentTab> {
   /// If an error occurs during the payment process, it displays an error message using [showSnackbar].
   displayPaymentSheet(String clientSecret) async {
     try {
-      Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters());
       // Display the Stripe payment sheet
-      await Stripe.instance
-          .presentPaymentSheet(options: PaymentSheetPresentOptions());
+      await Stripe.instance.presentPaymentSheet();
       final paymentIntent =
           await Stripe.instance.retrievePaymentIntent(clientSecret);
 
       // Show a success message if the payment is successful
-      showSnackbar(
-        context,
-        title: 'Success',
-        description: 'Payment Successful!',
-      );
+      // showSnackbar(
+      //   context,
+      //   title: 'Success',
+      //   description: 'Payment Successful!',
+      // );
 
       // Get the current user
-
       // Create a ReceiverInfo object with the recipient's information
+      // if (await showPincode(context)) {
       receiverInfo = ReceiverInfo(
         receiverName: receiverName.text,
         receiverPhoneNumber: isPermissionDenied
@@ -226,6 +220,8 @@ class _SentTabState extends State<SentTab> {
         receiverAccountNumber: bankAcocuntController.text,
         amount: double.parse(usdController.text),
         serviceChargePayer: whoPayFee,
+        paymentType:
+            selectedPaymentMethodIndex == 1 ? 'STRIPE_DEBIT' : 'STRIPE_CREDIT',
       );
       // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
       context.read<MoneyTransferBloc>().add(
@@ -234,6 +230,7 @@ class _SentTabState extends State<SentTab> {
               paymentId: paymentIntent.id,
             ),
           );
+      // }
     } catch (error) {
       if (error is StripeException) {
         // Handle StripeException specifically
@@ -2063,99 +2060,127 @@ class _SentTabState extends State<SentTab> {
                 ),
               ),
             ),
-            BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
-              listener: (context, state) async {
-                if (state is MoneyTransferFail) {
-                  showSnackbar(
-                    context,
-                    title: 'Error',
-                    description: state.reason,
-                  );
-                } else if (state is MoneyTransferSuccess) {
-                  context.pushNamed(
-                    RouteName.receipt,
-                    extra: receiverInfo,
-                  );
+            BlocConsumer<PaymentIntentBloc, PaymentIntentState>(
+              listener: (context, paymentState) async {
+                if (paymentState is PaymentIntentFail) {
+                  showSnackbar(context,
+                      title: 'Error', description: paymentState.reason);
+                } else if (paymentState is PaymentIntentSuccess) {
+                  /// Initializes and presents a Stripe payment sheet for processing a payment.
+                  ///
+                  /// Retrieves the `clientSecret` and `customerId` from the `paymentState`.
+                  /// Initializes the Stripe payment sheet with the retrieved information and merchant display name.
+                  /// Calls `displayPaymentSheet()` to present the payment sheet to the user.
+                  /// Logs any errors encountered during the process.
+                  try {
+                    final clientSecret = paymentState.clientSecret;
 
-                  clearSendInfo();
+                    await Stripe.instance.initPaymentSheet(
+                      paymentSheetParameters: SetupPaymentSheetParameters(
+                          paymentIntentClientSecret: clientSecret,
+                          customerId: paymentState.customerId,
+                          merchantDisplayName: 'Mela Fi',
+                          customFlow: true,
+                          appearance: const PaymentSheetAppearance(
+                            colors: PaymentSheetAppearanceColors(
+                              primary: ColorName.primaryColor,
+                            ),
+                          )),
+                    );
+
+                    displayPaymentSheet(clientSecret);
+                  } catch (error) {
+                    log(error.toString());
+                  }
                 }
               },
-              builder: (context, state) {
-                return BlocConsumer<PlaidBloc, PlaidState>(
-                  listener: (context, state) async {
-                    if (state is PlaidLinkTokenFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is PlaidLinkTokenSuccess) {
-                      _createLinkTokenConfiguration(state.linkToken);
-                      await PlaidLink.open(configuration: _configuration!);
-                    } else if (state is PlaidPublicTokenFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is PlaidPublicTokenSuccess) {
-                      receiverInfo = ReceiverInfo(
-                        receiverName: receiverName.text,
-                        receiverPhoneNumber: isPermissionDenied
-                            ? phoneNumberController.text
-                            : selectedContact!.phones.first.number,
-                        receiverBankName: selectedBank,
-                        receiverAccountNumber: bankAcocuntController.text,
-                        amount: double.parse(usdController.text),
-                        serviceChargePayer: whoPayFee,
-                      );
-                      //                 final paymentIntent =
-                      // await Stripe.instance.retrievePaymentIntent(clientSecret);
-                      context.read<MoneyTransferBloc>().add(SendMoney(
-                            receiverInfo: receiverInfo!,
-                            paymentId: '',
-                          ));
-                    }
-                  },
-                  builder: (context, plaidState) {
-                    return ButtonWidget(
-                      child: state is MoneyTransferLoading ||
-                              plaidState is PlaidLinkTokenLoading ||
-                              plaidState is PlaidPublicTokenLoading
-                          ? const LoadingWidget()
-                          : const TextWidget(
-                              text: 'Next',
-                              type: TextType.small,
-                              color: Colors.white,
-                            ),
-                      onPressed: () async {
-                        if (selectedPaymentMethodIndex != 0) {
-                          receiverInfo = ReceiverInfo(
-                            receiverName: receiverName.text,
-                            receiverPhoneNumber: isPermissionDenied
-                                ? phoneNumberController.text
-                                : selectedContact!.phones.first.number,
-                            receiverBankName: selectedBank,
-                            receiverAccountNumber: bankAcocuntController.text,
-                            amount: double.parse(usdController.text),
-                            serviceChargePayer: whoPayFee,
-                          );
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) => StripePaymentPage(
-                              controller: _controller,
-                              receiverInfo: receiverInfo!,
-                            ),
-                          );
-                        } else {
-                          context.read<PlaidBloc>().add(CreateLinkToken());
-                        }
-                      },
+              builder: (context, paymentState) =>
+                  BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
+                listener: (context, state) async {
+                  if (state is MoneyTransferFail) {
+                    showSnackbar(
+                      context,
+                      title: 'Error',
+                      description: state.reason,
                     );
-                  },
-                );
-              },
+                  } else if (state is MoneyTransferSuccess) {
+                    context.pushNamed(
+                      RouteName.receipt,
+                      extra: receiverInfo,
+                    );
+
+                    clearSendInfo();
+                  }
+                },
+                builder: (context, state) {
+                  return BlocConsumer<PlaidBloc, PlaidState>(
+                    listener: (context, state) async {
+                      if (state is PlaidLinkTokenFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is PlaidLinkTokenSuccess) {
+                        _createLinkTokenConfiguration(state.linkToken);
+                        await PlaidLink.open(configuration: _configuration!);
+                      } else if (state is PlaidPublicTokenFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is PlaidPublicTokenSuccess) {
+                        receiverInfo = ReceiverInfo(
+                          receiverName: receiverName.text,
+                          receiverPhoneNumber: isPermissionDenied
+                              ? phoneNumberController.text
+                              : selectedContact!.phones.first.number,
+                          receiverBankName: selectedBank,
+                          receiverAccountNumber: bankAcocuntController.text,
+                          paymentType: 'PLAID_ACH',
+                          amount: double.parse(usdController.text),
+                          serviceChargePayer: whoPayFee,
+                          publicToken: publicToken,
+                        );
+                        //                 final paymentIntent =
+                        // await Stripe.instance.retrievePaymentIntent(clientSecret);
+                        context.read<MoneyTransferBloc>().add(SendMoney(
+                              receiverInfo: receiverInfo!,
+                              paymentId: '',
+                            ));
+                      }
+                    },
+                    builder: (context, plaidState) {
+                      return ButtonWidget(
+                        child: state is MoneyTransferLoading ||
+                                paymentState is PaymentIntentLoading ||
+                                plaidState is PlaidLinkTokenLoading ||
+                                plaidState is PlaidPublicTokenLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Next',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                        onPressed: () async {
+                          // if (await showPincode(context)) {
+                          if (selectedPaymentMethodIndex != 0) {
+                            context.read<PaymentIntentBloc>().add(
+                                  FetchClientSecret(
+                                      currency: 'USD',
+                                      amount: double.parse(usdController.text)),
+                                );
+                          } else {
+                            context.read<PlaidBloc>().add(CreateLinkToken());
+                          }
+                          // }
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 10),
           ],
