@@ -21,7 +21,6 @@ import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.d
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
-import 'package:transaction_mobile_app/core/utils/show_pincode.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -230,6 +229,8 @@ class _SentTabState extends State<SentTab> {
               paymentId: paymentIntent.id,
             ),
           );
+      log(paymentIntent.id);
+      log(receiverInfo.toString());
       // }
     } catch (error) {
       if (error is StripeException) {
@@ -1207,7 +1208,12 @@ class _SentTabState extends State<SentTab> {
                                   children: [
                                     if (bank.bankLogo != null)
                                       CachedNetworkImage(
-                                        imageUrl: bank.bankLogo!,
+                                        imageUrl: bank.bankLogo ?? '',
+                                        errorWidget: (context, x, y) =>
+                                            const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                        ),
                                       )
                                     else
                                       const SizedBox(
@@ -2131,24 +2137,68 @@ class _SentTabState extends State<SentTab> {
                           description: state.reason,
                         );
                       } else if (state is PlaidPublicTokenSuccess) {
-                        receiverInfo = ReceiverInfo(
-                          receiverName: receiverName.text,
-                          receiverPhoneNumber: isPermissionDenied
-                              ? phoneNumberController.text
-                              : selectedContact!.phones.first.number,
-                          receiverBankName: selectedBank,
-                          receiverAccountNumber: bankAcocuntController.text,
-                          paymentType: 'PLAID_ACH',
-                          amount: double.parse(usdController.text),
-                          serviceChargePayer: whoPayFee,
-                          publicToken: publicToken,
-                        );
-                        //                 final paymentIntent =
-                        // await Stripe.instance.retrievePaymentIntent(clientSecret);
-                        context.read<MoneyTransferBloc>().add(SendMoney(
-                              receiverInfo: receiverInfo!,
-                              paymentId: '',
-                            ));
+                        final feeState = context.read<FeeBloc>().state;
+                        final bankState = context.read<BankFeeBloc>().state;
+                        if (feeState is FeeSuccess) {
+                          if (bankState is BankFeeSuccess) {
+                            final totalFee = (feeState.fees
+                                    .where((f) => f.type == 'FIXED')
+                                    .map((f) => f.amount)
+                                    .reduce(
+                                        (value, element) => value + element)) +
+                                (feeState.fees
+                                    .where((f) => f.type == 'PERCENTAGE')
+                                    .map((f) => (((double.tryParse(usdController.text) ?? 0) *
+                                        (f.amount / 100))))
+                                    .reduce(
+                                        (value, element) => value + element)) +
+                                (selectedPaymentMethodIndex == 1
+                                    ? ((double.tryParse(usdController.text) ?? 0) *
+                                        (bankState.bankFees
+                                                .where((bf) =>
+                                                    bf.paymentMethod == 'DEBIT')
+                                                .first
+                                                .amount /
+                                            100))
+                                    : selectedPaymentMethodIndex == 2
+                                        ? (bankState.bankFees
+                                            .where((bf) => bf.paymentMethod == 'CREDIT')
+                                            .first
+                                            .amount)
+                                        : 0);
+                            receiverInfo = ReceiverInfo(
+                              receiverName: receiverName.text,
+                              receiverPhoneNumber: isPermissionDenied
+                                  ? phoneNumberController.text
+                                  : selectedContact!.phones.first.number,
+                              receiverBankName: selectedBank,
+                              receiverAccountNumber: bankAcocuntController.text,
+                              paymentType: 'PLAID_ACH',
+                              amount:
+                                  double.parse(usdController.text) + totalFee,
+                              serviceChargePayer: whoPayFee,
+                              publicToken: publicToken,
+                            );
+                            //                 final paymentIntent =
+                            // await Stripe.instance.retrievePaymentIntent(clientSecret);
+                            context.read<MoneyTransferBloc>().add(SendMoney(
+                                  receiverInfo: receiverInfo!,
+                                  paymentId: '',
+                                ));
+                          } else {
+                            showSnackbar(
+                              context,
+                              title: "Error",
+                              description: "Bank Fee not fetched",
+                            );
+                          }
+                        } else {
+                          showSnackbar(
+                            context,
+                            title: "Error",
+                            description: "Fee not fetched",
+                          );
+                        }
                       }
                     },
                     builder: (context, plaidState) {
@@ -2166,11 +2216,41 @@ class _SentTabState extends State<SentTab> {
                         onPressed: () async {
                           // if (await showPincode(context)) {
                           if (selectedPaymentMethodIndex != 0) {
-                            context.read<PaymentIntentBloc>().add(
-                                  FetchClientSecret(
+                            final feeState = context.read<FeeBloc>().state;
+                            final bankState = context.read<BankFeeBloc>().state;
+                            if (feeState is FeeSuccess &&
+                                bankState is BankFeeSuccess) {
+                              final totalFee = (feeState.fees
+                                      .where((f) => f.type == 'FIXED')
+                                      .map((f) => f.amount)
+                                      .reduce((value, element) =>
+                                          value + element)) +
+                                  (feeState.fees
+                                      .where((f) => f.type == 'PERCENTAGE')
+                                      .map((f) =>
+                                          (((double.tryParse(usdController.text) ?? 0) *
+                                              (f.amount / 100))))
+                                      .reduce((value, element) =>
+                                          value + element)) +
+                                  (selectedPaymentMethodIndex == 1
+                                      ? ((double.tryParse(usdController.text) ??
+                                              0) *
+                                          (bankState.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount /
+                                              100))
+                                      : selectedPaymentMethodIndex == 2
+                                          ? (bankState.bankFees
+                                              .where((bf) => bf.paymentMethod == 'CREDIT')
+                                              .first
+                                              .amount)
+                                          : 0);
+                              context.read<PaymentIntentBloc>().add(
+                                    FetchClientSecret(
                                       currency: 'USD',
-                                      amount: double.parse(usdController.text)),
-                                );
+                                      amount: double.parse(usdController.text) +
+                                          totalFee,
+                                    ),
+                                  );
+                            }
                           } else {
                             context.read<PlaidBloc>().add(CreateLinkToken());
                           }

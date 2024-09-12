@@ -28,7 +28,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final emailController = TextEditingController();
-  final birthDateController = TextEditingController();
   final password1Controller = TextEditingController();
   final password2Controller = TextEditingController();
   final phoneNumberController = TextEditingController();
@@ -43,6 +42,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   String selectedGender = '';
 
   DateTime? birthdayDate;
+
+  String emailError = '';
+  String phoneNumberError = '';
 
   String? strongPasswordValidator(password) {
     if (password!.isEmpty) {
@@ -246,6 +248,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        errorText: emailError.isEmpty ? null : emailError,
                         keyboardType: TextInputType.emailAddress,
                         validator: (text) {
                           if (text!.isEmpty) {
@@ -269,6 +272,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        errorText:
+                            phoneNumberError.isEmpty ? null : phoneNumberError,
                         prefixText:
                             selectedCoutry == 'ethiopia' ? '+251' : '+1',
                         enableFocusColor: false,
@@ -383,7 +388,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         children: [
                           Checkbox(
                               activeColor: ColorName.primaryColor,
-                              shape: CircleBorder(),
+                              shape: const CircleBorder(),
                               value: termAndConditionAgreed,
                               onChanged: (value) {
                                 if (value != null) {
@@ -421,6 +426,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 child: BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
                     if (state is RegisterUserFail) {
+                      if (state.field == 'email') {
+                        setState(() {
+                          emailError = state.reason;
+                        });
+                      } else if (state.field == 'phoneNumber') {
+                        setState(() {
+                          phoneNumberError = state.reason;
+                        });
+                      }
+                      setState(() {});
                       showSnackbar(
                         context,
                         title: 'Error',
@@ -478,16 +493,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         onPressed: () {
                           if (termAndConditionAgreed) {
                             if (_formKey.currentState!.validate()) {
-                              String phoneCode =
-                                  selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                              String phoneNumber =
-                                  phoneCode + phoneNumberController.text;
                               UserModel user = widget.userModel.copyWith(
                                 firstName: firstNameController.text,
                                 lastName: lastNameController.text,
                                 email: emailController.text,
                                 password: password1Controller.text,
-                                phoneNumber: phoneNumber,
+                                phoneNumber: phoneNumberController.text,
                                 countryCode:
                                     selectedCoutry == 'ethiopia' ? 251 : 1,
                               );

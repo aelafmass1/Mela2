@@ -273,8 +273,8 @@ class _AccountTabState extends State<AccountTab> {
                           // FirebaseAuth.instance.signOut();
                           deleteToken();
                           deleteDisplayName();
-                          deleteEmail();
                           deletePhoneNumber();
+                          deleteLogInStatus();
                           context.goNamed(RouteName.login);
                         },
                       ),

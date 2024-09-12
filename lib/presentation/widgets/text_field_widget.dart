@@ -16,21 +16,22 @@ class TextFieldWidget extends StatelessWidget {
   final String? prefixText;
   final bool obscurePassword;
   final List<TextInputFormatter>? inputFormatters;
-  const TextFieldWidget({
-    super.key,
-    required this.controller,
-    this.validator,
-    this.hintText,
-    this.suffix,
-    this.prefix,
-    this.onTab,
-    this.keyboardType,
-    this.readOnly = false,
-    this.prefixText,
-    this.enableFocusColor = true,
-    this.obscurePassword = false,
-    this.inputFormatters,
-  });
+  final String? errorText;
+  const TextFieldWidget(
+      {super.key,
+      required this.controller,
+      this.validator,
+      this.hintText,
+      this.suffix,
+      this.prefix,
+      this.onTab,
+      this.keyboardType,
+      this.readOnly = false,
+      this.prefixText,
+      this.enableFocusColor = true,
+      this.obscurePassword = false,
+      this.inputFormatters,
+      this.errorText});
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +49,7 @@ class TextFieldWidget extends StatelessWidget {
       ),
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
+        errorText: errorText,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         hintText: hintText,

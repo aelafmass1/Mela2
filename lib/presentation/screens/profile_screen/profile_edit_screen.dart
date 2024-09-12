@@ -37,9 +37,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   void initState() {
-    getEmail().then((value) {
-      emailNameController.text = value ?? '';
-    });
     getDisplayName().then((name) {
       if (name != null) {
         final names = name.split(' ');

@@ -23,8 +23,9 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
       if (res.first.containsKey('error')) {
         return emit(BanksFail(reason: res.first['error']));
       }
+      final banks = res.map((b) => BankModel.fromMap(b)).toList();
       emit(
-        BanksSuccess(bankList: res.map((b) => BankModel.fromMap(b)).toList()),
+        BanksSuccess(bankList: banks),
       );
     } catch (error) {
       log(error.toString());

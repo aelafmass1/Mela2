@@ -1,12 +1,9 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../data/repository/auth_repository.dart';
 
@@ -122,7 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final data = res['successResponse'];
       final token = data['jwtToken'];
 
-      storeToken(token);
+      await storeToken(token);
       storeDisplayName('${data['firstName']} ${data['lastName']}');
       storePhoneNumber(event.phoneNumber);
       emit(LoginUserSuccess());
@@ -138,13 +135,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.userModel,
       );
       if (res.containsKey('error')) {
-        return emit(RegisterUserFail(reason: res['error']));
+        List errorResponse = res['data']['errorResponse'];
+        String fieldName = '';
+        if (errorResponse.isNotEmpty) {
+          if (errorResponse.first.containsKey('field')) {
+            fieldName = errorResponse.first['field'];
+          }
+        }
+        return emit(RegisterUserFail(
+          reason: res['error'],
+          field: fieldName,
+        ));
       }
       final token = res['successResponse']['jwtToken'];
       storeToken(token);
       storeDisplayName(
           '${event.userModel.firstName} ${event.userModel.lastName}');
-      storeEmail(event.userModel.email!);
       storePhoneNumber(event.userModel.phoneNumber!);
       emit(RegisterUserSuccess());
     } catch (error) {

@@ -6,8 +6,8 @@ const _isContactPermissonAllowed = '_isContactPermissonAllowed';
 const _jwtToken = 'jwt_token';
 const _displayName = 'display_name';
 const _imageUrl = 'image_url';
-const _email = 'email';
 const _phoneNumber = 'phone_number';
+const _loggedIn = 'is_logged_in';
 
 const storage = FlutterSecureStorage();
 
@@ -67,18 +67,6 @@ Future<void> deleteImageUrl() async {
   await storage.delete(key: _imageUrl);
 }
 
-Future<void> storeEmail(String fullName) async {
-  await storage.write(key: _email, value: fullName);
-}
-
-Future<String?> getEmail() async {
-  return await storage.read(key: _email);
-}
-
-Future<void> deleteEmail() async {
-  await storage.delete(key: _email);
-}
-
 Future<void> storePhoneNumber(String fullName) async {
   await storage.write(key: _phoneNumber, value: fullName);
 }
@@ -89,4 +77,20 @@ Future<String?> getPhoneNumber() async {
 
 Future<void> deletePhoneNumber() async {
   await storage.delete(key: _phoneNumber);
+}
+
+Future<void> setIsLoggedIn(bool isLoggedIn) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  preferences.setBool(_loggedIn, isLoggedIn);
+}
+
+Future<bool> isLoggedIn() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+
+  return preferences.getBool(_loggedIn) ?? false;
+}
+
+Future<void> deleteLogInStatus() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  await preferences.remove(_loggedIn);
 }

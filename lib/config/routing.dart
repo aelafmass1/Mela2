@@ -12,6 +12,7 @@ import 'package:transaction_mobile_app/presentation/screens/profile_screen/passw
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/profile_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 
 import '../presentation/screens/home_screen/home_screen.dart';
@@ -38,12 +39,17 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
       path: '/',
       name: RouteName.welcome,
       builder: (context, state) => const WelcomeScreen(),
+    ),
+    GoRoute(
+      path: '/splash',
+      name: RouteName.splash,
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
         path: '/home',

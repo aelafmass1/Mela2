@@ -1,65 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 
-import '../../widgets/text_widget.dart';
+import '../../../core/utils/settings.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  checkStatus() async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (await isFirstTime() == false) {
+      final isLoggedIN = await isLoggedIn();
+      if (isLoggedIN) {
+        context.goNamed(RouteName.home);
+      } else {
+        context.goNamed(RouteName.login);
+      }
+    } else {
+      context.goNamed(RouteName.welcome);
+    }
+  }
+
+  @override
+  void initState() {
+    checkStatus();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: Assets.images.splashLogo.image(
-                width: 441,
-                fit: BoxFit.cover,
-              ),
+      appBar: AppBar(
+        toolbarHeight: 0,
+        backgroundColor: ColorName.primaryColor,
+      ),
+      backgroundColor: ColorName.primaryColor,
+      body: Center(
+        child: Container(
+            width: 120,
+            height: 120,
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25),
             ),
-          ),
-          Container(
-              width: 100.sh,
-              height: 100,
-              alignment: Alignment.topRight,
-              padding: const EdgeInsets.only(right: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        //
-                      },
-                      child: const TextWidget(
-                        text: "Next",
-                        color: ColorName.primaryColor,
-                      )),
-                  const SizedBox(width: 16),
-                  SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorName.primaryColor,
-                        shape: const CircleBorder(),
-                      ),
-                      onPressed: () {
-                        context.goNamed(RouteName.login);
-                      },
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Assets.images.nextArrow.image(),
-                      ),
-                    ),
-                  )
-                ],
-              )),
-        ],
+            child: SvgPicture.asset(
+              Assets.images.svgs.melaLogo,
+              color: ColorName.primaryColor,
+              height: 50,
+              width: 50,
+            )),
       ),
     );
   }

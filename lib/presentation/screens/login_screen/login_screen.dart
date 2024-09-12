@@ -192,6 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     } else if (state is LoginUserSuccess) {
                       setFirstTime(false);
+                      setIsLoggedIn(true);
                       context.goNamed(RouteName.home); //
                     }
                   },

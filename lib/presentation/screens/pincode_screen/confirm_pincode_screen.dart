@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
 import '../../../core/utils/show_snackbar.dart';
@@ -88,14 +89,14 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextWidget(
+            const TextWidget(
               text: 'Confirm your PIN',
               color: ColorName.primaryColor,
               fontSize: 20,
               weight: FontWeight.w700,
             ),
             const SizedBox(height: 5),
-            TextWidget(
+            const TextWidget(
               text: 'Please remember to keep it secure.',
               fontSize: 14,
               color: ColorName.grey,
@@ -126,6 +127,7 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                     description: state.reason,
                   );
                 } else if (state is PinSuccess) {
+                  setIsLoggedIn(true);
                   context.goNamed(RouteName.home);
                 }
               },

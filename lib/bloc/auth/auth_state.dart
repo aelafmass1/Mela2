@@ -58,8 +58,9 @@ final class RegisterUserLoaing extends AuthState {}
 
 final class RegisterUserFail extends AuthState {
   final String reason;
+  final String? field;
 
-  RegisterUserFail({required this.reason});
+  RegisterUserFail({required this.reason, this.field});
 }
 
 final class RegisterUserSuccess extends AuthState {}

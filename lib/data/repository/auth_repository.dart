@@ -22,7 +22,7 @@ class AuthRepository {
       return data;
     }
 
-    return {'error': data['errorResponse'].first['message']};
+    return {'error': data['errorResponse'].first['message'], 'data': data};
   }
 
   static Future<Map> loginUser({
