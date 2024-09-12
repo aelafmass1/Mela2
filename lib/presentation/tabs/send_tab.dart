@@ -2080,7 +2080,7 @@ class _SentTabState extends State<SentTab> {
                           paymentIntentClientSecret: clientSecret,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
-                          customFlow: true,
+                          // customFlow: true,
                           appearance: const PaymentSheetAppearance(
                             colors: PaymentSheetAppearanceColors(
                               primary: ColorName.primaryColor,
