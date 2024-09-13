@@ -2,23 +2,23 @@
 import 'dart:convert';
 
 class PaymentCardModel {
-  final int id;
+  final String id;
   final String cardBrand;
   final String last4Digits;
   final int expirationMonth;
   final int expirationYear;
-  final bool isDefault;
+  final bool? isDefault;
   PaymentCardModel({
     required this.id,
     required this.cardBrand,
     required this.last4Digits,
     required this.expirationMonth,
     required this.expirationYear,
-    required this.isDefault,
+    this.isDefault,
   });
 
   PaymentCardModel copyWith({
-    int? id,
+    String? id,
     String? cardBrand,
     String? last4Digits,
     int? expirationMonth,
@@ -42,18 +42,18 @@ class PaymentCardModel {
       'last4Digits': last4Digits,
       'expirationMonth': expirationMonth,
       'expirationYear': expirationYear,
-      'default': isDefault,
+      'isDefault': isDefault,
     };
   }
 
   factory PaymentCardModel.fromMap(Map<String, dynamic> map) {
     return PaymentCardModel(
-      id: map['id'] as int,
+      id: map['id'] as String,
       cardBrand: map['cardBrand'] as String,
       last4Digits: map['last4Digits'] as String,
       expirationMonth: map['expirationMonth'] as int,
       expirationYear: map['expirationYear'] as int,
-      isDefault: map['default'] as bool,
+      isDefault: map['isDefault'] != null ? map['isDefault'] as bool : null,
     );
   }
 
@@ -64,7 +64,7 @@ class PaymentCardModel {
 
   @override
   String toString() {
-    return 'PaymentMethodModel(id: $id, cardBrand: $cardBrand, last4Digits: $last4Digits, expirationMonth: $expirationMonth, expirationYear: $expirationYear, isDefault: $isDefault)';
+    return 'PaymentCardModel(id: $id, cardBrand: $cardBrand, last4Digits: $last4Digits, expirationMonth: $expirationMonth, expirationYear: $expirationYear, isDefault: $isDefault)';
   }
 
   @override

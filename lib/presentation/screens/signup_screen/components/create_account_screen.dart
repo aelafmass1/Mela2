@@ -430,9 +430,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         setState(() {
                           emailError = state.reason;
                         });
-                      } else if (state.field == 'phoneNumber') {
+                      } else {
+                        setState(() {
+                          emailError = '';
+                        });
+                      }
+                      if (state.field == 'phoneNumber') {
                         setState(() {
                           phoneNumberError = state.reason;
+                        });
+                      } else {
+                        setState(() {
+                          phoneNumberError = '';
                         });
                       }
                       setState(() {});

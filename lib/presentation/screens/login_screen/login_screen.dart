@@ -206,16 +206,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            String phoneCode =
-                                selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                            String phoneNumber =
-                                phoneCode + phoneNumberController.text;
-                            log(phoneNumber);
                             context.read<AuthBloc>().add(
                                   LoginUser(
                                     countryCode:
                                         selectedCoutry == 'ethiopia' ? 251 : 1,
-                                    phoneNumber: phoneNumber,
+                                    phoneNumber: phoneNumberController.text,
                                     password: passwordController.text,
                                   ),
                                 );
