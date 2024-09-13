@@ -74,3 +74,13 @@ final class LoginUserFail extends AuthState {
 }
 
 final class LoginUserSuccess extends AuthState {}
+
+final class LoginWithPincodeLoading extends AuthState {}
+
+final class LoginWithPincodeFail extends AuthState {
+  final String reason;
+
+  LoginWithPincodeFail({required this.reason});
+}
+
+final class LoginWithPincodeSuccess extends AuthState {}

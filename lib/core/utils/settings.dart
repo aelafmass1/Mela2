@@ -8,6 +8,7 @@ const _displayName = 'display_name';
 const _imageUrl = 'image_url';
 const _phoneNumber = 'phone_number';
 const _loggedIn = 'is_logged_in';
+const _countryCode = 'country_code';
 
 const storage = FlutterSecureStorage();
 
@@ -93,4 +94,20 @@ Future<bool> isLoggedIn() async {
 Future<void> deleteLogInStatus() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   await preferences.remove(_loggedIn);
+}
+
+Future<void> setCountryCode(int code) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  preferences.setInt(_countryCode, code);
+}
+
+Future<int?> getCountryCode() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+
+  return preferences.getInt(_countryCode);
+}
+
+Future<void> deleteCountryCode() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  await preferences.remove(_countryCode);
 }

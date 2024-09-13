@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (await isFirstTime() == false) {
       final isLoggedIN = await isLoggedIn();
       if (isLoggedIN) {
-        context.goNamed(RouteName.home);
+        context.goNamed(RouteName.loginPincode);
       } else {
         context.goNamed(RouteName.login);
       }

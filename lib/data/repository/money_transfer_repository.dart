@@ -9,6 +9,7 @@ class MoneyTransferRepository {
     required String accessToken,
     required ReceiverInfo receiverInfo,
     required String paymentId,
+    required String savedPaymentId,
   }) async {
     final res = await http.post(
       Uri.parse(
@@ -28,6 +29,7 @@ class MoneyTransferRepository {
         "paymentType": receiverInfo.paymentType,
         "publicToken": receiverInfo.publicToken ?? '',
         "paymentIntentId": paymentId,
+        "savedPaymentId": savedPaymentId,
       }),
     );
 

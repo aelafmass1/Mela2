@@ -23,6 +23,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
           accessToken: token,
           receiverInfo: event.receiverInfo,
           paymentId: event.paymentId,
+          savedPaymentId: event.savedPaymentId,
         );
         if (res.containsKey('error')) {
           return emit(MoneyTransferFail(reason: res['error']));

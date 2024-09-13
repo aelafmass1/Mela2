@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/core/utils/show_pincode.dart';
+import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
+import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -14,10 +15,13 @@ import '../../gen/colors.gen.dart';
 class PaymentCardSelection extends StatefulWidget {
   final List<PaymentCardModel> paymentCards;
   final Function() onAddNewCardPressed;
-  const PaymentCardSelection(
-      {super.key,
-      required this.paymentCards,
-      required this.onAddNewCardPressed});
+  final ReceiverInfo receiverInfo;
+  const PaymentCardSelection({
+    super.key,
+    required this.paymentCards,
+    required this.onAddNewCardPressed,
+    required this.receiverInfo,
+  });
 
   @override
   State<PaymentCardSelection> createState() => _PaymentCardSelectionState();
@@ -108,7 +112,15 @@ class _PaymentCardSelectionState extends State<PaymentCardSelection> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  //
+                  context.read<MoneyTransferBloc>().add(
+                        SendMoney(
+                          receiverInfo: widget.receiverInfo,
+                          paymentId: '',
+                          savedPaymentId: widget
+                              .paymentCards[selectedPaymentMethodIndex].id,
+                        ),
+                      );
+                  context.pop();
                 }),
           )
         ],

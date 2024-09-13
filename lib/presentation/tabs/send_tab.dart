@@ -211,6 +211,33 @@ class _SentTabState extends State<SentTab> {
       // Get the current user
       // Create a ReceiverInfo object with the recipient's information
       // if (await showPincode(context)) {
+      final feeState = context.read<FeeBloc>().state;
+      final bankState = context.read<BankFeeBloc>().state;
+      double totalFee = 0;
+      if (feeState is FeeSuccess && bankState is BankFeeSuccess) {
+        totalFee = (feeState.fees
+                .where((f) => f.type == 'FIXED')
+                .map((f) => f.amount)
+                .reduce((value, element) => value + element)) +
+            (feeState.fees
+                .where((f) => f.type == 'PERCENTAGE')
+                .map((f) => (((double.tryParse(usdController.text) ?? 0) *
+                    (f.amount / 100))))
+                .reduce((value, element) => value + element)) +
+            (selectedPaymentMethodIndex == 1
+                ? ((double.tryParse(usdController.text) ?? 0) *
+                    (bankState.bankFees
+                            .where((bf) => bf.paymentMethod == 'DEBIT')
+                            .first
+                            .amount /
+                        100))
+                : selectedPaymentMethodIndex == 2
+                    ? (bankState.bankFees
+                        .where((bf) => bf.paymentMethod == 'CREDIT')
+                        .first
+                        .amount)
+                    : 0);
+      }
       receiverInfo = ReceiverInfo(
         receiverName: receiverName.text,
         receiverPhoneNumber: isPermissionDenied
@@ -218,7 +245,7 @@ class _SentTabState extends State<SentTab> {
             : selectedContact!.phones.first.number,
         receiverBankName: selectedBank,
         receiverAccountNumber: bankAcocuntController.text,
-        amount: double.parse(usdController.text),
+        amount: double.parse(usdController.text) + totalFee,
         serviceChargePayer: whoPayFee,
         paymentType:
             selectedPaymentMethodIndex == 1 ? 'STRIPE_DEBIT' : 'STRIPE_CREDIT',
@@ -226,9 +253,9 @@ class _SentTabState extends State<SentTab> {
       // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
       context.read<MoneyTransferBloc>().add(
             SendMoney(
-              receiverInfo: receiverInfo!,
-              paymentId: paymentIntent.id,
-            ),
+                receiverInfo: receiverInfo!,
+                paymentId: paymentIntent.id,
+                savedPaymentId: ''),
           );
       log(paymentIntent.id);
       log(receiverInfo.toString());
@@ -1232,322 +1259,6 @@ class _SentTabState extends State<SentTab> {
                                   ],
                                 ),
                               )
-
-                          // DropdownMenuItem(
-                          //   value: 'Abyisinia Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.abysiniaLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Abyisinia Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Ahadu Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.ahaduLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Ahadu Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Abay Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.abayBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Abay Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Amhara Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.amaraBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Amhara Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Bank of Oromia',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.bankOfOromo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Bank of Oromia',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Awash Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.awashBank.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Awash Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Birhan Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.birhanBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Birhan Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Buna Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.bunaBank.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Buna Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Dashen Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.dashnBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Dashen Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Gedda Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.gedaBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Gedda Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Enat Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.enatBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Enat Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Global Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.globalBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Global Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Hibret Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.hibretBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Hibret Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Hijra Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.hijraBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Hijra Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Nib Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.nibBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Nib Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Oromia Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.oromiaBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Oromia Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Sinqe Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.sinqeBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Sinqe Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Tsedey Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.tsedeyBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Tsedey Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Tsehay Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.tsehayBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Tsehay Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Wegagen Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.wegagenBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Wegagen Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // DropdownMenuItem(
-                          //   value: 'Zemen Bank',
-                          //   child: Row(
-                          //     children: [
-                          //       Assets.images.zemenBankLogo.image(
-                          //         width: 24,
-                          //       ),
-                          //       const SizedBox(width: 10),
-                          //       const TextWidget(
-                          //         text: 'Zemen Bank',
-                          //         type: TextType.small,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
                         ],
                         onChanged: (value) {
                           if (value != null) {
@@ -2072,7 +1783,7 @@ class _SentTabState extends State<SentTab> {
                           paymentIntentClientSecret: clientSecret,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
-                          // customFlow: true,
+                          customFlow: true,
                           appearance: const PaymentSheetAppearance(
                             colors: PaymentSheetAppearanceColors(
                               primary: ColorName.primaryColor,
@@ -2168,9 +1879,9 @@ class _SentTabState extends State<SentTab> {
                             //                 final paymentIntent =
                             // await Stripe.instance.retrievePaymentIntent(clientSecret);
                             context.read<MoneyTransferBloc>().add(SendMoney(
-                                  receiverInfo: receiverInfo!,
-                                  paymentId: '',
-                                ));
+                                receiverInfo: receiverInfo!,
+                                paymentId: '',
+                                savedPaymentId: ''));
                           } else {
                             showSnackbar(
                               context,
@@ -2242,6 +1953,19 @@ class _SentTabState extends State<SentTab> {
                                     ),
                                   );
                             } else {
+                              receiverInfo = ReceiverInfo(
+                                receiverName: receiverName.text,
+                                receiverPhoneNumber: isPermissionDenied
+                                    ? phoneNumberController.text
+                                    : selectedContact!.phones.first.number,
+                                receiverBankName: selectedBank,
+                                receiverAccountNumber:
+                                    bankAcocuntController.text,
+                                amount:
+                                    double.parse(usdController.text) + totalFee,
+                                serviceChargePayer: whoPayFee,
+                                paymentType: 'SAVED_PAYMENT',
+                              );
                               showModalBottomSheet(
                                 context: context,
                                 backgroundColor: Colors.white,
@@ -2252,6 +1976,7 @@ class _SentTabState extends State<SentTab> {
                                   topRight: Radius.circular(30),
                                 )),
                                 builder: (_) => PaymentCardSelection(
+                                  receiverInfo: receiverInfo!,
                                   paymentCards: paymentCardState.paymentCards,
                                   onAddNewCardPressed: () {
                                     context.read<PaymentIntentBloc>().add(

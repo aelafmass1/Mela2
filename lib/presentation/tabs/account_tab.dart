@@ -275,6 +275,7 @@ class _AccountTabState extends State<AccountTab> {
                           deleteDisplayName();
                           deletePhoneNumber();
                           deleteLogInStatus();
+                          deleteCountryCode();
                           context.goNamed(RouteName.login);
                         },
                       ),

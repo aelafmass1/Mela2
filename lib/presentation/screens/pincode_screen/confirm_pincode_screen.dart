@@ -128,6 +128,7 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                   );
                 } else if (state is PinSuccess) {
                   setIsLoggedIn(true);
+                  setFirstTime(false);
                   context.goNamed(RouteName.home);
                 }
               },

@@ -70,20 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // ResponsiveBuilder(builder: (context, sizingInfo) {
-                //   return Padding(
-                //     padding: const EdgeInsets.only(top: 99),
-                //     child: SizedBox(
-                //       width: ResponsiveUtil.forScreen(
-                //           sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
-                //       child: const TextWidget(
-                //         text: 'Log in',
-                //         type: TextType.large,
-                //       ),
-                //     ),
-                //   );
-                // }),
                 TextFieldWidget(
                   prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
                   enableFocusColor: false,
@@ -170,20 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                // PhoneNumberBox(
-                //   onChange: (value) {
-                //     setState(() {
-                //       countryCode = value;
-                //     });
-                //   },
-                //   controller: phoneNumberController,
-                // ),
-                // PasswordBox(
-                //   controller: passwordController,
-                // ),
                 const SizedBox(height: 30),
                 BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
+                  listener: (context, state) async {
                     if (state is LoginUserFail) {
                       showSnackbar(
                         context,
@@ -191,9 +166,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         description: state.reason,
                       );
                     } else if (state is LoginUserSuccess) {
+                      await setCountryCode(
+                          selectedCoutry == 'ethiopia' ? 251 : 1);
                       setFirstTime(false);
-                      setIsLoggedIn(true);
-                      context.goNamed(RouteName.home); //
+
+                      // ignore: use_build_context_synchronously
+                      context.pushNamed(RouteName.loginPincode); //
                     }
                   },
                   builder: (context, state) {

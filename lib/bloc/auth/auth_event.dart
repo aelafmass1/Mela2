@@ -48,3 +48,9 @@ final class UploadProfilePicture extends AuthEvent {
   UploadProfilePicture(
       {required this.profilePicture, required this.phoneNumber});
 }
+
+final class LoginWithPincode extends AuthEvent {
+  final String pincode;
+
+  LoginWithPincode({required this.pincode});
+}

@@ -52,9 +52,37 @@ class AuthRepository {
     return {'error': data['message']};
   }
 
+  static Future<Map> loginWithPincode({
+    required String pincode,
+    required int phoneNumber,
+    required int countryCode,
+  }) async {
+    final res = await http.post(
+      Uri.parse(
+        '$baseUrl/auth/login',
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "countryCode": countryCode,
+        "phoneNumber": phoneNumber,
+        "pin": pincode,
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+
+    return {'error': data['message']};
+  }
+
   static Future<Map> deleteUser(
       String accessToken, String phoneNumber, String code) async {
-    return {};
+    return {
+      //
+    };
   }
 
   static Future<Map> setPincode(String accessToken, String pincode) async {

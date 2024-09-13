@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
@@ -7,6 +6,7 @@ import 'package:transaction_mobile_app/presentation/screens/home_screen/componen
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/confirm_pincode_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/pincode_screen/pincode_login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/set_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/password_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/profile_edit_screen.dart';
@@ -36,13 +36,14 @@ class RouteName {
   static const setPinCode = 'set_pincode_screen';
   static const confirmPinCode = 'confirm_pincode_screen';
   static const pinCode = 'pincode_screen';
+  static const loginPincode = 'login_pincode_screen';
 }
 
 final goRouting = GoRouter(
   initialLocation: '/splash',
   routes: [
     GoRoute(
-      path: '/',
+      path: '/welcome',
       name: RouteName.welcome,
       builder: (context, state) => const WelcomeScreen(),
     ),
@@ -133,6 +134,11 @@ final goRouting = GoRouter(
       builder: (context, state) => ProfileUploadScreen(
         userModel: state.extra as UserModel,
       ),
+    ),
+    GoRoute(
+      path: '/pincode_login',
+      name: RouteName.loginPincode,
+      builder: (context, state) => const PincodeLoginScreen(),
     ),
   ],
 );
