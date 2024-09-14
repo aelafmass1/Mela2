@@ -451,13 +451,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         description: state.reason,
                       );
                     } else if (state is RegisterUserSuccess) {
-                      String phoneCode =
-                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                      String phoneNumber =
-                          phoneCode + phoneNumberController.text;
                       context.read<AuthBloc>().add(
                             SendOTP(
-                              phoneNumber: phoneNumber,
+                              phoneNumber:
+                                  int.tryParse(phoneNumberController.text) ?? 0,
+                              countryCode:
+                                  selectedCoutry == 'ethiopia' ? 251 : 1,
                             ),
                           );
                       //
@@ -477,7 +476,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         lastName: lastNameController.text,
                         email: emailController.text,
                         password: password1Controller.text,
-                        phoneNumber: phoneNumber,
+                        phoneNumber: phoneNumberController.text,
                         countryCode: selectedCoutry == 'ethiopia' ? 251 : 1,
                       );
                       context.pushNamed(

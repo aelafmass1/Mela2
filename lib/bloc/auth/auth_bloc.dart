@@ -69,7 +69,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final accessToken = await getToken();
 
       final res = await AuthRepository.verifyOtp(
-          accessToken!, event.phoneNumber, event.code);
+        accessToken: accessToken!,
+        phoneNumber: event.phoneNumber,
+        code: event.code,
+        countryCode: event.conutryCode,
+      );
       if (res.containsKey('error')) {
         return emit(OTPVerificationFail(reason: res['error']));
       }
@@ -191,6 +195,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final res = await AuthRepository.sendOtp(
         accessToken!,
         event.phoneNumber,
+        event.countryCode,
       );
       if (res.containsKey('error')) {
         return emit(SendOTPFail(reason: res['error']));

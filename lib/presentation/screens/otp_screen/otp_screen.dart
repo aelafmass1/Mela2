@@ -178,7 +178,11 @@ class _OTPScreenState extends State<OTPScreen> {
                         onPressed: () {
                           context.read<AuthBloc>().add(
                                 SendOTP(
-                                    phoneNumber: widget.userModel.phoneNumber!),
+                                  phoneNumber: int.tryParse(
+                                          widget.userModel.phoneNumber!) ??
+                                      0,
+                                  countryCode: widget.userModel.countryCode!,
+                                ),
                               );
                         },
                         child: const TextWidget(
@@ -240,7 +244,10 @@ class _OTPScreenState extends State<OTPScreen> {
                       if (isValid) {
                         context.read<AuthBloc>().add(
                               VerfiyOTP(
-                                phoneNumber: widget.userModel.phoneNumber!,
+                                phoneNumber: int.tryParse(
+                                        widget.userModel.phoneNumber!) ??
+                                    0,
+                                conutryCode: widget.userModel.countryCode!,
                                 code: pins.join(),
                               ),
                             );

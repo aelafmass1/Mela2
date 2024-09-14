@@ -3,9 +3,10 @@ part of 'auth_bloc.dart';
 sealed class AuthEvent {}
 
 final class SendOTP extends AuthEvent {
-  final String phoneNumber;
+  final int phoneNumber;
+  final int countryCode;
 
-  SendOTP({required this.phoneNumber});
+  SendOTP({required this.phoneNumber, required this.countryCode});
 }
 
 final class CreateAccount extends AuthEvent {
@@ -35,10 +36,15 @@ final class UpdateUser extends AuthEvent {
 }
 
 final class VerfiyOTP extends AuthEvent {
-  final String phoneNumber;
+  final int phoneNumber;
+  final int conutryCode;
   final String code;
 
-  VerfiyOTP({required this.phoneNumber, required this.code});
+  VerfiyOTP({
+    required this.phoneNumber,
+    required this.code,
+    required this.conutryCode,
+  });
 }
 
 final class UploadProfilePicture extends AuthEvent {

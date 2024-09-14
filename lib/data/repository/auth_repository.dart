@@ -59,7 +59,7 @@ class AuthRepository {
   }) async {
     final res = await http.post(
       Uri.parse(
-        '$baseUrl/auth/login',
+        '$baseUrl/auth/login-by-pin',
       ),
       headers: {
         'Content-Type': 'application/json',
@@ -121,7 +121,8 @@ class AuthRepository {
     return {'error': data['message']};
   }
 
-  static Future<Map> sendOtp(String accessToken, String phoneNumber) async {
+  static Future<Map> sendOtp(
+      String accessToken, int phoneNumber, int countryCode) async {
     final res =
         await http.post(Uri.parse('$baseUrl/auth/phone/start-verification'),
             headers: {
@@ -130,6 +131,7 @@ class AuthRepository {
             },
             body: jsonEncode({
               "phoneNumber": phoneNumber,
+              "countryCode": countryCode,
             }));
 
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -139,8 +141,12 @@ class AuthRepository {
     return {'error': res.body};
   }
 
-  static Future<Map> verifyOtp(
-      String accessToken, String phoneNumber, String code) async {
+  static Future<Map> verifyOtp({
+    required String accessToken,
+    required int phoneNumber,
+    required String code,
+    required int countryCode,
+  }) async {
     final res = await http.post(Uri.parse('$baseUrl/auth/phone/verify-code'),
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -148,6 +154,7 @@ class AuthRepository {
         },
         body: jsonEncode(
           {
+            "countryCode": countryCode,
             "phoneNumber": phoneNumber,
             "code": code,
           },
