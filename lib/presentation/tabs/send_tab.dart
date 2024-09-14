@@ -215,6 +215,22 @@ class _SentTabState extends State<SentTab> {
       final bankState = context.read<BankFeeBloc>().state;
       double totalFee = 0;
       if (feeState is FeeSuccess && bankState is BankFeeSuccess) {
+        final creditCardAmount = bankState.bankFees
+                .where((bf) => bf.label == 'Credit Card fee')
+                .isEmpty
+            ? 0
+            : bankState.bankFees
+                .where((bf) => bf.label == 'Credit Card fee')
+                .first
+                .amount;
+        final debitCardAmount = bankState.bankFees
+                .where((bf) => bf.label == 'Debit Card fee')
+                .isEmpty
+            ? 0
+            : bankState.bankFees
+                .where((bf) => bf.label == 'Debit Card fee')
+                .first
+                .amount;
         totalFee = (feeState.fees
                 .where((f) => f.type == 'FIXED')
                 .map((f) => f.amount)
@@ -226,16 +242,9 @@ class _SentTabState extends State<SentTab> {
                 .reduce((value, element) => value + element)) +
             (selectedPaymentMethodIndex == 1
                 ? ((double.tryParse(usdController.text) ?? 0) *
-                    (bankState.bankFees
-                            .where((bf) => bf.paymentMethod == 'DEBIT')
-                            .first
-                            .amount /
-                        100))
+                    (debitCardAmount / 100))
                 : selectedPaymentMethodIndex == 2
-                    ? (bankState.bankFees
-                        .where((bf) => bf.paymentMethod == 'CREDIT')
-                        .first
-                        .amount)
+                    ? creditCardAmount
                     : 0);
       }
       receiverInfo = ReceiverInfo(
@@ -314,7 +323,6 @@ class _SentTabState extends State<SentTab> {
     context.read<FeeBloc>().add(FetchFees());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
     context.read<BanksBloc>().add(FetchBanks());
-    context.read<BankFeeBloc>().add(FetchBankFee());
 
     super.initState();
   }
@@ -409,9 +417,7 @@ class _SentTabState extends State<SentTab> {
                 context.read<FeeBloc>().add(FetchFees());
                 context.read<PaymentCardBloc>().add(FetchPaymentCards());
                 context.read<BanksBloc>().add(FetchBanks());
-                context.read<BankFeeBloc>().add(FetchBankFee());
                 await Future.delayed(Durations.extralong1);
-                //
               },
               child: SingleChildScrollView(
                 child: Form(
@@ -1343,6 +1349,7 @@ class _SentTabState extends State<SentTab> {
                       onPressed: () {
                         if (_recipientSelectionFormKey.currentState!
                             .validate()) {
+                          context.read<BankFeeBloc>().add(FetchBankFee());
                           setState(() {
                             index = 2;
                           });
@@ -1492,24 +1499,34 @@ class _SentTabState extends State<SentTab> {
                                     BlocBuilder<BankFeeBloc, BankFeeState>(
                                       builder: (context, state) {
                                         if (state is BankFeeSuccess) {
-                                          return Container(
-                                            margin:
-                                                const EdgeInsets.only(left: 10),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 7, vertical: 2),
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey
-                                                    .withOpacity(0.4),
-                                                borderRadius:
-                                                    BorderRadius.circular(10)),
-                                            child: TextWidget(
-                                              text:
-                                                  '+${state.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount}%',
-                                              fontSize: 11,
-                                              color: ColorName.primaryColor,
-                                              weight: FontWeight.w400,
-                                            ),
-                                          );
+                                          return state.bankFees
+                                                  .where((bf) =>
+                                                      bf.label ==
+                                                      'Debit Card fee')
+                                                  .isEmpty
+                                              ? const SizedBox.shrink()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 10),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.4),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  child: TextWidget(
+                                                    text:
+                                                        '+${state.bankFees.where((bf) => bf.label == 'Debit Card fee').first.amount}%',
+                                                    fontSize: 11,
+                                                    color:
+                                                        ColorName.primaryColor,
+                                                    weight: FontWeight.w400,
+                                                  ),
+                                                );
                                         }
                                         return const SizedBox.shrink();
                                       },
@@ -1568,24 +1585,34 @@ class _SentTabState extends State<SentTab> {
                                     BlocBuilder<BankFeeBloc, BankFeeState>(
                                       builder: (context, state) {
                                         if (state is BankFeeSuccess) {
-                                          return Container(
-                                            margin:
-                                                const EdgeInsets.only(left: 10),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 7, vertical: 2),
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey
-                                                    .withOpacity(0.4),
-                                                borderRadius:
-                                                    BorderRadius.circular(10)),
-                                            child: TextWidget(
-                                              text:
-                                                  '+${state.bankFees.where((bf) => bf.paymentMethod == 'CREDIT').first.amount}%',
-                                              fontSize: 11,
-                                              color: ColorName.primaryColor,
-                                              weight: FontWeight.w400,
-                                            ),
-                                          );
+                                          return state.bankFees
+                                                  .where((bf) =>
+                                                      bf.label ==
+                                                      'Credit Card fee')
+                                                  .isEmpty
+                                              ? const SizedBox.shrink()
+                                              : Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 10),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.4),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  child: TextWidget(
+                                                    text:
+                                                        '+${state.bankFees.where((bf) => bf.label == 'Credit Card fee').first.amount}%',
+                                                    fontSize: 11,
+                                                    color:
+                                                        ColorName.primaryColor,
+                                                    weight: FontWeight.w400,
+                                                  ),
+                                                );
                                         }
                                         return const SizedBox.shrink();
                                       },
@@ -1627,7 +1654,30 @@ class _SentTabState extends State<SentTab> {
                         ),
                         child: BlocBuilder<BankFeeBloc, BankFeeState>(
                           builder: (context, state) {
-                            if (state is BankFeeSuccess) {
+                            if (state is BankFeeLoading) {
+                              return Column(
+                                children: [
+                                  CustomShimmer(
+                                    width: 100.sw,
+                                    height: 34,
+                                  ),
+                                  const Divider(
+                                    color: ColorName.borderColor,
+                                  ),
+                                  CustomShimmer(
+                                    width: 100.sw,
+                                    height: 34,
+                                  ),
+                                  const Divider(
+                                    color: ColorName.borderColor,
+                                  ),
+                                  CustomShimmer(
+                                    width: 100.sw,
+                                    height: 34,
+                                  ),
+                                ],
+                              );
+                            } else if (state is BankFeeSuccess) {
                               return Column(
                                 children: [
                                   for (var bankFee in state.bankFees)
@@ -1715,12 +1765,39 @@ class _SentTabState extends State<SentTab> {
                                         ),
                                         BlocBuilder<FeeBloc, FeeState>(
                                           builder: (context, feeState) {
+                                            final creditCardAmount = state
+                                                    .bankFees
+                                                    .where((bf) =>
+                                                        bf.label ==
+                                                        'Credit Card fee')
+                                                    .isEmpty
+                                                ? 0
+                                                : state.bankFees
+                                                    .where((bf) =>
+                                                        bf.label ==
+                                                        'Credit Card fee')
+                                                    .first
+                                                    .amount;
+                                            final debitCardAmount = state
+                                                    .bankFees
+                                                    .where((bf) =>
+                                                        bf.label ==
+                                                        'Debit Card fee')
+                                                    .isEmpty
+                                                ? 0
+                                                : state.bankFees
+                                                    .where((bf) =>
+                                                        bf.label ==
+                                                        'Debit Card fee')
+                                                    .first
+                                                    .amount;
+
                                             return Row(
                                               children: [
                                                 if (feeState is FeeSuccess)
                                                   TextWidget(
                                                     text:
-                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (state.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount / 100)) : selectedPaymentMethodIndex == 2 ? (state.bankFees.where((bf) => bf.paymentMethod == 'CREDIT').first.amount) : 0)).toStringAsFixed(2)}',
+                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? creditCardAmount : 0)).toStringAsFixed(2)}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w500,
                                                   )
@@ -1783,7 +1860,7 @@ class _SentTabState extends State<SentTab> {
                           paymentIntentClientSecret: clientSecret,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
-                          customFlow: true,
+                          // customFlow: true,
                           appearance: const PaymentSheetAppearance(
                             colors: PaymentSheetAppearanceColors(
                               primary: ColorName.primaryColor,
@@ -1836,66 +1913,64 @@ class _SentTabState extends State<SentTab> {
                       } else if (state is PlaidPublicTokenSuccess) {
                         final feeState = context.read<FeeBloc>().state;
                         final bankState = context.read<BankFeeBloc>().state;
-                        if (feeState is FeeSuccess) {
-                          if (bankState is BankFeeSuccess) {
-                            final totalFee = (feeState.fees
-                                    .where((f) => f.type == 'FIXED')
-                                    .map((f) => f.amount)
-                                    .reduce(
-                                        (value, element) => value + element)) +
-                                (feeState.fees
-                                    .where((f) => f.type == 'PERCENTAGE')
-                                    .map((f) => (((double.tryParse(usdController.text) ?? 0) *
-                                        (f.amount / 100))))
-                                    .reduce(
-                                        (value, element) => value + element)) +
-                                (selectedPaymentMethodIndex == 1
-                                    ? ((double.tryParse(usdController.text) ?? 0) *
-                                        (bankState.bankFees
-                                                .where((bf) =>
-                                                    bf.paymentMethod == 'DEBIT')
-                                                .first
-                                                .amount /
-                                            100))
-                                    : selectedPaymentMethodIndex == 2
-                                        ? (bankState.bankFees
-                                            .where((bf) => bf.paymentMethod == 'CREDIT')
-                                            .first
-                                            .amount)
-                                        : 0);
-                            receiverInfo = ReceiverInfo(
-                              receiverName: receiverName.text,
-                              receiverPhoneNumber: isPermissionDenied
-                                  ? phoneNumberController.text
-                                  : selectedContact!.phones.first.number,
-                              receiverBankName: selectedBank,
-                              receiverAccountNumber: bankAcocuntController.text,
-                              paymentType: 'PLAID_ACH',
-                              amount:
-                                  double.parse(usdController.text) + totalFee,
-                              serviceChargePayer: whoPayFee,
-                              publicToken: publicToken,
-                            );
-                            //                 final paymentIntent =
-                            // await Stripe.instance.retrievePaymentIntent(clientSecret);
-                            context.read<MoneyTransferBloc>().add(SendMoney(
-                                receiverInfo: receiverInfo!,
-                                paymentId: '',
-                                savedPaymentId: ''));
-                          } else {
-                            showSnackbar(
-                              context,
-                              title: "Error",
-                              description: "Bank Fee not fetched",
-                            );
-                          }
-                        } else {
-                          showSnackbar(
-                            context,
-                            title: "Error",
-                            description: "Fee not fetched",
-                          );
+                        double totalFee = 0;
+                        if (feeState is FeeSuccess &&
+                            bankState is BankFeeSuccess) {
+                          final creditCardAmount = bankState.bankFees
+                                  .where((bf) => bf.label == 'Credit Card fee')
+                                  .isEmpty
+                              ? 0
+                              : bankState.bankFees
+                                  .where((bf) => bf.label == 'Credit Card fee')
+                                  .first
+                                  .amount;
+                          final debitCardAmount = bankState.bankFees
+                                  .where((bf) => bf.label == 'Debit Card fee')
+                                  .isEmpty
+                              ? 0
+                              : bankState.bankFees
+                                  .where((bf) => bf.label == 'Debit Card fee')
+                                  .first
+                                  .amount;
+                          totalFee = (feeState.fees
+                                  .where((f) => f.type == 'FIXED')
+                                  .map((f) => f.amount)
+                                  .reduce(
+                                      (value, element) => value + element)) +
+                              (feeState.fees
+                                  .where((f) => f.type == 'PERCENTAGE')
+                                  .map((f) =>
+                                      (((double.tryParse(usdController.text) ??
+                                              0) *
+                                          (f.amount / 100))))
+                                  .reduce(
+                                      (value, element) => value + element)) +
+                              (selectedPaymentMethodIndex == 1
+                                  ? ((double.tryParse(usdController.text) ??
+                                          0) *
+                                      (debitCardAmount / 100))
+                                  : selectedPaymentMethodIndex == 2
+                                      ? creditCardAmount
+                                      : 0);
                         }
+                        receiverInfo = ReceiverInfo(
+                          receiverName: receiverName.text,
+                          receiverPhoneNumber: isPermissionDenied
+                              ? phoneNumberController.text
+                              : selectedContact!.phones.first.number,
+                          receiverBankName: selectedBank,
+                          receiverAccountNumber: bankAcocuntController.text,
+                          paymentType: 'PLAID_ACH',
+                          amount: double.parse(usdController.text) + totalFee,
+                          serviceChargePayer: whoPayFee,
+                          publicToken: publicToken,
+                        );
+                        //                 final paymentIntent =
+                        // await Stripe.instance.retrievePaymentIntent(clientSecret);
+                        context.read<MoneyTransferBloc>().add(SendMoney(
+                            receiverInfo: receiverInfo!,
+                            paymentId: '',
+                            savedPaymentId: ''));
                       }
                     },
                     builder: (context, plaidState) {
@@ -1918,6 +1993,26 @@ class _SentTabState extends State<SentTab> {
                             double totalFee = 0;
                             if (feeState is FeeSuccess &&
                                 bankState is BankFeeSuccess) {
+                              final creditCardAmount = bankState.bankFees
+                                      .where(
+                                          (bf) => bf.label == 'Credit Card fee')
+                                      .isEmpty
+                                  ? 0
+                                  : bankState.bankFees
+                                      .where(
+                                          (bf) => bf.label == 'Credit Card fee')
+                                      .first
+                                      .amount;
+                              final debitCardAmount = bankState.bankFees
+                                      .where(
+                                          (bf) => bf.label == 'Debit Card fee')
+                                      .isEmpty
+                                  ? 0
+                                  : bankState.bankFees
+                                      .where(
+                                          (bf) => bf.label == 'Debit Card fee')
+                                      .first
+                                      .amount;
                               totalFee = (feeState.fees
                                       .where((f) => f.type == 'FIXED')
                                       .map((f) => f.amount)
@@ -1925,21 +2020,18 @@ class _SentTabState extends State<SentTab> {
                                           value + element)) +
                                   (feeState.fees
                                       .where((f) => f.type == 'PERCENTAGE')
-                                      .map((f) =>
-                                          (((double.tryParse(usdController.text) ?? 0) *
-                                              (f.amount / 100))))
+                                      .map((f) => (((double.tryParse(
+                                                  usdController.text) ??
+                                              0) *
+                                          (f.amount / 100))))
                                       .reduce((value, element) =>
                                           value + element)) +
                                   (selectedPaymentMethodIndex == 1
                                       ? ((double.tryParse(usdController.text) ??
                                               0) *
-                                          (bankState.bankFees.where((bf) => bf.paymentMethod == 'DEBIT').first.amount /
-                                              100))
+                                          (debitCardAmount / 100))
                                       : selectedPaymentMethodIndex == 2
-                                          ? (bankState.bankFees
-                                              .where((bf) => bf.paymentMethod == 'CREDIT')
-                                              .first
-                                              .amount)
+                                          ? creditCardAmount
                                           : 0);
                             }
                             final paymentCardState =

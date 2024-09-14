@@ -20,30 +20,32 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
 
   _onFetchPaymentCards(FetchPaymentCards event, Emitter emit) async {
     try {
-      emit(PaymentCardLoading(paymentCards: state.paymentCards));
-      final token = await getToken();
+      if (state is! PaymentCardLoading) {
+        emit(PaymentCardLoading(paymentCards: state.paymentCards));
+        final token = await getToken();
 
-      final res = await PaymentCardRepository.fetchPaymentCards(
-        accessToken: token!,
-      );
-      if (res.isNotEmpty) {
-        if (res.first.containsKey('error')) {
-          return emit(PaymentCardFail(
-            reason: res.first['error'],
+        final res = await PaymentCardRepository.fetchPaymentCards(
+          accessToken: token!,
+        );
+        if (res.isNotEmpty) {
+          if (res.first.containsKey('error')) {
+            return emit(PaymentCardFail(
+              reason: res.first['error'],
+              paymentCards: state.paymentCards,
+            ));
+          }
+          final cards = res
+              .map((c) => PaymentCardModel.fromMap(c as Map<String, dynamic>))
+              .toList();
+
+          emit(PaymentCardSuccess(
+            paymentCards: cards,
+          ));
+        } else {
+          emit(PaymentCardSuccess(
             paymentCards: state.paymentCards,
           ));
         }
-        final cards = res
-            .map((c) => PaymentCardModel.fromMap(c as Map<String, dynamic>))
-            .toList();
-
-        emit(PaymentCardSuccess(
-          paymentCards: cards,
-        ));
-      } else {
-        emit(PaymentCardSuccess(
-          paymentCards: state.paymentCards,
-        ));
       }
     } catch (error) {
       log(error.toString());
@@ -58,27 +60,29 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
 
   _onPaymentCard(AddPaymentCard event, Emitter emit) async {
     try {
-      List<PaymentCardModel> cards = state.paymentCards;
+      if (state is! PaymentCardLoading) {
+        List<PaymentCardModel> cards = state.paymentCards;
 
-      emit(PaymentCardLoading(paymentCards: state.paymentCards));
-      final token = await getToken();
+        emit(PaymentCardLoading(paymentCards: state.paymentCards));
+        final token = await getToken();
 
-      final res = await PaymentCardRepository.addPaymentCard(
-        accessToken: token!,
-        token: event.token,
-      );
-      if (res.containsKey('error')) {
-        return emit(PaymentCardFail(
-          reason: res['error'],
-          paymentCards: state.paymentCards,
+        final res = await PaymentCardRepository.addPaymentCard(
+          accessToken: token!,
+          token: event.token,
+        );
+        if (res.containsKey('error')) {
+          return emit(PaymentCardFail(
+            reason: res['error'],
+            paymentCards: state.paymentCards,
+          ));
+        }
+        final newCard = PaymentCardModel.fromMap(res);
+        cards.add(newCard);
+
+        emit(PaymentCardSuccess(
+          paymentCards: cards,
         ));
       }
-      final newCard = PaymentCardModel.fromMap(res);
-      cards.add(newCard);
-
-      emit(PaymentCardSuccess(
-        paymentCards: cards,
-      ));
     } catch (error) {
       log(error.toString());
       emit(

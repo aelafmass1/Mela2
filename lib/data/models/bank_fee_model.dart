@@ -6,13 +6,11 @@ class BankFeeModel {
   final String label;
   final String type;
   final double amount;
-  final String paymentMethod;
   BankFeeModel({
     required this.id,
     required this.label,
     required this.type,
     required this.amount,
-    required this.paymentMethod,
   });
 
   BankFeeModel copyWith({
@@ -20,14 +18,12 @@ class BankFeeModel {
     String? label,
     String? type,
     double? amount,
-    String? paymentMethod,
   }) {
     return BankFeeModel(
       id: id ?? this.id,
       label: label ?? this.label,
       type: type ?? this.type,
       amount: amount ?? this.amount,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
 
@@ -37,7 +33,6 @@ class BankFeeModel {
       'label': label,
       'type': type,
       'amount': amount,
-      'paymentMethod': paymentMethod,
     };
   }
 
@@ -47,7 +42,6 @@ class BankFeeModel {
       label: map['label'] as String,
       type: map['type'] as String,
       amount: map['amount'] as double,
-      paymentMethod: map['paymentMethod'] as String,
     );
   }
 
@@ -58,7 +52,7 @@ class BankFeeModel {
 
   @override
   String toString() {
-    return 'BankFeeModel(id: $id, label: $label, type: $type, amount: $amount, paymentMethod: $paymentMethod)';
+    return 'BankFeeModel(id: $id, label: $label, type: $type, amount: $amount)';
   }
 
   @override
@@ -68,16 +62,11 @@ class BankFeeModel {
     return other.id == id &&
         other.label == label &&
         other.type == type &&
-        other.amount == amount &&
-        other.paymentMethod == paymentMethod;
+        other.amount == amount;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        label.hashCode ^
-        type.hashCode ^
-        amount.hashCode ^
-        paymentMethod.hashCode;
+    return id.hashCode ^ label.hashCode ^ type.hashCode ^ amount.hashCode;
   }
 }

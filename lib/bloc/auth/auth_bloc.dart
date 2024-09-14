@@ -24,21 +24,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onLoginWithPincode(LoginWithPincode event, Emitter emit) async {
     try {
-      emit(LoginWithPincodeLoading());
-      final countryCode = await getCountryCode();
-      final phoneNumber = await getPhoneNumber();
-      int phoneNumberInt = int.parse(phoneNumber!);
-      final res = await AuthRepository.loginWithPincode(
-        pincode: event.pincode,
-        countryCode: countryCode!,
-        phoneNumber: phoneNumberInt,
-      );
-      if (res.containsKey('error')) {
-        return emit(LoginWithPincodeFail(reason: res['error']));
+      if (state is! LoginWithPincodeLoading) {
+        emit(LoginWithPincodeLoading());
+        final countryCode = await getCountryCode();
+        final phoneNumber = await getPhoneNumber();
+        int phoneNumberInt = int.parse(phoneNumber!);
+        final res = await AuthRepository.loginWithPincode(
+          pincode: event.pincode,
+          countryCode: countryCode!,
+          phoneNumber: phoneNumberInt,
+        );
+        if (res.containsKey('error')) {
+          return emit(LoginWithPincodeFail(reason: res['error']));
+        }
+        final token = res['successResponse']['jwtToken'];
+        storeToken(token);
+        emit(LoginWithPincodeSuccess());
       }
-      final token = res['successResponse']['jwtToken'];
-      storeToken(token);
-      emit(LoginWithPincodeSuccess());
     } catch (error) {
       log(error.toString());
       emit(LoginWithPincodeFail(reason: error.toString()));
@@ -65,19 +67,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
-      emit(OTPVerificationLoading());
-      final accessToken = await getToken();
+      if (state is! OTPVerificationLoading) {
+        emit(OTPVerificationLoading());
+        final accessToken = await getToken();
 
-      final res = await AuthRepository.verifyOtp(
-        accessToken: accessToken!,
-        phoneNumber: event.phoneNumber,
-        code: event.code,
-        countryCode: event.conutryCode,
-      );
-      if (res.containsKey('error')) {
-        return emit(OTPVerificationFail(reason: res['error']));
+        final res = await AuthRepository.verifyOtp(
+          accessToken: accessToken!,
+          phoneNumber: event.phoneNumber,
+          code: event.code,
+          countryCode: event.conutryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(OTPVerificationFail(reason: res['error']));
+        }
+        emit(OTPVerificationSuccess());
       }
-      emit(OTPVerificationSuccess());
     } catch (error) {
       log(error.toString());
       emit(OTPVerificationFail(reason: error.toString()));
@@ -134,23 +138,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onLoginUser(LoginUser event, Emitter emit) async {
     try {
-      emit(LoginUserLoading());
-      final phoneNumber = int.parse(event.phoneNumber.trim());
-      final res = await AuthRepository.loginUser(
-        phoneNumber: phoneNumber,
-        countryCode: event.countryCode,
-        password: event.password,
-      );
-      if (res.containsKey('error')) {
-        return emit(LoginUserFail(reason: res['error']));
-      }
-      final data = res['successResponse'];
-      final token = data['jwtToken'];
+      if (state is! LoginUserLoading) {
+        emit(LoginUserLoading());
+        final phoneNumber = int.parse(event.phoneNumber.trim());
+        final res = await AuthRepository.loginUser(
+          phoneNumber: phoneNumber,
+          countryCode: event.countryCode,
+          password: event.password,
+        );
+        if (res.containsKey('error')) {
+          return emit(LoginUserFail(reason: res['error']));
+        }
+        final data = res['successResponse'];
+        final token = data['jwtToken'];
 
-      await storeToken(token);
-      storeDisplayName('${data['firstName']} ${data['lastName']}');
-      storePhoneNumber(event.phoneNumber);
-      emit(LoginUserSuccess());
+        await storeToken(token);
+        storeDisplayName('${data['firstName']} ${data['lastName']}');
+        storePhoneNumber(event.phoneNumber);
+        emit(LoginUserSuccess());
+      }
     } catch (error) {
       emit(LoginUserFail(reason: error.toString()));
     }
@@ -158,30 +164,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onCreateAccount(CreateAccount event, Emitter emit) async {
     try {
-      emit(RegisterUserLoaing());
-      final res = await AuthRepository.registerUser(
-        event.userModel,
-      );
-      if (res.containsKey('error')) {
-        List errorResponse = res['data']['errorResponse'];
-        String fieldName = '';
-        if (errorResponse.isNotEmpty) {
-          if (errorResponse.first.containsKey('field')) {
-            fieldName = errorResponse.first['field'];
+      if (state is! RegisterUserLoaing) {
+        emit(RegisterUserLoaing());
+        final res = await AuthRepository.registerUser(
+          event.userModel,
+        );
+        if (res.containsKey('error')) {
+          List errorResponse = res['data']['errorResponse'];
+          String fieldName = '';
+          if (errorResponse.isNotEmpty) {
+            if (errorResponse.first.containsKey('field')) {
+              fieldName = errorResponse.first['field'];
+            }
           }
+          return emit(RegisterUserFail(
+            reason: res['error'],
+            field: fieldName,
+          ));
         }
-        return emit(RegisterUserFail(
-          reason: res['error'],
-          field: fieldName,
-        ));
+        final token = res['successResponse']['jwtToken'];
+        storeToken(token);
+        storeDisplayName(
+            '${event.userModel.firstName} ${event.userModel.lastName}');
+        storePhoneNumber(event.userModel.phoneNumber!);
+        setCountryCode(event.userModel.countryCode!);
+        emit(RegisterUserSuccess());
       }
-      final token = res['successResponse']['jwtToken'];
-      storeToken(token);
-      storeDisplayName(
-          '${event.userModel.firstName} ${event.userModel.lastName}');
-      storePhoneNumber(event.userModel.phoneNumber!);
-      setCountryCode(event.userModel.countryCode!);
-      emit(RegisterUserSuccess());
     } catch (error) {
       emit(RegisterUserFail(reason: error.toString()));
     }
@@ -189,18 +197,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
-      emit(SendOTPLoading());
-      final accessToken = await getToken();
+      if (state is! SendOTPLoading) {
+        emit(SendOTPLoading());
+        final accessToken = await getToken();
 
-      final res = await AuthRepository.sendOtp(
-        accessToken!,
-        event.phoneNumber,
-        event.countryCode,
-      );
-      if (res.containsKey('error')) {
-        return emit(SendOTPFail(reason: res['error']));
+        final res = await AuthRepository.sendOtp(
+          accessToken!,
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
+        emit(SendOTPSuccess());
       }
-      emit(SendOTPSuccess());
     } catch (error) {
       log(error.toString());
       emit(SendOTPFail(reason: error.toString()));

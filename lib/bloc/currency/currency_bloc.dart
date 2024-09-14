@@ -14,20 +14,21 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
   }
   _onFetchAllCurrencies(FetchAllCurrencies event, Emitter emit) async {
     try {
-      //loading state
-      emit(CurrencyLoading());
-      final token = await getToken();
+      if (state is! CurrencyLoading) {
+        emit(CurrencyLoading());
+        final token = await getToken();
 
-      if (token != null) {
-        final res = await CurrencyRepository.fetchCurrencies(token);
-        if (res.first.containsKey('error')) {
-          return emit(CurrencyFail(reason: res.first['error']));
+        if (token != null) {
+          final res = await CurrencyRepository.fetchCurrencies(token);
+          if (res.first.containsKey('error')) {
+            return emit(CurrencyFail(reason: res.first['error']));
+          }
+          emit(
+            CurrencySuccess(
+              currencies: res.map((c) => CurrencyModel.fromMap(c)).toList(),
+            ),
+          );
         }
-        emit(
-          CurrencySuccess(
-            currencies: res.map((c) => CurrencyModel.fromMap(c)).toList(),
-          ),
-        );
       }
     } catch (error) {
       emit(CurrencyFail(reason: error.toString()));
@@ -37,21 +38,23 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
   _onFetchPromotinalCurrency(
       FetchPromotionalCurrency event, Emitter emit) async {
     try {
-      emit(CurrencyLoading());
-      final token = await getToken();
+      if (state is! CurrencyLoading) {
+        emit(CurrencyLoading());
+        final token = await getToken();
 
-      if (token != null) {
-        final res = await CurrencyRepository.fetchPromotionalCurrency(token);
-        if (res.containsKey('error')) {
-          return emit(CurrencyFail(reason: res['error']));
+        if (token != null) {
+          final res = await CurrencyRepository.fetchPromotionalCurrency(token);
+          if (res.containsKey('error')) {
+            return emit(CurrencyFail(reason: res['error']));
+          }
+          emit(
+            CurrencySuccess(
+              currencies: [
+                CurrencyModel.fromMap(res),
+              ],
+            ),
+          );
         }
-        emit(
-          CurrencySuccess(
-            currencies: [
-              CurrencyModel.fromMap(res),
-            ],
-          ),
-        );
       }
     } catch (error) {
       emit(CurrencyFail(reason: error.toString()));

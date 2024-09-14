@@ -18,25 +18,27 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
   /// Emits [PaymentIntentLoading], [PaymentIntentSuccess], or [PaymentIntentFail] states.
   _onFetchClientSecret(FetchClientSecret event, Emitter emit) async {
     try {
-      emit(PaymentIntentLoading());
-      final token = await getToken();
+      if (state is! PaymentIntentLoading) {
+        emit(PaymentIntentLoading());
+        final token = await getToken();
 
-      if (token != null) {
-        final res = await PaymentIntentRepository.createPaymentIntent(
-          currency: event.currency,
-          amount: event.amount,
-          accessToken: token,
-        );
-        if (res.containsKey('error')) {
-          return emit(PaymentIntentFail(reason: res['error']));
+        if (token != null) {
+          final res = await PaymentIntentRepository.createPaymentIntent(
+            currency: event.currency,
+            amount: event.amount,
+            accessToken: token,
+          );
+          if (res.containsKey('error')) {
+            return emit(PaymentIntentFail(reason: res['error']));
+          }
+          emit(
+            PaymentIntentSuccess(
+                clientSecret: res['clientSecret'],
+                customerId: res['stripeCustomerId']),
+          );
+        } else {
+          emit(PaymentIntentFail(reason: 'Please login first'));
         }
-        emit(
-          PaymentIntentSuccess(
-              clientSecret: res['clientSecret'],
-              customerId: res['stripeCustomerId']),
-        );
-      } else {
-        emit(PaymentIntentFail(reason: 'Please login first'));
       }
     } catch (error) {
       log(error.toString());

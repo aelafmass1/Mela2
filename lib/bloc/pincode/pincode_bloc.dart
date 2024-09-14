@@ -14,17 +14,19 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
   }
   _onVerifyPincode(VerifyPincode event, Emitter emit) async {
     try {
-      emit(PinLoading());
-      final token = await getToken();
+      if (state is! PinLoading) {
+        emit(PinLoading());
+        final token = await getToken();
 
-      final res = await AuthRepository.verfiyPincode(
-        token ?? '',
-        event.pincode,
-      );
-      if (res.containsKey('error')) {
-        return emit(PinFail(reason: res['error']));
+        final res = await AuthRepository.verfiyPincode(
+          token ?? '',
+          event.pincode,
+        );
+        if (res.containsKey('error')) {
+          return emit(PinFail(reason: res['error']));
+        }
+        emit(PinSuccess());
       }
-      emit(PinSuccess());
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());
@@ -33,13 +35,15 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
 
   _onSetPincode(SetPinCode event, Emitter emit) async {
     try {
-      emit(PinLoading());
-      final token = await getToken();
-      final res = await AuthRepository.setPincode(token ?? '', event.pincode);
-      if (res.containsKey('error')) {
-        return emit(PinFail(reason: res['error']));
+      if (state is! PinLoading) {
+        emit(PinLoading());
+        final token = await getToken();
+        final res = await AuthRepository.setPincode(token ?? '', event.pincode);
+        if (res.containsKey('error')) {
+          return emit(PinFail(reason: res['error']));
+        }
+        emit(PinSuccess());
       }
-      emit(PinSuccess());
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());

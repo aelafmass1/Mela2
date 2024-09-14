@@ -15,18 +15,20 @@ class FeeBloc extends Bloc<FeeEvent, FeeState> {
   }
   _onFetchFees(FetchFees event, Emitter emit) async {
     try {
-      emit(FeeLoading());
-      final token = await getToken();
+      if (state is! FeeLoading) {
+        emit(FeeLoading());
+        final token = await getToken();
 
-      final res = await FeeRepository.fetchFees(token!);
-      if (res.first.containsKey('error')) {
-        return emit(FeeFailed(reason: res.first['error']));
+        final res = await FeeRepository.fetchFees(token!);
+        if (res.first.containsKey('error')) {
+          return emit(FeeFailed(reason: res.first['error']));
+        }
+        emit(
+          FeeSuccess(
+            fees: res.map((f) => FeeModel.fromMap(f)).toList(),
+          ),
+        );
       }
-      emit(
-        FeeSuccess(
-          fees: res.map((f) => FeeModel.fromMap(f)).toList(),
-        ),
-      );
     } catch (error) {
       log(error.toString());
       emit(FeeFailed(reason: error.toString()));

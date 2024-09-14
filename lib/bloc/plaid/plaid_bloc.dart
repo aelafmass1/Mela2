@@ -15,15 +15,17 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
   }
   _onExchangePublicToken(ExchangePublicToken event, Emitter emit) async {
     try {
-      emit(PlaidPublicTokenLoading());
-      final token = await getToken();
+      if (state is! PlaidPublicTokenLoading) {
+        emit(PlaidPublicTokenLoading());
+        final token = await getToken();
 
-      final res =
-          await PlaidRepository.exchangePublicToken(token!, event.publicToken);
-      if (res.containsKey('error')) {
-        return emit(PlaidPublicTokenFail(reason: res['error']));
+        final res = await PlaidRepository.exchangePublicToken(
+            token!, event.publicToken);
+        if (res.containsKey('error')) {
+          return emit(PlaidPublicTokenFail(reason: res['error']));
+        }
+        emit(PlaidPublicTokenSuccess());
       }
-      emit(PlaidPublicTokenSuccess());
     } catch (error) {
       log(error.toString());
       emit(PlaidPublicTokenFail(reason: error.toString()));
@@ -32,14 +34,16 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
 
   _onCreateLinkToken(CreateLinkToken event, Emitter emit) async {
     try {
-      emit(PlaidLinkTokenLoading());
-      final token = await getToken();
+      if (state is! PlaidLinkTokenLoading) {
+        emit(PlaidLinkTokenLoading());
+        final token = await getToken();
 
-      final res = await PlaidRepository.createLinkToken(token!);
-      if (res.containsKey('error')) {
-        return emit(PlaidLinkTokenFail(reason: res['error']));
+        final res = await PlaidRepository.createLinkToken(token!);
+        if (res.containsKey('error')) {
+          return emit(PlaidLinkTokenFail(reason: res['error']));
+        }
+        emit(PlaidLinkTokenSuccess(linkToken: res['linkToken']));
       }
-      emit(PlaidLinkTokenSuccess(linkToken: res['linkToken']));
     } catch (error) {
       log(error.toString());
       emit(PlaidLinkTokenFail(reason: error.toString()));

@@ -15,20 +15,22 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
   }
   _onSendMoney(SendMoney event, Emitter emit) async {
     try {
-      emit(MoneyTransferLoading());
-      final token = await getToken();
+      if (state is! MoneyTransferLoading) {
+        emit(MoneyTransferLoading());
+        final token = await getToken();
 
-      if (token != null) {
-        final res = await MoneyTransferRepository.sendMoney(
-          accessToken: token,
-          receiverInfo: event.receiverInfo,
-          paymentId: event.paymentId,
-          savedPaymentId: event.savedPaymentId,
-        );
-        if (res.containsKey('error')) {
-          return emit(MoneyTransferFail(reason: res['error']));
+        if (token != null) {
+          final res = await MoneyTransferRepository.sendMoney(
+            accessToken: token,
+            receiverInfo: event.receiverInfo,
+            paymentId: event.paymentId,
+            savedPaymentId: event.savedPaymentId,
+          );
+          if (res.containsKey('error')) {
+            return emit(MoneyTransferFail(reason: res['error']));
+          }
+          emit(MoneyTransferSuccess());
         }
-        emit(MoneyTransferSuccess());
       }
     } catch (error) {
       log(error.toString());

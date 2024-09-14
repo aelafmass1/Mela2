@@ -16,17 +16,19 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
 
   _onFetchBanks(FetchBanks event, Emitter emit) async {
     try {
-      emit(BanksLoading());
-      final token = await getToken();
+      if (state is! BanksLoading) {
+        emit(BanksLoading());
+        final token = await getToken();
 
-      final res = await BanksRepository.fetchBanks(token!);
-      if (res.first.containsKey('error')) {
-        return emit(BanksFail(reason: res.first['error']));
+        final res = await BanksRepository.fetchBanks(token!);
+        if (res.first.containsKey('error')) {
+          return emit(BanksFail(reason: res.first['error']));
+        }
+        final banks = res.map((b) => BankModel.fromMap(b)).toList();
+        emit(
+          BanksSuccess(bankList: banks),
+        );
       }
-      final banks = res.map((b) => BankModel.fromMap(b)).toList();
-      emit(
-        BanksSuccess(bankList: banks),
-      );
     } catch (error) {
       log(error.toString());
       emit(BanksFail(reason: error.toString()));

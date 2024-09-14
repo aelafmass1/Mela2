@@ -15,17 +15,19 @@ class BankFeeBloc extends Bloc<BankFeeEvent, BankFeeState> {
   }
   _onFetchBankFee(FetchBankFee evene, Emitter emit) async {
     try {
-      emit(BankFeeLoading());
-      final token = await getToken();
+      if (state is! BankFeeLoading) {
+        emit(BankFeeLoading());
+        final token = await getToken();
 
-      final res = await BanksRepository.fetchBankFee(token!);
-      if (res.first.containsKey('error')) {
-        return emit(BankFeeFail(reason: res.first['error']));
+        final res = await BanksRepository.fetchBankFee(token!);
+        if (res.first.containsKey('error')) {
+          return emit(BankFeeFail(reason: res.first['error']));
+        }
+        emit(
+          BankFeeSuccess(
+              bankFees: res.map((f) => BankFeeModel.fromMap(f)).toList()),
+        );
       }
-      emit(
-        BankFeeSuccess(
-            bankFees: res.map((f) => BankFeeModel.fromMap(f)).toList()),
-      );
     } catch (error) {
       log(error.toString());
       emit(BankFeeFail(reason: error.toString()));

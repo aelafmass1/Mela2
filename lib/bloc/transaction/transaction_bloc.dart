@@ -17,34 +17,36 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
   _onFetchTransaction(FetchTrasaction event, Emitter emit) async {
     try {
-      emit(TransactionLoading());
-      final token = await getToken();
+      if (state is! TransactionLoading) {
+        emit(TransactionLoading());
+        final token = await getToken();
 
-      final res = await TransactionRepository.fetchTransaction(
-        token!,
-      );
-      if (res.containsKey('error')) {
-        return emit(TransactionFail(error: res['error']));
-      }
-      final data = res['success'] as List;
-      final transactions = data.map((t) => ReceiverInfo.fromMap(t)).toList();
-      Map<String, List<ReceiverInfo>> groupedTransactions = {};
-
-      for (var transaction in transactions) {
-        String formattedDate = DateFormat('yyyy-MM-dd')
-            .format(transaction.trasactionDate ?? DateTime.now());
-
-        if (groupedTransactions.containsKey(formattedDate)) {
-          groupedTransactions[formattedDate]!.add(transaction);
-        } else {
-          groupedTransactions[formattedDate] = [transaction];
+        final res = await TransactionRepository.fetchTransaction(
+          token!,
+        );
+        if (res.containsKey('error')) {
+          return emit(TransactionFail(error: res['error']));
         }
+        final data = res['success'] as List;
+        final transactions = data.map((t) => ReceiverInfo.fromMap(t)).toList();
+        Map<String, List<ReceiverInfo>> groupedTransactions = {};
 
-        return emit(TransactionSuccess(
-          data: groupedTransactions,
-        ));
+        for (var transaction in transactions) {
+          String formattedDate = DateFormat('yyyy-MM-dd')
+              .format(transaction.trasactionDate ?? DateTime.now());
+
+          if (groupedTransactions.containsKey(formattedDate)) {
+            groupedTransactions[formattedDate]!.add(transaction);
+          } else {
+            groupedTransactions[formattedDate] = [transaction];
+          }
+
+          return emit(TransactionSuccess(
+            data: groupedTransactions,
+          ));
+        }
+        emit(TransactionSuccess(data: groupedTransactions));
       }
-      emit(TransactionSuccess(data: groupedTransactions));
     } catch (error) {
       log(error.toString());
       return emit(TransactionFail(error: error.toString()));

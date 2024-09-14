@@ -17,11 +17,11 @@ class BankCurrencyRateBloc
   _onFetchCurrencyRate(
       FetchCurrencyRate event, Emitter<BankCurrencyRateState> emit) async {
     try {
-      final token = await getToken();
-
-      if (token != null) {
+      if (state is! BankCurrencyRateLoading) {
         emit(BankCurrencyRateLoading());
-        final res = await CurrencyRateRepository.fetchCurrencyRate(token);
+
+        final token = await getToken();
+        final res = await CurrencyRateRepository.fetchCurrencyRate(token!);
         final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
         emit(BankCurrencyRateSuccess(rates: rates));
       }
