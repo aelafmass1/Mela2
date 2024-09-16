@@ -45,7 +45,9 @@ class EqubCard extends StatelessWidget {
             ),
             child: Center(
               child: TextWidget(
-                text: equb.name.split(' ').map((e) => e[0]).join(),
+                text: equb.name.split(' ').length > 1
+                    ? equb.name.split(' ').map((e) => e[0]).join().toUpperCase()
+                    : equb.name.split('').first.toUpperCase(),
                 color: Colors.white,
                 fontSize: 14,
               ),

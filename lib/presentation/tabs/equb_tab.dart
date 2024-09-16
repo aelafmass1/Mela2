@@ -24,7 +24,9 @@ class _EqubTabState extends State<EqubTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         toolbarHeight: 30,
       ),
       body: Padding(
