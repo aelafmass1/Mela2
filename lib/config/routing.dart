@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
@@ -37,6 +38,7 @@ class RouteName {
   static const confirmPinCode = 'confirm_pincode_screen';
   static const pinCode = 'pincode_screen';
   static const loginPincode = 'login_pincode_screen';
+  static const completePage = 'complete_page';
 }
 
 final goRouting = GoRouter(
@@ -85,6 +87,13 @@ final goRouting = GoRouter(
             path: 'password_edit',
             name: RouteName.passwordEdit,
             builder: (context, state) => const PasswordEditScreen(),
+          ),
+          GoRoute(
+            path: 'complete_page',
+            name: RouteName.completePage,
+            builder: (context, state) => CompletePage(
+              equbName: state.extra as String,
+            ),
           ),
         ]),
     GoRoute(

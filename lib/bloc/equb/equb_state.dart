@@ -14,3 +14,16 @@ class EqubState {
     );
   }
 }
+
+final class EqubLoading extends EqubState {
+  EqubLoading({required super.equbList});
+}
+
+final class EqubSuccess extends EqubState {
+  EqubSuccess({required super.equbList});
+}
+
+final class EqubFail extends EqubState {
+  final String reason;
+  EqubFail({required super.equbList, required this.reason});
+}

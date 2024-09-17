@@ -4,16 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../../data/models/contact_model.dart';
 
 class EqubCreationScreen extends StatefulWidget {
   const EqubCreationScreen({super.key});
@@ -31,6 +37,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   final searchingController = TextEditingController();
   String selectedCurrency = 'usd';
   String? selectedFrequency;
+  String adminName = '';
   int index = 0;
 
   final _formKey = GlobalKey<FormState>();
@@ -55,12 +62,23 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   }
 
   @override
+  void initState() {
+    getDisplayName().then((value) {
+      setState(() {
+        adminName = value ?? '';
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorName.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: ColorName.white,
+        surfaceTintColor: Colors.white,
         leading: IconButton(
           onPressed: () {
             if (index == 0) {
@@ -178,10 +196,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                 child: Visibility(
                   visible: index != 3,
                   child: ButtonWidget(
-                      onPressed: (index == 1 &&
-                                  (selectedContacts.length !=
-                                      int.tryParse(
-                                          numberOfMembersController.text))) ||
+                      onPressed: (index == 1 && (selectedContacts.isEmpty)) ||
                               (index == 2 && agreeToTermAndCondition == false)
                           ? null
                           : () {
@@ -257,28 +272,28 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
           },
           items: const [
             DropdownMenuItem(
-              value: 'daily',
+              value: 'DAILY',
               child: TextWidget(
                 text: 'Daily',
                 type: TextType.small,
               ),
             ),
             DropdownMenuItem(
-              value: 'weekly',
+              value: 'WEEKLY',
               child: TextWidget(
                 text: 'Weekly',
                 type: TextType.small,
               ),
             ),
             DropdownMenuItem(
-              value: 'bi-weekly',
+              value: 'BIWEEKLY',
               child: TextWidget(
                 text: 'Bi Weekly',
                 type: TextType.small,
               ),
             ),
             DropdownMenuItem(
-              value: 'monthly',
+              value: 'MONTHLY',
               child: TextWidget(
                 text: 'Monthly',
                 type: TextType.small,
@@ -634,13 +649,14 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
           children: [
             Container(
               margin: const EdgeInsets.only(bottom: 15),
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
                 children: [
-                  _buildEqubTextFeilds(isReviewPage: true),
+                  _buildReviewTop(),
+                  // _buildEqubTextFeilds(isReviewPage: true),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -649,23 +665,27 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                         text: 'Members',
                         fontSize: 16,
                       ),
-                      SizedBox(
-                        height: 45,
-                        width: 100,
-                        child: ButtonWidget(
-                            topPadding: 0,
-                            child: const TextWidget(
-                              text: 'Add Member',
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                index = 1;
-                                sliderWidth = 60.sw;
-                              });
-                            }),
-                      )
+                      TextButton(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.add,
+                                color: ColorName.primaryColor,
+                              ),
+                              SizedBox(width: 3),
+                              TextWidget(
+                                text: 'Add Member',
+                                fontSize: 13,
+                                color: ColorName.primaryColor,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              index = 1;
+                              sliderWidth = 60.sw;
+                            });
+                          })
                     ],
                   ),
                   const SizedBox(height: 15),
@@ -716,40 +736,62 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                             selectedContacts.remove(contact);
                           }
                         });
-                        setState(() {
-                          selectedContacts = selectedContacts;
-                        });
+                        setState(() {});
                       },
                     ),
                 ],
               ),
             ),
             const SizedBox(height: 10),
-            ButtonWidget(
-                child: const TextWidget(
-                  text: 'Confirm',
-                  color: Colors.white,
-                  type: TextType.small,
-                ),
-                onPressed: () {
-                  context.read<EqubBloc>().add(
-                        AddEqub(
-                          equbModel: EqubModel(
-                            name: nameController.text,
-                            amount: double.parse(amountController.text),
-                            frequency: selectedFrequency!,
-                            numberOfMembers:
-                                int.parse(numberOfMembersController.text),
-                            startingDate: startingDate!,
-                            selectedContacts: selectedContacts,
-                          ),
-                        ),
-                      );
-                  showDialog(
-                    context: context,
-                    builder: (_) => const CompletePage(),
+            BlocConsumer<EqubBloc, EqubState>(
+              listener: (context, state) {
+                if (state is EqubFail) {
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
                   );
-                })
+                } else if (state is EqubSuccess) {
+                  context.pushNamed(
+                    RouteName.completePage,
+                    extra: nameController.text,
+                  );
+                }
+              },
+              builder: (context, state) {
+                return ButtonWidget(
+                    child: state is EqubLoading
+                        ? const LoadingWidget()
+                        : const TextWidget(
+                            text: 'Confirm',
+                            color: Colors.white,
+                            type: TextType.small,
+                          ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<EqubBloc>().add(
+                              AddEqub(
+                                equbModel: EqubModel(
+                                  name: nameController.text,
+                                  contributionAmount:
+                                      double.parse(amountController.text),
+                                  frequency: selectedFrequency!,
+                                  numberOfMembers:
+                                      int.parse(numberOfMembersController.text),
+                                  startDate: startingDate!,
+                                  members: selectedContacts
+                                      .map((c) => ContactModel(
+                                            name: c.displayName,
+                                            phoneNumber: c.phones.first.number,
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            );
+                      }
+                    });
+              },
+            )
           ],
         ),
       ),
@@ -980,6 +1022,236 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
           },
         ),
       ],
+    );
+  }
+
+  _buildReviewTop() {
+    return Container(
+      width: 100.sw,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 64,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: const BoxDecoration(
+              color: ColorName.primaryColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF4776E6),
+                        Color(0xFF8E54E9),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: nameController.text.isNotEmpty
+                        ? TextWidget(
+                            text: nameController.text.split(' ').length == 1
+                                ? nameController.text
+                                    .split('')
+                                    .first
+                                    .toUpperCase()
+                                : nameController.text
+                                    .split(' ')
+                                    .map((e) => e[0])
+                                    .join()
+                                    .toUpperCase(),
+                            color: Colors.white,
+                            fontSize: 14,
+                          )
+                        : SizedBox.shrink(),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextWidget(
+                      text: nameController.text,
+                      color: Colors.white,
+                    ),
+                    TextWidget(
+                      text:
+                          'Created at ${DateTime.now().day.toString().padLeft(2, '0')}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().year}',
+                      color: Colors.white,
+                      fontSize: 10,
+                      weight: FontWeight.w400,
+                    ),
+                  ],
+                ),
+                const Expanded(child: SizedBox()),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        index = 0;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const TextWidget(
+                          text: 'Edit',
+                          fontSize: 12,
+                          color: ColorName.primaryColor,
+                        ),
+                        const SizedBox(width: 3),
+                        SvgPicture.asset(
+                          Assets.images.svgs.editIcon,
+                        ),
+                      ],
+                    ))
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(Assets.images.svgs.adminIcon),
+                    const SizedBox(width: 10),
+                    TextWidget(
+                      text: adminName,
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    const Icon(
+                      Icons.groups_outlined,
+                      color: Color(0xfF6D6D6D),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    TextWidget(
+                      text: 'Members : ${selectedContacts.length}',
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      Assets.images.svgs.endTimeIcon,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const SizedBox(width: 10),
+                    const TextWidget(
+                      text: 'Start Date',
+                      fontSize: 14,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    TextWidget(
+                      text:
+                          '${startingDate?.day}-${startingDate?.month}-${startingDate?.year}',
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      Assets.images.svgs.frequencyIcon,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const SizedBox(width: 10),
+                    const TextWidget(
+                      text: 'Frequency',
+                      fontSize: 14,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    TextWidget(
+                      text: selectedFrequency ?? '',
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      Assets.images.svgs.equbIcon,
+                      color: Color(0xfF6D6D6D),
+                      width: 14,
+                      height: 14,
+                    ),
+                    const SizedBox(width: 10),
+                    const TextWidget(
+                      text: 'Contribution amount',
+                      fontSize: 14,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    TextWidget(
+                      text: '\$${amountController.text}',
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      Assets.images.svgs.amountIcon,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const SizedBox(width: 10),
+                    const TextWidget(
+                      text: 'Total amount',
+                      fontSize: 14,
+                      color: Color(0xfF6D6D6D),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    TextWidget(
+                      text: numberOfMembersController.text.isNotEmpty
+                          ? '\$${int.parse(numberOfMembersController.text) * int.parse(amountController.text)}'
+                          : '',
+                      fontSize: 14,
+                      color: const Color(0xfF6D6D6D),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }

@@ -8,7 +8,8 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class CompletePage extends StatelessWidget {
-  const CompletePage({super.key});
+  final String equbName;
+  const CompletePage({super.key, required this.equbName});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class CompletePage extends StatelessWidget {
         child: Column(
           children: [
             const Expanded(child: SizedBox()),
-            SvgPicture.asset(Assets.images.svgs.cameraIcon),
+            SvgPicture.asset(Assets.images.svgs.completeLogo),
             const SizedBox(height: 20),
             const TextWidget(
               text: 'Completed',
@@ -26,9 +27,9 @@ class CompletePage extends StatelessWidget {
               color: ColorName.primaryColor,
             ),
             const SizedBox(height: 10),
-            const TextWidget(
-              text: 'You have successfully Joined  “Name Equb”',
-              color: Color(0xFF6D6D6D),
+            TextWidget(
+              text: 'You have successfully Joined  “$equbName”',
+              color: const Color(0xFF6D6D6D),
               fontSize: 14,
             ),
             const Expanded(child: SizedBox()),

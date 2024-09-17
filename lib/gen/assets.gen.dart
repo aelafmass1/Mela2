@@ -234,6 +234,12 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/admin_icon.svg
+  String get adminIcon => 'assets/images/svgs/admin_icon.svg';
+
+  /// File path: assets/images/svgs/amount_icon.svg
+  String get amountIcon => 'assets/images/svgs/amount_icon.svg';
+
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
@@ -242,6 +248,12 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
+
+  /// File path: assets/images/svgs/edit_icon.svg
+  String get editIcon => 'assets/images/svgs/edit_icon.svg';
+
+  /// File path: assets/images/svgs/end_time_icon.svg
+  String get endTimeIcon => 'assets/images/svgs/end_time_icon.svg';
 
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
@@ -254,6 +266,9 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/filter_icon.svg
   String get filterIcon => 'assets/images/svgs/filter_icon.svg';
+
+  /// File path: assets/images/svgs/frequency_icon.svg
+  String get frequencyIcon => 'assets/images/svgs/frequency_icon.svg';
 
   /// File path: assets/images/svgs/hi_emoji.svg
   String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
@@ -282,13 +297,18 @@ class $AssetsImagesSvgsGen {
 
   /// List of all assets
   List<String> get values => [
+        adminIcon,
+        amountIcon,
         cameraIcon,
         cardPattern,
         completeLogo,
+        editIcon,
+        endTimeIcon,
         equbIcon,
         exchangeIcon,
         faceId,
         filterIcon,
+        frequencyIcon,
         hiEmoji,
         historyIcon,
         homeIcon,

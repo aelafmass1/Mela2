@@ -3,6 +3,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
+import '../../../../data/models/contact_model.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
 
@@ -45,9 +46,13 @@ class EqubCard extends StatelessWidget {
             ),
             child: Center(
               child: TextWidget(
-                text: equb.name.split(' ').length > 1
-                    ? equb.name.split(' ').map((e) => e[0]).join().toUpperCase()
-                    : equb.name.split('').first.toUpperCase(),
+                text: equb.name.split(' ').length == 1
+                    ? equb.name.split('').first.toUpperCase()
+                    : equb.name
+                        .split(' ')
+                        .map((e) => e[0])
+                        .join()
+                        .toUpperCase(),
                 color: Colors.white,
                 fontSize: 14,
               ),
@@ -87,10 +92,14 @@ class EqubCard extends StatelessWidget {
                           weight: FontWeight.w400,
                         ),
                         const SizedBox(height: 3),
-                        TextWidget(
-                          text: 'ETB ${equb.amount}',
-                          fontSize: 14,
-                          color: ColorName.primaryColor,
+                        SizedBox(
+                          width: 20.sw,
+                          child: TextWidget(
+                            text: 'ETB ${equb.contributionAmount}',
+                            fontSize: 12,
+                            color: ColorName.primaryColor,
+                            weight: FontWeight.bold,
+                          ),
                         )
                       ],
                     ),
@@ -114,10 +123,15 @@ class EqubCard extends StatelessWidget {
                           weight: FontWeight.w400,
                         ),
                         const SizedBox(height: 3),
-                        TextWidget(
-                          text: 'ETB ${equb.amount * equb.numberOfMembers}',
-                          fontSize: 14,
-                          color: ColorName.primaryColor,
+                        SizedBox(
+                          width: 20.sw,
+                          child: TextWidget(
+                            text:
+                                'ETB ${equb.contributionAmount * equb.numberOfMembers}',
+                            fontSize: 12,
+                            color: ColorName.primaryColor,
+                            weight: FontWeight.bold,
+                          ),
                         )
                       ],
                     ),
@@ -135,9 +149,10 @@ class EqubCard extends StatelessWidget {
                         const SizedBox(height: 3),
                         TextWidget(
                           text:
-                              '${equb.startingDate.day}-${equb.startingDate.month}-${equb.startingDate.year}',
+                              '${equb.startDate.day}-${equb.startDate.month}-${equb.startDate.year}',
                           fontSize: 14,
                           color: ColorName.primaryColor,
+                          weight: FontWeight.bold,
                         )
                       ],
                     ),
@@ -153,8 +168,8 @@ class EqubCard extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.centerLeft,
                       children: [
-                        for (int i = 0; i < equb.selectedContacts.length; i++)
-                          _buildEqubMember(equb.selectedContacts[i], i),
+                        for (int i = 0; i < equb.members.length; i++)
+                          if (i < 5) _buildEqubMember(equb.members[i], i),
                       ],
                     ),
                   ),
@@ -172,7 +187,7 @@ class EqubCard extends StatelessWidget {
     );
   }
 
-  _buildEqubMember(Contact contact, int index) {
+  _buildEqubMember(ContactModel contact, int index) {
     return Positioned(
       left: index * 22,
       child: Container(
@@ -187,18 +202,19 @@ class EqubCard extends StatelessWidget {
                 blurRadius: 2,
               ),
             ]),
-        child: contact.photo != null
-            ? Image.memory(
-                contact.photo!,
-                fit: BoxFit.cover,
-              )
-            : Center(
-                child: TextWidget(
-                  text: contact.displayName.split(' ').map((n) => n[0]).join(),
-                  fontSize: 10,
-                  color: Colors.white,
-                ),
-              ),
+        child:
+            //  contact.photo != null
+            //     ? Image.memory(
+            //         contact.photo!,
+            //         fit: BoxFit.cover,
+            //       )
+            Center(
+          child: TextWidget(
+            text: contact.name.split(' ').map((n) => n[0]).join(),
+            fontSize: 10,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

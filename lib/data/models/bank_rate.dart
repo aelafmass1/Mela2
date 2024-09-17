@@ -3,8 +3,8 @@ import 'dart:convert';
 
 class BankRate {
   final String bankName;
-  final double buyingRate;
-  final double sellingRate;
+  final num buyingRate;
+  final num sellingRate;
   final String incrementPercentage;
   final String buyingRateChange;
   final String sellingRateChange;
@@ -50,8 +50,8 @@ class BankRate {
   factory BankRate.fromMap(Map<String, dynamic> map) {
     return BankRate(
       bankName: map['bank_name'] as String,
-      buyingRate: map['buying_rate'] as double,
-      sellingRate: map['selling_rate'] as double,
+      buyingRate: map['buying_rate'] as num,
+      sellingRate: map['selling_rate'] as num,
       incrementPercentage: map['incrementPercentage'] as String,
       buyingRateChange: map['buyingRateChange'] as String,
       sellingRateChange: map['sellingRateChange'] as String,

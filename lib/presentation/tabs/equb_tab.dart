@@ -27,6 +27,7 @@ class _EqubTabState extends State<EqubTab> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         toolbarHeight: 30,
       ),
       body: Padding(
@@ -94,7 +95,15 @@ class _EqubTabState extends State<EqubTab> {
                   ],
                 ),
                 const SizedBox(height: 25),
-                for (var equb in state.equbList) EqubCard(equb: equb),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        for (var equb in state.equbList) EqubCard(equb: equb),
+                      ],
+                    ),
+                  ),
+                )
               ],
             );
           },

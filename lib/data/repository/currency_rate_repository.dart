@@ -19,7 +19,8 @@ class CurrencyRateRepository {
     // metric.stop();
 
     if (res.statusCode == 200) {
-      List rates = jsonDecode(res.body)[0]['rates'];
+      final data = jsonDecode(res.body);
+      List rates = data[0]['rates'];
       return rates;
     }
     throw Exception('Failed to fetch currency rate');
