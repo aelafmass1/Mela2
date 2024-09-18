@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_member_card.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_winners_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class EqubDetailScreen extends StatefulWidget {
-  const EqubDetailScreen({super.key});
+  // final EqubDetailModel? equb;
+  const EqubDetailScreen({
+    // this.equb,
+    super.key,
+  });
 
   @override
   State<EqubDetailScreen> createState() => _EqubDetailScreenState();
@@ -23,6 +27,7 @@ class EqubDetailScreen extends StatefulWidget {
 class _EqubDetailScreenState extends State<EqubDetailScreen> with TickerProviderStateMixin {
   // Create a TabController to manage the TabBar and TabBarView
   late TabController _tabController;
+  int activeIndex = -1;
 
   @override
   void initState() {
@@ -309,51 +314,6 @@ class _EqubDetailScreenState extends State<EqubDetailScreen> with TickerProvider
     );
   }
 
-  // Widget _buildTabs() {
-  //   return Column(
-  //     children: [
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           const TextWidget(
-  //             text: 'Members',
-  //             fontSize: 16,
-  //           ),
-  //           TextButton(
-  //             child: const Row(
-  //               children: [
-  //                 Icon(
-  //                   Icons.add,
-  //                   color: ColorName.primaryColor,
-  //                 ),
-  //                 SizedBox(width: 3),
-  //                 TextWidget(
-  //                   text: 'Add Member',
-  //                   fontSize: 13,
-  //                   color: ColorName.primaryColor,
-  //                 ),
-  //               ],
-  //             ),
-  //             onPressed: () {
-  //               // Action to add a new member
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //       ListView.builder(
-  //         shrinkWrap: true,
-  //         physics: const NeverScrollableScrollPhysics(),
-  //         itemCount: 9,
-  //         itemBuilder: (context, index) {
-  //           return EqubMemberCard(
-  //             index: index + 1,
-  //           );
-  //         },
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _buildTabs() {
     return Expanded(
       child: Column(
@@ -376,10 +336,10 @@ class _EqubDetailScreenState extends State<EqubDetailScreen> with TickerProvider
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildTabContent(), // Tab 1 content
-                _buildTabContent(), // Tab 2 content
-                _buildTabContent(), // Tab 3 content
-                _buildTabContent(), // Tab 4 content
+                _buildMembersContent(), // Tab 1 content
+                _buildWinnersContent(), // Tab 2 content
+                _buildPaymentContent(), // Tab 3 content
+                _buildRequestsContent(), // Tab 4 content
               ],
             ),
           ),
@@ -388,16 +348,272 @@ class _EqubDetailScreenState extends State<EqubDetailScreen> with TickerProvider
     );
   }
 
-  Widget _buildTabContent() {
+  Widget _buildMembersContent() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ListView.builder(
-        itemCount: 9, // Example list item count
-        itemBuilder: (context, index) {
-          return EqubMemberCard(
-            index: index + 1, // Example widget for each list item
-          );
-        },
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const TextWidget(
+                  text: 'All Members (10)',
+                  fontSize: 16,
+                ),
+                TextButton(
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: ColorName.primaryColor,
+                        ),
+                        SizedBox(width: 3),
+                        TextWidget(
+                          text: 'Add Member',
+                          fontSize: 13,
+                          color: ColorName.primaryColor,
+                        ),
+                      ],
+                    ),
+                    onPressed: () {
+                      // setState(() {
+                      //   index = 1;
+                      //   sliderWidth = 60.sw;
+                      // });
+                    })
+              ],
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 9, // Example list item count
+              itemBuilder: (context, index) {
+                return EqubMemberCard(
+                  index: index + 1, // Example widget for each list item
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWinnersContent() {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const TextWidget(
+                      text: 'All Members (10)',
+                      fontSize: 16,
+                    ),
+                    TextButton(
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.gamepad_outlined,
+                              size: 20,
+                              color: ColorName.green,
+                            ),
+                            SizedBox(width: 5),
+                            TextWidget(
+                              text: 'Auto Pick',
+                              fontSize: 13,
+                              color: ColorName.green,
+                            ),
+                          ],
+                        ),
+                        onPressed: () {
+                          // setState(() {
+                          //   index = 1;
+                          //   sliderWidth = 60.sw;
+                          // });
+                        })
+                  ],
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 9, // Example list item count
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          debugPrint("Selected index - $index");
+                          activeIndex = index;
+                        });
+                      },
+                      child: EqubWinnersCard(
+                        index: index,
+                        isActive: index == activeIndex,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 75,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          child: SizedBox(
+            width: 89.sw,
+            child: ButtonWidget(
+              color: activeIndex != -1 ? ColorName.primaryColor : ColorName.grey.shade200,
+              onPressed: () {},
+              child: const TextWidget(
+                text: 'Confirm',
+                type: TextType.small,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildPaymentContent() {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const TextWidget(
+                      text: 'All Members (10)',
+                      fontSize: 16,
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      child: const TextWidget(
+                        text: 'Paid',
+                        fontSize: 13,
+                        color: ColorName.green,
+                      ),
+                      onPressed: () {
+                        // setState(() {
+                        //   index = 1;
+                        //   sliderWidth = 60.sw;
+                        // });
+                      },
+                    ),
+                    TextButton(
+                      child: const TextWidget(
+                        text: 'Unpaid',
+                        fontSize: 13,
+                        color: ColorName.red,
+                      ),
+                      onPressed: () {
+                        // setState(() {
+                        //   index = 1;
+                        //   sliderWidth = 60.sw;
+                        // });
+                      },
+                    )
+                  ],
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 9, // Example list item count
+                  itemBuilder: (context, index) {
+                    return const EqubPaymentCard();
+                  },
+                ),
+                const SizedBox(
+                  height: 75,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          child: SizedBox(
+            width: 89.sw,
+            child: ButtonWidget(
+              onPressed: () {},
+              child: const TextWidget(
+                text: 'Send Reminder To All',
+                type: TextType.small,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildRequestsContent() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const TextWidget(
+                  text: 'All Members (10)',
+                  fontSize: 16,
+                ),
+                const Spacer(),
+                TextButton(
+                  child: const TextWidget(
+                    text: 'Accept',
+                    fontSize: 13,
+                    color: ColorName.green,
+                  ),
+                  onPressed: () {
+                    // setState(() {
+                    //   index = 1;
+                    //   sliderWidth = 60.sw;
+                    // });
+                  },
+                ),
+                TextButton(
+                  child: const TextWidget(
+                    text: 'Reject',
+                    fontSize: 13,
+                    color: ColorName.red,
+                  ),
+                  onPressed: () {
+                    // setState(() {
+                    //   index = 1;
+                    //   sliderWidth = 60.sw;
+                    // });
+                  },
+                )
+              ],
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 9, // Example list item count
+              itemBuilder: (context, index) {
+                return const EqubRequestsCard();
+              },
+            ),
+            const SizedBox(
+              height: 75,
+            ),
+          ],
+        ),
       ),
     );
   }

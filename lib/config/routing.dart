@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
@@ -48,7 +49,7 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/home/equb_detail',
   routes: [
     GoRoute(
       path: '/welcome',
@@ -66,19 +67,21 @@ final goRouting = GoRouter(
       builder: (context, state) => const HomeScreen(),
       routes: [
         GoRoute(
-          path: 'equb_edit',
-          name: RouteName.equbEdit,
-          builder: (context, state) => const EqubEditScreen(),
+          path: 'equb_creation',
+          name: RouteName.equbCreation,
+          builder: (context, state) => const EqubCreationScreen(),
         ),
         GoRoute(
           path: 'equb_detail',
           name: RouteName.equbDetail,
-          builder: (context, state) => const EqubDetailScreen(),
+          builder: (context, state) => EqubDetailScreen(
+              // equb: state.extra as EqubDetailModel,
+              ),
         ),
         GoRoute(
-          path: 'equb_creation',
-          name: RouteName.equbCreation,
-          builder: (context, state) => const EqubCreationScreen(),
+          path: 'equb_edit',
+          name: RouteName.equbEdit,
+          builder: (context, state) => const EqubEditScreen(),
         ),
         GoRoute(
           path: 'receipt',

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
+import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 
 import '../../../../data/models/equb_detail_model.dart';
 import '../../../../gen/colors.gen.dart';
@@ -8,7 +11,10 @@ import '../../../widgets/text_widget.dart';
 
 class EqubCard extends StatelessWidget {
   final EqubDetailModel equb;
-  const EqubCard({super.key, required this.equb});
+  const EqubCard({
+    super.key,
+    required this.equb,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +53,7 @@ class EqubCard extends StatelessWidget {
               child: TextWidget(
                 text: equb.name.split(' ').length == 1
                     ? equb.name.split('').first.toUpperCase()
-                    : equb.name
-                        .split(' ')
-                        .map((e) => e[0])
-                        .join()
-                        .toUpperCase(),
+                    : equb.name.split(' ').map((e) => e[0]).join().toUpperCase(),
                 color: Colors.white,
                 fontSize: 14,
               ),
@@ -125,8 +127,7 @@ class EqubCard extends StatelessWidget {
                         SizedBox(
                           width: 20.sw,
                           child: TextWidget(
-                            text:
-                                'ETB ${equb.contributionAmount * equb.numberOfMembers}',
+                            text: 'ETB ${equb.contributionAmount * equb.numberOfMembers}',
                             fontSize: 12,
                             color: ColorName.primaryColor,
                             weight: FontWeight.bold,
@@ -147,8 +148,7 @@ class EqubCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         TextWidget(
-                          text:
-                              '${equb.startDate.day}-${equb.startDate.month}-${equb.startDate.year}',
+                          text: '${equb.startDate.day}-${equb.startDate.month}-${equb.startDate.year}',
                           fontSize: 14,
                           color: ColorName.primaryColor,
                           weight: FontWeight.bold,
@@ -162,7 +162,7 @@ class EqubCard extends StatelessWidget {
               Row(
                 children: [
                   SizedBox(
-                    width: 55.sw,
+                    width: 50.sw,
                     height: 40,
                     child: Stack(
                       alignment: Alignment.centerLeft,
@@ -172,11 +172,18 @@ class EqubCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Container(
-                  //   width: 40,
-                  //   height: 40,
-                  //   color: Colors.blue,
-                  // )
+                  SizedBox(
+                    height: 40,
+                    width: 20.sw,
+                    child: ButtonWidget(
+                      verticalPadding: 7.5,
+                      child: const Text("Status"),
+                      onPressed: () => context.pushNamed(
+                        RouteName.equbDetail,
+                        extra: equb,
+                      ),
+                    ),
+                  ),
                 ],
               )
             ],
@@ -193,14 +200,12 @@ class EqubCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         width: 30,
         height: 30,
-        decoration: BoxDecoration(
-            color: ColorName.primaryColor,
-            borderRadius: BorderRadius.circular(100),
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 2,
-              ),
-            ]),
+        decoration:
+            BoxDecoration(color: ColorName.primaryColor, borderRadius: BorderRadius.circular(100), boxShadow: const [
+          BoxShadow(
+            blurRadius: 2,
+          ),
+        ]),
         child:
             //  contact.photo != null
             //     ? Image.memory(
@@ -209,9 +214,7 @@ class EqubCard extends StatelessWidget {
             //       )
             Center(
           child: TextWidget(
-            text: contact.name.isEmpty
-                ? ''
-                : contact.name.split(' ').map((n) => n[0]).join(),
+            text: contact.name.isEmpty ? '' : contact.name.split(' ').map((n) => n[0]).join(),
             fontSize: 10,
             color: Colors.white,
           ),
