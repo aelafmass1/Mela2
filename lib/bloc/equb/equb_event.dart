@@ -7,3 +7,5 @@ final class AddEqub extends EqubEvent {
 
   AddEqub({required this.equbModel});
 }
+
+final class FetchEqubs extends EqubEvent {}

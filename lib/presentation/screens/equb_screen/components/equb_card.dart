@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/data/models/equb_model.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 
-import '../../../../data/models/contact_model.dart';
+import '../../../../data/models/equb_detail_model.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
 
 class EqubCard extends StatelessWidget {
-  final EqubModel equb;
+  final EqubDetailModel equb;
   const EqubCard({super.key, required this.equb});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.all(15),
       width: 100.sw,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -168,8 +167,8 @@ class EqubCard extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.centerLeft,
                       children: [
-                        for (int i = 0; i < equb.members.length; i++)
-                          if (i < 5) _buildEqubMember(equb.members[i], i),
+                        for (int i = 0; i < equb.invitees.length; i++)
+                          if (i < 5) _buildEqubMember(equb.invitees[i], i),
                       ],
                     ),
                   ),
@@ -187,7 +186,7 @@ class EqubCard extends StatelessWidget {
     );
   }
 
-  _buildEqubMember(ContactModel contact, int index) {
+  _buildEqubMember(EqubInviteeModel contact, int index) {
     return Positioned(
       left: index * 22,
       child: Container(
@@ -210,7 +209,9 @@ class EqubCard extends StatelessWidget {
             //       )
             Center(
           child: TextWidget(
-            text: contact.name.split(' ').map((n) => n[0]).join(),
+            text: contact.name.isEmpty
+                ? ''
+                : contact.name.split(' ').map((n) => n[0]).join(),
             fontSize: 10,
             color: Colors.white,
           ),

@@ -60,4 +60,28 @@ class EqubRepository {
       {'error': res.body}
     ];
   }
+
+  static Future<List> fetchEqubs({
+    required String accessToken,
+  }) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/ekub/all'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
+    }
+    if (data.containsKey('errorResponse')) {
+      return [
+        {'error': data['errorResponse']['message']}
+      ];
+    }
+    return [
+      {'error': res.body}
+    ];
+  }
 }

@@ -5,6 +5,8 @@ import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
+import '../../data/models/equb_detail_model.dart';
+
 part 'equb_event.dart';
 part 'equb_state.dart';
 
@@ -14,13 +16,38 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
           equbList: [],
         )) {
     on<AddEqub>(_onAddEqub);
+    on<FetchEqubs>(_onFetchEqubs);
+  }
+  _onFetchEqubs(FetchEqubs event, Emitter emit) async {
+    try {
+      if (state is! EqubLoading) {
+        emit(EqubLoading(equbList: state.equbList));
+        final token = await getToken();
+
+        final res = await EqubRepository.fetchEqubs(
+          accessToken: token!,
+        );
+        if (res.first.containsKey('error')) {
+          return emit(
+              EqubFail(equbList: state.equbList, reason: res.first['error']));
+        }
+        final fetchedEqubs =
+            res.map((e) => EqubDetailModel.fromMap(e)).toList();
+        emit(
+          EqubSuccess(equbList: fetchedEqubs),
+        );
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+    }
   }
 
   _onAddEqub(AddEqub event, Emitter emit) async {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
-        List<EqubModel> equbs = state.equbList;
+        List<EqubDetailModel> equbs = state.equbList;
 
         final token = await getToken();
         final res = await EqubRepository.createEqub(
@@ -30,7 +57,6 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         if (res.containsKey('error')) {
           return emit(EqubFail(equbList: state.equbList, reason: res['error']));
         }
-        equbs.add(event.equbModel);
         int equbId = res['successResponse']['id'];
 
         final inviteRes = await EqubRepository.inviteMembers(

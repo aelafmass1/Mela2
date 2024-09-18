@@ -2,12 +2,12 @@
 part of 'equb_bloc.dart';
 
 class EqubState {
-  final List<EqubModel> equbList;
+  final List<EqubDetailModel> equbList;
 
   EqubState({required this.equbList});
 
   EqubState copyWith({
-    List<EqubModel>? equbList,
+    List<EqubDetailModel>? equbList,
   }) {
     return EqubState(
       equbList: equbList ?? this.equbList,
