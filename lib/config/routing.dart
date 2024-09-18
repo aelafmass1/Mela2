@@ -3,6 +3,8 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_detail_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
@@ -26,6 +28,10 @@ class RouteName {
   static const login = 'login_screen';
   static const signup = 'signup_screen';
   static const equbCreation = 'equb_creation_screen';
+  // Added by Fasil
+  static const equbDetail = 'equb_detail_screen';
+  static const equbEdit = 'equb_edit_screen';
+
   static const welcome = 'welcome_screen';
   static const otp = 'otp_screen';
   static const createAccount = 'create_account_screen';
@@ -55,47 +61,58 @@ final goRouting = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-        path: '/home',
-        name: RouteName.home,
-        builder: (context, state) => const HomeScreen(),
-        routes: [
-          GoRoute(
-            path: 'equb_creation',
-            name: RouteName.equbCreation,
-            builder: (context, state) => const EqubCreationScreen(),
+      path: '/home',
+      name: RouteName.home,
+      builder: (context, state) => const HomeScreen(),
+      routes: [
+        GoRoute(
+          path: 'equb_edit',
+          name: RouteName.equbEdit,
+          builder: (context, state) => const EqubEditScreen(),
+        ),
+        GoRoute(
+          path: 'equb_detail',
+          name: RouteName.equbDetail,
+          builder: (context, state) => const EqubDetailScreen(),
+        ),
+        GoRoute(
+          path: 'equb_creation',
+          name: RouteName.equbCreation,
+          builder: (context, state) => const EqubCreationScreen(),
+        ),
+        GoRoute(
+          path: 'receipt',
+          name: RouteName.receipt,
+          builder: (context, state) => ReceiptScreen(
+            receiverInfo: state.extra as ReceiverInfo,
           ),
-          GoRoute(
-            path: 'receipt',
-            name: RouteName.receipt,
-            builder: (context, state) => ReceiptScreen(
-              receiverInfo: state.extra as ReceiverInfo,
-            ),
+        ),
+        GoRoute(
+          path: 'contact_permission',
+          name: RouteName.contactPermission,
+          builder: (context, state) => ContactPermissionScreen(
+            checkContactPermission: state.extra as Function(),
           ),
-          GoRoute(
-            path: 'contact_permission',
-            name: RouteName.contactPermission,
-            builder: (context, state) => ContactPermissionScreen(
-              checkContactPermission: state.extra as Function(),
-            ),
+        ),
+        GoRoute(
+          path: 'profile_edit',
+          name: RouteName.profileEdit,
+          builder: (context, state) => const ProfileEditScreen(),
+        ),
+        GoRoute(
+          path: 'password_edit',
+          name: RouteName.passwordEdit,
+          builder: (context, state) => const PasswordEditScreen(),
+        ),
+        GoRoute(
+          path: 'complete_page',
+          name: RouteName.completePage,
+          builder: (context, state) => CompletePage(
+            equbName: state.extra as String,
           ),
-          GoRoute(
-            path: 'profile_edit',
-            name: RouteName.profileEdit,
-            builder: (context, state) => const ProfileEditScreen(),
-          ),
-          GoRoute(
-            path: 'password_edit',
-            name: RouteName.passwordEdit,
-            builder: (context, state) => const PasswordEditScreen(),
-          ),
-          GoRoute(
-            path: 'complete_page',
-            name: RouteName.completePage,
-            builder: (context, state) => CompletePage(
-              equbName: state.extra as String,
-            ),
-          ),
-        ]),
+        ),
+      ],
+    ),
     GoRoute(
       path: '/login',
       name: RouteName.login,
