@@ -49,7 +49,7 @@ class RouteName {
 }
 
 final goRouting = GoRouter(
-  initialLocation: '/home/equb_detail',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
       path: '/welcome',
