@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_card.dart';
@@ -153,7 +154,6 @@ class _EqubTabState extends State<EqubTab> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 25),
                 Expanded(
                   child: RefreshIndicator(
                     color: ColorName.primaryColor,
@@ -164,7 +164,63 @@ class _EqubTabState extends State<EqubTab> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          for (var equb in state.equbList) EqubCard(equb: equb),
+                          const SizedBox(height: 10),
+                          Container(
+                              padding: const EdgeInsets.only(left: 15),
+                              alignment: Alignment.centerLeft,
+                              child: const TextWidget(
+                                text: 'Your Equb',
+                                color: ColorName.grey,
+                                type: TextType.small,
+                              )),
+                          const SizedBox(height: 15),
+                          if (state.equbList.length == 1)
+                            EqubCard(equb: state.equbList.first)
+                          else
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  for (var equb in state.equbList)
+                                    EqubCard(equb: equb),
+                                ],
+                              ),
+                            ),
+                          Container(
+                            padding: const EdgeInsets.only(left: 15, top: 15),
+                            alignment: Alignment.centerLeft,
+                            child: const TextWidget(
+                              text: 'Other Equb',
+                              color: ColorName.grey,
+                              type: TextType.small,
+                            ),
+                          ),
+                          EqubCard(
+                            onTab: () {
+                              final detail = EqubDetailModel(
+                                id: -1,
+                                name: 'Member Test Another',
+                                numberOfMembers: 10,
+                                contributionAmount: 250,
+                                frequency: 'WEEKLY',
+                                startDate: DateTime.now(),
+                                members: [],
+                                invitees: [],
+                              );
+                              context.goNamed(RouteName.equbMemberDetail,
+                                  extra: detail);
+                            },
+                            equb: EqubDetailModel(
+                              id: -1,
+                              name: 'Member Test Another',
+                              numberOfMembers: 10,
+                              contributionAmount: 250,
+                              frequency: 'WEEKLY',
+                              startDate: DateTime.now(),
+                              members: [],
+                              invitees: [],
+                            ),
+                          ),
                         ],
                       ),
                     ),

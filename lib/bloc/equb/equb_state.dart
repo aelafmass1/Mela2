@@ -20,7 +20,8 @@ final class EqubLoading extends EqubState {
 }
 
 final class EqubSuccess extends EqubState {
-  EqubSuccess({required super.equbList});
+  final List<EqubInviteeModel>? invitees;
+  EqubSuccess({required super.equbList, this.invitees});
 }
 
 final class EqubFail extends EqubState {

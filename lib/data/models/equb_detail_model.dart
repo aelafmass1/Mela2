@@ -74,11 +74,12 @@ class EqubDetailModel {
           (x) => EqubMemberModel.fromMap(x),
         ),
       ),
-      invitees: List<EqubInviteeModel>.from(
-        (map['invitees']).map<EqubInviteeModel>(
-          (x) => EqubInviteeModel.fromMap(x),
-        ),
-      ),
+      invitees: [],
+      // invitees: List<EqubInviteeModel>.from(
+      //   (map['invitees']).map<EqubInviteeModel>(
+      //     (x) => EqubInviteeModel.fromMap(x),
+      //   ),
+      // ),
     );
   }
 

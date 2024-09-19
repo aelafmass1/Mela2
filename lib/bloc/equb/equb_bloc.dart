@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
 import '../../data/models/equb_detail_model.dart';
@@ -64,13 +65,26 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
           equbId: equbId,
           members: event.equbModel.members,
         );
+
         if (inviteRes.first.containsKey('error')) {
           return emit(EqubFail(
               equbList: state.equbList, reason: inviteRes.first['error']));
         }
 
+        final invitees = inviteRes.map((m) {
+          final invitee = m['invite'];
+          final member = m['member'];
+          return EqubInviteeModel(
+            id: -1,
+            phoneNumber: invitee != null ? invitee['phoneNumber'] : '',
+            status: member != null ? member['status'] : '',
+            name: invitee != null ? invitee['name'] : '',
+          );
+        }).toList();
+
         emit(EqubSuccess(
           equbList: equbs,
+          invitees: invitees,
         ));
       }
     } catch (error) {

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/main.dart';
@@ -45,9 +46,9 @@ class CompletePage extends StatelessWidget {
                     type: TextType.small,
                   ),
                   onPressed: () {
-                    context.read<EqubBloc>().add(FetchEqubs());
                     context.pop();
                     context.pop();
+                    context.pushNamed(RouteName.sendInvitation);
                   }),
             )
           ],

@@ -61,6 +61,12 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
         _contacts = contacts;
       });
     } else {
+      context.pushNamed(RouteName.contactPermission, extra: () {
+        setState(() {
+          index = 0;
+          sliderWidth = 30.sw;
+        });
+      });
       setState(() {
         isPermissionDenied = true;
       });
@@ -365,245 +371,217 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   _buildAddMember() {
     return Visibility(
       visible: index == 1,
-      child: isPermissionDenied
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const TextWidget(
-                  text:
-                      'Inorder to select members you need to allow us to pull your contact info',
-                  type: TextType.small,
-                  textAlign: TextAlign.center,
+      child: SizedBox(
+        width: 100.sw,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const TextWidget(
+              text: 'Add Members',
+              fontSize: 14,
+              weight: FontWeight.w400,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: searchingController,
+              onChanged: (value) {
+                if (value.isEmpty) {
+                  setState(() {
+                    isSearching = false;
+                    filteredContacts = [];
+                  });
+                } else {
+                  filteredContacts = _contacts
+                      .where((contact) => contact.displayName
+                          .toLowerCase()
+                          .contains(value.toLowerCase()))
+                      .toList();
+                  setState(() {
+                    filteredContacts = filteredContacts;
+                    isSearching = true;
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                hintText: 'Search name',
+                hintStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                    onPressed: () async {
-                      openAppSettings();
-                    },
-                    child: TextWidget(
-                      text: 'Enable Contact Permission',
-                      type: TextType.small,
-                      color: ColorName.primaryColor,
-                    ))
-              ],
-            )
-          : SizedBox(
-              width: 100.sw,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const TextWidget(
-                    text: 'Add Members',
-                    fontSize: 14,
-                    weight: FontWeight.w400,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: searchingController,
-                    onChanged: (value) {
-                      if (value.isEmpty) {
-                        setState(() {
-                          isSearching = false;
-                          filteredContacts = [];
-                        });
-                      } else {
-                        filteredContacts = _contacts
-                            .where((contact) => contact.displayName
-                                .toLowerCase()
-                                .contains(value.toLowerCase()))
-                            .toList();
-                        setState(() {
-                          filteredContacts = filteredContacts;
-                          isSearching = true;
-                        });
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Search name',
-                      hintStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      prefixIcon: const Icon(
-                        BoxIcons.bx_search,
-                      ),
-                      contentPadding: const EdgeInsets.only(left: 20),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextWidget(
-                        text: 'All Contact (${_contacts.length} Contacts) ',
-                        fontSize: 14,
-                        weight: FontWeight.w500,
-                      ),
-                      TextWidget(
-                        text:
-                            '${selectedContacts.length}/${numberOfMembersController.text}',
-                        fontSize: 14,
-                        weight: FontWeight.w500,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: isSearching
-                        ? filteredContacts.isEmpty
-                            ? Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                alignment: Alignment.topCenter,
-                                child: TextWidget(
-                                  text: '${searchingController.text} not Found',
-                                  type: TextType.small,
-                                  weight: FontWeight.w300,
-                                  color: const Color(0xFF6D6D6D),
-                                ),
-                              )
-                            : ListView.builder(
-                                itemCount: filteredContacts.length,
-                                itemBuilder: (context, index) {
-                                  final contact = filteredContacts[index];
-                                  final isSelected =
-                                      selectedContacts.contains(contact);
-                                  return CheckboxListTile(
-                                    activeColor: ColorName.primaryColor,
-                                    checkboxShape: const CircleBorder(),
-                                    contentPadding: EdgeInsets.zero,
-                                    value: isSelected,
-                                    secondary: contact.photo == null
-                                        ? ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(100),
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              color: ColorName.primaryColor,
-                                              alignment: Alignment.center,
-                                              child: TextWidget(
-                                                text: contact.displayName[0],
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          )
-                                        : ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(100),
-                                            child: Image.memory(
-                                              contact.photo!,
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.cover,
-                                            )),
-                                    title: TextWidget(
-                                      text: contact.displayName,
-                                      fontSize: 16,
-                                      weight: FontWeight.w400,
-                                    ),
-                                    subtitle: TextWidget(
-                                      text: contact.phones.first.number,
-                                      type: TextType.small,
-                                      fontSize: 14,
-                                      weight: FontWeight.w300,
-                                    ),
-                                    onChanged: (bool? selected) {
-                                      setState(() {
-                                        if (selected == true) {
-                                          if (selectedContacts.length <
-                                              (int.tryParse(
-                                                      numberOfMembersController
-                                                          .text) ??
-                                                  0)) {
-                                            selectedContacts.add(contact);
-                                          }
-                                        } else {
-                                          selectedContacts.remove(contact);
-                                        }
-                                      });
-                                      setState(() {
-                                        selectedContacts = selectedContacts;
-                                      });
-                                    },
-                                  );
-                                })
-                        : ListView.builder(
-                            itemCount: _contacts.length,
-                            itemBuilder: (context, index) {
-                              final contact = _contacts[index];
-                              final isSelected =
-                                  selectedContacts.contains(contact);
-                              return CheckboxListTile(
-                                activeColor: ColorName.primaryColor,
-                                checkboxShape: const CircleBorder(),
-                                contentPadding: EdgeInsets.zero,
-                                value: isSelected,
-                                secondary: contact.photo == null
-                                    ? ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        child: Container(
-                                          width: 50,
-                                          height: 50,
-                                          color: ColorName.primaryColor,
-                                          alignment: Alignment.center,
-                                          child: TextWidget(
-                                            text: contact.displayName[0],
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      )
-                                    : ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        child: Image.memory(
-                                          contact.photo!,
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        )),
-                                title: TextWidget(
-                                  text: contact.displayName,
-                                  fontSize: 16,
-                                  weight: FontWeight.w400,
-                                ),
-                                subtitle: TextWidget(
-                                  text: contact.phones.first.number,
-                                  type: TextType.small,
-                                  fontSize: 14,
-                                  weight: FontWeight.w300,
-                                ),
-                                onChanged: (bool? selected) {
-                                  setState(() {
-                                    if (selected == true) {
-                                      if (selectedContacts.length <
-                                          (int.tryParse(
-                                                  numberOfMembersController
-                                                      .text) ??
-                                              0)) {
-                                        selectedContacts.add(contact);
-                                      }
-                                    } else {
-                                      selectedContacts.remove(contact);
-                                    }
-                                  });
-                                  setState(() {
-                                    selectedContacts = selectedContacts;
-                                  });
-                                  log(selectedContacts.toString());
-                                },
-                              );
-                            }),
-                  )
-                ],
+                prefixIcon: const Icon(
+                  BoxIcons.bx_search,
+                ),
+                contentPadding: const EdgeInsets.only(left: 20),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextWidget(
+                  text: 'All Contact (${_contacts.length} Contacts) ',
+                  fontSize: 14,
+                  weight: FontWeight.w500,
+                ),
+                TextWidget(
+                  text:
+                      '${selectedContacts.length}/${numberOfMembersController.text}',
+                  fontSize: 14,
+                  weight: FontWeight.w500,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: isSearching
+                  ? filteredContacts.isEmpty
+                      ? Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          alignment: Alignment.topCenter,
+                          child: TextWidget(
+                            text: '${searchingController.text} not Found',
+                            type: TextType.small,
+                            weight: FontWeight.w300,
+                            textAlign: TextAlign.center,
+                            color: const Color(0xFF6D6D6D),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredContacts.length,
+                          itemBuilder: (context, index) {
+                            final contact = filteredContacts[index];
+                            final isSelected =
+                                selectedContacts.contains(contact);
+                            return CheckboxListTile(
+                              activeColor: ColorName.primaryColor,
+                              checkboxShape: const CircleBorder(),
+                              contentPadding: EdgeInsets.zero,
+                              value: isSelected,
+                              secondary: contact.photo == null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(100),
+                                      child: Container(
+                                        width: 50,
+                                        height: 50,
+                                        color: ColorName.primaryColor,
+                                        alignment: Alignment.center,
+                                        child: TextWidget(
+                                          text: contact.displayName[0],
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(100),
+                                      child: Image.memory(
+                                        contact.photo!,
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                      )),
+                              title: TextWidget(
+                                text: contact.displayName,
+                                fontSize: 16,
+                                weight: FontWeight.w400,
+                              ),
+                              subtitle: TextWidget(
+                                text: contact.phones.first.number,
+                                type: TextType.small,
+                                fontSize: 14,
+                                weight: FontWeight.w300,
+                              ),
+                              onChanged: (bool? selected) {
+                                setState(() {
+                                  if (selected == true) {
+                                    if (selectedContacts.length <
+                                        (int.tryParse(numberOfMembersController
+                                                .text) ??
+                                            0)) {
+                                      selectedContacts.add(contact);
+                                    }
+                                  } else {
+                                    selectedContacts.remove(contact);
+                                  }
+                                });
+                                setState(() {
+                                  selectedContacts = selectedContacts;
+                                });
+                              },
+                            );
+                          })
+                  : ListView.builder(
+                      itemCount: _contacts.length,
+                      itemBuilder: (context, index) {
+                        final contact = _contacts[index];
+                        final isSelected = selectedContacts.contains(contact);
+                        return CheckboxListTile(
+                          activeColor: ColorName.primaryColor,
+                          checkboxShape: const CircleBorder(),
+                          contentPadding: EdgeInsets.zero,
+                          value: isSelected,
+                          secondary: contact.photo == null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    color: ColorName.primaryColor,
+                                    alignment: Alignment.center,
+                                    child: TextWidget(
+                                      text: contact.displayName[0],
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Image.memory(
+                                    contact.photo!,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  )),
+                          title: TextWidget(
+                            text: contact.displayName,
+                            fontSize: 16,
+                            weight: FontWeight.w400,
+                          ),
+                          subtitle: TextWidget(
+                            text: contact.phones.first.number,
+                            type: TextType.small,
+                            fontSize: 14,
+                            weight: FontWeight.w300,
+                          ),
+                          onChanged: (bool? selected) {
+                            setState(() {
+                              if (selected == true) {
+                                if (selectedContacts.length <
+                                    (int.tryParse(
+                                            numberOfMembersController.text) ??
+                                        0)) {
+                                  selectedContacts.add(contact);
+                                }
+                              } else {
+                                selectedContacts.remove(contact);
+                              }
+                            });
+                            setState(() {
+                              selectedContacts = selectedContacts;
+                            });
+                            log(selectedContacts.toString());
+                          },
+                        );
+                      }),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -1149,6 +1127,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                     onPressed: () {
                       setState(() {
                         index = 0;
+                        sliderWidth = 30.sw;
                       });
                     },
                     child: Row(

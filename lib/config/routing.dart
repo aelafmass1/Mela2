@@ -4,7 +4,8 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_detail_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_admin_detail_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_member_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
@@ -14,6 +15,7 @@ import 'package:transaction_mobile_app/presentation/screens/pincode_screen/pinco
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/set_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/password_edit_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/profile_edit_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/send_invitation_screen/send_invitation_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
@@ -30,7 +32,9 @@ class RouteName {
   static const signup = 'signup_screen';
   static const equbCreation = 'equb_creation_screen';
   // Added by Fasil
-  static const equbDetail = 'equb_detail_screen';
+  static const equbAdminDetail = 'equb_admin_detail_screen';
+  static const equbMemberDetail = 'equb_member_detail_screen';
+
   static const equbEdit = 'equb_edit_screen';
 
   static const welcome = 'welcome_screen';
@@ -46,6 +50,7 @@ class RouteName {
   static const pinCode = 'pincode_screen';
   static const loginPincode = 'login_pincode_screen';
   static const completePage = 'complete_page';
+  static const sendInvitation = 'send_invitation_screen';
 }
 
 final goRouting = GoRouter(
@@ -72,11 +77,23 @@ final goRouting = GoRouter(
           builder: (context, state) => const EqubCreationScreen(),
         ),
         GoRoute(
-          path: 'equb_detail',
-          name: RouteName.equbDetail,
-          builder: (context, state) => EqubDetailScreen(
-              // equb: state.extra as EqubDetailModel,
-              ),
+          path: 'send_invitation',
+          name: RouteName.sendInvitation,
+          builder: (context, state) => const SendInvitationScreen(),
+        ),
+        GoRoute(
+          path: 'equb_admin_detail',
+          name: RouteName.equbAdminDetail,
+          builder: (context, state) => EqubAdminDetailScreen(
+            equbDetailModel: state.extra as EqubDetailModel,
+          ),
+        ),
+        GoRoute(
+          path: 'equb_member_detail',
+          name: RouteName.equbMemberDetail,
+          builder: (context, state) => EqubMemberDetailScreen(
+            equbDetailModel: state.extra as EqubDetailModel,
+          ),
         ),
         GoRoute(
           path: 'equb_edit',
