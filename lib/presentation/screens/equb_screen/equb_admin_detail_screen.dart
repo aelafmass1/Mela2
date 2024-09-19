@@ -1,6 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icons_plus/icons_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -9,6 +14,7 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/componen
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_winners_card.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -22,11 +28,33 @@ class EqubAdminDetailScreen extends StatefulWidget {
   State<EqubAdminDetailScreen> createState() => _EqubAdminDetailScreenState();
 }
 
-class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
-    with TickerProviderStateMixin {
+class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with TickerProviderStateMixin {
   // Create a TabController to manage the TabBar and TabBarView
   late TabController _tabController;
   int activeIndex = -1;
+
+  final numberOfMembersController = TextEditingController();
+  final searchingController = TextEditingController();
+
+  List<Contact> _contacts = [];
+  List<Contact> selectedContacts = [];
+  List<Contact> filteredContacts = [];
+
+  bool isPermissionDenied = false;
+  bool isSearching = false;
+
+  Future<void> _fetchContacts() async {
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> contacts = await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        _contacts = contacts;
+      });
+    } else {
+      setState(() {
+        isPermissionDenied = true;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -53,18 +81,15 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
       body: Column(
         children: [
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTop(),
-                  const SizedBox(height: 20),
-                  _buildTitle(),
-                  const SizedBox(height: 10),
-                  _buildTabs(),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTop(),
+                const SizedBox(height: 20),
+                _buildTitle(),
+                const SizedBox(height: 10),
+                _buildTabs(),
+              ],
             ),
           ),
         ],
@@ -81,6 +106,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           topRight: Radius.circular(24),
         ),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,15 +137,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   child: Center(
                     child: widget.equbDetailModel.name.isNotEmpty
                         ? TextWidget(
-                            text: widget.equbDetailModel.name
-                                        .trim()
-                                        .split(' ')
-                                        .length ==
-                                    1
-                                ? widget.equbDetailModel.name
-                                    .split('')
-                                    .first
-                                    .trim()
+                            text: widget.equbDetailModel.name.trim().split(' ').length == 1
+                                ? widget.equbDetailModel.name.split('').first.trim()
                                 : '${widget.equbDetailModel.name.trim().split(' ').first[0]}${widget.equbDetailModel.name.trim().split(' ').last[0]}',
                             color: Colors.white,
                             fontSize: 14,
@@ -197,8 +216,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     ),
                     const SizedBox(width: 10),
                     TextWidget(
-                      text:
-                          'Members : ${widget.equbDetailModel.members.length}',
+                      text: 'Members : ${widget.equbDetailModel.members.length}',
                       fontSize: 14,
                       color: const Color(0xfF6D6D6D),
                     ),
@@ -525,24 +543,27 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextWidget(
-          text: "Equb Group Settings",
-          fontSize: 24,
-          weight: FontWeight.w700,
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 5),
-          child: TextWidget(
-            text: "Please review your Equb details carefully.",
-            weight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF6D6D6D),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: "Equb Group Settings",
+            fontSize: 24,
+            weight: FontWeight.w700,
           ),
-        )
-      ],
+          Padding(
+            padding: EdgeInsets.only(top: 5),
+            child: TextWidget(
+              text: "Please review your Equb details carefully.",
+              weight: FontWeight.w400,
+              fontSize: 14,
+              color: Color(0xFF6D6D6D),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -551,17 +572,23 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
       child: Column(
         children: [
           // TabBar to display the tabs
-          TabBar(
-            controller: _tabController,
-            labelColor: ColorName.primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: ColorName.primaryColor,
-            tabs: const [
-              Tab(text: 'Members'),
-              Tab(text: 'Winners'),
-              Tab(text: 'Payment'),
-              Tab(text: 'Requests'),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: TabBar(
+              controller: _tabController,
+              labelColor: ColorName.primaryColor,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: ColorName.primaryColor,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelPadding: const EdgeInsets.only(right: 15),
+              tabs: const [
+                Tab(text: 'Members'),
+                Tab(text: 'Winners'),
+                Tab(text: 'Payment'),
+                Tab(text: 'Requests'),
+              ],
+            ),
           ),
           // TabBarView to handle tab content switching
           Expanded(
@@ -581,9 +608,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   Widget _buildMembersContent() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Column(
           children: [
             Row(
@@ -594,26 +621,288 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   fontSize: 16,
                 ),
                 TextButton(
-                    child: const Row(
-                      children: [
-                        Icon(
-                          Icons.add,
-                          color: ColorName.primaryColor,
-                        ),
-                        SizedBox(width: 3),
-                        TextWidget(
-                          text: 'Add Member',
-                          fontSize: 13,
-                          color: ColorName.primaryColor,
-                        ),
-                      ],
-                    ),
-                    onPressed: () {
-                      // setState(() {
-                      //   index = 1;
-                      //   sliderWidth = 60.sw;
-                      // });
-                    })
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.add,
+                        color: ColorName.primaryColor,
+                      ),
+                      SizedBox(width: 3),
+                      TextWidget(
+                        text: 'Add Member',
+                        fontSize: 13,
+                        color: ColorName.primaryColor,
+                      ),
+                    ],
+                  ),
+                  onPressed: () async {
+                    // setState(() {
+                    //   index = 1;
+                    //   sliderWidth = 60.sw;
+                    // });
+
+                    await _fetchContacts();
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20, right: 20, top: 40),
+                            child: isPermissionDenied
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const TextWidget(
+                                        text:
+                                            'Inorder to select members you need to allow us to pull your contact info',
+                                        type: TextType.small,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      TextButton(
+                                          onPressed: () async {
+                                            openAppSettings();
+                                          },
+                                          child: const TextWidget(
+                                            text: 'Enable Contact Permission',
+                                            type: TextType.small,
+                                            color: ColorName.primaryColor,
+                                          ))
+                                    ],
+                                  )
+                                : SizedBox(
+                                    width: 100.sw,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const TextWidget(
+                                          text: 'Add Members',
+                                          fontSize: 14,
+                                          weight: FontWeight.w400,
+                                        ),
+                                        const SizedBox(height: 10),
+                                        TextField(
+                                          controller: searchingController,
+                                          onChanged: (value) {
+                                            if (value.isEmpty) {
+                                              setState(() {
+                                                isSearching = false;
+                                                filteredContacts = [];
+                                              });
+                                            } else {
+                                              filteredContacts = _contacts
+                                                  .where((contact) =>
+                                                      contact.displayName.toLowerCase().contains(value.toLowerCase()))
+                                                  .toList();
+                                              setState(() {
+                                                filteredContacts = filteredContacts;
+                                                isSearching = true;
+                                              });
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                            hintText: 'Search name',
+                                            hintStyle: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            prefixIcon: const Icon(
+                                              BoxIcons.bx_search,
+                                            ),
+                                            contentPadding: const EdgeInsets.only(left: 20),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(30),
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(30),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            TextWidget(
+                                              text: 'All Contact (${_contacts.length} Contacts) ',
+                                              fontSize: 14,
+                                              weight: FontWeight.w500,
+                                            ),
+                                            TextWidget(
+                                              text: '${selectedContacts.length}/${numberOfMembersController.text}',
+                                              fontSize: 14,
+                                              weight: FontWeight.w500,
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Expanded(
+                                          child: isSearching
+                                              ? filteredContacts.isEmpty
+                                                  ? Container(
+                                                      margin: const EdgeInsets.only(top: 10),
+                                                      alignment: Alignment.topCenter,
+                                                      child: TextWidget(
+                                                        text: '${searchingController.text} not Found',
+                                                        type: TextType.small,
+                                                        weight: FontWeight.w300,
+                                                        color: const Color(0xFF6D6D6D),
+                                                      ),
+                                                    )
+                                                  : ListView.builder(
+                                                      itemCount: filteredContacts.length,
+                                                      itemBuilder: (context, index) {
+                                                        final contact = filteredContacts[index];
+                                                        final isSelected = selectedContacts.contains(contact);
+                                                        return CheckboxListTile(
+                                                          activeColor: ColorName.primaryColor,
+                                                          checkboxShape: const CircleBorder(),
+                                                          contentPadding: EdgeInsets.zero,
+                                                          value: isSelected,
+                                                          secondary: contact.photo == null
+                                                              ? ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(100),
+                                                                  child: Container(
+                                                                    width: 50,
+                                                                    height: 50,
+                                                                    color: ColorName.primaryColor,
+                                                                    alignment: Alignment.center,
+                                                                    child: TextWidget(
+                                                                      text: contact.displayName[0],
+                                                                      color: Colors.white,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(100),
+                                                                  child: Image.memory(
+                                                                    contact.photo!,
+                                                                    width: 50,
+                                                                    height: 50,
+                                                                    fit: BoxFit.cover,
+                                                                  )),
+                                                          title: TextWidget(
+                                                            text: contact.displayName,
+                                                            fontSize: 16,
+                                                            weight: FontWeight.w400,
+                                                          ),
+                                                          subtitle: TextWidget(
+                                                            text: contact.phones.first.number,
+                                                            type: TextType.small,
+                                                            fontSize: 14,
+                                                            weight: FontWeight.w300,
+                                                          ),
+                                                          onChanged: (bool? selected) {
+                                                            setState(() {
+                                                              if (selected == true) {
+                                                                if (selectedContacts.length <
+                                                                    (int.tryParse(numberOfMembersController.text) ??
+                                                                        0)) {
+                                                                  selectedContacts.add(contact);
+                                                                }
+                                                              } else {
+                                                                selectedContacts.remove(contact);
+                                                              }
+                                                            });
+                                                            setState(() {
+                                                              selectedContacts = selectedContacts;
+                                                            });
+                                                          },
+                                                        );
+                                                      })
+                                              : ListView.builder(
+                                                  itemCount: _contacts.length,
+                                                  itemBuilder: (context, index) {
+                                                    final contact = _contacts[index];
+                                                    final isSelected = selectedContacts.contains(contact);
+                                                    return CheckboxListTile(
+                                                      activeColor: ColorName.primaryColor,
+                                                      checkboxShape: const CircleBorder(),
+                                                      contentPadding: EdgeInsets.zero,
+                                                      value: isSelected,
+                                                      secondary: contact.photo == null
+                                                          ? ClipRRect(
+                                                              borderRadius: BorderRadius.circular(100),
+                                                              child: Container(
+                                                                width: 50,
+                                                                height: 50,
+                                                                color: ColorName.primaryColor,
+                                                                alignment: Alignment.center,
+                                                                child: TextWidget(
+                                                                  text: contact.displayName[0],
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : ClipRRect(
+                                                              borderRadius: BorderRadius.circular(100),
+                                                              child: Image.memory(
+                                                                contact.photo!,
+                                                                width: 50,
+                                                                height: 50,
+                                                                fit: BoxFit.cover,
+                                                              )),
+                                                      title: TextWidget(
+                                                        text: contact.displayName,
+                                                        fontSize: 16,
+                                                        weight: FontWeight.w400,
+                                                      ),
+                                                      subtitle: TextWidget(
+                                                        text: contact.phones.first.number,
+                                                        type: TextType.small,
+                                                        fontSize: 14,
+                                                        weight: FontWeight.w300,
+                                                      ),
+                                                      onChanged: (bool? selected) {
+                                                        // setState(() {
+                                                        //   if (selected == true) {
+                                                        //     if (selectedContacts.length <
+                                                        //         (int.tryParse(numberOfMembersController.text) ?? 0)) {
+                                                        //       selectedContacts.add(contact);
+                                                        //     }
+                                                        //   } else {
+                                                        //     selectedContacts.remove(contact);
+                                                        //   }
+                                                        // });
+                                                        setState(() {
+                                                          selectedContacts = selectedContacts;
+                                                        });
+                                                        log(selectedContacts.toString());
+                                                      },
+                                                    );
+                                                  }),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            child: SizedBox(
+                              width: 100.sw,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                child: ButtonWidget(
+                                  onPressed: () {},
+                                  child: const TextWidget(
+                                    text: 'Next',
+                                    type: TextType.small,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             ListView.builder(
@@ -636,7 +925,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -648,27 +937,30 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                       fontSize: 16,
                     ),
                     TextButton(
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.gamepad_outlined,
-                              size: 20,
-                              color: ColorName.green,
-                            ),
-                            SizedBox(width: 5),
-                            TextWidget(
-                              text: 'Auto Pick',
-                              fontSize: 13,
-                              color: ColorName.green,
-                            ),
-                          ],
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.gamepad_outlined,
+                            size: 20,
+                            color: ColorName.green,
+                          ),
+                          SizedBox(width: 5),
+                          TextWidget(
+                            text: 'Auto Pick',
+                            fontSize: 13,
+                            color: ColorName.green,
+                          ),
+                        ],
+                      ),
+                      onPressed: () => context.pushNamed(
+                        RouteName.equbActionCompleted,
+                        extra: CompletePageDto(
+                          title: "Xth Round Pick",
+                          description: "Member Name",
+                          onComplete: () => context.pop(),
                         ),
-                        onPressed: () {
-                          // setState(() {
-                          //   index = 1;
-                          //   sliderWidth = 60.sw;
-                          // });
-                        })
+                      ),
+                    )
                   ],
                 ),
                 ListView.builder(
@@ -698,18 +990,31 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           ),
         ),
         Positioned(
-          bottom: 10,
-          child: SizedBox(
-            width: 89.sw,
-            child: ButtonWidget(
-              color: activeIndex != -1
-                  ? ColorName.primaryColor
-                  : ColorName.grey.shade200,
-              onPressed: () {},
-              child: const TextWidget(
-                text: 'Confirm',
-                type: TextType.small,
-                color: Colors.white,
+          bottom: 0,
+          child: Container(
+            color: ColorName.white,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: SizedBox(
+                width: 100.sw - 30,
+                child: ButtonWidget(
+                  color: activeIndex != -1 ? ColorName.primaryColor : ColorName.grey.shade200,
+                  onPressed: () => activeIndex != -1
+                      ? context.pushNamed(
+                          RouteName.equbActionCompleted,
+                          extra: CompletePageDto(
+                            title: "Xth Round Pick",
+                            description: "Member Name",
+                            onComplete: () => context.pop(),
+                          ),
+                        )
+                      : null,
+                  child: const TextWidget(
+                    text: 'Confirm',
+                    type: TextType.small,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
@@ -722,7 +1027,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -766,7 +1071,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: 9, // Example list item count
                   itemBuilder: (context, index) {
-                    return const EqubPaymentCard();
+                    return EqubPaymentCard(
+                      index: index,
+                    );
                   },
                 ),
                 const SizedBox(
@@ -777,15 +1084,28 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           ),
         ),
         Positioned(
-          bottom: 10,
-          child: SizedBox(
-            width: 89.sw,
-            child: ButtonWidget(
-              onPressed: () {},
-              child: const TextWidget(
-                text: 'Send Reminder To All',
-                type: TextType.small,
-                color: Colors.white,
+          bottom: 0,
+          child: Container(
+            color: ColorName.white,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: SizedBox(
+                width: 100.sw - 30,
+                child: ButtonWidget(
+                  onPressed: () => context.pushNamed(
+                    RouteName.equbActionCompleted,
+                    extra: CompletePageDto(
+                      title: "Reminder sent!",
+                      description: "You have successfully sent a reminder to all members!",
+                      onComplete: () => context.pop(),
+                    ),
+                  ),
+                  child: const TextWidget(
+                    text: 'Send Reminder To All',
+                    type: TextType.small,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
@@ -796,7 +1116,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   Widget _buildRequestsContent() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -840,11 +1160,13 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
               physics: const NeverScrollableScrollPhysics(),
               itemCount: 9, // Example list item count
               itemBuilder: (context, index) {
-                return const EqubRequestsCard();
+                return EqubRequestsCard(
+                  index: index,
+                );
               },
             ),
             const SizedBox(
-              height: 75,
+              height: 15,
             ),
           ],
         ),

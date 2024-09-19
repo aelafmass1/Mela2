@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class EqubRequestsCard extends StatefulWidget {
-  const EqubRequestsCard({super.key});
+  final int index;
+  const EqubRequestsCard({
+    required this.index,
+    super.key,
+  });
 
   @override
   State<EqubRequestsCard> createState() => _EqubRequestsCardState();
 }
 
 class _EqubRequestsCardState extends State<EqubRequestsCard> {
+  bool isActive = false;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -57,12 +64,30 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
             width: 15,
           ),
           Checkbox(
-            value: false,
-            onChanged: (value) {},
+            value: isActive,
+            checkColor: ColorName.green,
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return ColorName.green.shade100;
+            }),
+            side: BorderSide.none,
+            onChanged: (value) {
+              setState(() {
+                isActive = !isActive;
+              });
+            },
           ),
           Checkbox(
-            value: false,
-            onChanged: (value) {},
+            value: !isActive,
+            checkColor: ColorName.red,
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return ColorName.red.shade100;
+            }),
+            side: BorderSide.none,
+            onChanged: (value) {
+              setState(() {
+                isActive = !isActive;
+              });
+            },
           ),
         ],
       ),

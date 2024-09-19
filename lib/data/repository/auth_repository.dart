@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -41,7 +42,7 @@ class AuthRepository {
         "countryCode": countryCode,
         "phoneNumber": phoneNumber,
         "password": password,
-        "phoneNumberLogin": true
+        "phoneNumberLogin": true,
       }),
     );
     final data = jsonDecode(res.body);
@@ -78,8 +79,7 @@ class AuthRepository {
     return {'error': data['message']};
   }
 
-  static Future<Map> deleteUser(
-      String accessToken, String phoneNumber, String code) async {
+  static Future<Map> deleteUser(String accessToken, String phoneNumber, String code) async {
     return {
       //
     };
@@ -121,18 +121,16 @@ class AuthRepository {
     return {'error': data['message']};
   }
 
-  static Future<Map> sendOtp(
-      String accessToken, int phoneNumber, int countryCode) async {
-    final res =
-        await http.post(Uri.parse('$baseUrl/auth/phone/start-verification'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
-              "phoneNumber": phoneNumber,
-              "countryCode": countryCode,
-            }));
+  static Future<Map> sendOtp(String accessToken, int phoneNumber, int countryCode) async {
+    final res = await http.post(Uri.parse('$baseUrl/auth/phone/start-verification'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "phoneNumber": phoneNumber,
+          "countryCode": countryCode,
+        }));
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       final data = jsonDecode(res.body);

@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class EqubPaymentCard extends StatefulWidget {
-  const EqubPaymentCard({super.key});
+  final int index;
+  const EqubPaymentCard({
+    required this.index,
+    super.key,
+  });
 
   @override
   State<EqubPaymentCard> createState() => _EqubPaymentCardState();
 }
 
 class _EqubPaymentCardState extends State<EqubPaymentCard> {
+  bool isActive = false;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -56,13 +66,62 @@ class _EqubPaymentCardState extends State<EqubPaymentCard> {
           const SizedBox(
             width: 15,
           ),
+          if (!widget.index.isPrime())
+            GestureDetector(
+              onTap: () => context.pushNamed(
+                RouteName.equbActionCompleted,
+                extra: CompletePageDto(
+                  title: "Reminder sent!",
+                  description: "You have successfully sent a reminder to member ${widget.index}!",
+                  onComplete: () => context.pop(),
+                ),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: ColorName.white,
+                  border: Border.all(
+                    color: ColorName.red,
+                  ),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const TextWidget(
+                  text: "Remind",
+                  fontSize: 13,
+                  color: ColorName.red,
+                ),
+              ),
+            ),
+          if (!widget.index.isPrime())
+            const SizedBox(
+              width: 15,
+            ),
           Checkbox(
-            value: false,
-            onChanged: (value) {},
+            // value: isActive,
+            value: widget.index.isPrime(),
+            checkColor: ColorName.green,
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return ColorName.green.shade100;
+            }),
+            side: BorderSide.none,
+            onChanged: (value) {
+              // setState(() {
+              //   isActive = !isActive;
+              // });
+            },
           ),
           Checkbox(
-            value: false,
-            onChanged: (value) {},
+            value: !widget.index.isPrime(),
+            checkColor: ColorName.red,
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return ColorName.red.shade100;
+            }),
+            side: BorderSide.none,
+            onChanged: (value) {
+              // setState(() {
+              //   isActive = !isActive;
+              // });
+            },
           ),
         ],
       ),
