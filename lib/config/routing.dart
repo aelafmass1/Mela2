@@ -3,10 +3,12 @@ import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page_dynamic.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_admin_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_member_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_edit_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
@@ -34,8 +36,8 @@ class RouteName {
   // Added by Fasil
   static const equbAdminDetail = 'equb_admin_detail_screen';
   static const equbMemberDetail = 'equb_member_detail_screen';
-
   static const equbEdit = 'equb_edit_screen';
+  static const equbActionCompleted = 'equb_action_completed_screen';
 
   static const welcome = 'welcome_screen';
   static const otp = 'otp_screen';
@@ -99,6 +101,13 @@ final goRouting = GoRouter(
           path: 'equb_edit',
           name: RouteName.equbEdit,
           builder: (context, state) => const EqubEditScreen(),
+        ),
+        GoRoute(
+          path: 'equb_action_completed',
+          name: RouteName.equbActionCompleted,
+          builder: (context, state) => CompletePageDynamic(
+            completePageArgs: state.extra as CompletePageDto,
+          ),
         ),
         GoRoute(
           path: 'receipt',

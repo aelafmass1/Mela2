@@ -110,10 +110,10 @@ class _EqubMemberCardState extends State<EqubMemberCard> {
                 color: ColorName.primaryColor,
               ),
             ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert_rounded),
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.more_vert_rounded),
+          // ),
         ],
       ),
     );

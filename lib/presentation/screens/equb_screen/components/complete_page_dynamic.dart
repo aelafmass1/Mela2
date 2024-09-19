@@ -5,12 +5,16 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-class CompletePage extends StatelessWidget {
-  final String equbName;
-  const CompletePage({super.key, required this.equbName});
+class CompletePageDynamic extends StatelessWidget {
+  final CompletePageDto completePageArgs;
+  const CompletePageDynamic({
+    super.key,
+    required this.completePageArgs,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +26,14 @@ class CompletePage extends StatelessWidget {
             const Expanded(child: SizedBox()),
             SvgPicture.asset(Assets.images.svgs.completeLogo),
             const SizedBox(height: 20),
-            const TextWidget(
-              text: 'Completed',
+            TextWidget(
+              text: completePageArgs.title,
               fontSize: 24,
               color: ColorName.primaryColor,
             ),
             const SizedBox(height: 10),
             TextWidget(
-              text: 'You have successfully Joined  “$equbName”',
+              text: completePageArgs.description,
               color: const Color(0xFF6D6D6D),
               fontSize: 14,
             ),
@@ -37,16 +41,13 @@ class CompletePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
               child: ButtonWidget(
-                  child: const TextWidget(
-                    text: 'Done',
-                    color: Colors.white,
-                    type: TextType.small,
-                  ),
-                  onPressed: () {
-                    context.pop();
-                    context.pop();
-                    context.pushNamed(RouteName.sendInvitation);
-                  }),
+                onPressed: completePageArgs.onComplete,
+                child: const TextWidget(
+                  text: 'Done',
+                  color: Colors.white,
+                  type: TextType.small,
+                ),
+              ),
             )
           ],
         ),
