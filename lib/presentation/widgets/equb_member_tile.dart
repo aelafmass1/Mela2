@@ -107,16 +107,7 @@ class EqubMemberTile extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                onPressed: () {
-                                  context.pop();
-                                },
-                                icon: const Icon(Icons.close),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 40),
                             SvgPicture.asset(Assets.images.svgs.completeLogo),
                             const SizedBox(height: 20),
                             const TextWidget(
