@@ -13,7 +13,13 @@ import '../../../widgets/text_widget.dart';
 class EqubCard extends StatelessWidget {
   final EqubDetailModel equb;
   final Function()? onTab;
-  const EqubCard({super.key, required this.equb, this.onTab});
+  final bool showJoinRequestButton;
+  const EqubCard({
+    super.key,
+    required this.equb,
+    this.onTab,
+    this.showJoinRequestButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +69,7 @@ class EqubCard extends StatelessWidget {
                       : equb.name
                           .trim()
                           .split(' ')
+                          .take(3)
                           .map((e) => e[0])
                           .join()
                           .toUpperCase(),
@@ -75,9 +82,12 @@ class EqubCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextWidget(
-                  text: equb.name,
-                  fontSize: 16,
+                SizedBox(
+                  width: 70.sw,
+                  child: TextWidget(
+                    text: equb.name,
+                    fontSize: 16,
+                  ),
                 ),
                 const TextWidget(
                   text: 'Created at 12-02-2024',
@@ -189,34 +199,50 @@ class EqubCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        width: 35,
-                        height: 35,
-                        child: SimpleCircularProgressBar(
-                          valueNotifier: ValueNotifier(3),
-                          progressStrokeWidth: 3,
-                          backStrokeWidth: 3,
-                          maxValue: 10,
-                          animationDuration: 3,
-                          mergeMode: true,
-                          onGetText: (value) {
-                            return Text(
-                              '${value.toInt()}\nDays',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(
-                                    fontSize: 10,
-                                  ),
-                            );
-                          },
-                          progressColors: const [
-                            ColorName.primaryColor,
-                          ],
-                          backColor: Colors.black.withOpacity(0.2),
+                      if (showJoinRequestButton)
+                        SizedBox(
+                          width: 75,
+                          height: 30,
+                          child: ButtonWidget(
+                              horizontalPadding: 5,
+                              verticalPadding: 0,
+                              child: const TextWidget(
+                                text: 'Request Join',
+                                type: TextType.small,
+                                fontSize: 10,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {}),
+                        )
+                      else
+                        SizedBox(
+                          width: 35,
+                          height: 35,
+                          child: SimpleCircularProgressBar(
+                            valueNotifier: ValueNotifier(3),
+                            progressStrokeWidth: 3,
+                            backStrokeWidth: 3,
+                            maxValue: 10,
+                            animationDuration: 3,
+                            mergeMode: true,
+                            onGetText: (value) {
+                              return Text(
+                                '${value.toInt()}\nDays',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall!
+                                    .copyWith(
+                                      fontSize: 10,
+                                    ),
+                              );
+                            },
+                            progressColors: const [
+                              ColorName.primaryColor,
+                            ],
+                            backColor: Colors.black.withOpacity(0.2),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 )

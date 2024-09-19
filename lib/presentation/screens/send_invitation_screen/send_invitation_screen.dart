@@ -15,6 +15,7 @@ class SendInvitationScreen extends StatefulWidget {
 }
 
 class _SendInvitationScreenState extends State<SendInvitationScreen> {
+  List invitedMembers = [];
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -62,9 +63,30 @@ class _SendInvitationScreenState extends State<SendInvitationScreen> {
                     ],
                   ),
                   const SizedBox(height: 15),
-                  if (state is EqubSuccess && state.invitees != null)
-                    for (var invitee in state.invitees!)
-                      EqubMemberTile(equbInviteeModel: invitee),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (state is EqubSuccess && state.invitees != null)
+                            for (var invitee in state.invitees!)
+                              EqubMemberTile(
+                                equbInviteeModel: invitee.copyWith(
+                                  status: invitedMembers
+                                          .contains(invitee.phoneNumber)
+                                      ? 'Pending'
+                                      : null,
+                                ),
+                                onSuccessInvite: () {
+                                  invitedMembers.add(invitee.phoneNumber);
+                                  setState(() {
+                                    invitedMembers = invitedMembers;
+                                  });
+                                },
+                              ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );

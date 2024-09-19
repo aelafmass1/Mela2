@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_card.dart';
@@ -196,6 +197,7 @@ class _EqubTabState extends State<EqubTab> {
                             ),
                           ),
                           EqubCard(
+                            showJoinRequestButton: true,
                             onTab: () {
                               final detail = EqubDetailModel(
                                 id: -1,
@@ -205,7 +207,14 @@ class _EqubTabState extends State<EqubTab> {
                                 frequency: 'WEEKLY',
                                 startDate: DateTime.now(),
                                 members: [],
-                                invitees: [],
+                                invitees: [
+                                  EqubInviteeModel(
+                                    id: -1,
+                                    phoneNumber: '+251910101010',
+                                    status: '',
+                                    name: 'Abebe Kebede',
+                                  )
+                                ],
                               );
                               context.goNamed(RouteName.equbMemberDetail,
                                   extra: detail);
@@ -218,7 +227,14 @@ class _EqubTabState extends State<EqubTab> {
                               frequency: 'WEEKLY',
                               startDate: DateTime.now(),
                               members: [],
-                              invitees: [],
+                              invitees: [
+                                EqubInviteeModel(
+                                  id: -1,
+                                  phoneNumber: '+251910101010',
+                                  status: '',
+                                  name: 'Abebe Kebede',
+                                )
+                              ],
                             ),
                           ),
                         ],

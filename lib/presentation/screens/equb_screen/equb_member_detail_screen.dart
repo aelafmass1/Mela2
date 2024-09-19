@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 
+import '../../../core/utils/show_consent.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../widgets/text_widget.dart';
@@ -19,6 +22,7 @@ class EqubMemberDetailScreen extends StatefulWidget {
 }
 
 class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
+  bool isPending = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,14 +54,65 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 10, top: 10),
               child: ButtonWidget(
-                  child: const TextWidget(
-                    text: 'Request to Join',
+                  onPressed: isPending
+                      ? null
+                      : () async {
+                          final agreed = await showConsent(context);
+                          if (agreed) {
+                            setState(() {
+                              isPending = true;
+                            });
+                            showDialog(
+                                // ignore: use_build_context_synchronously
+                                context: context,
+                                builder: ((_) => Dialog(
+                                      child: Container(
+                                        width: 100.sw,
+                                        height: 55.sh,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  context.pop();
+                                                },
+                                                icon: const Icon(Icons.close),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            SvgPicture.asset(Assets
+                                                .images.svgs.completeLogo),
+                                            const SizedBox(height: 20),
+                                            const TextWidget(
+                                              text: 'Request Sent',
+                                              color: ColorName.primaryColor,
+                                              fontSize: 24,
+                                            ),
+                                            const SizedBox(height: 20),
+                                            TextWidget(
+                                              text:
+                                                  'You have successfully sent a request to join “${widget.equbDetailModel.name}”',
+                                              color: ColorName.grey,
+                                              textAlign: TextAlign.center,
+                                              fontSize: 14,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )));
+                          }
+                        },
+                  child: TextWidget(
+                    text: isPending ? 'Pending' : 'Request to Join',
                     type: TextType.small,
                     color: Colors.white,
-                  ),
-                  onPressed: () {
-                    //
-                  }),
+                  )),
             )
           ],
         ),
@@ -193,7 +248,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     const SizedBox(width: 10),
                     TextWidget(
                       text:
-                          'Members : ${widget.equbDetailModel.members.length}',
+                          'Members : ${widget.equbDetailModel.invitees.length}',
                       fontSize: 14,
                       color: const Color(0xfF6D6D6D),
                     ),
@@ -306,12 +361,13 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
           padding: const EdgeInsets.only(top: 25, bottom: 20),
           alignment: Alignment.centerLeft,
           child: TextWidget(
-            text: 'All Members (${widget.equbDetailModel.members.length})',
+            text: 'All Members (${widget.equbDetailModel.invitees.length})',
           ),
         ),
         for (var member in widget.equbDetailModel.invitees)
           EqubMemberTile(
             equbInviteeModel: member,
+            trailingWidget: const SizedBox.shrink(),
           ),
       ],
     );
