@@ -246,6 +246,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/card_pattern.svg
   String get cardPattern => 'assets/images/svgs/card_pattern.svg';
 
+  /// File path: assets/images/svgs/checkmark_icon.svg
+  String get checkmarkIcon => 'assets/images/svgs/checkmark_icon.svg';
+
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
 
@@ -289,6 +292,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/reward_icon.svg
+  String get rewardIcon => 'assets/images/svgs/reward_icon.svg';
+
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
@@ -301,6 +307,7 @@ class $AssetsImagesSvgsGen {
         amountIcon,
         cameraIcon,
         cardPattern,
+        checkmarkIcon,
         completeLogo,
         editIcon,
         endTimeIcon,
@@ -315,6 +322,7 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
+        rewardIcon,
         sendIcon,
         transactionIcon
       ];

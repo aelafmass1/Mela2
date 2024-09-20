@@ -22,6 +22,7 @@ import 'package:transaction_mobile_app/presentation/screens/signup_screen/compon
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
 
 import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
@@ -53,6 +54,7 @@ class RouteName {
   static const loginPincode = 'login_pincode_screen';
   static const completePage = 'complete_page';
   static const sendInvitation = 'send_invitation_screen';
+  static const win = 'win_screen';
 }
 
 final goRouting = GoRouter(
@@ -73,6 +75,16 @@ final goRouting = GoRouter(
       name: RouteName.home,
       builder: (context, state) => const HomeScreen(),
       routes: [
+        GoRoute(
+            path: 'win_screen',
+            name: RouteName.win,
+            builder: (context, state) {
+              List data = state.extra as List;
+              return WinScreen(
+                round: data[0],
+                equbInviteeModel: data[1],
+              );
+            }),
         GoRoute(
           path: 'equb_creation',
           name: RouteName.equbCreation,

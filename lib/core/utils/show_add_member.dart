@@ -10,14 +10,14 @@ import '../../gen/colors.gen.dart';
 import '../../presentation/widgets/button_widget.dart';
 import '../../presentation/widgets/text_widget.dart';
 
-showAddMember(
-    BuildContext context, int numberOfMembers, List<Contact> contacts) {
+Future<List<Contact>> showAddMember(
+    BuildContext context, int numberOfMembers, List<Contact> contacts) async {
   final searchController = TextEditingController();
   bool isSearching = false;
   List<Contact> filteredContacts = [];
 
   List<Contact> selectedContacts = [];
-  showModalBottomSheet(
+  await showModalBottomSheet<List<Contact>>(
     context: context,
     isScrollControlled: true,
     builder: (context) => StatefulBuilder(builder: (context, setState) {
@@ -273,4 +273,5 @@ showAddMember(
       );
     }),
   );
+  return selectedContacts;
 }

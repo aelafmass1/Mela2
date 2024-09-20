@@ -1,13 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:icons_plus/icons_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_member_card.dart';
@@ -569,14 +566,15 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     ? ColorName.primaryColor
                     : ColorName.grey.shade200.withOpacity(0.5),
                 onPressed: () => activeIndex != -1
-                    ? context.pushNamed(
-                        RouteName.equbActionCompleted,
-                        extra: CompletePageDto(
-                          title: "Xth Round Pick",
-                          description: "Member Name",
-                          onComplete: () => context.pop(),
+                    ? context.pushNamed(RouteName.win, extra: [
+                        '4th',
+                        EqubInviteeModel(
+                          id: -1,
+                          phoneNumber: '+251910101010',
+                          status: '',
+                          name: 'Abebe Kebede',
                         ),
-                      )
+                      ])
                     : null,
                 child: const TextWidget(
                   text: 'Confirm',
