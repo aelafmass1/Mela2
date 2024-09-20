@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class EqubRequestsCard extends StatefulWidget {
   final int index;
+  final Function onAccept;
+
   const EqubRequestsCard({
     required this.index,
+    required this.onAccept,
     super.key,
   });
 
@@ -15,8 +17,6 @@ class EqubRequestsCard extends StatefulWidget {
 }
 
 class _EqubRequestsCardState extends State<EqubRequestsCard> {
-  bool isActive = false;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -39,19 +39,19 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
           const SizedBox(
             width: 15,
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextWidget(
-                  text: "Member Name",
+                  text: "Member Name ${widget.index}",
                   fontSize: 16,
                   weight: FontWeight.w400,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
-                TextWidget(
+                const TextWidget(
                   text: "+251912345678",
                   type: TextType.small,
                   fontSize: 14,
@@ -63,31 +63,82 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
           const SizedBox(
             width: 15,
           ),
-          Checkbox(
-            value: isActive,
-            checkColor: ColorName.green,
-            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-              return ColorName.green.shade100;
-            }),
-            side: BorderSide.none,
-            onChanged: (value) {
-              setState(() {
-                isActive = !isActive;
-              });
+          // Checkbox(
+          //   value: true,
+          //   checkColor: ColorName.green,
+          //   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+          //     return ColorName.green.shade100;
+          //   }),
+          //   side: BorderSide.none,
+          //   onChanged: (value) {
+          //     // setState(() {
+          //     //   isActive = true;
+          //     //   isInactive = false;
+          //     // });
+          //     // Call the onAccept function when this checkbox is clicked
+          //     widget.onAccept(widget.index);
+          //   },
+          // ),
+          // Custom Accept "X" checkbox
+          GestureDetector(
+            onTap: () {
+              widget.onAccept(widget.index); // Call the onAccept function
             },
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: ColorName.green,
+                  width: 2.0,
+                ),
+              ),
+              padding: const EdgeInsets.all(1.0),
+              child: const Icon(
+                Icons.check, // Empty circle when unchecked
+                color: ColorName.green,
+                size: 15,
+              ),
+            ),
           ),
-          Checkbox(
-            value: !isActive,
-            checkColor: ColorName.red,
-            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-              return ColorName.red.shade100;
-            }),
-            side: BorderSide.none,
-            onChanged: (value) {
-              setState(() {
-                isActive = !isActive;
-              });
+
+          const SizedBox(width: 25),
+          // Checkbox(
+          //   value: true,
+          //   checkColor: ColorName.red,
+          //   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+          //     return ColorName.red.shade100;
+          //   }),
+          //   side: BorderSide.none,
+          //   onChanged: (value) {
+          //     // setState(() {
+          //     //   isInactive = true;
+          //     //   isActive = false;
+          //     // });
+          //     // Call the onAccept function when this checkbox is clicked
+          //     widget.onAccept(widget.index);
+          //   },
+          // ),
+          // Custom Reject "X" checkbox
+          GestureDetector(
+            onTap: () {
+              // Call the onAccept function when this checkbox is clicked
+              widget.onAccept(widget.index);
             },
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: ColorName.red,
+                  width: 2.0,
+                ),
+              ),
+              padding: const EdgeInsets.all(1.0),
+              child: const Icon(
+                Icons.close, // "X" icon for reject
+                color: ColorName.red,
+                size: 15,
+              ),
+            ),
           ),
         ],
       ),
