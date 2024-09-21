@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/data/models/contact_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
@@ -18,14 +20,44 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         )) {
     on<AddEqub>(_onAddEqub);
     on<FetchEqubs>(_onFetchEqubs);
+    on<InviteMembers>(_onInviteMembers);
   }
+  _onInviteMembers(InviteMembers event, Emitter emit) async {
+    try {
+      if (state is! EqubLoading) {
+        emit(EqubLoading(equbList: state.equbList));
+        List<EqubDetailModel> equbs = state.equbList;
+
+        final token = await getToken();
+
+        final res = await EqubRepository(client: Client()).inviteMembers(
+          accessToken: token!,
+          equbId: event.equbId,
+          members: event.contacts,
+        );
+
+        if (res.first.containsKey('error')) {
+          return emit(
+              EqubFail(equbList: state.equbList, reason: res.first['error']));
+        }
+
+        emit(EqubSuccess(
+          equbList: equbs,
+        ));
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+    }
+  }
+
   _onFetchEqubs(FetchEqubs event, Emitter emit) async {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
         final token = await getToken();
 
-        final res = await EqubRepository.fetchEqubs(
+        final res = await EqubRepository(client: Client()).fetchEqubs(
           accessToken: token!,
         );
         if (res.first.containsKey('error')) {
@@ -51,7 +83,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         List<EqubDetailModel> equbs = state.equbList;
 
         final token = await getToken();
-        final res = await EqubRepository.createEqub(
+        final res = await EqubRepository(client: Client()).createEqub(
           event.equbModel,
           token!,
         );
@@ -60,7 +92,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         }
         int equbId = res['successResponse']['id'];
 
-        final inviteRes = await EqubRepository.inviteMembers(
+        final inviteRes = await EqubRepository(client: Client()).inviteMembers(
           accessToken: token,
           equbId: equbId,
           members: event.equbModel.members,

@@ -207,6 +207,7 @@ class _EqubTabState extends State<EqubTab> {
                                 frequency: 'WEEKLY',
                                 startDate: DateTime.now(),
                                 members: [],
+                                cycles: [],
                                 invitees: [
                                   EqubInviteeModel(
                                     id: -1,
@@ -227,6 +228,7 @@ class _EqubTabState extends State<EqubTab> {
                               frequency: 'WEEKLY',
                               startDate: DateTime.now(),
                               members: [],
+                              cycles: [],
                               invitees: [
                                 EqubInviteeModel(
                                   id: -1,

@@ -469,6 +469,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                       context,
                       int.tryParse(numberOfMembersController.text) ?? 3,
                       _contacts,
+                      widget.equbDetailModel.id,
                     );
                   }
                 },

@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
@@ -47,6 +48,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   List<Contact> selectedContacts = [];
   List<Contact> filteredContacts = [];
 
+  List<String> melaMemberContacts = [];
+
   DateTime? startingDate;
 
   bool isSearching = false;
@@ -60,6 +63,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
       setState(() {
         _contacts = contacts;
       });
+      context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
     } else {
       context.pushNamed(RouteName.contactPermission, extra: () {
         setState(() {
@@ -122,16 +126,28 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextWidget(
-                text: index == 0
-                    ? 'Creating Equb'
-                    : index == 1
-                        ? 'Add Members'
-                        : index == 2
-                            ? 'Consent'
-                            : 'Review your Equb',
-                fontSize: 24,
-                weight: FontWeight.w700,
+              BlocListener<ContactBloc, ContactState>(
+                listener: (context, state) {
+                  if (state is ContactSuccess) {
+                    if (state.contacts.isNotEmpty) {
+                      setState(() {
+                        melaMemberContacts =
+                            state.contacts.map((c) => c.contactId).toList();
+                      });
+                    }
+                  }
+                },
+                child: TextWidget(
+                  text: index == 0
+                      ? 'Creating Equb'
+                      : index == 1
+                          ? 'Add Members'
+                          : index == 2
+                              ? 'Consent'
+                              : 'Review your Equb',
+                  fontSize: 24,
+                  weight: FontWeight.w700,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 10),
@@ -485,10 +501,22 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                         height: 50,
                                         fit: BoxFit.cover,
                                       )),
-                              title: TextWidget(
-                                text: contact.displayName,
-                                fontSize: 16,
-                                weight: FontWeight.w400,
+                              title: Row(
+                                children: [
+                                  TextWidget(
+                                    text: contact.displayName,
+                                    fontSize: 16,
+                                    weight: FontWeight.w400,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Visibility(
+                                    visible:
+                                        melaMemberContacts.contains(contact.id),
+                                    child: SvgPicture.asset(
+                                      Assets.images.svgs.checkmarkIcon,
+                                    ),
+                                  ),
+                                ],
                               ),
                               subtitle: TextWidget(
                                 text: contact.phones.first.number,
@@ -547,10 +575,22 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                     height: 50,
                                     fit: BoxFit.cover,
                                   )),
-                          title: TextWidget(
-                            text: contact.displayName,
-                            fontSize: 16,
-                            weight: FontWeight.w400,
+                          title: Row(
+                            children: [
+                              TextWidget(
+                                text: contact.displayName,
+                                fontSize: 16,
+                                weight: FontWeight.w400,
+                              ),
+                              const SizedBox(width: 5),
+                              Visibility(
+                                visible:
+                                    melaMemberContacts.contains(contact.id),
+                                child: SvgPicture.asset(
+                                  Assets.images.svgs.checkmarkIcon,
+                                ),
+                              ),
+                            ],
                           ),
                           subtitle: TextWidget(
                             text: contact.phones.first.number,
@@ -574,7 +614,6 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                             setState(() {
                               selectedContacts = selectedContacts;
                             });
-                            log(selectedContacts.toString());
                           },
                         );
                       }),
@@ -802,6 +841,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                   startDate: startingDate!,
                                   members: selectedContacts
                                       .map((c) => ContactModel(
+                                            contactId: c.id,
                                             name: c.displayName,
                                             phoneNumber: c.phones.first.number,
                                           ))
