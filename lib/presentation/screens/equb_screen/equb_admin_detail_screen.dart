@@ -4,16 +4,17 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_member_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_winners_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../core/utils/show_add_member.dart';
@@ -29,6 +30,9 @@ class EqubAdminDetailScreen extends StatefulWidget {
 
 class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     with TickerProviderStateMixin {
+  List<int> members = List.generate(10, (index) => index);
+  List<int> requests = List.generate(10, (index) => index);
+
   // Create a TabController to manage the TabBar and TabBarView
   late TabController _tabController;
   int activeIndex = -1;
@@ -42,6 +46,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   bool isPermissionDenied = false;
   bool isSearching = false;
+  bool isJoin = false;
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -403,11 +408,11 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             tabAlignment: TabAlignment.start,
 
             // labelPadding: const EdgeInsets.only(right: 15),
-            tabs: const [
-              Tab(text: 'Members'),
-              Tab(text: 'Winners'),
-              Tab(text: 'Payment'),
-              Tab(text: 'Requests'),
+            tabs: [
+              const Tab(text: 'Members'),
+              _buildTabWithNotification("Winners"),
+              _buildTabWithNotification("Payment"),
+              _buildTabWithNotification("Requests", count: 10),
             ],
           ),
           // TabBarView to handle tab content switching
@@ -427,67 +432,281 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     );
   }
 
-  Widget _buildMembersContent() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const TextWidget(
-                text: 'All Members (10)',
-                fontSize: 16,
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 0)),
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.add,
-                      color: ColorName.primaryColor,
-                    ),
-                    SizedBox(width: 3),
-                    TextWidget(
-                      text: 'Add Member',
-                      fontSize: 13,
-                      color: ColorName.primaryColor,
-                    ),
-                  ],
+  Widget _buildTabWithNotification(String text, {int count = 0}) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Row(
+          children: [
+            Tab(text: text),
+            if (count != 0)
+              Container(
+                margin: const EdgeInsets.only(left: 3),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: ColorName.yellow,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                onPressed: () async {
-                  // setState(() {
-                  //   index = 1;
-                  //   sliderWidth = 60.sw;
-                  // });
+                child: Text(
+                  count.toString(),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: ColorName.white,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        if (count == 0)
+          Positioned(
+            top: 15,
+            right: -10, // You can adjust this based on your design
+            child: Container(
+              width: 5,
+              height: 5,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 
-                  await _fetchContacts();
+  Widget _buildMembersContent() {
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const TextWidget(
+                    text: 'All Members (10)',
+                    fontSize: 16,
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 0)),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: ColorName.primaryColor,
+                        ),
+                        SizedBox(width: 3),
+                        TextWidget(
+                          text: 'Add Member',
+                          fontSize: 13,
+                          color: ColorName.primaryColor,
+                        ),
+                      ],
+                    ),
+                    onPressed: () async {
+                      // setState(() {
+                      //   index = 1;
+                      //   sliderWidth = 60.sw;
+                      // })
+                      await _fetchContacts();
 
-                  if (isPermissionDenied == false) {
-                    showAddMember(
-                      context,
-                      int.tryParse(numberOfMembersController.text) ?? 3,
-                      _contacts,
-                      widget.equbDetailModel.id,
-                    );
-                  }
+                      if (isPermissionDenied == false) {
+                        showAddMember(
+                          context,
+                          int.tryParse(numberOfMembersController.text) ?? 3,
+                          _contacts,
+                          widget.equbDetailModel.id,
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 9, // Example list item count
+                itemBuilder: (context, index) {
+                  // return EqubMemberCard(
+                  //   index: index + 1, // Example widget for each list item
+                  // );
+                  return GestureDetector(
+                    onTap: !index.isPrime() && index.isEven
+                        ? null
+                        : () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Wrap(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        children: [
+                                          ListTile(
+                                            leading: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: Container(
+                                                width: 40,
+                                                height: 40,
+                                                color: ColorName.green,
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.person_add,
+                                                  color: ColorName.white,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            title: const TextWidget(
+                                                text: "Make Co-Admin"),
+                                            onTap: () => showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const TextWidget(
+                                                    text:
+                                                        "Are you sure you want to promote to co-admin?"),
+                                                actions: [
+                                                  MaterialButton(
+                                                    child: const Text("Cancel"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                  MaterialButton(
+                                                    child:
+                                                        const Text("Promote"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          ListTile(
+                                            leading: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: Container(
+                                                width: 40,
+                                                height: 40,
+                                                color: ColorName.green,
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.person_remove,
+                                                  color: ColorName.white,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            title: const TextWidget(
+                                                text: "Remove Co-Admin"),
+                                            onTap: () => showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const TextWidget(
+                                                    text:
+                                                        "Are you sure you want to remove this co-admin?"),
+                                                actions: [
+                                                  MaterialButton(
+                                                    child: const Text("Cancel"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                  MaterialButton(
+                                                    child: const Text("Remove"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          ListTile(
+                                            leading: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: Container(
+                                                width: 40,
+                                                height: 40,
+                                                color: ColorName.red,
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.close,
+                                                  color: ColorName.white,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            title: const TextWidget(
+                                                text: "Remove from equb"),
+                                            onTap: () => showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const TextWidget(
+                                                    text:
+                                                        "Are you sure you want to remove this member?"),
+                                                actions: [
+                                                  MaterialButton(
+                                                    child: const Text("Cancel"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                  MaterialButton(
+                                                    child: const Text("Remove"),
+                                                    onPressed: () =>
+                                                        context.pop(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                    child: EqubMemberTile(
+                      equbInviteeModel: EqubInviteeModel(
+                        id: index,
+                        phoneNumber: "+251912345678",
+                        status: !index.isPrime() && index.isEven
+                            ? ""
+                            : !index.isPrime() && index.isOdd
+                                ? "Joined"
+                                : "Pending",
+                        name: "Member Name $index",
+                      ),
+                    ),
+                  );
                 },
               ),
             ],
           ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 9, // Example list item count
-            itemBuilder: (context, index) {
-              return EqubMemberCard(
-                index: index + 1, // Example widget for each list item
-              );
-            },
+        ),
+        Positioned(
+          bottom: 0,
+          child: Container(
+            color: ColorName.white,
+            child: SizedBox(
+              width: 100.sw - 30,
+              child: ButtonWidget(
+                color: ColorName.primaryColor,
+                onPressed: () {},
+                child: const TextWidget(
+                  text: 'Send reminder to all',
+                  type: TextType.small,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
+        )
+      ],
     );
   }
 
@@ -667,41 +886,209 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return SingleChildScrollView(
       child: Column(
         children: [
-          const SizedBox(height: 10),
-          const Row(
-            children: [
-              TextWidget(
-                text: 'All Members (10)',
-                fontSize: 16,
-              ),
-              Spacer(),
-              TextWidget(
-                text: 'Accept',
-                fontSize: 13,
-                color: ColorName.green,
-              ),
-              SizedBox(width: 16),
-              TextWidget(
-                text: 'Reject',
-                fontSize: 13,
-                color: ColorName.red,
-              ),
-              SizedBox(width: 5),
-            ],
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 9, // Example list item count
-            itemBuilder: (context, index) {
-              return EqubRequestsCard(
-                index: index,
-              );
-            },
+          Padding(
+            padding: const EdgeInsets.only(top: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() {
+                    isJoin = false;
+                  }),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: isJoin ? ColorName.white : ColorName.primaryColor,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      "Leave Request",
+                      style: TextStyle(
+                        color:
+                            isJoin ? ColorName.primaryColor : ColorName.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                GestureDetector(
+                  onTap: () => setState(() {
+                    isJoin = true;
+                  }),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: isJoin ? ColorName.primaryColor : ColorName.white,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      "Join Request",
+                      style: TextStyle(
+                        color:
+                            isJoin ? ColorName.white : ColorName.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(
-            height: 15,
+            height: 25,
           ),
+          if (isJoin)
+            Column(
+              children: [
+                const SizedBox(height: 10),
+                const Row(
+                  children: [
+                    TextWidget(
+                      text: 'All Requests (10)',
+                      fontSize: 16,
+                    ),
+                    Spacer(),
+                    TextWidget(
+                      text: 'Accept',
+                      fontSize: 13,
+                      color: ColorName.green,
+                    ),
+                    SizedBox(width: 16),
+                    TextWidget(
+                      text: 'Reject',
+                      fontSize: 13,
+                      color: ColorName.red,
+                    ),
+                    SizedBox(width: 5),
+                  ],
+                ),
+                if (members.isNotEmpty)
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: requests.length, // Example list item count
+                    itemBuilder: (context, index) {
+                      return EqubRequestsCard(
+                        index: requests[index],
+                        onAccept: (int rerquestId) {
+                          setState(() {
+                            requests.remove(rerquestId);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                if (members.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Assets.images.equbImage.image(height: 150),
+                        const SizedBox(height: 20),
+                        const TextWidget(
+                          text: 'oops, You don’t have any requests.',
+                          type: TextType.small,
+                          weight: FontWeight.w500,
+                        ),
+                        const SizedBox(height: 35),
+                      ],
+                    ),
+                  ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
+            ),
+          if (!isJoin)
+            Column(
+              children: [
+                const SizedBox(height: 10),
+                const Row(
+                  children: [
+                    TextWidget(
+                      text: 'All Members (10)',
+                      fontSize: 16,
+                    ),
+                    Spacer(),
+                    TextWidget(
+                      text: 'Accept',
+                      fontSize: 13,
+                      color: ColorName.green,
+                    ),
+                    SizedBox(width: 16),
+                    TextWidget(
+                      text: 'Reject',
+                      fontSize: 13,
+                      color: ColorName.red,
+                    ),
+                    SizedBox(width: 5),
+                  ],
+                ),
+                if (members.isNotEmpty)
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: members.length, // Example list item count
+                    itemBuilder: (context, index) {
+                      return EqubRequestsCard(
+                        index: members[index],
+                        onAccept: (int memberId) {
+                          setState(() {
+                            members.remove(memberId);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                if (members.isEmpty && isJoin)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Assets.images.equbImage.image(height: 150),
+                        const SizedBox(height: 20),
+                        const TextWidget(
+                          text: 'oops, You don’t have any requests.',
+                          type: TextType.small,
+                          weight: FontWeight.w500,
+                        ),
+                        const SizedBox(height: 35),
+                      ],
+                    ),
+                  ),
+                if (members.isEmpty && !isJoin)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Assets.images.equbImage.image(height: 150),
+                        const SizedBox(height: 20),
+                        const TextWidget(
+                          text: 'oops, You don’t have any requests.',
+                          type: TextType.small,
+                          weight: FontWeight.w500,
+                        ),
+                        const SizedBox(height: 35),
+                      ],
+                    ),
+                  ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
+            ),
         ],
       ),
     );
