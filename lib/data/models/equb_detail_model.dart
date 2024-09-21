@@ -68,7 +68,7 @@ class EqubDetailModel {
     };
   }
 
-  factory EqubDetailModel.fromMap(Map<String, dynamic> map) {
+  factory EqubDetailModel.fromMap(Map map) {
     return EqubDetailModel(
       id: map['id'] as int,
       name: map['name'] as String,
@@ -90,8 +90,8 @@ class EqubDetailModel {
       cycles: map['cycles'] == null
           ? []
           : List<EqubCycleModel>.from(
-              (map['cycles'] as List<int>).map<EqubCycleModel>(
-                (x) => EqubCycleModel.fromMap(x as Map<String, dynamic>),
+              (map['cycles'] as List).map<EqubCycleModel>(
+                (x) => EqubCycleModel.fromMap(x),
               ),
             ),
     );

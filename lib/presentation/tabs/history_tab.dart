@@ -258,7 +258,7 @@ class _HistoryTabState extends State<HistoryTab> {
             weight: FontWeight.w600,
           ),
           TextWidget(
-            text: DateFormat('hh:mm a').format(receiverInfo.trasactionDate!),
+            text: DateFormat('hh:mm a').format(receiverInfo.transactionDate!),
             fontSize: 10,
             weight: FontWeight.w400,
           )

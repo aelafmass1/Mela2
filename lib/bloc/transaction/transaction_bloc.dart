@@ -33,7 +33,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
         for (var transaction in transactions) {
           String formattedDate = DateFormat('yyyy-MM-dd')
-              .format(transaction.trasactionDate ?? DateTime.now());
+              .format(transaction.transactionDate ?? DateTime.now());
 
           if (groupedTransactions.containsKey(formattedDate)) {
             groupedTransactions[formattedDate]!.add(transaction);

@@ -51,9 +51,7 @@ class _WinScreenState extends State<WinScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               children: [
-                SvgPicture.asset(
-                  Assets.images.svgs.completeLogo,
-                ),
+                Assets.images.reward.image(),
                 const SizedBox(height: 15),
                 TextWidget(
                   text: '${widget.round} Round Pick',

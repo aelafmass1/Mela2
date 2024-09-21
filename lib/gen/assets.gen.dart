@@ -141,6 +141,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/receipt.png
   AssetGenImage get receipt => const AssetGenImage('assets/images/receipt.png');
 
+  /// File path: assets/images/reward.png
+  AssetGenImage get reward => const AssetGenImage('assets/images/reward.png');
+
   /// File path: assets/images/send_icon.png
   AssetGenImage get sendIcon =>
       const AssetGenImage('assets/images/send_icon.png');
@@ -218,6 +221,7 @@ class $AssetsImagesGen {
         oromiaBankLogo,
         profileImage,
         receipt,
+        reward,
         sendIcon,
         sinqeBankLogo,
         splashLogo,
@@ -292,9 +296,6 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
-  /// File path: assets/images/svgs/reward_icon.svg
-  String get rewardIcon => 'assets/images/svgs/reward_icon.svg';
-
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
@@ -322,7 +323,6 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
-        rewardIcon,
         sendIcon,
         transactionIcon
       ];

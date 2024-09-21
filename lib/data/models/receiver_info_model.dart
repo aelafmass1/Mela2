@@ -8,7 +8,7 @@ class ReceiverInfo {
   final String receiverAccountNumber;
   final double amount;
   final String? serviceChargePayer;
-  final DateTime? trasactionDate;
+  final DateTime? transactionDate;
   final String? publicToken;
   final String paymentType;
   ReceiverInfo({
@@ -18,7 +18,7 @@ class ReceiverInfo {
     required this.receiverAccountNumber,
     required this.amount,
     this.serviceChargePayer,
-    this.trasactionDate,
+    this.transactionDate,
     this.publicToken,
     required this.paymentType,
   });
@@ -42,7 +42,7 @@ class ReceiverInfo {
           receiverAccountNumber ?? this.receiverAccountNumber,
       amount: amount ?? this.amount,
       serviceChargePayer: serviceChargePayer ?? this.serviceChargePayer,
-      trasactionDate: trasactionDate ?? this.trasactionDate,
+      transactionDate: trasactionDate ?? this.transactionDate,
       publicToken: publicToken ?? this.publicToken,
       paymentType: paymentType ?? this.paymentType,
     );
@@ -56,7 +56,7 @@ class ReceiverInfo {
       'receiverAccountNumber': receiverAccountNumber,
       'amount': amount,
       'serviceChargePayer': serviceChargePayer,
-      'trasactionDate': trasactionDate?.millisecondsSinceEpoch,
+      'trasactionDate': transactionDate?.millisecondsSinceEpoch,
       'publicToken': publicToken,
       'paymentType': paymentType,
     };
@@ -66,18 +66,18 @@ class ReceiverInfo {
     return ReceiverInfo(
       receiverName: map['receiverName'] as String,
       receiverPhoneNumber: map['receiverPhoneNumber'] as String,
-      receiverBankName: map['receiverBankName'] as String,
+      receiverBankName: map['receiverBank']['name'] as String,
       receiverAccountNumber: map['receiverAccountNumber'] as String,
       amount: map['amount'] as double,
       serviceChargePayer: map['serviceChargePayer'] != null
           ? map['serviceChargePayer'] as String
           : null,
-      trasactionDate: map['trasactionDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['trasactionDate'] as int)
+      transactionDate: map['transactionDate'] != null
+          ? DateTime.parse(map['transactionDate'] as String)
           : null,
       publicToken:
           map['publicToken'] != null ? map['publicToken'] as String : null,
-      paymentType: map['paymentType'] as String,
+      paymentType: map['paymentType'] ?? '',
     );
   }
 
@@ -88,7 +88,7 @@ class ReceiverInfo {
 
   @override
   String toString() {
-    return 'ReceiverInfo(receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $trasactionDate, publicToken: $publicToken, paymentType: $paymentType)';
+    return 'ReceiverInfo(receiverName: $receiverName, receiverPhoneNumber: $receiverPhoneNumber, receiverBankName: $receiverBankName, receiverAccountNumber: $receiverAccountNumber, amount: $amount, serviceChargePayer: $serviceChargePayer, trasactionDate: $transactionDate, publicToken: $publicToken, paymentType: $paymentType)';
   }
 
   @override
@@ -101,7 +101,7 @@ class ReceiverInfo {
         other.receiverAccountNumber == receiverAccountNumber &&
         other.amount == amount &&
         other.serviceChargePayer == serviceChargePayer &&
-        other.trasactionDate == trasactionDate &&
+        other.transactionDate == transactionDate &&
         other.publicToken == publicToken &&
         other.paymentType == paymentType;
   }
@@ -114,7 +114,7 @@ class ReceiverInfo {
         receiverAccountNumber.hashCode ^
         amount.hashCode ^
         serviceChargePayer.hashCode ^
-        trasactionDate.hashCode ^
+        transactionDate.hashCode ^
         publicToken.hashCode ^
         paymentType.hashCode;
   }

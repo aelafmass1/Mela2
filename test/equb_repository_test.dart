@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
@@ -26,7 +25,7 @@ void main() {
       frequency: 'WEEKLY',
       numberOfMembers: 10,
       name: 'Test Equb',
-      startDate: DateTime.now(),
+      startDate: DateTime.parse('2024-09-20'),
       members: [],
     );
 
@@ -120,95 +119,52 @@ void main() {
       );
     });
 
-    // group('joinEqub', () {
-    //   const tEqubId = '1';
-
-    //   test(
-    //     'should return EqubModel when the response code is 200 (OK)',
-    //     () async {
-    //       // arrange
-    //       when(() => mockClient.put(any(), headers: any(named: 'headers')))
-    //           .thenAnswer((_) async => http.Response(
-    //               json.encode(tEqubJson), 200,
-    //               headers: {'Content-Type': 'application/json'}));
-    //       // act
-    //       final result = await equbRepository.joinEqub(tEqubId);
-    //       // assert
-    //       expect(result, equals(Right(tEqubModel)));
-    //       verify(() => mockClient
-    //               .put(Uri.parse('$baseUrl/api/equbs/$tEqubId/join'), headers: {
-    //             'Content-Type': 'application/json',
-    //             'Authorization': 'Bearer token'
-    //           }));
-    //       verifyNoMoreInteractions(mockClient);
-    //     },
-    //   );
-
-    //   test(
-    //     'should return a ServerFailure when the response code is 400 or 500',
-    //     () async {
-    //       // arrange
-    //       when(() => mockClient.put(any(), headers: any(named: 'headers')))
-    //           .thenAnswer((_) async => http.Response('Server Error', 500));
-    //       // act
-    //       final result = await equbRepository.joinEqub(tEqubId);
-    //       // assert
-    //       expect(
-    //           result,
-    //           equals(Left(
-    //               ServerException(message: 'Server Error', statusCode: 500))));
-    //     },
-    //   );
-    // });
-
-    // group('updateEqub', () {
-    //   test(
-    //     'should return EqubModel when the response code is 200 (OK)',
-    //     () async {
-    //       // arrange
-    //       when(() => mockClient.put(any(),
-    //               headers: any(named: 'headers'), body: any(named: 'body')))
-    //           .thenAnswer((_) async => http.Response(
-    //               json.encode(tEqubJson), 200,
-    //               headers: {'Content-Type': 'application/json'}));
-    //       // act
-    //       final result = await equbRepository.updateEqub(tEqubModel);
-    //       // assert
-    //       expect(result, equals(Right(tEqubModel)));
-    //       verify(() => mockClient.put(
-    //           Uri.parse('$baseUrl/api/equbs/${tEqubModel.id}'),
-    //           headers: {
-    //             'Content-Type': 'application/json',
-    //             'Authorization': 'Bearer token'
-    //           },
-    //           body: json.encode(tEqubModel.toJson())));
-    //       verifyNoMoreInteractions(mockClient);
-    //     },
-    //   );
-
-    //   test(
-    //     'should return a ServerFailure when the response code is 400 or 500',
-    //     () async {
-    //       // arrange
-    //       when(() => mockClient.put(any(),
-    //               headers: any(named: 'headers'), body: any(named: 'body')))
-    //           .thenAnswer((_) async => http.Response('Server Error', 500));
-    //       // act
-    //       final result = await equbRepository.updateEqub(tEqubModel);
-    //       // assert
-    //       expect(
-    //           result,
-    //           equals(Left(
-    //               ServerException(message: 'Server Error', statusCode: 500))));
-    //     },
-    //   );
-    // });
+    group('invite members', () {
+      test(
+        'should return a List when the response code is 201 ',
+        () async {
+          // arrange
+          when(() => mockClient.post(Uri.parse('$baseUrl/ekub/1/invite'),
+                  headers: any(named: 'headers'), body: any(named: 'body')))
+              .thenAnswer((_) async =>
+                  http.Response(json.encode([tEqubJson]), 200, headers: {
+                    'Content-Type': 'application/json',
+                  }));
+          // act
+          final result = await equbRepository.inviteMembers(
+            accessToken: 'token',
+            equbId: 1,
+            members: [],
+          );
+          // assert
+          expect(result, equals([tEqubModel.toMap()]));
+        },
+      );
+      test(
+        'should return a List with error when the response code is 400 | 500 ',
+        () async {
+          // arrange
+          when(() => mockClient.post(Uri.parse('$baseUrl/ekub/1/invite'),
+              headers: any(named: 'headers'),
+              body: any(named: 'body'))).thenAnswer((_) async => http.Response(
+                  json.encode([
+                    {'error': "something is wrong"}
+                  ]),
+                  200,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }));
+          // act
+          final result = await equbRepository.inviteMembers(
+            accessToken: 'token',
+            equbId: 1,
+            members: [],
+          );
+          log(result.toString());
+          // assert
+          expect(result.first.containsKey('error'), true);
+        },
+      );
+    });
   });
-}
-
-class ServerException {
-  final String message;
-  final int statusCode;
-
-  ServerException({required this.message, required this.statusCode});
 }

@@ -19,9 +19,38 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
           equbList: [],
         )) {
     on<AddEqub>(_onAddEqub);
-    on<FetchEqubs>(_onFetchEqubs);
+    on<FetchAllEqubs>(_onFetchAllEqubs);
     on<InviteMembers>(_onInviteMembers);
+    on<FetchEqub>(_onFetchEqub);
   }
+
+  _onFetchEqub(FetchEqub event, Emitter emit) async {
+    try {
+      if (state is! EqubLoading) {
+        emit(EqubLoading(equbList: state.equbList));
+        final token = await getToken();
+
+        final res = await EqubRepository(client: Client()).fetchEqubDetail(
+          accessToken: token!,
+          equbId: event.equbId,
+        );
+        if (res.containsKey('error')) {
+          return emit(EqubFail(equbList: state.equbList, reason: res['error']));
+        }
+        final fetchedEqub = EqubDetailModel.fromMap(res);
+        emit(
+          EqubSuccess(
+            equbList: state.equbList,
+            selectedEqub: fetchedEqub,
+          ),
+        );
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+    }
+  }
+
   _onInviteMembers(InviteMembers event, Emitter emit) async {
     try {
       if (state is! EqubLoading) {
@@ -51,7 +80,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
     }
   }
 
-  _onFetchEqubs(FetchEqubs event, Emitter emit) async {
+  _onFetchAllEqubs(FetchAllEqubs event, Emitter emit) async {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
@@ -60,6 +89,11 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         final res = await EqubRepository(client: Client()).fetchEqubs(
           accessToken: token!,
         );
+        if (res.isEmpty) {
+          return emit(
+            EqubSuccess(equbList: []),
+          );
+        }
         if (res.first.containsKey('error')) {
           return emit(
               EqubFail(equbList: state.equbList, reason: res.first['error']));

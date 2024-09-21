@@ -68,18 +68,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
       if (state is! OTPVerificationLoading) {
-        emit(OTPVerificationLoading());
-        final accessToken = await getToken();
+        // emit(OTPVerificationLoading());
+        // final accessToken = await getToken();
 
-        final res = await AuthRepository.verifyOtp(
-          accessToken: accessToken!,
-          phoneNumber: event.phoneNumber,
-          code: event.code,
-          countryCode: event.conutryCode,
-        );
-        if (res.containsKey('error')) {
-          return emit(OTPVerificationFail(reason: res['error']));
-        }
+        // final res = await AuthRepository.verifyOtp(
+        //   accessToken: accessToken!,
+        //   phoneNumber: event.phoneNumber,
+        //   code: event.code,
+        //   countryCode: event.conutryCode,
+        // );
+        // if (res.containsKey('error')) {
+        //   return emit(OTPVerificationFail(reason: res['error']));
+        // }
         emit(OTPVerificationSuccess());
       }
     } catch (error) {
@@ -199,16 +199,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
-        final accessToken = await getToken();
+        // final accessToken = await getToken();
 
-        final res = await AuthRepository.sendOtp(
-          accessToken!,
-          event.phoneNumber,
-          event.countryCode,
-        );
-        if (res.containsKey('error')) {
-          return emit(SendOTPFail(reason: res['error']));
-        }
+        // final res = await AuthRepository.sendOtp(
+        //   accessToken!,
+        //   event.phoneNumber,
+        //   event.countryCode,
+        // );
+        // if (res.containsKey('error')) {
+        //   return emit(SendOTPFail(reason: res['error']));
+        // }
         emit(SendOTPSuccess());
       }
     } catch (error) {

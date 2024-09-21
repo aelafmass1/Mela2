@@ -32,11 +32,11 @@ class EqubRepository {
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.runtimeType == String) {
-      return {'error': res.body};
-    }
     if (data.containsKey('errorResponse')) {
       return {'error': data['errorResponse']['message']};
+    }
+    if (data.containsKey('error')) {
+      return {'error': data['error']};
     }
     return {'error': res.body};
   }
@@ -87,8 +87,38 @@ class EqubRepository {
         {'error': data['errorResponse']['message']}
       ];
     }
+    if (data.containsKey('error')) {
+      return [
+        {'error': data['error']}
+      ];
+    }
     return [
       {'error': res.body}
     ];
+  }
+
+  Future<Map> fetchEqubDetail({
+    required String accessToken,
+    required int equbId,
+  }) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/ekub/$equbId/get'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
+    }
+
+    if (data.containsKey('errorResponse')) {
+      return {'error': data['errorResponse']['message']};
+    }
+    if (data.containsKey('error')) {
+      return {'error': data['error']};
+    }
+    return {'error': res.body};
   }
 }

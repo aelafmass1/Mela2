@@ -20,7 +20,7 @@ class _SendInvitationScreenState extends State<SendInvitationScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
-        context.read<EqubBloc>().add(FetchEqubs());
+        context.read<EqubBloc>().add(FetchAllEqubs());
       },
       child: Scaffold(
         appBar: AppBar(
