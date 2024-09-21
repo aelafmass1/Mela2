@@ -66,18 +66,18 @@ class ReceiverInfo {
     return ReceiverInfo(
       receiverName: map['receiverName'] as String,
       receiverPhoneNumber: map['receiverPhoneNumber'] as String,
-      receiverBankName: map['receiverBankName'] as String,
+      receiverBankName: map['receiverBank']['name'] as String,
       receiverAccountNumber: map['receiverAccountNumber'] as String,
       amount: map['amount'] as double,
       serviceChargePayer: map['serviceChargePayer'] != null
           ? map['serviceChargePayer'] as String
           : null,
-      trasactionDate: map['trasactionDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['trasactionDate'] as int)
+      trasactionDate: map['transactionDate'] != null
+          ? DateTime.parse(map['transactionDate'])
           : null,
       publicToken:
           map['publicToken'] != null ? map['publicToken'] as String : null,
-      paymentType: map['paymentType'] as String,
+      paymentType: map['paymentType'] ?? '',
     );
   }
 
