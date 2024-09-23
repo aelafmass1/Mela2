@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +27,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final phoneNumberController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final phoneNumberKey = GlobalKey<FormFieldState>();
+  final passwordKey = GlobalKey<FormFieldState>();
+
   String selectedCoutry = 'usa';
   bool showPassword = false;
 
@@ -37,6 +41,17 @@ class _LoginScreenState extends State<LoginScreen> {
     phoneNumberController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Timer? _debounceTimer;
+
+  debounceValidation(GlobalKey<FormFieldState> formKey) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 600), () {
+      // Trigger validation after 600ms of inactivity (debounce period)
+
+      formKey.currentState?.validate();
+    });
   }
 
   @override
@@ -71,6 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextFieldWidget(
+                  globalKey: phoneNumberKey,
+                  onChanged: (p0) {
+                    debounceValidation(phoneNumberKey);
+                  },
                   prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
                   enableFocusColor: false,
                   prefix: Container(
@@ -121,6 +140,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (text!.isEmpty) {
                       return 'Phone Number is empty';
                     }
+                    if (selectedCoutry == 'ethiopia') {
+                      // RegEx for Ethiopian (+251) phone numbers (9 digits after country code)
+                      final ethiopianPhoneRegex = RegExp(r'^\+251\d{9}$');
+                      if (ethiopianPhoneRegex
+                              .hasMatch('+251${phoneNumberController.text}') ==
+                          false) {
+                        return 'Invalid Ethiopian Number';
+                      }
+                    } else {
+                      // RegEx for US (+1) phone numbers (10 digits after country code)
+                      final usPhoneRegex = RegExp(r'^\+1\d{10}$');
+                      if (usPhoneRegex
+                              .hasMatch('+1${phoneNumberController.text}') ==
+                          false) {
+                        return 'Invalid US Number';
+                      }
+                    }
+
                     return null;
                   },
                   controller: phoneNumberController,
@@ -129,9 +166,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 30),
                   child: TextFieldWidget(
+                    onChanged: (p0) {
+                      debounceValidation(passwordKey);
+                    },
+                    globalKey: passwordKey,
                     validator: (text) {
                       if (text!.isEmpty) {
                         return 'password is empty';
+                      } else if (text.length < 8) {
+                        return 'Password must be at least 8 characters long.';
                       }
                       return null;
                     },
@@ -196,8 +239,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                   },
                 ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    //
+                  },
+                  child: const TextWidget(
+                    text: 'Forget Password?',
+                    fontSize: 15,
+                    weight: FontWeight.w300,
+                  ),
+                ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 15),
+                  padding: const EdgeInsets.only(top: 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

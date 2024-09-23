@@ -30,8 +30,11 @@ class _HistoryTabState extends State<HistoryTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        toolbarHeight: 50,
         title: const TextWidget(
           text: 'Transaction History',
         ),
@@ -193,7 +196,15 @@ class _HistoryTabState extends State<HistoryTab> {
                                               .format(DateTime.now()) ==
                                           state.data.keys.elementAt(index)
                                       ? 'Today'
-                                      : state.data.keys.elementAt(index),
+                                      : (DateTime.parse(state.data.keys
+                                                          .elementAt(index))
+                                                      .day -
+                                                  1) ==
+                                              DateTime.now().day
+                                          ? 'Yesterday'
+                                          : DateFormat('d-MMMM yyyy').format(
+                                              DateTime.parse(state.data.keys
+                                                  .elementAt(index))),
                                   color: ColorName.primaryColor,
                                   fontSize: 14,
                                   weight: FontWeight.w600,
@@ -207,7 +218,7 @@ class _HistoryTabState extends State<HistoryTab> {
                         ),
                       );
                     }
-                    return Center(
+                    return const Center(
                       child: TextWidget(
                         text: 'Transaction history is empty',
                         type: TextType.small,

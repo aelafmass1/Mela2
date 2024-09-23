@@ -17,9 +17,13 @@ class TextFieldWidget extends StatelessWidget {
   final bool obscurePassword;
   final List<TextInputFormatter>? inputFormatters;
   final String? errorText;
+  final FocusNode? focusNode;
+  final Key? globalKey;
+  final Function(String)? onChanged;
   const TextFieldWidget(
       {super.key,
       required this.controller,
+      this.globalKey,
       this.validator,
       this.hintText,
       this.suffix,
@@ -31,12 +35,17 @@ class TextFieldWidget extends StatelessWidget {
       this.enableFocusColor = true,
       this.obscurePassword = false,
       this.inputFormatters,
+      this.focusNode,
+      this.onChanged,
       this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      key: globalKey,
+      focusNode: focusNode,
       onTap: onTab,
+      onChanged: onChanged,
       obscureText: obscurePassword,
       controller: controller,
       validator: validator,
