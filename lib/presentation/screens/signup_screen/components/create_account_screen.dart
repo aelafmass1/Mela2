@@ -31,14 +31,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final emailController = TextEditingController();
   final password1Controller = TextEditingController();
   final password2Controller = TextEditingController();
-  final phoneNumberController = TextEditingController();
+  // final phoneNumberController = TextEditingController();
 
   final firstNameKey = GlobalKey<FormFieldState>();
   final lastNameKey = GlobalKey<FormFieldState>();
   final emailKey = GlobalKey<FormFieldState>();
   final password1Key = GlobalKey<FormFieldState>();
   final password2Key = GlobalKey<FormFieldState>();
-  final phoneNumberKey = GlobalKey<FormFieldState>();
+  // final phoneNumberKey = GlobalKey<FormFieldState>();
 
   bool termAndConditionAgreed = false;
   bool enableFaceId = true;
@@ -73,7 +73,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     emailController.dispose();
     password1Controller.dispose();
     password2Controller.dispose();
-    phoneNumberController.dispose();
+    // phoneNumberController.dispose();
 
     super.dispose();
   }
@@ -82,20 +82,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leadingWidth: 200,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 20, left: 15),
-          child: InkWell(
-              onTap: () {
-                context.goNamed(RouteName.login);
-              },
-              child: const TextWidget(
-                text: 'Login',
-                color: ColorName.primaryColor,
-                fontSize: 15,
-                weight: FontWeight.w300,
-              )),
-        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 15),
@@ -195,96 +181,96 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: emailController,
                         hintText: 'Enter your email address',
                       ),
-                      const SizedBox(height: 25),
-                      const TextWidget(
-                        text: 'Phone Number',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      TextFieldWidget(
-                        onChanged: (p0) {
-                          debounceValidation(phoneNumberKey);
-                        },
-                        globalKey: phoneNumberKey,
-                        errorText:
-                            phoneNumberError.isEmpty ? null : phoneNumberError,
-                        prefixText:
-                            selectedCoutry == 'ethiopia' ? '+251' : '+1',
-                        enableFocusColor: false,
-                        prefix: Container(
-                          width: 80,
-                          height: 55,
-                          margin: const EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(40),
-                              border: Border.all(color: Colors.black54)),
-                          child: Center(
-                            child: DropdownButton(
-                                value: selectedCoutry,
-                                padding: EdgeInsets.zero,
-                                underline: const SizedBox.shrink(),
-                                icon: const Padding(
-                                  padding: EdgeInsets.only(left: 5.0),
-                                  child: Icon(Icons.keyboard_arrow_down),
-                                ),
-                                items: [
-                                  DropdownMenuItem(
-                                      alignment: Alignment.center,
-                                      value: 'ethiopia',
-                                      child: CircleAvatar(
-                                        radius: 13,
-                                        backgroundImage: Assets
-                                            .images.ethiopianFlag
-                                            .provider(),
-                                      )),
-                                  DropdownMenuItem(
-                                      alignment: Alignment.center,
-                                      value: 'usa',
-                                      child: CircleAvatar(
-                                        radius: 13,
-                                        backgroundImage:
-                                            Assets.images.usaFlag.provider(),
-                                      )),
-                                ],
-                                onChanged: (value) {
-                                  debounceValidation(phoneNumberKey);
-                                  if (value != null) {
-                                    setState(() {
-                                      selectedCoutry = value;
-                                    });
-                                  }
-                                }),
-                          ),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return 'Phone Number is empty';
-                          }
-                          if (selectedCoutry == 'ethiopia') {
-                            // RegEx for Ethiopian (+251) phone numbers (9 digits after country code)
-                            final ethiopianPhoneRegex = RegExp(r'^\+251\d{9}$');
-                            if (ethiopianPhoneRegex.hasMatch(
-                                    '+251${phoneNumberController.text}') ==
-                                false) {
-                              return 'Invalid Ethiopian Number';
-                            }
-                          } else {
-                            // RegEx for US (+1) phone numbers (10 digits after country code)
-                            final usPhoneRegex = RegExp(r'^\+1\d{10}$');
-                            if (usPhoneRegex.hasMatch(
-                                    '+1${phoneNumberController.text}') ==
-                                false) {
-                              return 'Invalid US Number';
-                            }
-                          }
+                      // const SizedBox(height: 25),
+                      // const TextWidget(
+                      //   text: 'Phone Number',
+                      //   fontSize: 12,
+                      //   weight: FontWeight.w400,
+                      // ),
+                      // const SizedBox(height: 5),
+                      // TextFieldWidget(
+                      //   onChanged: (p0) {
+                      //     debounceValidation(phoneNumberKey);
+                      //   },
+                      //   globalKey: phoneNumberKey,
+                      //   errorText:
+                      //       phoneNumberError.isEmpty ? null : phoneNumberError,
+                      //   prefixText:
+                      //       selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                      //   enableFocusColor: false,
+                      //   prefix: Container(
+                      //     width: 80,
+                      //     height: 55,
+                      //     margin: const EdgeInsets.only(right: 10),
+                      //     decoration: BoxDecoration(
+                      //         borderRadius: BorderRadius.circular(40),
+                      //         border: Border.all(color: Colors.black54)),
+                      //     child: Center(
+                      //       child: DropdownButton(
+                      //           value: selectedCoutry,
+                      //           padding: EdgeInsets.zero,
+                      //           underline: const SizedBox.shrink(),
+                      //           icon: const Padding(
+                      //             padding: EdgeInsets.only(left: 5.0),
+                      //             child: Icon(Icons.keyboard_arrow_down),
+                      //           ),
+                      //           items: [
+                      //             DropdownMenuItem(
+                      //                 alignment: Alignment.center,
+                      //                 value: 'ethiopia',
+                      //                 child: CircleAvatar(
+                      //                   radius: 13,
+                      //                   backgroundImage: Assets
+                      //                       .images.ethiopianFlag
+                      //                       .provider(),
+                      //                 )),
+                      //             DropdownMenuItem(
+                      //                 alignment: Alignment.center,
+                      //                 value: 'usa',
+                      //                 child: CircleAvatar(
+                      //                   radius: 13,
+                      //                   backgroundImage:
+                      //                       Assets.images.usaFlag.provider(),
+                      //                 )),
+                      //           ],
+                      //           onChanged: (value) {
+                      //             debounceValidation(phoneNumberKey);
+                      //             if (value != null) {
+                      //               setState(() {
+                      //                 selectedCoutry = value;
+                      //               });
+                      //             }
+                      //           }),
+                      //     ),
+                      //   ),
+                      //   keyboardType: TextInputType.phone,
+                      //   validator: (text) {
+                      //     if (text!.isEmpty) {
+                      //       return 'Phone Number is empty';
+                      //     }
+                      //     if (selectedCoutry == 'ethiopia') {
+                      //       // RegEx for Ethiopian (+251) phone numbers (9 digits after country code)
+                      //       final ethiopianPhoneRegex = RegExp(r'^\+251\d{9}$');
+                      //       if (ethiopianPhoneRegex.hasMatch(
+                      //               '+251${phoneNumberController.text}') ==
+                      //           false) {
+                      //         return 'Invalid Ethiopian Number';
+                      //       }
+                      //     } else {
+                      //       // RegEx for US (+1) phone numbers (10 digits after country code)
+                      //       final usPhoneRegex = RegExp(r'^\+1\d{10}$');
+                      //       if (usPhoneRegex.hasMatch(
+                      //               '+1${phoneNumberController.text}') ==
+                      //           false) {
+                      //         return 'Invalid US Number';
+                      //       }
+                      //     }
 
-                          return null;
-                        },
-                        controller: phoneNumberController,
-                        hintText: 'Phone Number',
-                      ),
+                      //     return null;
+                      //   },
+                      //   controller: phoneNumberController,
+                      //   hintText: 'Phone Number',
+                      // ),
                       const SizedBox(height: 20),
                       const TextWidget(
                         text: 'Password',
@@ -416,99 +402,30 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20, top: 10),
-                child: BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is RegisterUserFail) {
-                      if (state.field == 'email') {
-                        setState(() {
-                          emailError = state.reason;
-                        });
-                      } else {
-                        setState(() {
-                          emailError = '';
-                        });
+                child: ButtonWidget(
+                  color: termAndConditionAgreed
+                      ? ColorName.primaryColor
+                      : Colors.grey.withOpacity(0.5),
+                  child: const TextWidget(
+                    text: 'Next',
+                    type: TextType.small,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    if (termAndConditionAgreed) {
+                      if (_formKey.currentState!.validate()) {
+                        UserModel user = widget.userModel.copyWith(
+                          firstName: firstNameController.text,
+                          lastName: lastNameController.text,
+                          email: emailController.text,
+                          password: password1Controller.text,
+                        );
+                        context.pushNamed(
+                          RouteName.setPinCode,
+                          extra: user,
+                        );
                       }
-                      if (state.field == 'phoneNumber') {
-                        setState(() {
-                          phoneNumberError = state.reason;
-                        });
-                      } else {
-                        setState(() {
-                          phoneNumberError = '';
-                        });
-                      }
-                      setState(() {});
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is RegisterUserSuccess) {
-                      context.read<AuthBloc>().add(
-                            SendOTP(
-                              phoneNumber:
-                                  int.tryParse(phoneNumberController.text) ?? 0,
-                              countryCode:
-                                  selectedCoutry == 'ethiopia' ? 251 : 1,
-                            ),
-                          );
-                      //
-                    } else if (state is SendOTPFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is SendOTPSuccess) {
-                      String phoneCode =
-                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                      String phoneNumber =
-                          phoneCode + phoneNumberController.text;
-                      UserModel user = widget.userModel.copyWith(
-                        firstName: firstNameController.text,
-                        lastName: lastNameController.text,
-                        email: emailController.text,
-                        password: password1Controller.text,
-                        phoneNumber: phoneNumberController.text,
-                        countryCode: selectedCoutry == 'ethiopia' ? 251 : 1,
-                      );
-                      context.pushNamed(
-                        RouteName.otp,
-                        extra: user,
-                      );
                     }
-                  },
-                  builder: (context, state) {
-                    return ButtonWidget(
-                        color: termAndConditionAgreed
-                            ? ColorName.primaryColor
-                            : Colors.grey.withOpacity(0.5),
-                        child: state is RegisterUserLoaing ||
-                                state is SendOTPLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Next',
-                                type: TextType.small,
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (termAndConditionAgreed) {
-                            if (_formKey.currentState!.validate()) {
-                              UserModel user = widget.userModel.copyWith(
-                                firstName: firstNameController.text,
-                                lastName: lastNameController.text,
-                                email: emailController.text,
-                                password: password1Controller.text,
-                                phoneNumber: phoneNumberController.text,
-                                countryCode:
-                                    selectedCoutry == 'ethiopia' ? 251 : 1,
-                              );
-                              context
-                                  .read<AuthBloc>()
-                                  .add(CreateAccount(userModel: user));
-                            }
-                          }
-                        });
                   },
                 ),
               )

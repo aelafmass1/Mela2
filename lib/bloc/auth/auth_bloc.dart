@@ -48,38 +48,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   _onUploadProfilePicture(UploadProfilePicture event, Emitter emit) async {
-    // try {
-    //   emit(UploadProfileLoading());
-    //   // upload user profile picutre
-    //   final storageRef = FirebaseStorage.instance.ref();
-    //   final imagesRef =
-    //       storageRef.child('profilePictures/${event.phoneNumber}');
-    //   await imagesRef.putFile(File(event.profilePicture.path));
-    //   final downloadUrl = await imagesRef.getDownloadURL();
-
-    //   // await _auth.currentUser!.updatePhotoURL(downloadUrl);
-    //   emit(UploadProfileSuccess());
-    // } catch (error) {
-    //   log(error.toString());
-    //   emit(UploadProfileFail(reason: error.toString()));
-    // }
+    //
   }
 
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
       if (state is! OTPVerificationLoading) {
-        emit(OTPVerificationLoading());
-        final accessToken = await getToken();
+        // emit(OTPVerificationLoading());
 
-        final res = await AuthRepository.verifyOtp(
-          accessToken: accessToken!,
-          phoneNumber: event.phoneNumber,
-          code: event.code,
-          countryCode: event.conutryCode,
-        );
-        if (res.containsKey('error')) {
-          return emit(OTPVerificationFail(reason: res['error']));
-        }
+        // final res = await AuthRepository.verifyOtp(
+        //   phoneNumber: event.phoneNumber,
+        //   code: event.code,
+        //   countryCode: event.conutryCode,
+        // );
+        // if (res.containsKey('error')) {
+        //   return emit(OTPVerificationFail(reason: res['error']));
+        // }
+        // if (res.containsKey('response')) {
+        //   return emit(OTPVerificationSuccess(userId: res['response']));
+        // }
         emit(OTPVerificationSuccess());
       }
     } catch (error) {
@@ -90,14 +77,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onUpdateUser(UpdateUser event, Emitter emit) async {
     try {
-      // emit(UpdateLoading());
-      // final auth = FirebaseAuth.instance;
-      // await auth.currentUser?.updateDisplayName(event.fullName);
-      // FirebaseFirestore firestore = FirebaseFirestore.instance;
-      // await firestore.collection('users').doc(auth.currentUser?.uid).update({
-      //   'email': event.email,
-      // });
-      // emit(UpdateSuccess());
       //
     } catch (error) {
       log(error.toString());
@@ -107,30 +86,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onDeleteUser(DeleteUser event, Emitter emit) async {
     try {
-      // emit(AuthLoading());
-
-      // final currentUser = _auth.currentUser;
-      // if (currentUser != null) {
-      //   // Delete the user's document from Firestore
-      //   FirebaseFirestore firestore = FirebaseFirestore.instance;
-      //   await firestore.collection('users').doc(currentUser.uid).delete();
-
-      //   // Check if the user has a profile picture and delete it from Firebase Storage
-      //   if (currentUser.photoURL != null) {
-      //     final storageRef = FirebaseStorage.instance.ref();
-      //     final phoneNumber = currentUser.email!.split('@').first;
-      //     final imagesRef = storageRef.child('profilePictures/$phoneNumber');
-      //     await imagesRef.delete();
-      //   }
-
-      //   // Delete the user from Firebase Authentication
-      //   await _auth.currentUser?.reload();
-      //   await currentUser.delete();
-
-      //   emit(AuthSuccess());
-      // } else {
-      //   emit(AuthFail(reason: "No user is currently signed in."));
-      // }
+      //
     } catch (error) {
       emit(AuthFail(reason: error.toString()));
     }
@@ -170,17 +126,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.userModel,
         );
         if (res.containsKey('error')) {
-          List errorResponse = res['data']['errorResponse'];
-          String fieldName = '';
-          if (errorResponse.isNotEmpty) {
-            if (errorResponse.first.containsKey('field')) {
-              fieldName = errorResponse.first['field'];
+          if (res['error'] is String) {
+            return emit(RegisterUserFail(reason: res['error']));
+          } else {
+            List errorResponse = res['data']['errorResponse'];
+            String fieldName = '';
+            if (errorResponse.isNotEmpty) {
+              if (errorResponse.first.containsKey('field')) {
+                fieldName = errorResponse.first['field'];
+              }
             }
+            return emit(RegisterUserFail(
+              reason: res['error'],
+              field: fieldName,
+            ));
           }
-          return emit(RegisterUserFail(
-            reason: res['error'],
-            field: fieldName,
-          ));
         }
         final token = res['successResponse']['jwtToken'];
         storeToken(token);
@@ -198,17 +158,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
       if (state is! SendOTPLoading) {
-        emit(SendOTPLoading());
-        final accessToken = await getToken();
+        // emit(SendOTPLoading());
 
-        final res = await AuthRepository.sendOtp(
-          accessToken!,
-          event.phoneNumber,
-          event.countryCode,
-        );
-        if (res.containsKey('error')) {
-          return emit(SendOTPFail(reason: res['error']));
-        }
+        // final res = await AuthRepository.sendOtp(
+        //   event.phoneNumber,
+        //   event.countryCode,
+        // );
+        // if (res.containsKey('error')) {
+        //   return emit(SendOTPFail(reason: res['error']));
+        // }
         emit(SendOTPSuccess());
       }
     } catch (error) {

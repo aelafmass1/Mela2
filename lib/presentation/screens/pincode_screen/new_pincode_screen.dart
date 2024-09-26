@@ -1,32 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
-import '../../../bloc/auth/auth_bloc.dart';
-import '../../../core/utils/show_snackbar.dart';
+import '../../../config/routing.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../widgets/button_widget.dart';
-import '../../widgets/loading_widget.dart';
 import '../../widgets/text_widget.dart';
 
-class SetPincodeScreen extends StatefulWidget {
-  final UserModel user;
-  const SetPincodeScreen({super.key, required this.user});
+class NewPincodeScreen extends StatefulWidget {
+  const NewPincodeScreen({super.key});
 
   @override
-  State<SetPincodeScreen> createState() => _SetPincodeScreenState();
+  State<NewPincodeScreen> createState() => _NewPincodeScreenState();
 }
 
-class _SetPincodeScreenState extends State<SetPincodeScreen> {
+class _NewPincodeScreenState extends State<NewPincodeScreen> {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
@@ -83,22 +73,20 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: EdgeInsets.symmetric(horizontal: 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const TextWidget(
-              text: 'Set a PIN',
-              color: ColorName.primaryColor,
+            TextWidget(
+              text: 'Enter New PIN',
               fontSize: 20,
-              weight: FontWeight.w700,
+              color: ColorName.primaryColor,
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 7),
             const TextWidget(
-              text: 'Please remember to keep it secure.',
-              fontSize: 14,
+              text: 'Please keep your PIN confidential & secure.',
               color: ColorName.grey,
-              weight: FontWeight.w400,
+              fontSize: 14,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 40),
@@ -120,17 +108,14 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
                 color:
                     isValid ? ColorName.primaryColor : ColorName.grey.shade200,
                 child: const TextWidget(
-                  text: 'Continue',
+                  text: 'Set PIN',
                   type: TextType.small,
                   color: Colors.white,
                 ),
                 onPressed: () {
                   if (isValid) {
                     final pins = getAllPins();
-                    context.pushNamed(RouteName.confirmPinCode, extra: [
-                      widget.user,
-                      pins.join(),
-                    ]);
+                    //
                   }
                   //
                 })

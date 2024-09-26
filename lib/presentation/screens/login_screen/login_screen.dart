@@ -1,19 +1,21 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../bloc/auth/auth_bloc.dart';
+import '../../../bloc/bloc/location_bloc.dart';
 import '../../../gen/assets.gen.dart';
 import '../../widgets/text_field_widget.dart';
 
@@ -31,10 +33,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final phoneNumberKey = GlobalKey<FormFieldState>();
   final passwordKey = GlobalKey<FormFieldState>();
 
-  String selectedCoutry = 'usa';
+  PhoneNumber initialNumber = PhoneNumber(isoCode: 'US');
+  PhoneNumber selectedNumber = PhoneNumber(isoCode: 'US');
+
   bool showPassword = false;
 
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    final countryCode = context.read<LocationBloc>().state.countryCode;
+    if (countryCode != null) {
+      setState(() {
+        initialNumber = PhoneNumber(
+          isoCode: countryCode,
+        );
+        selectedNumber = initialNumber;
+      });
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -56,226 +74,225 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    Assets.images.svgs.horizontalMelaLogo,
-                  ),
-                ),
-                const SizedBox(height: 45),
-                Row(
-                  children: [
-                    const TextWidget(
-                      text: 'Hello There',
-                      fontSize: 24,
-                      weight: FontWeight.w700,
-                    ),
-                    const SizedBox(width: 10),
-                    SvgPicture.asset(Assets.images.svgs.hiEmoji),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                TextFieldWidget(
-                  globalKey: phoneNumberKey,
-                  onChanged: (p0) {
-                    debounceValidation(phoneNumberKey);
-                  },
-                  prefixText: selectedCoutry == 'ethiopia' ? '+251' : '+1',
-                  enableFocusColor: false,
-                  prefix: Container(
-                    width: 80,
-                    height: 60,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
-                        border: Border.all(color: Colors.black54)),
-                    child: Center(
-                      child: DropdownButton(
-                          value: selectedCoutry,
-                          padding: EdgeInsets.zero,
-                          underline: const SizedBox.shrink(),
-                          icon: const Padding(
-                            padding: EdgeInsets.only(left: 5.0),
-                            child: Icon(Icons.keyboard_arrow_down),
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                                alignment: Alignment.center,
-                                value: 'ethiopia',
-                                child: CircleAvatar(
-                                  radius: 13,
-                                  backgroundImage:
-                                      Assets.images.ethiopianFlag.provider(),
-                                )),
-                            DropdownMenuItem(
-                                alignment: Alignment.center,
-                                value: 'usa',
-                                child: CircleAvatar(
-                                  radius: 13,
-                                  backgroundImage:
-                                      Assets.images.usaFlag.provider(),
-                                )),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                selectedCoutry = value;
-                              });
-                            }
-                          }),
+    return BlocListener<LocationBloc, LocationState>(
+      listener: (context, state) {
+        if (state.countryCode != null) {
+          setState(() {
+            initialNumber = PhoneNumber(
+              isoCode: state.countryCode,
+            );
+          });
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: SvgPicture.asset(
+                      Assets.images.svgs.horizontalMelaLogo,
                     ),
                   ),
-                  keyboardType: TextInputType.phone,
-                  validator: (text) {
-                    if (text!.isEmpty) {
-                      return 'Phone Number is empty';
-                    }
-                    if (selectedCoutry == 'ethiopia') {
-                      // RegEx for Ethiopian (+251) phone numbers (9 digits after country code)
-                      final ethiopianPhoneRegex = RegExp(r'^\+251\d{9}$');
-                      if (ethiopianPhoneRegex
-                              .hasMatch('+251${phoneNumberController.text}') ==
-                          false) {
-                        return 'Invalid Ethiopian Number';
-                      }
-                    } else {
-                      // RegEx for US (+1) phone numbers (10 digits after country code)
-                      final usPhoneRegex = RegExp(r'^\+1\d{10}$');
-                      if (usPhoneRegex
-                              .hasMatch('+1${phoneNumberController.text}') ==
-                          false) {
-                        return 'Invalid US Number';
-                      }
-                    }
-
-                    return null;
-                  },
-                  controller: phoneNumberController,
-                  hintText: 'Phone Number',
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: TextFieldWidget(
-                    onChanged: (p0) {
-                      debounceValidation(passwordKey);
+                  const SizedBox(height: 45),
+                  Row(
+                    children: [
+                      const TextWidget(
+                        text: 'Hello There',
+                        fontSize: 24,
+                        weight: FontWeight.w700,
+                      ),
+                      const SizedBox(width: 10),
+                      SvgPicture.asset(Assets.images.svgs.hiEmoji),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  InternationalPhoneNumberInput(
+                    onInputChanged: (PhoneNumber number) {
+                      setState(() {
+                        selectedNumber = number;
+                      });
                     },
-                    globalKey: passwordKey,
-                    validator: (text) {
-                      if (text!.isEmpty) {
-                        return 'password is empty';
-                      } else if (text.length < 8) {
-                        return 'Password must be at least 8 characters long.';
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Phone Number is empty';
                       }
                       return null;
                     },
-                    obscurePassword: showPassword,
-                    controller: passwordController,
-                    hintText: 'Password',
-                    suffix: Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: IconButton(
-                        icon: Icon(
-                          showPassword
-                              ? Icons.remove_red_eye
-                              : Icons.remove_red_eye_outlined,
-                          color: ColorName.grey,
+                    selectorConfig: const SelectorConfig(
+                      useEmoji: true,
+                      selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                      leadingPadding: 10,
+                      useBottomSheetSafeArea: true,
+                      setSelectorButtonAsPrefixIcon: false,
+                    ),
+                    ignoreBlank: false,
+                    autoValidateMode: AutovalidateMode.disabled,
+                    initialValue: initialNumber,
+                    spaceBetweenSelectorAndTextField: 0,
+                    textFieldController: phoneNumberController,
+                    formatInput: true,
+                    cursorColor: ColorName.primaryColor,
+                    keyboardType: TextInputType.phone,
+                    inputDecoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 18),
+                      hintText: 'Phone Number',
+                      hintStyle: const TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF8E8E8E),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40),
+                          borderSide: const BorderSide(
+                            color: ColorName.primaryColor,
+                          )),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 30),
+                    child: TextFieldWidget(
+                      onChanged: (p0) {
+                        debounceValidation(passwordKey);
+                      },
+                      globalKey: passwordKey,
+                      validator: (text) {
+                        if (text!.isEmpty) {
+                          return 'password is empty';
+                        } else if (text.length < 8) {
+                          return 'Password must be at least 8 characters long.';
+                        }
+                        return null;
+                      },
+                      obscurePassword: showPassword,
+                      controller: passwordController,
+                      hintText: 'Password',
+                      suffix: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: IconButton(
+                          icon: Icon(
+                            showPassword
+                                ? Icons.remove_red_eye
+                                : Icons.remove_red_eye_outlined,
+                            color: ColorName.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              showPassword = !showPassword;
+                            });
+                          },
                         ),
-                        onPressed: () {
-                          setState(() {
-                            showPassword = !showPassword;
-                          });
-                        },
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) async {
-                    if (state is LoginUserFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is LoginUserSuccess) {
-                      await setCountryCode(
-                          selectedCoutry == 'ethiopia' ? 251 : 1);
-                      setFirstTime(false);
-
-                      // ignore: use_build_context_synchronously
-                      context.pushNamed(RouteName.loginPincode); //
-                    }
-                  },
-                  builder: (context, state) {
-                    return ButtonWidget(
-                        child: state is LoginUserLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Log In',
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(
-                                  LoginUser(
-                                    countryCode:
-                                        selectedCoutry == 'ethiopia' ? 251 : 1,
-                                    phoneNumber: phoneNumberController.text,
-                                    password: passwordController.text,
-                                  ),
-                                );
-                          }
-                        });
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    //
-                  },
-                  child: const TextWidget(
-                    text: 'Forget Password?',
-                    fontSize: 15,
-                    weight: FontWeight.w300,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const TextWidget(
-                        text: 'Don’t have an account ?',
-                        fontSize: 15,
-                        weight: FontWeight.w300,
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        context.pushNamed(
+                          RouteName.forgetPassword,
+                          extra: RouteName.newPassword,
+                        );
+                      },
+                      child: const TextWidget(
+                        text: 'Forgot password?   ',
+                        fontSize: 14,
+                        weight: FontWeight.w500,
+                        color: ColorName.primaryColor,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          context.pushNamed(RouteName.createAccount,
-                              extra: UserModel());
-                        },
-                        child: const TextWidget(
-                          text: 'Sign up',
-                          fontSize: 18,
-                          color: ColorName.primaryColor,
-                          weight: FontWeight.w600,
-                        ),
-                      )
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) async {
+                      if (state is LoginUserFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is LoginUserSuccess) {
+                        final countryCode =
+                            selectedNumber.dialCode?.substring(1);
+                        if (countryCode != null) {
+                          setCountryCode(int.parse(countryCode));
+                        }
+
+                        setFirstTime(false);
+
+                        context.pushNamed(RouteName.loginPincode);
+                      }
+                    },
+                    builder: (context, state) {
+                      return ButtonWidget(
+                          child: state is LoginUserLoading
+                              ? const LoadingWidget()
+                              : const TextWidget(
+                                  text: 'Log In',
+                                  color: Colors.white,
+                                ),
+                          onPressed: () {
+                            try {
+                              if (_formKey.currentState!.validate()) {
+                                final phoneN =
+                                    selectedNumber.phoneNumber!.replaceAll(
+                                  selectedNumber.dialCode!,
+                                  '',
+                                );
+                                final countryCode =
+                                    selectedNumber.dialCode!.substring(1);
+                                context.read<AuthBloc>().add(
+                                      LoginUser(
+                                        countryCode:
+                                            int.tryParse(countryCode) ?? 0,
+                                        phoneNumber: phoneN,
+                                        password: passwordController.text,
+                                      ),
+                                    );
+                              }
+                            } catch (error) {
+                              log(error.toString());
+                            }
+                          });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const TextWidget(
+                          text: 'Don’t have an account ?',
+                          fontSize: 15,
+                          weight: FontWeight.w300,
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context.pushNamed(RouteName.signup);
+                          },
+                          child: const TextWidget(
+                            text: 'Sign up',
+                            fontSize: 18,
+                            color: ColorName.primaryColor,
+                            weight: FontWeight.w600,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

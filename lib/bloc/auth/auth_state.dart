@@ -32,7 +32,11 @@ final class OTPVerificationFail extends AuthState {
   OTPVerificationFail({required this.reason});
 }
 
-final class OTPVerificationSuccess extends AuthState {}
+final class OTPVerificationSuccess extends AuthState {
+  final String? userId;
+
+  OTPVerificationSuccess({this.userId});
+}
 
 final class SendOTPLoading extends AuthState {}
 

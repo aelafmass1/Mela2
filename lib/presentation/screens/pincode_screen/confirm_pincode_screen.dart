@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -118,15 +116,15 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
             ),
             const SizedBox(height: 20),
             const SizedBox(height: 30),
-            BlocConsumer<PincodeBloc, PincodeState>(
+            BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
-                if (state is PinFail) {
+                if (state is RegisterUserFail) {
                   showSnackbar(
                     context,
                     title: 'Error',
                     description: state.reason,
                   );
-                } else if (state is PinSuccess) {
+                } else if (state is RegisterUserSuccess) {
                   setIsLoggedIn(true);
                   setFirstTime(false);
                   context.goNamed(RouteName.home);
@@ -137,7 +135,7 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                     color: isValid
                         ? ColorName.primaryColor
                         : ColorName.grey.shade200,
-                    child: state is PinLoading
+                    child: state is RegisterUserLoaing
                         ? const LoadingWidget()
                         : const TextWidget(
                             text: 'Set up PIN',
@@ -148,8 +146,12 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
                       if (isValid) {
                         final pins = getAllPins().join();
                         if (pins == widget.pincode) {
-                          context.read<PincodeBloc>().add(
-                                SetPinCode(pincode: pins),
+                          context.read<AuthBloc>().add(
+                                CreateAccount(
+                                  userModel: widget.user.copyWith(
+                                    pinCode: pins,
+                                  ),
+                                ),
                               );
                         } else {
                           showSnackbar(context,
@@ -185,6 +187,7 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
             ),
         textAlign: TextAlign.center,
         inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),
         ],
         keyboardType: TextInputType.phone,

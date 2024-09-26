@@ -8,6 +8,9 @@ class UserModel {
   final String? lastName;
   final String? email;
   final int? countryCode;
+  final String? verificationUUID;
+  final String? pinCode;
+  final String? toScreen;
   UserModel({
     this.phoneNumber,
     this.password,
@@ -15,6 +18,9 @@ class UserModel {
     this.lastName,
     this.email,
     this.countryCode,
+    this.verificationUUID,
+    this.pinCode,
+    this.toScreen,
   });
 
   UserModel copyWith({
@@ -24,6 +30,8 @@ class UserModel {
     String? lastName,
     String? email,
     int? countryCode,
+    String? verificationUUID,
+    String? pinCode,
   }) {
     return UserModel(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -32,6 +40,8 @@ class UserModel {
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       countryCode: countryCode ?? this.countryCode,
+      verificationUUID: verificationUUID ?? this.verificationUUID,
+      pinCode: pinCode ?? this.pinCode,
     );
   }
 
@@ -43,6 +53,8 @@ class UserModel {
       'lastName': lastName,
       'email': email,
       'countryCode': countryCode,
+      'verificationUUID': verificationUUID,
+      'pinCode': pinCode,
     };
   }
 
@@ -56,6 +68,10 @@ class UserModel {
       email: map['email'] != null ? map['email'] as String : null,
       countryCode:
           map['countryCode'] != null ? map['countryCode'] as int : null,
+      verificationUUID: map['verificationUUID'] != null
+          ? map['verificationUUID'] as String
+          : null,
+      pinCode: map['pinCode'] != null ? map['pinCode'] as String : null,
     );
   }
 
@@ -66,7 +82,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(phoneNumber: $phoneNumber, password: $password, firstName: $firstName, lastName: $lastName, email: $email, countryCode: $countryCode)';
+    return 'UserModel(phoneNumber: $phoneNumber, password: $password, firstName: $firstName, lastName: $lastName, email: $email, countryCode: $countryCode, verificationUUID: $verificationUUID, pinCode: $pinCode)';
   }
 
   @override
@@ -78,7 +94,9 @@ class UserModel {
         other.firstName == firstName &&
         other.lastName == lastName &&
         other.email == email &&
-        other.countryCode == countryCode;
+        other.countryCode == countryCode &&
+        other.verificationUUID == verificationUUID &&
+        other.pinCode == pinCode;
   }
 
   @override
@@ -88,6 +106,8 @@ class UserModel {
         firstName.hashCode ^
         lastName.hashCode ^
         email.hashCode ^
-        countryCode.hashCode;
+        countryCode.hashCode ^
+        verificationUUID.hashCode ^
+        pinCode.hashCode;
   }
 }
