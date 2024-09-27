@@ -267,6 +267,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
       child: SizedBox(
         width: 100.sh,
         child: DropdownButtonFormField(
+          isDense: true,
+          isExpanded: false,
           validator: (value) {
             if (value?.isEmpty ?? true) {
               return 'frequency not selected';
