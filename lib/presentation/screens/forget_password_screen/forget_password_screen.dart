@@ -182,14 +182,21 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                           );
                           final countryCode =
                               selectedNumber.dialCode!.substring(1);
-                          log(phoneN);
-                          log(countryCode);
-                          context.read<AuthBloc>().add(
-                                SendOTP(
-                                  phoneNumber: int.tryParse(phoneN) ?? 0,
-                                  countryCode: int.tryParse(countryCode) ?? 0,
-                                ),
-                              );
+                          if (widget.routeName == RouteName.newPassword) {
+                            context.read<AuthBloc>().add(
+                                  SendOTPForPasswordReset(
+                                    phoneNumber: int.tryParse(phoneN) ?? 0,
+                                    countryCode: int.tryParse(countryCode) ?? 0,
+                                  ),
+                                );
+                          } else if (widget.routeName == RouteName.newPincode) {
+                            context.read<AuthBloc>().add(
+                                  SendOTPForPincodeReset(
+                                    phoneNumber: int.tryParse(phoneN) ?? 0,
+                                    countryCode: int.tryParse(countryCode) ?? 0,
+                                  ),
+                                );
+                          }
                         }
                       });
                 },

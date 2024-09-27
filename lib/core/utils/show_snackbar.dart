@@ -5,7 +5,7 @@ import '../../gen/colors.gen.dart';
 
 void showSnackbar(
   BuildContext context, {
-  required String title,
+  String? title,
   required String description,
 }) {
   ScaffoldMessenger.of(context).showSnackBar(

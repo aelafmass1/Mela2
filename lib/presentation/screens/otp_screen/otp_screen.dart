@@ -228,6 +228,9 @@ class _OTPScreenState extends State<OTPScreen> {
                   } else {
                     context.pushNamed(
                       widget.userModel.toScreen!,
+                      extra: widget.userModel.copyWith(
+                        otp: getAllPins().join(),
+                      ),
                     );
                   }
                 } else if (state is OTPVerificationFail) {

@@ -300,7 +300,7 @@ class AuthRepository {
     required int phoneNumber,
     required String otp,
     required int countryCode,
-    required String newPassword,
+    required String newPincode,
   }) async {
     final res = await http.post(Uri.parse('$baseUrl/auth/pin/forgot/reset'),
         headers: {
@@ -310,7 +310,7 @@ class AuthRepository {
           "countryCode": countryCode,
           "phoneNumber": phoneNumber,
           "otpCode": otp,
-          "newPassword": newPassword,
+          "newPin": newPincode
         }));
     if (res.statusCode == 500) {
       return {'error': 'Unexpected error'};

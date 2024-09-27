@@ -108,12 +108,16 @@ final goRouting = GoRouter(
     GoRoute(
       path: '/newPassword',
       name: RouteName.newPassword,
-      builder: (context, state) => const NewPasswordScreen(),
+      builder: (context, state) => NewPasswordScreen(
+        userModel: state.extra as UserModel,
+      ),
     ),
     GoRoute(
       path: '/newPincode',
       name: RouteName.newPincode,
-      builder: (context, state) => const NewPincodeScreen(),
+      builder: (context, state) => NewPincodeScreen(
+        userModel: state.extra as UserModel,
+      ),
     ),
     GoRoute(
       path: '/signup',

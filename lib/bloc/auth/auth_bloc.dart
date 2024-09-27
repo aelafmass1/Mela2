@@ -20,9 +20,107 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<VerfiyOTP>(_onVerifyOTP);
     on<UploadProfilePicture>(_onUploadProfilePicture);
     on<LoginWithPincode>(_onLoginWithPincode);
+    on<SendOTPForPasswordReset>(_onSendOTPForPasswordReset);
+    on<SendOTPForPincodeReset>(_onSendOTPForPincodeReset);
+    on<ResetPassword>(_onResetPassword);
+    on<ResetPincode>(_onResetPincode);
+  }
+  _onSendOTPForPasswordReset(
+    SendOTPForPasswordReset event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! SendOTPLoading) {
+        emit(SendOTPLoading());
+        final res = await AuthRepository.sendOtpForPasswordReset(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
+        emit(SendOTPSuccess());
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(SendOTPFail(reason: error.toString()));
+    }
   }
 
-  _onLoginWithPincode(LoginWithPincode event, Emitter emit) async {
+  _onSendOTPForPincodeReset(
+    SendOTPForPincodeReset event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! SendOTPLoading) {
+        emit(SendOTPLoading());
+        final res = await AuthRepository.sendOtpForPincodeReset(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
+        emit(SendOTPSuccess());
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(SendOTPFail(reason: error.toString()));
+    }
+  }
+
+  _onResetPassword(
+    ResetPassword event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! ResetLoading) {
+        emit(ResetLoading());
+        final res = await AuthRepository.resetPassword(
+          phoneNumber: event.phoneNumber,
+          otp: event.otp,
+          countryCode: event.countryCode,
+          newPassword: event.newPassword,
+        );
+        if (res.containsKey('error')) {
+          return emit(ResetFail(reason: res['error']));
+        }
+        emit(ResetSuccess());
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(ResetFail(reason: error.toString()));
+    }
+  }
+
+  _onResetPincode(
+    ResetPincode event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! ResetLoading) {
+        emit(ResetLoading());
+        final res = await AuthRepository.resetPincode(
+          phoneNumber: event.phoneNumber,
+          otp: event.otp,
+          countryCode: event.countryCode,
+          newPincode: event.newPincode,
+        );
+        if (res.containsKey('error')) {
+          return emit(ResetFail(reason: res['error']));
+        }
+        emit(ResetSuccess());
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(ResetFail(reason: error.toString()));
+    }
+  }
+
+  _onLoginWithPincode(
+    LoginWithPincode event,
+    Emitter emit,
+  ) async {
     try {
       if (state is! LoginWithPincodeLoading) {
         emit(LoginWithPincodeLoading());
@@ -54,19 +152,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
       if (state is! OTPVerificationLoading) {
-        // emit(OTPVerificationLoading());
+        emit(OTPVerificationLoading());
 
-        // final res = await AuthRepository.verifyOtp(
-        //   phoneNumber: event.phoneNumber,
-        //   code: event.code,
-        //   countryCode: event.conutryCode,
-        // );
-        // if (res.containsKey('error')) {
-        //   return emit(OTPVerificationFail(reason: res['error']));
-        // }
-        // if (res.containsKey('response')) {
-        //   return emit(OTPVerificationSuccess(userId: res['response']));
-        // }
+        final res = await AuthRepository.verifyOtp(
+          phoneNumber: event.phoneNumber,
+          code: event.code,
+          countryCode: event.conutryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(OTPVerificationFail(reason: res['error']));
+        }
+        if (res.containsKey('response')) {
+          return emit(OTPVerificationSuccess(userId: res['response']));
+        }
         emit(OTPVerificationSuccess());
       }
     } catch (error) {
@@ -158,15 +256,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
       if (state is! SendOTPLoading) {
-        // emit(SendOTPLoading());
+        emit(SendOTPLoading());
 
-        // final res = await AuthRepository.sendOtp(
-        //   event.phoneNumber,
-        //   event.countryCode,
-        // );
-        // if (res.containsKey('error')) {
-        //   return emit(SendOTPFail(reason: res['error']));
-        // }
+        final res = await AuthRepository.sendOtp(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
         emit(SendOTPSuccess());
       }
     } catch (error) {

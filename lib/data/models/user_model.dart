@@ -11,6 +11,7 @@ class UserModel {
   final String? verificationUUID;
   final String? pinCode;
   final String? toScreen;
+  final String? otp;
   UserModel({
     this.phoneNumber,
     this.password,
@@ -21,6 +22,7 @@ class UserModel {
     this.verificationUUID,
     this.pinCode,
     this.toScreen,
+    this.otp,
   });
 
   UserModel copyWith({
@@ -32,6 +34,8 @@ class UserModel {
     int? countryCode,
     String? verificationUUID,
     String? pinCode,
+    String? toScreen,
+    String? otp,
   }) {
     return UserModel(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -42,6 +46,8 @@ class UserModel {
       countryCode: countryCode ?? this.countryCode,
       verificationUUID: verificationUUID ?? this.verificationUUID,
       pinCode: pinCode ?? this.pinCode,
+      otp: otp ?? this.otp,
+      toScreen: toScreen ?? this.toScreen,
     );
   }
 
@@ -82,7 +88,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(phoneNumber: $phoneNumber, password: $password, firstName: $firstName, lastName: $lastName, email: $email, countryCode: $countryCode, verificationUUID: $verificationUUID, pinCode: $pinCode)';
+    return 'UserModel(phoneNumber: $phoneNumber, password: $password, firstName: $firstName, lastName: $lastName, email: $email, countryCode: $countryCode, verificationUUID: $verificationUUID, pinCode: $pinCode, otp: $otp)';
   }
 
   @override
