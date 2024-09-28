@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '997344617329',
     projectId: 'mela-finance',
     storageBucket: 'mela-finance.appspot.com',
-    iosBundleId: 'com.melafinance.app',
+    iosBundleId: 'com.melafinance.main',
   );
 }
