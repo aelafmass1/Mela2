@@ -25,6 +25,7 @@ import 'package:transaction_mobile_app/firebase_options.dart';
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'config/routing.dart';
 
+//main method
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
