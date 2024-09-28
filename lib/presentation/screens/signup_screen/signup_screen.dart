@@ -38,7 +38,10 @@ class _SignupScreenState extends State<SignupScreen> {
   PhoneNumber selectedNumber = PhoneNumber(isoCode: 'US');
   bool showPassword = false;
 
+  final _phoneNumberNode = FocusNode();
+
   bool hasAccount = false;
+  bool isPhoneNumberFocused = false;
 
   @override
   void initState() {
@@ -51,7 +54,26 @@ class _SignupScreenState extends State<SignupScreen> {
         selectedNumber = initialNumber;
       });
     }
+    _phoneNumberNode.addListener(() {
+      if (_phoneNumberNode.hasFocus) {
+        setState(() {
+          isPhoneNumberFocused = true;
+        });
+      } else {
+        setState(() {
+          isPhoneNumberFocused = false;
+        });
+      }
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    phoneNumberController.dispose();
+    passwordController.dispose();
+    _phoneNumberNode.dispose();
   }
 
   @override
@@ -101,50 +123,55 @@ class _SignupScreenState extends State<SignupScreen> {
                     weight: FontWeight.w400,
                   ),
                   const SizedBox(height: 10),
-                  InternationalPhoneNumberInput(
-                    onInputChanged: (PhoneNumber number) {
-                      setState(() {
-                        selectedNumber = number;
-                      });
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Phone Number is empty';
-                      }
-                      return null;
-                    },
-                    selectorConfig: const SelectorConfig(
-                      useEmoji: true,
-                      selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                      leadingPadding: 10,
-                      useBottomSheetSafeArea: true,
-                      setSelectorButtonAsPrefixIcon: false,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        width: isPhoneNumberFocused ? 2 : 1,
+                        color: isPhoneNumberFocused
+                            ? ColorName.primaryColor
+                            : ColorName.grey,
+                      ),
+                      // color: Colors.amber,
                     ),
-                    ignoreBlank: false,
-                    autoValidateMode: AutovalidateMode.disabled,
-                    initialValue: initialNumber,
-                    spaceBetweenSelectorAndTextField: 0,
-                    textFieldController: phoneNumberController,
-                    formatInput: true,
-                    cursorColor: ColorName.primaryColor,
-                    keyboardType: TextInputType.phone,
-                    inputDecoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 18),
-                      hintText: 'Phone Number',
-                      hintStyle: const TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF8E8E8E),
-                        fontWeight: FontWeight.w500,
+                    child: InternationalPhoneNumberInput(
+                      onInputChanged: (PhoneNumber number) {
+                        setState(() {
+                          selectedNumber = number;
+                        });
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Phone Number is empty';
+                        }
+                        return null;
+                      },
+                      selectorConfig: const SelectorConfig(
+                        useEmoji: true,
+                        selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                        leadingPadding: 10,
+                        useBottomSheetSafeArea: true,
+                        setSelectorButtonAsPrefixIcon: false,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
+                      focusNode: _phoneNumberNode,
+                      ignoreBlank: false,
+                      autoValidateMode: AutovalidateMode.disabled,
+                      initialValue: initialNumber,
+                      spaceBetweenSelectorAndTextField: 0,
+                      textFieldController: phoneNumberController,
+                      formatInput: true,
+                      cursorColor: ColorName.primaryColor,
+                      keyboardType: TextInputType.phone,
+                      inputDecoration: const InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 17),
+                        hintText: 'Phone Number',
+                        hintStyle: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF8E8E8E),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        border: InputBorder.none,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(40),
-                          borderSide: const BorderSide(
-                            color: ColorName.primaryColor,
-                          )),
                     ),
                   ),
                   Visibility(
@@ -243,11 +270,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   BlocConsumer<AuthBloc, AuthState>(
                     listener: (context, state) {
                       if (state is SendOTPFail) {
-                        showSnackbar(
-                          context,
-                          title: 'Error',
-                          description: state.reason,
-                        );
+                        if (state.reason ==
+                            'User with this phone number already exists and is active') {
+                          setState(() {
+                            hasAccount = true;
+                          });
+                        } else {
+                          showSnackbar(
+                            context,
+                            title: 'Error',
+                            description: state.reason,
+                          );
+                        }
                       } else if (state is SendOTPSuccess) {
                         try {
                           final phoneN = selectedNumber.phoneNumber!

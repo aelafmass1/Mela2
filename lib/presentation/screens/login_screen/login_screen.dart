@@ -36,6 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
   PhoneNumber initialNumber = PhoneNumber(isoCode: 'US');
   PhoneNumber selectedNumber = PhoneNumber(isoCode: 'US');
 
+  final _phoneNumberNode = FocusNode();
+
+  bool isPhoneNumberFocused = false;
   bool showPassword = false;
 
   final _formKey = GlobalKey<FormState>();
@@ -51,6 +54,17 @@ class _LoginScreenState extends State<LoginScreen> {
         selectedNumber = initialNumber;
       });
     }
+    _phoneNumberNode.addListener(() {
+      if (_phoneNumberNode.hasFocus) {
+        setState(() {
+          isPhoneNumberFocused = true;
+        });
+      } else {
+        setState(() {
+          isPhoneNumberFocused = false;
+        });
+      }
+    });
     super.initState();
   }
 
@@ -58,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     phoneNumberController.dispose();
     passwordController.dispose();
+    _phoneNumberNode.dispose();
     super.dispose();
   }
 
@@ -113,50 +128,67 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  InternationalPhoneNumberInput(
-                    onInputChanged: (PhoneNumber number) {
-                      setState(() {
-                        selectedNumber = number;
-                      });
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Phone Number is empty';
-                      }
-                      return null;
-                    },
-                    selectorConfig: const SelectorConfig(
-                      useEmoji: true,
-                      selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                      leadingPadding: 10,
-                      useBottomSheetSafeArea: true,
-                      setSelectorButtonAsPrefixIcon: false,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        width: isPhoneNumberFocused ? 2 : 1,
+                        color: isPhoneNumberFocused
+                            ? ColorName.primaryColor
+                            : ColorName.grey,
+                      ),
+                      // color: Colors.amber,
                     ),
-                    ignoreBlank: false,
-                    autoValidateMode: AutovalidateMode.disabled,
-                    initialValue: initialNumber,
-                    spaceBetweenSelectorAndTextField: 0,
-                    textFieldController: phoneNumberController,
-                    formatInput: true,
-                    cursorColor: ColorName.primaryColor,
-                    keyboardType: TextInputType.phone,
-                    inputDecoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 18),
-                      hintText: 'Phone Number',
-                      hintStyle: const TextStyle(
+                    child: InternationalPhoneNumberInput(
+                      focusNode: _phoneNumberNode,
+                      fieldKey: phoneNumberKey,
+                      onInputChanged: (PhoneNumber number) {
+                        setState(() {
+                          selectedNumber = number;
+                        });
+                        debounceValidation(phoneNumberKey);
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Phone Number is empty';
+                        }
+                        return null;
+                      },
+                      selectorButtonOnErrorPadding: 0,
+                      selectorTextStyle: const TextStyle(
                         fontSize: 15,
-                        color: Color(0xFF8E8E8E),
                         fontWeight: FontWeight.w500,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
+                      selectorConfig: const SelectorConfig(
+                        useEmoji: true,
+                        selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                        leadingPadding: 10,
+                        useBottomSheetSafeArea: true,
+                        setSelectorButtonAsPrefixIcon: false,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(40),
-                          borderSide: const BorderSide(
-                            color: ColorName.primaryColor,
-                          )),
+                      ignoreBlank: false,
+                      autoValidateMode: AutovalidateMode.disabled,
+                      initialValue: initialNumber,
+                      spaceBetweenSelectorAndTextField: 0,
+                      textFieldController: phoneNumberController,
+                      formatInput: true,
+                      cursorColor: ColorName.primaryColor,
+                      keyboardType: TextInputType.phone,
+                      inputDecoration: const InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 17),
+                        hintText: 'Phone Number',
+                        hintStyle: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF8E8E8E),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        border: InputBorder.none,
+                        // focusedBorder: OutlineInputBorder(
+                        //     borderRadius: BorderRadius.circular(40),
+                        //     borderSide: const BorderSide(
+                        //       color: ColorName.primaryColor,
+                        //     )),
+                      ),
                     ),
                   ),
                   Padding(
@@ -182,8 +214,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: IconButton(
                           icon: Icon(
                             showPassword
-                                ? Icons.remove_red_eye
-                                : Icons.remove_red_eye_outlined,
+                                ? Icons.remove_red_eye_outlined
+                                : Icons.remove_red_eye,
                             color: ColorName.grey,
                           ),
                           onPressed: () {

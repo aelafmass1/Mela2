@@ -33,6 +33,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  final _phoneNumberNode = FocusNode();
+  bool isPhoneNumberFocused = false;
+
   @override
   void initState() {
     final countryCode = context.read<LocationBloc>().state.countryCode;
@@ -44,13 +47,25 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         selectedNumber = initialNumber;
       });
     }
+    _phoneNumberNode.addListener(() {
+      if (_phoneNumberNode.hasFocus) {
+        setState(() {
+          isPhoneNumberFocused = true;
+        });
+      } else {
+        setState(() {
+          isPhoneNumberFocused = false;
+        });
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    phoneNumberController.dispose();
     super.dispose();
+    _phoneNumberNode.dispose();
+    phoneNumberController.dispose();
   }
 
   @override
@@ -92,50 +107,61 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 fontSize: 12,
                 weight: FontWeight.w400,
               ),
-              InternationalPhoneNumberInput(
-                onInputChanged: (PhoneNumber number) {
-                  setState(() {
-                    selectedNumber = number;
-                  });
-                },
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Phone Number is empty';
-                  }
-                  return null;
-                },
-                selectorConfig: const SelectorConfig(
-                  useEmoji: true,
-                  selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                  leadingPadding: 10,
-                  useBottomSheetSafeArea: true,
-                  setSelectorButtonAsPrefixIcon: false,
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(
+                    width: isPhoneNumberFocused ? 2 : 1,
+                    color: isPhoneNumberFocused
+                        ? ColorName.primaryColor
+                        : ColorName.grey,
+                  ),
+                  // color: Colors.amber,
                 ),
-                ignoreBlank: false,
-                autoValidateMode: AutovalidateMode.disabled,
-                initialValue: initialNumber,
-                spaceBetweenSelectorAndTextField: 0,
-                textFieldController: phoneNumberController,
-                formatInput: true,
-                cursorColor: ColorName.primaryColor,
-                keyboardType: TextInputType.phone,
-                inputDecoration: InputDecoration(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                  hintText: 'Phone Number',
-                  hintStyle: const TextStyle(
+                child: InternationalPhoneNumberInput(
+                  focusNode: _phoneNumberNode,
+                  onInputChanged: (PhoneNumber number) {
+                    setState(() {
+                      selectedNumber = number;
+                    });
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Phone Number is empty';
+                    }
+                    return null;
+                  },
+                  selectorConfig: const SelectorConfig(
+                    useEmoji: true,
+                    selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                    leadingPadding: 10,
+                    useBottomSheetSafeArea: true,
+                    setSelectorButtonAsPrefixIcon: false,
+                  ),
+                  selectorButtonOnErrorPadding: 0,
+                  selectorTextStyle: const TextStyle(
                     fontSize: 15,
-                    color: Color(0xFF8E8E8E),
                     fontWeight: FontWeight.w500,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
+                  ignoreBlank: false,
+                  autoValidateMode: AutovalidateMode.disabled,
+                  initialValue: initialNumber,
+                  spaceBetweenSelectorAndTextField: 0,
+                  textFieldController: phoneNumberController,
+                  formatInput: true,
+                  cursorColor: ColorName.primaryColor,
+                  keyboardType: TextInputType.phone,
+                  inputDecoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    hintText: 'Phone Number',
+                    hintStyle: TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF8E8E8E),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: const BorderSide(
-                        color: ColorName.primaryColor,
-                      )),
                 ),
               ),
               const SizedBox(height: 30),
