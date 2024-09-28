@@ -516,6 +516,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                         melaMemberContacts.contains(contact.id),
                                     child: SvgPicture.asset(
                                       Assets.images.svgs.checkmarkIcon,
+                                      width: 18,
+                                      height: 18,
                                     ),
                                   ),
                                 ],
@@ -590,6 +592,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                     melaMemberContacts.contains(contact.id),
                                 child: SvgPicture.asset(
                                   Assets.images.svgs.checkmarkIcon,
+                                  width: 18,
+                                  height: 18,
                                 ),
                               ),
                             ],

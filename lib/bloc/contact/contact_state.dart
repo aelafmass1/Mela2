@@ -1,3 +1,9 @@
+/// Represents the different states of the contact bloc.
+///
+/// [ContactInitial] is the initial state of the contact bloc.
+/// [ContactLoading] is the state when the contact data is being loaded.
+/// [ContactFail] is the state when there is an error loading the contact data.
+/// [ContactSuccess] is the state when the contact data is successfully loaded.
 part of 'contact_bloc.dart';
 
 sealed class ContactState {}

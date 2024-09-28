@@ -70,11 +70,13 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   @override
   void initState() {
     _tabController = TabController(length: 4, vsync: this);
+    final equbId = widget.equbDetailModel.id;
     context.read<EqubBloc>().add(
           FetchEqub(
-            equbId: widget.equbDetailModel.id,
+            equbId: equbId,
           ),
         );
+    // context.read<EqubBloc>().add(FetchEqubMembers(equbId: equbId));
     super.initState();
   }
 

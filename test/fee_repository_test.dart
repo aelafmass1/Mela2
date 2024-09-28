@@ -9,6 +9,13 @@ import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
+/// Tests the behavior of the [FeeRepository] class.
+///
+/// This test suite verifies the following scenarios:
+/// - Fetching fees successfully returns a list of [FeeModel] instances.
+/// - Fetching fees with a failure returns an error message.
+///
+/// The tests use a [MockHttpClient] to simulate the network requests and responses.
 void main() {
   late FeeRepository feeRepository;
   late MockHttpClient mockClient;

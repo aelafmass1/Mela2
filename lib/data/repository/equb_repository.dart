@@ -28,6 +28,9 @@ class EqubRepository {
       },
       body: jsonEncode(body),
     );
+    if (res.statusCode == 500) {
+      return {'error': 'Internal Server Error'};
+    }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -54,6 +57,11 @@ class EqubRepository {
       },
       body: jsonEncode(body),
     );
+    if (res.statusCode == 500) {
+      return [
+        {'error': 'Internal Server Error'}
+      ];
+    }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -78,6 +86,11 @@ class EqubRepository {
         'Content-Type': 'application/json',
       },
     );
+    if (res.statusCode == 500) {
+      return [
+        {'error': 'Internal Server Error'}
+      ];
+    }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -108,6 +121,9 @@ class EqubRepository {
         'Content-Type': 'application/json',
       },
     );
+    if (res.statusCode == 500) {
+      return {'error': 'Internal Server Error'};
+    }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -120,5 +136,40 @@ class EqubRepository {
       return {'error': data['error']};
     }
     return {'error': res.body};
+  }
+
+  Future<List> fetchEqubMembers({
+    required String accessToken,
+    required int equbId,
+  }) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/ekub/$equbId/members/get'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode == 500) {
+      return [
+        {'error': 'Internal Server Error'}
+      ];
+    }
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
+    }
+    if (data.containsKey('errorResponse')) {
+      return [
+        {'error': data['errorResponse']['message']}
+      ];
+    }
+    if (data.containsKey('error')) {
+      return [
+        {'error': data['error']}
+      ];
+    }
+    return [
+      {'error': res.body}
+    ];
   }
 }

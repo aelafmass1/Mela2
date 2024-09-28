@@ -22,3 +22,9 @@ final class FetchEqub extends EqubEvent {
 
   FetchEqub({required this.equbId});
 }
+
+final class FetchEqubMembers extends EqubEvent {
+  final int equbId;
+
+  FetchEqubMembers({required this.equbId});
+}

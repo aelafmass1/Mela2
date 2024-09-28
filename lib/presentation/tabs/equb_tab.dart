@@ -182,7 +182,10 @@ class _EqubTabState extends State<EqubTab> {
                             child: Row(
                               children: [
                                 for (var equb in state.equbList)
-                                  EqubCard(equb: equb),
+                                  EqubCard(
+                                    equb: equb,
+                                    onCarousel: true,
+                                  ),
                               ],
                             ),
                           ),

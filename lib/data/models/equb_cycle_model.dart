@@ -1,18 +1,16 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 class EqubCycleModel {
   final int cycleId;
   final int cycleNumber;
-  final String cycleDate;
-  final Map winner;
+  final String? cycleDate;
+  final Map? winner;
   EqubCycleModel({
     required this.cycleId,
     required this.cycleNumber,
-    required this.cycleDate,
-    required this.winner,
+    this.cycleDate,
+    this.winner,
   });
 
   EqubCycleModel copyWith({
@@ -38,12 +36,12 @@ class EqubCycleModel {
     };
   }
 
-  factory EqubCycleModel.fromMap(Map<String, dynamic> map) {
+  factory EqubCycleModel.fromMap(Map map) {
     return EqubCycleModel(
       cycleId: map['cycleId'] as int,
       cycleNumber: map['cycleNumber'] as int,
-      cycleDate: map['cycleDate'] as String,
-      winner: Map.from((map['winner'] as Map)),
+      cycleDate: map['cycleDate'] != null ? map['cycleDate'] as String : null,
+      winner: map['winner'] != null ? Map.from(map['winner']) : null,
     );
   }
 
@@ -64,7 +62,7 @@ class EqubCycleModel {
     return other.cycleId == cycleId &&
         other.cycleNumber == cycleNumber &&
         other.cycleDate == cycleDate &&
-        mapEquals(other.winner, winner);
+        other.winner == winner;
   }
 
   @override
