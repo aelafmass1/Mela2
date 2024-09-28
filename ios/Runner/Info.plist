@@ -32,10 +32,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Mela Fi needs access to your camera to allow you to scan your card for automatic data entry and to take a photo for your profile picture. This enhances your experience by making setup quick and easy. Your photos will only be used for these specific purposes.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Mela Fi requires access to your photo library to allow you to upload a profile picture, helping personalize your app experience. Your photos will not be used for any other purpose.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Mela Fi needs access to your contacts to enable you to easily send money to recipients using their phone numbers. This allows us to contact the recipient and ensure funds are sent directly and securely.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mela Fi requires access to your photo library to allow you to upload a profile picture, helping personalize your app experience. Your photos will not be used for any other purpose.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
