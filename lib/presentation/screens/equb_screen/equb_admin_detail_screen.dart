@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_winners_card.dart';
@@ -28,7 +31,8 @@ class EqubAdminDetailScreen extends StatefulWidget {
   State<EqubAdminDetailScreen> createState() => _EqubAdminDetailScreenState();
 }
 
-class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with TickerProviderStateMixin {
+class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
+    with TickerProviderStateMixin {
   List<int> members = List.generate(10, (index) => index);
   List<int> requests = List.generate(10, (index) => index);
 
@@ -49,7 +53,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
-      List<Contact> contacts = await FlutterContacts.getContacts(withProperties: true);
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
       setState(() {
         _contacts = contacts;
       });
@@ -65,6 +70,13 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
   @override
   void initState() {
     _tabController = TabController(length: 4, vsync: this);
+    final equbId = widget.equbDetailModel.id;
+    context.read<EqubBloc>().add(
+          FetchEqub(
+            equbId: equbId,
+          ),
+        );
+    // context.read<EqubBloc>().add(FetchEqubMembers(equbId: equbId));
     super.initState();
   }
 
@@ -90,7 +102,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTop(),
-            _buildReminder('Please select the winner for the second round in August.'),
+            _buildReminder(
+                'Please select the winner for the second round in August.'),
             const SizedBox(height: 15),
             _buildTitle(),
             const SizedBox(height: 10),
@@ -172,8 +185,15 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                       child: Center(
                         child: widget.equbDetailModel.name.isNotEmpty
                             ? TextWidget(
-                                text: widget.equbDetailModel.name.trim().split(' ').length == 1
-                                    ? widget.equbDetailModel.name.split('').first.trim()
+                                text: widget.equbDetailModel.name
+                                            .trim()
+                                            .split(' ')
+                                            .length ==
+                                        1
+                                    ? widget.equbDetailModel.name
+                                        .split('')
+                                        .first
+                                        .trim()
                                     : '${widget.equbDetailModel.name.trim().split(' ').first[0]}${widget.equbDetailModel.name.trim().split(' ').last[0]}',
                                 color: Colors.white,
                                 fontSize: 14,
@@ -229,7 +249,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -251,7 +272,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                         ),
                         const SizedBox(width: 10),
                         TextWidget(
-                          text: 'Members : ${widget.equbDetailModel.members.length}',
+                          text:
+                              'Members : ${widget.equbDetailModel.members.length}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),
@@ -320,7 +342,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                         ),
                         const Expanded(child: SizedBox()),
                         TextWidget(
-                          text: '\$${widget.equbDetailModel.contributionAmount}',
+                          text:
+                              '\$${widget.equbDetailModel.contributionAmount}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),
@@ -429,7 +452,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
             if (count != 0)
               Container(
                 margin: const EdgeInsets.only(left: 3),
-                padding: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
                 decoration: BoxDecoration(
                   color: ColorName.yellow,
                   borderRadius: BorderRadius.circular(10),
@@ -476,7 +500,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                     fontSize: 16,
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 0)),
+                    style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 0)),
                     child: const Row(
                       children: [
                         Icon(
@@ -495,8 +520,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                       // setState(() {
                       //   index = 1;
                       //   sliderWidth = 60.sw;
-                      // });
-
+                      // })
                       await _fetchContacts();
 
                       if (isPermissionDenied == false) {
@@ -504,6 +528,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                           context,
                           int.tryParse(numberOfMembersController.text) ?? 3,
                           _contacts,
+                          widget.equbDetailModel.id,
                         );
                       }
                     },
@@ -532,7 +557,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                         children: [
                                           ListTile(
                                             leading: ClipRRect(
-                                              borderRadius: BorderRadius.circular(100),
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
                                               child: Container(
                                                 width: 40,
                                                 height: 40,
@@ -545,20 +571,25 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                                 ),
                                               ),
                                             ),
-                                            title: const TextWidget(text: "Make Co-Admin"),
+                                            title: const TextWidget(
+                                                text: "Make Co-Admin"),
                                             onTap: () => showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: const TextWidget(
-                                                    text: "Are you sure you want to promote to co-admin?"),
+                                                    text:
+                                                        "Are you sure you want to promote to co-admin?"),
                                                 actions: [
                                                   MaterialButton(
                                                     child: const Text("Cancel"),
-                                                    onPressed: () => context.pop(),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                   MaterialButton(
-                                                    child: const Text("Promote"),
-                                                    onPressed: () => context.pop(),
+                                                    child:
+                                                        const Text("Promote"),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                 ],
                                               ),
@@ -566,7 +597,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                           ),
                                           ListTile(
                                             leading: ClipRRect(
-                                              borderRadius: BorderRadius.circular(100),
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
                                               child: Container(
                                                 width: 40,
                                                 height: 40,
@@ -579,20 +611,24 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                                 ),
                                               ),
                                             ),
-                                            title: const TextWidget(text: "Remove Co-Admin"),
+                                            title: const TextWidget(
+                                                text: "Remove Co-Admin"),
                                             onTap: () => showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: const TextWidget(
-                                                    text: "Are you sure you want to remove this co-admin?"),
+                                                    text:
+                                                        "Are you sure you want to remove this co-admin?"),
                                                 actions: [
                                                   MaterialButton(
                                                     child: const Text("Cancel"),
-                                                    onPressed: () => context.pop(),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                   MaterialButton(
                                                     child: const Text("Remove"),
-                                                    onPressed: () => context.pop(),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                 ],
                                               ),
@@ -600,7 +636,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                           ),
                                           ListTile(
                                             leading: ClipRRect(
-                                              borderRadius: BorderRadius.circular(100),
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
                                               child: Container(
                                                 width: 40,
                                                 height: 40,
@@ -613,20 +650,24 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                                                 ),
                                               ),
                                             ),
-                                            title: const TextWidget(text: "Remove from equb"),
+                                            title: const TextWidget(
+                                                text: "Remove from equb"),
                                             onTap: () => showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: const TextWidget(
-                                                    text: "Are you sure you want to remove this member?"),
+                                                    text:
+                                                        "Are you sure you want to remove this member?"),
                                                 actions: [
                                                   MaterialButton(
                                                     child: const Text("Cancel"),
-                                                    onPressed: () => context.pop(),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                   MaterialButton(
                                                     child: const Text("Remove"),
-                                                    onPressed: () => context.pop(),
+                                                    onPressed: () =>
+                                                        context.pop(),
                                                   ),
                                                 ],
                                               ),
@@ -751,7 +792,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
             child: SizedBox(
               width: 100.sw - 30,
               child: ButtonWidget(
-                color: activeIndex != -1 ? ColorName.primaryColor : ColorName.grey.shade200.withOpacity(0.5),
+                color: activeIndex != -1
+                    ? ColorName.primaryColor
+                    : ColorName.grey.shade200.withOpacity(0.5),
                 onPressed: () => activeIndex != -1
                     ? context.pushNamed(RouteName.win, extra: [
                         '4th',
@@ -831,7 +874,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                   RouteName.equbActionCompleted,
                   extra: CompletePageDto(
                     title: "Reminder sent!",
-                    description: "You have successfully sent a reminder to all members!",
+                    description:
+                        "You have successfully sent a reminder to all members!",
                     onComplete: () => context.pop(),
                   ),
                 ),
@@ -862,7 +906,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                     isJoin = false;
                   }),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                     decoration: BoxDecoration(
                       color: isJoin ? ColorName.white : ColorName.primaryColor,
                       borderRadius: BorderRadius.circular(50),
@@ -870,7 +915,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                     child: Text(
                       "Leave Request",
                       style: TextStyle(
-                        color: isJoin ? ColorName.primaryColor : ColorName.white,
+                        color:
+                            isJoin ? ColorName.primaryColor : ColorName.white,
                       ),
                     ),
                   ),
@@ -883,7 +929,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                     isJoin = true;
                   }),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                     decoration: BoxDecoration(
                       color: isJoin ? ColorName.primaryColor : ColorName.white,
                       borderRadius: BorderRadius.circular(50),
@@ -891,7 +938,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen> with Tick
                     child: Text(
                       "Join Request",
                       style: TextStyle(
-                        color: isJoin ? ColorName.white : ColorName.primaryColor,
+                        color:
+                            isJoin ? ColorName.white : ColorName.primaryColor,
                       ),
                     ),
                   ),

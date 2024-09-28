@@ -22,6 +22,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginWithPincode>(_onLoginWithPincode);
   }
 
+  /// Handles the login process using a pincode.
+  ///
+  /// This method is responsible for authenticating a user using a pincode. It first retrieves the user's country code and phone number, then calls the `AuthRepository.loginWithPincode()` method to verify the pincode. If the login is successful, the method stores the JWT token and emits a `LoginWithPincodeSuccess` state. If there is an error, it emits a `LoginWithPincodeFail` state with the error reason.
   _onLoginWithPincode(LoginWithPincode event, Emitter emit) async {
     try {
       if (state is! LoginWithPincodeLoading) {
@@ -199,16 +202,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
-        final accessToken = await getToken();
+        // final accessToken = await getToken();
 
-        final res = await AuthRepository.sendOtp(
-          accessToken!,
-          event.phoneNumber,
-          event.countryCode,
-        );
-        if (res.containsKey('error')) {
-          return emit(SendOTPFail(reason: res['error']));
-        }
+        // final res = await AuthRepository.sendOtp(
+        //   accessToken!,
+        //   event.phoneNumber,
+        //   event.countryCode,
+        // );
+        // if (res.containsKey('error')) {
+        //   return emit(SendOTPFail(reason: res['error']));
+        // }
         emit(SendOTPSuccess());
       }
     } catch (error) {

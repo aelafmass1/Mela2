@@ -14,11 +14,13 @@ class EqubCard extends StatelessWidget {
   final EqubDetailModel equb;
   final Function()? onTab;
   final bool showJoinRequestButton;
+  final bool onCarousel;
   const EqubCard({
     super.key,
     required this.equb,
     this.onTab,
     this.showJoinRequestButton = false,
+    this.onCarousel = false,
   });
 
   @override
@@ -34,7 +36,7 @@ class EqubCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(15),
         margin: const EdgeInsets.all(15),
-        width: 100.sw,
+        width: onCarousel ? 93.sw : 100.sw,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
 import 'package:transaction_mobile_app/data/models/fee_models.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 
@@ -19,7 +20,7 @@ class FeeBloc extends Bloc<FeeEvent, FeeState> {
         emit(FeeLoading());
         final token = await getToken();
 
-        final res = await FeeRepository.fetchFees(token!);
+        final res = await FeeRepository(client: Client()).fetchFees(token!);
         if (res.first.containsKey('error')) {
           return emit(FeeFailed(reason: res.first['error']));
         }

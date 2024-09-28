@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import 'package:transaction_mobile_app/data/models/equb_cycle_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 
@@ -15,6 +16,8 @@ class EqubDetailModel {
   final DateTime startDate;
   final List<EqubMemberModel> members;
   final List<EqubInviteeModel> invitees;
+  final List<EqubCycleModel> cycles;
+
   EqubDetailModel({
     required this.id,
     required this.name,
@@ -24,6 +27,7 @@ class EqubDetailModel {
     required this.startDate,
     required this.members,
     required this.invitees,
+    required this.cycles,
   });
 
   EqubDetailModel copyWith({
@@ -35,6 +39,7 @@ class EqubDetailModel {
     DateTime? startDate,
     List<EqubMemberModel>? members,
     List<EqubInviteeModel>? invitees,
+    List<EqubCycleModel>? cycles,
   }) {
     return EqubDetailModel(
       id: id ?? this.id,
@@ -45,6 +50,7 @@ class EqubDetailModel {
       startDate: startDate ?? this.startDate,
       members: members ?? this.members,
       invitees: invitees ?? this.invitees,
+      cycles: cycles ?? this.cycles,
     );
   }
 
@@ -58,28 +64,36 @@ class EqubDetailModel {
       'startDate': startDate.millisecondsSinceEpoch,
       'members': members.map((x) => x.toMap()).toList(),
       'invitees': invitees.map((x) => x.toMap()).toList(),
+      'cycles': cycles.map((x) => x.toMap()).toList(),
     };
   }
 
-  factory EqubDetailModel.fromMap(Map<String, dynamic> map) {
+  factory EqubDetailModel.fromMap(Map map) {
     return EqubDetailModel(
       id: map['id'] as int,
       name: map['name'] as String,
       numberOfMembers: map['numberOfMembers'] as int,
       contributionAmount: map['contributionAmount'] as double,
       frequency: map['frequency'] as String,
-      startDate: DateTime.parse(map['startDate']),
+      startDate: DateTime.parse(map['startDate'] as String),
       members: List<EqubMemberModel>.from(
-        (map['members']).map<EqubMemberModel>(
+        (map['members'] as List).map<EqubMemberModel>(
           (x) => EqubMemberModel.fromMap(x),
         ),
       ),
       invitees: [],
-      // invitees: List<EqubInviteeModel>.from(
-      //   (map['invitees']).map<EqubInviteeModel>(
+      //  List<EqubInviteeModel>.from(
+      //   (map['invitees'] as List).map<EqubInviteeModel>(
       //     (x) => EqubInviteeModel.fromMap(x),
       //   ),
       // ),
+      cycles: map['cycles'] == null
+          ? []
+          : List<EqubCycleModel>.from(
+              (map['cycles'] as List).map<EqubCycleModel>(
+                (x) => EqubCycleModel.fromMap(x),
+              ),
+            ),
     );
   }
 
@@ -90,7 +104,7 @@ class EqubDetailModel {
 
   @override
   String toString() {
-    return 'EqubDetailModel(id: $id, name: $name, numberOfMembers: $numberOfMembers, contributionAmount: $contributionAmount, frequency: $frequency, startDate: $startDate, members: $members, invitees: $invitees)';
+    return 'EqubDetailModel(id: $id, name: $name, numberOfMembers: $numberOfMembers, contributionAmount: $contributionAmount, frequency: $frequency, startDate: $startDate, members: $members, invitees: $invitees, cycles: $cycles)';
   }
 
   @override
@@ -104,7 +118,8 @@ class EqubDetailModel {
         other.frequency == frequency &&
         other.startDate == startDate &&
         listEquals(other.members, members) &&
-        listEquals(other.invitees, invitees);
+        listEquals(other.invitees, invitees) &&
+        listEquals(other.cycles, cycles);
   }
 
   @override
@@ -116,6 +131,7 @@ class EqubDetailModel {
         frequency.hashCode ^
         startDate.hashCode ^
         members.hashCode ^
-        invitees.hashCode;
+        invitees.hashCode ^
+        cycles.hashCode;
   }
 }

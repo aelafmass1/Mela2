@@ -1,17 +1,21 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/data/models/contact_model.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 
+import '../../bloc/equb/equb_bloc.dart';
 import '../../gen/colors.gen.dart';
 import '../../presentation/widgets/button_widget.dart';
 import '../../presentation/widgets/text_widget.dart';
 
-Future<List<Contact>> showAddMember(
-    BuildContext context, int numberOfMembers, List<Contact> contacts) async {
+Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
+    List<Contact> contacts, int equbId) async {
   final searchController = TextEditingController();
   bool isSearching = false;
   List<Contact> filteredContacts = [];
@@ -256,15 +260,31 @@ Future<List<Contact>> showAddMember(
                 color: Colors.white,
                 padding: const EdgeInsets.only(
                     bottom: 10, left: 15, right: 15, top: 10),
-                child: ButtonWidget(
-                  onPressed: () {
-                    //
+                child: BlocBuilder<EqubBloc, EqubState>(
+                  builder: (context, state) {
+                    return ButtonWidget(
+                      onPressed: () {
+                        context.read<EqubBloc>().add(
+                              InviteMembers(
+                                equbId: equbId,
+                                contacts: contacts
+                                    .map((c) => ContactModel(
+                                        contactId: c.id,
+                                        name: c.displayName,
+                                        phoneNumber: c.phones.first.number))
+                                    .toList(),
+                              ),
+                            );
+                      },
+                      child: state is EqubLoading
+                          ? const LoadingWidget()
+                          : const TextWidget(
+                              text: 'Next',
+                              type: TextType.small,
+                              color: Colors.white,
+                            ),
+                    );
                   },
-                  child: const TextWidget(
-                    text: 'Next',
-                    type: TextType.small,
-                    color: Colors.white,
-                  ),
                 ),
               ),
             ),
