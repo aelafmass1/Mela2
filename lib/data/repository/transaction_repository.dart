@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 class TransactionRepository {
   static Future<Map<String, dynamic>> fetchTransaction(
@@ -24,6 +25,6 @@ class TransactionRepository {
       }
       return {'success': data};
     }
-    return {"error": res.body.isEmpty ? 'please try again' : res.body};
+    return processErrorResponse(jsonDecode(res.body));
   }
 }

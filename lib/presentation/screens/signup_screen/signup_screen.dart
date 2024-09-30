@@ -16,7 +16,7 @@ import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart'
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 
 import '../../../bloc/auth/auth_bloc.dart';
-import '../../../bloc/bloc/location_bloc.dart';
+import '../../../bloc/location/location_bloc.dart';
 import '../../../core/utils/settings.dart';
 import '../../widgets/text_widget.dart';
 

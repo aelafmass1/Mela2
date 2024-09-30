@@ -17,7 +17,10 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
 
   /// Handles the logic for inviting members to an Equb.
   ///
-  /// This method is called when the `InviteEqubMemeber` event is emitted. It first checks if the current state is not `EqubMemberInviteLoading`, and if so, it emits the `EqubMemberInviteLoading` state. It then retrieves the access token, and uses the `EqubRepository` to invite the specified members to the Equb with the given ID. If the invitation is successful, it emits the `EqubMemberInviteSuccess` state. If there is an error, it emits the `EqubMemberInviteFail` state with the error reason.
+  /// This method is called when the `InviteEqubMemeber` event is emitted. It first checks if the current state is not `EqubMemberInviteLoading`,
+  ///  and if so, it emits the `EqubMemberInviteLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  ///  to invite the specified members to the Equb with the given ID. If the invitation is successful, it emits the `EqubMemberInviteSuccess`
+  ///  state. If there is an error, it emits the `EqubMemberInviteFail` state with the error reason.
   _onInviteEqubMember(InviteEqubMemeber event, Emitter emit) async {
     try {
       if (state is! EqubMemberInviteLoading) {

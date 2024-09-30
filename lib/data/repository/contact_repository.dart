@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:http/http.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 import '../../core/constants/url_constants.dart';
 
@@ -10,6 +11,19 @@ class ContactRepository {
 
   ContactRepository({required this.client});
 
+  /// Checks the contacts on the device against a list of contacts on the server.
+  ///
+  /// This method takes a list of [Contact] objects and an access token, and sends
+  /// the contact information to the server to check if the contacts exist on the
+  /// server. The server response is then returned as a list of dynamic objects.
+  ///
+  /// Parameters:
+  /// - `accessToken`: The access token to authenticate the request.
+  /// - `contacts`: The list of [Contact] objects to check against the server.
+  ///
+  /// Returns:
+  /// A list of dynamic objects containing the server response. If an error occurs,
+  /// the list will contain an object with an 'error' key and the error message.
   Future<List> checkMyContacts({
     required String accessToken,
     required List<Contact> contacts,
@@ -67,19 +81,15 @@ class ContactRepository {
         body,
       ),
     );
+    if (res.statusCode == 500) {
+      return [
+        {'error': 'Internal Server Error'}
+      ];
+    }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return [
-        {'error': data['errorResponse']['message']}
-      ];
-    }
-    return [
-      {
-        'error': res.body,
-      }
-    ];
+    return [processErrorResponse(data)];
   }
 }

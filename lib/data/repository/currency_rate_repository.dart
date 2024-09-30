@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
@@ -16,6 +17,9 @@ class CurrencyRateRepository {
         'Content-Type': 'application/json',
       },
     );
+    if (res.statusCode == 500) {
+      throw const HttpException('Internal Server Error');
+    }
     // metric.stop();
 
     if (res.statusCode == 200) {

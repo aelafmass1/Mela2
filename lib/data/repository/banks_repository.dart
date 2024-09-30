@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 class BanksRepository {
   static Future<List> fetchBanks(String accessToken) async {
@@ -14,13 +15,16 @@ class BanksRepository {
         'Content-Type': 'application/json',
       },
     );
+    if (res.statusCode == 500) {
+      return [
+        {'error': 'Internal Server Error'}
+      ];
+    }
+    final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200 || res.statusCode == 201) {
-      final data = jsonDecode(res.body) as List;
       return data;
     }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 
   static Future<List> fetchBankFee(String accessToken) async {
@@ -39,18 +43,6 @@ class BanksRepository {
 
       return data;
     }
-    if (data.containsKey('message')) {
-      return [
-        {'error': data['message']}
-      ];
-    }
-    if (data.containsKey('error')) {
-      return [
-        {'error': data['error']}
-      ];
-    }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 }

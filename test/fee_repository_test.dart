@@ -61,7 +61,7 @@ void main() {
       // act
       final result = await feeRepository.fetchFees('token');
       // assert
-      expect(result[0]['error'], "Failed to fetch fees");
+      expect(result[0]['error'], "Something went wrong");
     });
   });
 }

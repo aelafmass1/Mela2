@@ -25,6 +25,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResetPassword>(_onResetPassword);
     on<ResetPincode>(_onResetPincode);
   }
+
+  /// Handles the logic for sending an OTP (One-Time Password) for password reset.
+  ///
+  /// This method is called when the `SendOTPForPasswordReset` event is dispatched.
+  /// It first checks if the current state is not `SendOTPLoading`, and if so, it emits
+  /// the `SendOTPLoading` state. It then calls the `sendOtpForPasswordReset` method
+  /// of the `AuthRepository` to send the OTP. If the response contains an 'error' key,
+  /// it emits the `SendOTPFail` state with the error reason. Otherwise, it emits the
+  /// `SendOTPSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `SendOTPFail`
+  /// state with the error message.
   _onSendOTPForPasswordReset(
     SendOTPForPasswordReset event,
     Emitter emit,
@@ -47,6 +59,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Handles the logic for sending an OTP (One-Time Password) for pincode reset.
+  ///
+  /// This method is called when the `SendOTPForPincodeReset` event is dispatched.
+  /// It first checks if the current state is not `SendOTPLoading`, and if so, it emits
+  /// the `SendOTPLoading` state. It then calls the `sendOtpForPincodeReset` method
+  /// of the `AuthRepository` to send the OTP. If the response contains an 'error' key,
+  /// it emits the `SendOTPFail` state with the error reason. Otherwise, it emits the
+  /// `SendOTPSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `SendOTPFail`
+  /// state with the error message.
   _onSendOTPForPincodeReset(
     SendOTPForPincodeReset event,
     Emitter emit,
@@ -69,6 +92,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Handles the logic for resetting the user's password.
+  ///
+  /// This method is called when the `ResetPassword` event is dispatched.
+  /// It first checks if the current state is not `ResetLoading`, and if so, it emits
+  /// the `ResetLoading` state. It then calls the `resetPassword` method
+  /// of the `AuthRepository` to reset the password. If the response contains an 'error' key,
+  /// it emits the `ResetFail` state with the error reason. Otherwise, it emits the
+  /// `ResetSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `ResetFail`
+  /// state with the error message.
   _onResetPassword(
     ResetPassword event,
     Emitter emit,
@@ -93,6 +127,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Handles the logic for resetting the user's pincode.
+  ///
+  /// This method is called when the `ResetPincode` event is dispatched.
+  /// It first checks if the current state is not `ResetLoading`, and if so, it emits
+  /// the `ResetLoading` state. It then calls the `resetPincode` method
+  /// of the `AuthRepository` to reset the pincode. If the response contains an 'error' key,
+  /// it emits the `ResetFail` state with the error reason. Otherwise, it emits the
+  /// `ResetSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `ResetFail`
+  /// state with the error message.
   _onResetPincode(
     ResetPincode event,
     Emitter emit,
@@ -117,6 +162,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Logs in a user with the provided pincode.
+  ///
+  /// This method is responsible for authenticating a user with the application using a pincode. It first checks if the `LoginWithPincodeLoading` state is not already set, and if so, it emits the `LoginWithPincodeLoading` state. It then retrieves the user's country code and phone number, and calls the `AuthRepository.loginWithPincode()` method, passing the provided `pincode`, `countryCode`, and `phoneNumber` parameters.
+  ///
+  /// If the login is successful, it stores the returned JWT token and emits the `LoginWithPincodeSuccess` state. If an error occurs during the process, it logs the error and emits the `LoginWithPincodeFail` state with the error message.
   _onLoginWithPincode(
     LoginWithPincode event,
     Emitter emit,
@@ -149,6 +199,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     //
   }
 
+  /// Verifies the provided OTP (One-Time Password) for the given phone number and country code.
+  ///
+  /// This method is responsible for verifying the OTP entered by the user. It first checks if the `OTPVerificationLoading` state is not already set, and if so, it emits the `OTPVerificationLoading` state. It then calls the `AuthRepository.verifyOtp()` method, passing the provided `phoneNumber`, `code`, and `countryCode` parameters.
+  ///
+  /// If the response from `AuthRepository.verifyOtp()` contains an 'error' key, the method emits the `OTPVerificationFail` state with the error reason. If the response contains a 'response' key, the method emits the `OTPVerificationSuccess` state with the user ID. Otherwise, it emits the `OTPVerificationSuccess` state without any additional data.
+  ///
+  /// If an exception occurs during the process, the method emits the `OTPVerificationFail` state with the error reason.
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
       if (state is! OTPVerificationLoading) {
@@ -190,6 +247,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Logs in a user with the provided phone number and password.
+  ///
+  /// This method is responsible for authenticating a user with the application. It first checks if the `LoginUserLoading` state is not already set, and if so, it emits the `LoginUserLoading` state. It then calls the `AuthRepository.loginUser()` method, passing the provided `phoneNumber`, `countryCode`, and `password` parameters.
+  ///
+  /// If the response from `AuthRepository.loginUser()` contains an 'error' key, the method emits the `LoginUserFail` state with the error reason. Otherwise, it stores the returned JWT token, the user's display name, and phone number, and emits the `LoginUserSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method emits the `LoginUserFail` state with the error reason.
   _onLoginUser(LoginUser event, Emitter emit) async {
     try {
       if (state is! LoginUserLoading) {
@@ -216,6 +280,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Creates a new user account.
+  ///
+  /// This method is responsible for registering a new user with the application. It first checks if the `RegisterUserLoaing` state is not already set, and if so, it emits the `RegisterUserLoaing` state. It then calls the `AuthRepository.registerUser()` method, passing the provided `userModel` parameter.
+  ///
+  /// If the response from `AuthRepository.registerUser()` contains an 'error' key, the method emits the `RegisterUserFail` state with the error reason and, if available, the field name that caused the error. Otherwise, it stores the returned JWT token, the user's display name, phone number, and country code, and emits the `RegisterUserSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method emits the `RegisterUserFail` state with the error reason.
   _onCreateAccount(CreateAccount event, Emitter emit) async {
     try {
       if (state is! RegisterUserLoaing) {
@@ -253,6 +324,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Sends an OTP (One-Time Password) to the user's phone number.
+  ///
+  /// This method is responsible for initiating the OTP sending process. It first checks if the `SendOTPLoading` state is not already set, and if so, it emits the `SendOTPLoading` state. It then calls the `AuthRepository.sendOtp()` method, passing the provided `phoneNumber` and `countryCode` parameters.
+  ///
+  /// If the response from `AuthRepository.sendOtp()` contains an 'error' key, the method emits the `SendOTPFail` state with the error reason. Otherwise, it emits the `SendOTPSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method logs the error and emits the `SendOTPFail` state with the error reason.
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
       if (state is! SendOTPLoading) {

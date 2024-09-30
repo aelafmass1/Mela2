@@ -12,7 +12,7 @@ import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart'
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../bloc/auth/auth_bloc.dart';
-import '../../../bloc/bloc/location_bloc.dart';
+import '../../../bloc/location/location_bloc.dart';
 import '../../../config/routing.dart';
 import '../../../data/models/user_model.dart';
 import '../../../gen/assets.gen.dart';

@@ -15,6 +15,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<FetchTrasaction>(_onFetchTransaction);
   }
 
+  /// Handles the fetching of transaction data and emits the appropriate state.
+  ///
+  /// This method is called when the [FetchTrasaction] event is dispatched. It
+  /// first checks if the current state is not [TransactionLoading], then emits
+  /// the [TransactionLoading] state. It then fetches the token and uses it to
+  /// fetch the transaction data from the [TransactionRepository]. If the response
+  /// contains an error, it emits the [TransactionFail] state with the error
+  /// message. Otherwise, it maps the response data to a list of [ReceiverInfo]
+  /// objects, groups them by the transaction date, and emits the [TransactionSuccess]
+  /// state with the grouped data.
   _onFetchTransaction(FetchTrasaction event, Emitter emit) async {
     try {
       if (state is! TransactionLoading) {

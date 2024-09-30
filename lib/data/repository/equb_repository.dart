@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
 import '../models/contact_model.dart';
@@ -28,6 +29,7 @@ class EqubRepository {
       },
       body: jsonEncode(body),
     );
+
     if (res.statusCode == 500) {
       return {'error': 'Internal Server Error'};
     }
@@ -35,13 +37,7 @@ class EqubRepository {
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return {'error': data['errorResponse']['message']};
-    }
-    if (data.containsKey('error')) {
-      return {'error': data['error']};
-    }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
   Future<List> inviteMembers(
@@ -66,14 +62,7 @@ class EqubRepository {
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return [
-        {'error': data['errorResponse']['message']}
-      ];
-    }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 
   Future<List> fetchEqubs({
@@ -105,9 +94,7 @@ class EqubRepository {
         {'error': data['error']}
       ];
     }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 
   Future<Map> fetchEqubDetail({
@@ -129,13 +116,7 @@ class EqubRepository {
       return data;
     }
 
-    if (data.containsKey('errorResponse')) {
-      return {'error': data['errorResponse']['message']};
-    }
-    if (data.containsKey('error')) {
-      return {'error': data['error']};
-    }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
   Future<List> fetchEqubMembers({
@@ -158,18 +139,6 @@ class EqubRepository {
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return [
-        {'error': data['errorResponse']['message']}
-      ];
-    }
-    if (data.containsKey('error')) {
-      return [
-        {'error': data['error']}
-      ];
-    }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/models/bank_rate.dart';
@@ -25,6 +26,9 @@ class BankCurrencyRateBloc
         final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
         emit(BankCurrencyRateSuccess(rates: rates));
       }
+    } on HttpException catch (error) {
+      log(error.toString());
+      emit(BankCurrencyRateFail(reason: error.message));
     } catch (error) {
       log(error.toString());
       emit(BankCurrencyRateFail(reason: error.toString()));

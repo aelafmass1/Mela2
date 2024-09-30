@@ -10,7 +10,7 @@ import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
-import 'package:transaction_mobile_app/bloc/bloc/location_bloc.dart';
+import 'package:transaction_mobile_app/bloc/location/location_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
