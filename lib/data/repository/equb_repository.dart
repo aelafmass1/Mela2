@@ -5,6 +5,7 @@ import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../models/contact_model.dart';
 
 class EqubRepository {
@@ -31,7 +32,7 @@ class EqubRepository {
     );
 
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -54,9 +55,7 @@ class EqubRepository {
       body: jsonEncode(body),
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -76,9 +75,7 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -109,7 +106,7 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -131,9 +128,7 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {

@@ -1,9 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/bank_model.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'banks_event.dart';
@@ -29,7 +31,17 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
           BanksSuccess(bankList: banks),
         );
       }
-    } catch (error) {
+    } on ServerException catch (error, stackTrace) {
+      emit(BanksFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error, stackTrace) {
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
       log(error.toString());
       emit(BanksFail(reason: error.toString()));
     }

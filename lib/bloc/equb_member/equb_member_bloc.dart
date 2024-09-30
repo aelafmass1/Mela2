@@ -2,7 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 import '../../data/models/contact_model.dart';
 import '../../data/repository/equb_repository.dart';
@@ -40,6 +42,12 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
 
         emit(EqubMemberInviteSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubMemberInviteFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubMemberInviteFail(reason: error.toString()));

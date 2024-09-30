@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 
 class CurrencyRateRepository {
   static Future<List> fetchCurrencyRate(String accessToken) async {
@@ -18,7 +19,7 @@ class CurrencyRateRepository {
       },
     );
     if (res.statusCode == 500) {
-      throw const HttpException('Internal Server Error');
+      throw ServerException('Internal Server Error');
     }
     // metric.stop();
 

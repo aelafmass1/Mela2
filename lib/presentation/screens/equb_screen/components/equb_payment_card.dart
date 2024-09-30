@@ -72,7 +72,8 @@ class _EqubPaymentCardState extends State<EqubPaymentCard> {
                 RouteName.equbActionCompleted,
                 extra: CompletePageDto(
                   title: "Reminder sent!",
-                  description: "You have successfully sent a reminder to member ${widget.index}!",
+                  description:
+                      "You have successfully sent a reminder to member ${widget.index}!",
                   onComplete: () => context.pop(),
                 ),
               ),
@@ -100,27 +101,29 @@ class _EqubPaymentCardState extends State<EqubPaymentCard> {
             // value: isActive,
             value: widget.index.isPrime(),
             checkColor: ColorName.green,
-            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            fillColor: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
               return ColorName.green.shade100;
             }),
             side: BorderSide.none,
             onChanged: (value) {
-              // setState(() {
-              //   isActive = !isActive;
-              // });
+              setState(() {
+                isActive = !isActive;
+              });
             },
           ),
           Checkbox(
             value: !widget.index.isPrime(),
             checkColor: ColorName.red,
-            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            fillColor: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
               return ColorName.red.shade100;
             }),
             side: BorderSide.none,
             onChanged: (value) {
-              // setState(() {
-              //   isActive = !isActive;
-              // });
+              setState(() {
+                isActive = !isActive;
+              });
             },
           ),
         ],

@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
+import '../../core/exceptions/server_exception.dart';
+
 class CurrencyRepository {
   static Future<Map<String, dynamic>> fetchPromotionalCurrency(
       String accessToken) async {
@@ -18,7 +20,7 @@ class CurrencyRepository {
       },
     );
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
@@ -41,9 +43,7 @@ class CurrencyRepository {
       },
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {

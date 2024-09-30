@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
@@ -33,18 +34,13 @@ class AuthRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return {'error': data['errorResponse'].first['message'], 'data': data};
-    }
-    if (data.containsKey('message')) {
-      return {'error': data['message']};
-    }
+
     return processErrorResponse(data);
   }
 
@@ -84,7 +80,7 @@ class AuthRepository {
       }),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -129,7 +125,7 @@ class AuthRepository {
       }),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body) as Map;
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -157,7 +153,7 @@ class AuthRepository {
       }),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -178,7 +174,7 @@ class AuthRepository {
       }),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -214,7 +210,7 @@ class AuthRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
 
     final data = jsonDecode(res.body);
@@ -263,7 +259,7 @@ class AuthRepository {
           },
         ));
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
 
     final data = jsonDecode(res.body);
@@ -302,7 +298,7 @@ class AuthRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Unexpected error');
     }
 
     final data = jsonDecode(res.body);
@@ -345,7 +341,7 @@ class AuthRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
 
     final data = jsonDecode(res.body);
@@ -392,7 +388,7 @@ class AuthRepository {
               "newPassword": newPassword,
             }));
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
 
     final data = jsonDecode(res.body);
@@ -434,7 +430,7 @@ class AuthRepository {
           "newPin": newPincode
         }));
     if (res.statusCode == 500) {
-      return {'error': 'Unexpected error'};
+      throw ServerException('Internal Server Error');
     }
 
     final data = jsonDecode(res.body);

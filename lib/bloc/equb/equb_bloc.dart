@@ -2,12 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/contact_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../data/models/equb_detail_model.dart';
 
 part 'equb_event.dart';
@@ -52,6 +54,12 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         log(res.toString());
         emit(EqubSuccess(equbList: state.equbList));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubFail(reason: error.message, equbList: state.equbList));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubFail(equbList: state.equbList, reason: error.toString()));
@@ -88,6 +96,12 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         );
         // add(FetchEqubMembers(equbId: event.equbId));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubFail(reason: error.message, equbList: state.equbList));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubFail(equbList: state.equbList, reason: error.toString()));
@@ -126,6 +140,12 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
           EqubSuccess(equbList: fetchedEqubs),
         );
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubFail(reason: error.message, equbList: state.equbList));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubFail(equbList: state.equbList, reason: error.toString()));
@@ -184,6 +204,12 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
           addedEqubId: equbId,
         ));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubFail(reason: error.message, equbList: state.equbList));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubFail(equbList: state.equbList, reason: error.toString()));

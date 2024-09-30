@@ -3,6 +3,8 @@ import 'package:http/http.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
+import '../../core/exceptions/server_exception.dart';
+
 /// A repository class for fetching fee data from an API.
 class FeeRepository {
   final Client client;
@@ -25,14 +27,12 @@ class FeeRepository {
       },
     );
     if (response.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(response.body) as List<dynamic>;
     if (response.statusCode == 200) {
       return data;
     }
-    return [processErrorResponse(data)];
+    return [processErrorResponse(jsonDecode(response.body))];
   }
 }

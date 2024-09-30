@@ -299,6 +299,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
+  /// File path: assets/images/svgs/spin_wheel.svg
+  String get spinWheel => 'assets/images/svgs/spin_wheel.svg';
+
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
@@ -324,6 +327,7 @@ class $AssetsImagesSvgsGen {
         increaseArrow,
         melaLogo,
         sendIcon,
+        spinWheel,
         transactionIcon
       ];
 }

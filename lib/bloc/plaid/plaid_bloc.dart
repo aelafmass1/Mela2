@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'plaid_event.dart';
@@ -26,6 +28,12 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         }
         emit(PlaidPublicTokenSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PlaidPublicTokenFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(PlaidPublicTokenFail(reason: error.toString()));
@@ -44,6 +52,12 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         }
         emit(PlaidLinkTokenSuccess(linkToken: res['linkToken']));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PlaidLinkTokenFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(PlaidLinkTokenFail(reason: error.toString()));

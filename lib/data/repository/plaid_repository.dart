@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
+import '../../core/exceptions/server_exception.dart';
+
 class PlaidRepository {
   static Future<Map> createLinkToken(String accessToken) async {
     final res = await http.get(
@@ -14,7 +16,7 @@ class PlaidRepository {
       },
     );
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -41,7 +43,7 @@ class PlaidRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     if (res.statusCode == 200 || res.statusCode == 201) {
       return {'success': res.body};

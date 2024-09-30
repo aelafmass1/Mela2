@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
@@ -53,6 +55,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(SendOTPSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(SendOTPFail(reason: error.toString()));
@@ -86,6 +94,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(SendOTPSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(SendOTPFail(reason: error.toString()));
@@ -121,6 +135,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(ResetSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(ResetFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(ResetFail(reason: error.toString()));
@@ -156,6 +176,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(ResetSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(ResetFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(ResetFail(reason: error.toString()));
@@ -189,6 +215,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         storeToken(token);
         emit(LoginWithPincodeSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(LoginWithPincodeFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(LoginWithPincodeFail(reason: error.toString()));
@@ -224,6 +256,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(OTPVerificationSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(OTPVerificationFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(OTPVerificationFail(reason: error.toString()));
@@ -275,6 +313,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         storePhoneNumber(event.phoneNumber);
         emit(LoginUserSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(LoginUserFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(LoginUserFail(reason: error.toString()));
     }
@@ -319,6 +363,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         setCountryCode(event.userModel.countryCode!);
         emit(RegisterUserSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(RegisterUserFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(RegisterUserFail(reason: error.toString()));
     }
@@ -345,6 +395,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         emit(SendOTPSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(SendOTPFail(reason: error.toString()));

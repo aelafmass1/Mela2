@@ -5,6 +5,8 @@ import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 
+import '../../core/exceptions/server_exception.dart';
+
 class MoneyTransferRepository {
   /// Sends money to a receiver using the provided information.
   ///
@@ -43,7 +45,7 @@ class MoneyTransferRepository {
     );
 
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
 
     String data = res.body;

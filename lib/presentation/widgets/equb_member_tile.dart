@@ -14,72 +14,99 @@ class EqubMemberTile extends StatelessWidget {
   final EqubInviteeModel equbInviteeModel;
   final Widget? trailingWidget;
   final void Function()? onSuccessInvite;
+  final void Function()? onOptionPressed;
+
   const EqubMemberTile({
     super.key,
     required this.equbInviteeModel,
     this.onSuccessInvite,
     this.trailingWidget,
+    this.onOptionPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(100),
-        child: Container(
-          width: 50,
-          height: 50,
-          color: ColorName.primaryColor,
-          alignment: Alignment.center,
-          child: TextWidget(
-            text: equbInviteeModel.name.isNotEmpty
-                ? equbInviteeModel.name[0]
-                : '',
-            color: Colors.white,
+        contentPadding: EdgeInsets.zero,
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: Container(
+            width: 50,
+            height: 50,
+            color: ColorName.primaryColor,
+            alignment: Alignment.center,
+            child: TextWidget(
+              text: equbInviteeModel.name.isNotEmpty
+                  ? equbInviteeModel.name[0]
+                  : '',
+              color: Colors.white,
+            ),
           ),
         ),
-      ),
-      title: TextWidget(
-        text: equbInviteeModel.name,
-        fontSize: 16,
-        weight: FontWeight.w400,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextWidget(
-            text: equbInviteeModel.phoneNumber,
-            type: TextType.small,
-            fontSize: 14,
-            weight: FontWeight.w300,
-          ),
-          if (equbInviteeModel.status.isEmpty)
-            const TextWidget(
-              text: "Not Invited",
+        title: TextWidget(
+          text: equbInviteeModel.name,
+          fontSize: 16,
+          weight: FontWeight.w400,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextWidget(
+              text: equbInviteeModel.phoneNumber,
               type: TextType.small,
               fontSize: 14,
               weight: FontWeight.w300,
-              color: ColorName.red,
             ),
-        ],
-      ),
-      trailing: trailingWidget ??
-          (equbInviteeModel.status.isEmpty
-              ? _buildInviteButton(context)
-              : TextWidget(
-                  text: equbInviteeModel.status == 'INVITED'
-                      ? 'Pending'
-                      : equbInviteeModel.status,
-                  type: TextType.small,
-                  fontSize: 14,
-                  color: equbInviteeModel.status == 'Pending' ||
-                          equbInviteeModel.status == 'INVITED'
-                      ? Colors.orange
-                      : null,
-                  weight: FontWeight.w500,
-                )),
-    );
+            if (equbInviteeModel.status.isEmpty)
+              const TextWidget(
+                text: "Not Invited",
+                type: TextType.small,
+                fontSize: 14,
+                weight: FontWeight.w300,
+                color: ColorName.red,
+              ),
+          ],
+        ),
+        trailing: trailingWidget ??
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                equbInviteeModel.status.isEmpty
+                    ? _buildInviteButton(context)
+                    : TextWidget(
+                        text: equbInviteeModel.status == 'INVITED'
+                            ? 'Pending'
+                            : equbInviteeModel.status,
+                        type: TextType.small,
+                        fontSize: 14,
+                        color: equbInviteeModel.status == 'Pending' ||
+                                equbInviteeModel.status == 'INVITED'
+                            ? Colors.orange
+                            : null,
+                        weight: FontWeight.w500,
+                      ),
+                Visibility(
+                  visible: onOptionPressed != null,
+                  child: IconButton(
+                    style: IconButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: onOptionPressed,
+                    icon: const Icon(Icons.more_vert),
+                  ),
+                )
+                // Visibility(
+                //     visible: onOptionPressed != null,
+                //     replacement: const SizedBox.shrink(),
+                //     child: IconButton(
+                //       onPressed: onOptionPressed,
+                //       icon: const Icon(
+                //         Icons.more_vert_rounded,
+                //       ),
+                //     ))
+              ],
+            ));
   }
 
   Widget _buildInviteButton(BuildContext context) {

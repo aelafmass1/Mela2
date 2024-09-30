@@ -163,7 +163,7 @@ class _HistoryTabState extends State<HistoryTab> {
                     showSnackbar(
                       context,
                       title: 'Error',
-                      description: state.error,
+                      description: state.reason,
                     );
                   }
                 },

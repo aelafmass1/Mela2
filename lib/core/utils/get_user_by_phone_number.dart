@@ -1,5 +1,5 @@
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:phone_number/phone_number.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 /// Retrieves a [ContactEqubMember] based on the provided phone number and list of contacts.
 ///
@@ -43,19 +43,16 @@ class ContactEqubMember {
 
 /// Removes the country code from the provided phone number.
 ///
-/// This function takes a phone number as a string and attempts to parse it using the `PhoneNumberUtil`
-/// from the `phone_number` package. If the parsing is successful, it extracts the national number
-/// (without the country code) and returns it. If the parsing fails, it returns `null`.
+/// This function takes a phone number as a string and attempts to parse it using the `PhoneNumber.parse()` method from the `phone_numbers_parser` package. If the parsing is successful, it extracts the national number (without the country code) and returns it. If the parsing fails, it returns `null`.
 ///
 /// @param phoneNumber The phone number to remove the country code from.
-/// @return The national number without the country code, or `null` if the parsing failed.
+/// @return The national number without the country code, or `null` if the parsing fails.
 Future<String?> removeCountryCode(String phoneNumber) async {
   try {
-    PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil();
-    PhoneNumber number = await phoneNumberUtil.parse(phoneNumber);
+    final parsedNumber = PhoneNumber.parse(phoneNumber);
 
     // Get the national number (without country code)
-    String nationalNumber = number.nationalNumber;
+    String nationalNumber = parsedNumber.nsn;
 
     return nationalNumber;
   } catch (e) {

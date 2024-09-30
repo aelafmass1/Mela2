@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/curruncy_model.dart';
 import 'package:transaction_mobile_app/data/repository/currency_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'currency_event.dart';
@@ -30,6 +32,12 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
           );
         }
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(CurrencyFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(CurrencyFail(reason: error.toString()));
     }
@@ -56,6 +64,12 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
           );
         }
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(CurrencyFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(CurrencyFail(reason: error.toString()));
     }

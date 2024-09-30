@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 import '../../core/constants/url_constants.dart';
+import '../../core/exceptions/server_exception.dart';
 
 class ContactRepository {
   final Client client;
@@ -82,9 +83,7 @@ class ContactRepository {
       ),
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {

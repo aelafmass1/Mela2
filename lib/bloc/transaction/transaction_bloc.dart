@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'transaction_event.dart';
@@ -35,7 +37,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           token!,
         );
         if (res.containsKey('error')) {
-          return emit(TransactionFail(error: res['error']));
+          return emit(TransactionFail(reason: res['error']));
         }
         final data = res['success'] as List;
         final transactions = data.map((t) => ReceiverInfo.fromMap(t)).toList();
@@ -57,9 +59,15 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         }
         emit(TransactionSuccess(data: groupedTransactions));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(TransactionFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
-      return emit(TransactionFail(error: error.toString()));
+      return emit(TransactionFail(reason: error.toString()));
     }
   }
 }
