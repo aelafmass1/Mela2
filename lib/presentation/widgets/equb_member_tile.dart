@@ -24,6 +24,7 @@ class EqubMemberTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: EdgeInsets.zero,
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(100),
         child: Container(
@@ -32,7 +33,9 @@ class EqubMemberTile extends StatelessWidget {
           color: ColorName.primaryColor,
           alignment: Alignment.center,
           child: TextWidget(
-            text: equbInviteeModel.name.isNotEmpty ? equbInviteeModel.name[0] : '',
+            text: equbInviteeModel.name.isNotEmpty
+                ? equbInviteeModel.name[0]
+                : '',
             color: Colors.white,
           ),
         ),
@@ -65,10 +68,15 @@ class EqubMemberTile extends StatelessWidget {
           (equbInviteeModel.status.isEmpty
               ? _buildInviteButton(context)
               : TextWidget(
-                  text: equbInviteeModel.status,
+                  text: equbInviteeModel.status == 'INVITED'
+                      ? 'Pending'
+                      : equbInviteeModel.status,
                   type: TextType.small,
                   fontSize: 14,
-                  color: equbInviteeModel.status == 'Pending' ? Colors.orange : null,
+                  color: equbInviteeModel.status == 'Pending' ||
+                          equbInviteeModel.status == 'INVITED'
+                      ? Colors.orange
+                      : null,
                   weight: FontWeight.w500,
                 )),
     );
@@ -90,8 +98,9 @@ class EqubMemberTile extends StatelessWidget {
           ),
         ),
         onPressed: () async {
-          final res =
-              await Share.share('I Invite you to join our Mela Equb Group!', subject: 'Invitation to join Mela');
+          final res = await Share.share(
+              'I Invite you to join our Mela Equb Group!',
+              subject: 'Invitation to join Mela');
           log(res.status.toString());
 
           if (res.status == ShareResultStatus.success) {
@@ -122,7 +131,8 @@ class EqubMemberTile extends StatelessWidget {
                             ),
                             const SizedBox(height: 20),
                             const TextWidget(
-                              text: 'You have successfully sent your Invitation',
+                              text:
+                                  'You have successfully sent your Invitation',
                               color: ColorName.grey,
                               textAlign: TextAlign.center,
                               fontSize: 14,

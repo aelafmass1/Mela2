@@ -20,6 +20,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../core/utils/get_user_by_phone_number.dart';
 import '../../../core/utils/show_add_member.dart';
 import '../../../data/models/equb_detail_model.dart';
 
@@ -76,6 +77,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             equbId: equbId,
           ),
         );
+    _fetchContacts();
     // context.read<EqubBloc>().add(FetchEqubMembers(equbId: equbId));
     super.initState();
   }
@@ -486,237 +488,251 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   Widget _buildMembersContent() {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const TextWidget(
-                    text: 'All Members (10)',
-                    fontSize: 16,
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 0)),
-                    child: const Row(
-                      children: [
-                        Icon(
-                          Icons.add,
-                          color: ColorName.primaryColor,
-                        ),
-                        SizedBox(width: 3),
-                        TextWidget(
-                          text: 'Add Member',
-                          fontSize: 13,
-                          color: ColorName.primaryColor,
-                        ),
-                      ],
+    return SingleChildScrollView(
+      child: BlocBuilder<EqubBloc, EqubState>(
+        builder: (context, state) {
+          if (state is EqubSuccess && state.selectedEqub != null) {
+            return Column(
+              children: [
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextWidget(
+                      text:
+                          'All Members (${state.selectedEqub!.members.length})',
+                      fontSize: 16,
                     ),
-                    onPressed: () async {
-                      // setState(() {
-                      //   index = 1;
-                      //   sliderWidth = 60.sw;
-                      // })
-                      await _fetchContacts();
-
-                      if (isPermissionDenied == false) {
-                        showAddMember(
-                          context,
-                          int.tryParse(numberOfMembersController.text) ?? 3,
-                          _contacts,
-                          widget.equbDetailModel.id,
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 9, // Example list item count
-                itemBuilder: (context, index) {
-                  // return EqubMemberCard(
-                  //   index: index + 1, // Example widget for each list item
-                  // );
-                  return GestureDetector(
-                    onTap: !index.isPrime() && index.isEven
-                        ? null
-                        : () => showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return Wrap(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Column(
-                                        children: [
-                                          ListTile(
-                                            leading: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              child: Container(
-                                                width: 40,
-                                                height: 40,
-                                                color: ColorName.green,
-                                                alignment: Alignment.center,
-                                                child: const Icon(
-                                                  Icons.person_add,
-                                                  color: ColorName.white,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                            title: const TextWidget(
-                                                text: "Make Co-Admin"),
-                                            onTap: () => showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const TextWidget(
-                                                    text:
-                                                        "Are you sure you want to promote to co-admin?"),
-                                                actions: [
-                                                  MaterialButton(
-                                                    child: const Text("Cancel"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                  MaterialButton(
-                                                    child:
-                                                        const Text("Promote"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          ListTile(
-                                            leading: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              child: Container(
-                                                width: 40,
-                                                height: 40,
-                                                color: ColorName.green,
-                                                alignment: Alignment.center,
-                                                child: const Icon(
-                                                  Icons.person_remove,
-                                                  color: ColorName.white,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                            title: const TextWidget(
-                                                text: "Remove Co-Admin"),
-                                            onTap: () => showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const TextWidget(
-                                                    text:
-                                                        "Are you sure you want to remove this co-admin?"),
-                                                actions: [
-                                                  MaterialButton(
-                                                    child: const Text("Cancel"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                  MaterialButton(
-                                                    child: const Text("Remove"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          ListTile(
-                                            leading: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              child: Container(
-                                                width: 40,
-                                                height: 40,
-                                                color: ColorName.red,
-                                                alignment: Alignment.center,
-                                                child: const Icon(
-                                                  Icons.close,
-                                                  color: ColorName.white,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                            title: const TextWidget(
-                                                text: "Remove from equb"),
-                                            onTap: () => showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const TextWidget(
-                                                    text:
-                                                        "Are you sure you want to remove this member?"),
-                                                actions: [
-                                                  MaterialButton(
-                                                    child: const Text("Cancel"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                  MaterialButton(
-                                                    child: const Text("Remove"),
-                                                    onPressed: () =>
-                                                        context.pop(),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                    child: EqubMemberTile(
-                      equbInviteeModel: EqubInviteeModel(
-                        id: index,
-                        phoneNumber: "+251912345678",
-                        status: !index.isPrime() && index.isEven
-                            ? ""
-                            : !index.isPrime() && index.isOdd
-                                ? "Joined"
-                                : "Pending",
-                        name: "Member Name $index",
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 0)),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.add,
+                            color: ColorName.primaryColor,
+                          ),
+                          SizedBox(width: 3),
+                          TextWidget(
+                            text: 'Add Member',
+                            fontSize: 13,
+                            color: ColorName.primaryColor,
+                          ),
+                        ],
                       ),
+                      onPressed: () async {
+                        await _fetchContacts();
+
+                        if (isPermissionDenied == false) {
+                          showAddMember(
+                            context,
+                            int.tryParse(numberOfMembersController.text) ?? 3,
+                            _contacts,
+                            widget.equbDetailModel.id,
+                          );
+                        }
+                      },
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          child: Container(
-            color: ColorName.white,
-            child: SizedBox(
-              width: 100.sw - 30,
-              child: ButtonWidget(
-                color: ColorName.primaryColor,
-                onPressed: () {},
-                child: const TextWidget(
-                  text: 'Send reminder to all',
-                  type: TextType.small,
-                  color: Colors.white,
+                  ],
                 ),
-              ),
-            ),
-          ),
-        )
-      ],
+                for (var member in state.selectedEqub!.members)
+                  FutureBuilder(
+                      future: getUserByPhoneNumber(
+                        phoneNumber: member.username,
+                        contacts: _contacts,
+                      ),
+                      builder: (context, snapshot) {
+                        return EqubMemberTile(
+                          equbInviteeModel: EqubInviteeModel(
+                              id: member.userId,
+                              phoneNumber:
+                                  snapshot.data?.phoneNumber ?? member.username,
+                              status: member.status,
+                              name: snapshot.data?.displayName ??
+                                  member.username),
+                        );
+                      })
+                // ListView.builder(
+                //   shrinkWrap: true,
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   itemCount: 9, // Example list item count
+                //   itemBuilder: (context, index) {
+                //     // return EqubMemberCard(
+                //     //   index: index + 1, // Example widget for each list item
+                //     // );
+                //     return GestureDetector(
+                //       onTap: !index.isPrime() && index.isEven
+                //           ? null
+                //           : () => showModalBottomSheet(
+                //                 context: context,
+                //                 builder: (context) {
+                //                   return Wrap(
+                //                     children: [
+                //                       Padding(
+                //                         padding: const EdgeInsets.all(20),
+                //                         child: Column(
+                //                           children: [
+                //                             ListTile(
+                //                               leading: ClipRRect(
+                //                                 borderRadius:
+                //                                     BorderRadius.circular(
+                //                                         100),
+                //                                 child: Container(
+                //                                   width: 40,
+                //                                   height: 40,
+                //                                   color: ColorName.green,
+                //                                   alignment:
+                //                                       Alignment.center,
+                //                                   child: const Icon(
+                //                                     Icons.person_add,
+                //                                     color: ColorName.white,
+                //                                     size: 20,
+                //                                   ),
+                //                                 ),
+                //                               ),
+                //                               title: const TextWidget(
+                //                                   text: "Make Co-Admin"),
+                //                               onTap: () => showDialog(
+                //                                 context: context,
+                //                                 builder: (context) =>
+                //                                     AlertDialog(
+                //                                   title: const TextWidget(
+                //                                       text:
+                //                                           "Are you sure you want to promote to co-admin?"),
+                //                                   actions: [
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Cancel"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Promote"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                   ],
+                //                                 ),
+                //                               ),
+                //                             ),
+                //                             ListTile(
+                //                               leading: ClipRRect(
+                //                                 borderRadius:
+                //                                     BorderRadius.circular(
+                //                                         100),
+                //                                 child: Container(
+                //                                   width: 40,
+                //                                   height: 40,
+                //                                   color: ColorName.green,
+                //                                   alignment:
+                //                                       Alignment.center,
+                //                                   child: const Icon(
+                //                                     Icons.person_remove,
+                //                                     color: ColorName.white,
+                //                                     size: 20,
+                //                                   ),
+                //                                 ),
+                //                               ),
+                //                               title: const TextWidget(
+                //                                   text: "Remove Co-Admin"),
+                //                               onTap: () => showDialog(
+                //                                 context: context,
+                //                                 builder: (context) =>
+                //                                     AlertDialog(
+                //                                   title: const TextWidget(
+                //                                       text:
+                //                                           "Are you sure you want to remove this co-admin?"),
+                //                                   actions: [
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Cancel"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Remove"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                   ],
+                //                                 ),
+                //                               ),
+                //                             ),
+                //                             ListTile(
+                //                               leading: ClipRRect(
+                //                                 borderRadius:
+                //                                     BorderRadius.circular(
+                //                                         100),
+                //                                 child: Container(
+                //                                   width: 40,
+                //                                   height: 40,
+                //                                   color: ColorName.red,
+                //                                   alignment:
+                //                                       Alignment.center,
+                //                                   child: const Icon(
+                //                                     Icons.close,
+                //                                     color: ColorName.white,
+                //                                     size: 20,
+                //                                   ),
+                //                                 ),
+                //                               ),
+                //                               title: const TextWidget(
+                //                                   text: "Remove from equb"),
+                //                               onTap: () => showDialog(
+                //                                 context: context,
+                //                                 builder: (context) =>
+                //                                     AlertDialog(
+                //                                   title: const TextWidget(
+                //                                       text:
+                //                                           "Are you sure you want to remove this member?"),
+                //                                   actions: [
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Cancel"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                     MaterialButton(
+                //                                       child: const Text(
+                //                                           "Remove"),
+                //                                       onPressed: () =>
+                //                                           context.pop(),
+                //                                     ),
+                //                                   ],
+                //                                 ),
+                //                               ),
+                //                             ),
+                //                           ],
+                //                         ),
+                //                       ),
+                //                     ],
+                //                   );
+                //                 },
+                //               ),
+                //       child: EqubMemberTile(
+                //         equbInviteeModel: EqubInviteeModel(
+                //           id: index,
+                //           phoneNumber: "+251912345678",
+                //           status: !index.isPrime() && index.isEven
+                //               ? ""
+                //               : !index.isPrime() && index.isOdd
+                //                   ? "Joined"
+                //                   : "Pending",
+                //           name: "Member Name $index",
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
+              ],
+            );
+          }
+
+          return const SizedBox();
+        },
+      ),
     );
   }
 

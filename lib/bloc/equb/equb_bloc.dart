@@ -28,7 +28,6 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         )) {
     on<AddEqub>(_onAddEqub);
     on<FetchAllEqubs>(_onFetchAllEqubs);
-    on<InviteMembers>(_onInviteMembers);
     on<FetchEqub>(_onFetchEqub);
     on<FetchEqubMembers>(_onFetchEqubMembers);
   }
@@ -87,43 +86,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
             selectedEqub: fetchedEqub,
           ),
         );
-        add(FetchEqubMembers(equbId: event.equbId));
-      }
-    } catch (error) {
-      log(error.toString());
-      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
-    }
-  }
-
-  /// Invites members to the Equb with the given [equbId].
-  ///
-  /// This method is called when the [InviteMembers] event is dispatched.
-  /// It first checks if the current state is not [EqubLoading], and if so, it emits the [EqubLoading] state with the current [equbList].
-  /// It then retrieves the access token and uses the [EqubRepository] to invite the members specified in the [event.contacts] to the Equb with the given [event.equbId].
-  /// If the invite is successful, it emits the [EqubSuccess] state with the current [equbList].
-  /// If an error occurs, it emits the [EqubFail] state with the current [equbList] and the error message.
-  _onInviteMembers(InviteMembers event, Emitter emit) async {
-    try {
-      if (state is! EqubLoading) {
-        emit(EqubLoading(equbList: state.equbList));
-        List<EqubDetailModel> equbs = state.equbList;
-
-        final token = await getToken();
-
-        final res = await EqubRepository(client: Client()).inviteMembers(
-          accessToken: token!,
-          equbId: event.equbId,
-          members: event.contacts,
-        );
-
-        if (res.first.containsKey('error')) {
-          return emit(
-              EqubFail(equbList: state.equbList, reason: res.first['error']));
-        }
-
-        emit(EqubSuccess(
-          equbList: equbs,
-        ));
+        // add(FetchEqubMembers(equbId: event.equbId));
       }
     } catch (error) {
       log(error.toString());
@@ -218,6 +181,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         emit(EqubSuccess(
           equbList: equbs,
           invitees: invitees,
+          addedEqubId: equbId,
         ));
       }
     } catch (error) {

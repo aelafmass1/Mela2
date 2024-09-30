@@ -12,6 +12,7 @@ import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/bloc/fee/fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
@@ -115,6 +116,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => ContactBloc(),
+        ),
+        BlocProvider(
+          create: (context) => EqubMemberBloc(),
         ),
       ],
       child: ResponsiveApp(

@@ -34,6 +34,7 @@ dependencies:
   mockito: ^5.4.4
   mocktail: ^1.0.4
   permission_handler: ^11.3.1
+  phone_number: ^2.1.0
   plaid_flutter: ^3.1.8
   printing: ^5.13.1
   responsive_builder: ^0.7.1
