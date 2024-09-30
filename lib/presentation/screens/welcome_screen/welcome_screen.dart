@@ -72,8 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 onPressed: () {
                   context.goNamed(
-                    RouteName.createAccount,
-                    extra: UserModel(),
+                    RouteName.signup,
                   );
                 }),
           )

@@ -33,9 +33,21 @@ class BanksRepository {
         'Content-Type': 'application/json',
       },
     );
+    final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       final data = jsonDecode(res.body) as List;
+
       return data;
+    }
+    if (data.containsKey('message')) {
+      return [
+        {'error': data['message']}
+      ];
+    }
+    if (data.containsKey('error')) {
+      return [
+        {'error': data['error']}
+      ];
     }
     return [
       {'error': res.body}

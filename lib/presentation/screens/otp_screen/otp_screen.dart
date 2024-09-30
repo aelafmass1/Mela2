@@ -68,6 +68,15 @@ class _OTPScreenState extends State<OTPScreen> {
     return [];
   }
 
+  clearPins() {
+    pin1Controller.clear();
+    pin2Controller.clear();
+    pin3Controller.clear();
+    pin4Controller.clear();
+    pin5Controller.clear();
+    pin6Controller.clear();
+  }
+
   void startTimer() {
     if (mounted) {
       setState(() {
@@ -176,6 +185,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       ),
                       TextButton(
                         onPressed: () {
+                          clearPins();
                           context.read<AuthBloc>().add(
                                 SendOTP(
                                   phoneNumber: int.tryParse(
@@ -189,6 +199,7 @@ class _OTPScreenState extends State<OTPScreen> {
                           text: 'Resend',
                           fontSize: 16,
                           weight: FontWeight.w500,
+                          color: ColorName.yellow,
                         ),
                       )
                     ],
@@ -207,10 +218,21 @@ class _OTPScreenState extends State<OTPScreen> {
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is OTPVerificationSuccess) {
-                  context.pushNamed(
-                    RouteName.setPinCode,
-                    extra: widget.userModel,
-                  );
+                  if (widget.userModel.toScreen == null) {
+                    context.pushNamed(
+                      RouteName.createAccount,
+                      extra: widget.userModel.copyWith(
+                        verificationUUID: state.userId,
+                      ),
+                    );
+                  } else {
+                    context.pushNamed(
+                      widget.userModel.toScreen!,
+                      extra: widget.userModel.copyWith(
+                        otp: getAllPins().join(),
+                      ),
+                    );
+                  }
                 } else if (state is OTPVerificationFail) {
                   showSnackbar(
                     context,
@@ -233,7 +255,7 @@ class _OTPScreenState extends State<OTPScreen> {
                         ? ColorName.primaryColor
                         : ColorName.grey.shade200,
                     child: state is OTPVerificationLoading
-                        ? LoadingWidget()
+                        ? const LoadingWidget()
                         : const TextWidget(
                             text: 'Verify',
                             type: TextType.small,
@@ -279,6 +301,7 @@ class _OTPScreenState extends State<OTPScreen> {
             ),
         textAlign: TextAlign.center,
         inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),
         ],
         keyboardType: TextInputType.phone,

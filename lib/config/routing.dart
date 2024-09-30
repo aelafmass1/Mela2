@@ -11,8 +11,10 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_ed
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/new_password_screen/new_password_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/confirm_pincode_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/pincode_screen/new_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/pincode_login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/set_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/profile_screen/password_edit_screen.dart';
@@ -24,6 +26,7 @@ import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
 
+import '../presentation/screens/forget_password_screen/forget_password_screen.dart';
 import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
@@ -55,6 +58,9 @@ class RouteName {
   static const completePage = 'complete_page';
   static const sendInvitation = 'send_invitation_screen';
   static const win = 'win_screen';
+  static const forgetPassword = 'forget_screen';
+  static const newPassword = 'new_password_screen';
+  static const newPincode = 'new_pincode_screen';
 }
 
 final goRouting = GoRouter(
@@ -158,6 +164,27 @@ final goRouting = GoRouter(
       path: '/login',
       name: RouteName.login,
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/forgetPassword',
+      name: RouteName.forgetPassword,
+      builder: (context, state) => ForgetPasswordScreen(
+        routeName: state.extra as String,
+      ),
+    ),
+    GoRoute(
+      path: '/newPassword',
+      name: RouteName.newPassword,
+      builder: (context, state) => NewPasswordScreen(
+        userModel: state.extra as UserModel,
+      ),
+    ),
+    GoRoute(
+      path: '/newPincode',
+      name: RouteName.newPincode,
+      builder: (context, state) => NewPincodeScreen(
+        userModel: state.extra as UserModel,
+      ),
     ),
     GoRoute(
       path: '/signup',

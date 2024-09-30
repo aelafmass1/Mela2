@@ -7,7 +7,6 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 
-import '../../../bloc/pincode/pincode_bloc.dart';
 import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
@@ -93,76 +92,104 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const TextWidget(
-                text: 'Enter Your Pin',
-                color: ColorName.primaryColor,
-                fontSize: 20,
-                weight: FontWeight.w700,
-              ),
-              const SizedBox(height: 5),
-              const TextWidget(
-                text: 'Enter your pin to confirm your Identity.',
-                fontSize: 14,
-                color: ColorName.grey,
-                weight: FontWeight.w400,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildPinBox(controller: pin1Controller),
-                    _buildPinBox(controller: pin2Controller),
-                    _buildPinBox(controller: pin3Controller),
-                    _buildPinBox(controller: pin4Controller),
-                    _buildPinBox(controller: pin5Controller),
-                    _buildPinBox(controller: pin6Controller),
-                  ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const TextWidget(
+                  text: 'Enter Your Pin',
+                  color: ColorName.primaryColor,
+                  fontSize: 20,
+                  weight: FontWeight.w700,
                 ),
-              ),
-              const SizedBox(height: 20),
-              const SizedBox(height: 30),
-              BlocConsumer<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is LoginWithPincodeFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  } else if (state is LoginWithPincodeSuccess) {
-                    setIsLoggedIn(true);
-                    context.goNamed(RouteName.home);
-                  }
-                },
-                builder: (context, state) {
-                  return ButtonWidget(
-                      color: isValid
-                          ? ColorName.primaryColor
-                          : ColorName.grey.shade200,
-                      child: state is LoginWithPincodeLoading
-                          ? const LoadingWidget()
-                          : const TextWidget(
-                              text: 'Continue',
-                              type: TextType.small,
-                              color: Colors.white,
-                            ),
-                      onPressed: () {
-                        if (isValid) {
-                          final pins = getAllPins();
-                          context.read<AuthBloc>().add(
-                                LoginWithPincode(
-                                  pincode: pins.join(),
-                                ),
-                              );
-                        }
-                      });
-                },
-              )
-            ],
+                const SizedBox(height: 5),
+                const TextWidget(
+                  text: 'Enter your pin to confirm your Identity.',
+                  fontSize: 14,
+                  color: ColorName.grey,
+                  weight: FontWeight.w400,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildPinBox(controller: pin1Controller),
+                      _buildPinBox(controller: pin2Controller),
+                      _buildPinBox(controller: pin3Controller),
+                      _buildPinBox(controller: pin4Controller),
+                      _buildPinBox(controller: pin5Controller),
+                      _buildPinBox(controller: pin6Controller),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                BlocConsumer<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is LoginWithPincodeFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is LoginWithPincodeSuccess) {
+                      setIsLoggedIn(true);
+                      context.goNamed(RouteName.home);
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        color: isValid
+                            ? ColorName.primaryColor
+                            : ColorName.grey.shade200,
+                        child: state is LoginWithPincodeLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Continue',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                        onPressed: () {
+                          if (isValid) {
+                            final pins = getAllPins();
+                            context.read<AuthBloc>().add(
+                                  LoginWithPincode(
+                                    pincode: pins.join(),
+                                  ),
+                                );
+                          }
+                        });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const TextWidget(
+                        text: 'Forgot my PIN?',
+                        fontSize: 15,
+                        weight: FontWeight.w300,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.pushNamed(
+                            RouteName.forgetPassword,
+                            extra: RouteName.newPincode,
+                          );
+                        },
+                        child: const TextWidget(
+                          text: 'Reset',
+                          fontSize: 18,
+                          color: ColorName.primaryColor,
+                          weight: FontWeight.w600,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -187,6 +214,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
             ),
         textAlign: TextAlign.center,
         inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),
         ],
         keyboardType: TextInputType.phone,

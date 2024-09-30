@@ -1,16 +1,15 @@
-import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
-import '../../../bloc/auth/auth_bloc.dart';
+import '../../../config/routing.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -18,15 +17,15 @@ import '../../widgets/button_widget.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/text_widget.dart';
 
-class SetPincodeScreen extends StatefulWidget {
-  final UserModel user;
-  const SetPincodeScreen({super.key, required this.user});
+class NewPincodeScreen extends StatefulWidget {
+  final UserModel userModel;
+  const NewPincodeScreen({super.key, required this.userModel});
 
   @override
-  State<SetPincodeScreen> createState() => _SetPincodeScreenState();
+  State<NewPincodeScreen> createState() => _NewPincodeScreenState();
 }
 
-class _SetPincodeScreenState extends State<SetPincodeScreen> {
+class _NewPincodeScreenState extends State<NewPincodeScreen> {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
@@ -69,6 +68,12 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
   }
 
   @override
+  void initState() {
+    log(widget.userModel.toString());
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -88,17 +93,15 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const TextWidget(
-              text: 'Set a PIN',
-              color: ColorName.primaryColor,
+              text: 'Enter New PIN',
               fontSize: 20,
-              weight: FontWeight.w700,
+              color: ColorName.primaryColor,
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 7),
             const TextWidget(
-              text: 'Please remember to keep it secure.',
-              fontSize: 14,
+              text: 'Please keep your PIN confidential & secure.',
               color: ColorName.grey,
-              weight: FontWeight.w400,
+              fontSize: 14,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 40),
@@ -116,24 +119,45 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
             ),
             const SizedBox(height: 20),
             const SizedBox(height: 30),
-            ButtonWidget(
-                color:
-                    isValid ? ColorName.primaryColor : ColorName.grey.shade200,
-                child: const TextWidget(
-                  text: 'Continue',
-                  type: TextType.small,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  if (isValid) {
-                    final pins = getAllPins();
-                    context.pushNamed(RouteName.confirmPinCode, extra: [
-                      widget.user,
-                      pins.join(),
-                    ]);
-                  }
-                  //
-                })
+            BlocConsumer<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is ResetFail) {
+                  showSnackbar(
+                    context,
+                    description: state.reason,
+                  );
+                } else if (state is ResetSuccess) {
+                  context.goNamed(RouteName.login);
+                }
+              },
+              builder: (context, state) {
+                return ButtonWidget(
+                    color: isValid
+                        ? ColorName.primaryColor
+                        : ColorName.grey.shade200,
+                    child: state is ResetLoading
+                        ? const LoadingWidget()
+                        : const TextWidget(
+                            text: 'Set PIN',
+                            type: TextType.small,
+                            color: Colors.white,
+                          ),
+                    onPressed: () {
+                      if (isValid) {
+                        final pins = getAllPins().join();
+                        context.read<AuthBloc>().add(ResetPincode(
+                              phoneNumber:
+                                  int.tryParse(widget.userModel.phoneNumber!) ??
+                                      0,
+                              otp: widget.userModel.otp!,
+                              countryCode: widget.userModel.countryCode!,
+                              newPincode: pins,
+                            ));
+                      }
+                      //
+                    });
+              },
+            )
           ],
         ),
       ),

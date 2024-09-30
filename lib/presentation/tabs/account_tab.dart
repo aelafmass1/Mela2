@@ -39,8 +39,10 @@ class _AccountTabState extends State<AccountTab> {
       });
     });
     getPhoneNumber().then((value) {
-      setState(() {
-        phoneNumber = value;
+      getCountryCode().then((countrycode) {
+        setState(() {
+          phoneNumber = '+$countrycode $value';
+        });
       });
     });
     super.initState();

@@ -73,7 +73,7 @@ class ReceiverInfo {
           ? map['serviceChargePayer'] as String
           : null,
       transactionDate: map['transactionDate'] != null
-          ? DateTime.parse(map['transactionDate'] as String)
+          ? DateTime.parse(map['transactionDate'])
           : null,
       publicToken:
           map['publicToken'] != null ? map['publicToken'] as String : null,

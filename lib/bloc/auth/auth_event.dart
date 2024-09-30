@@ -60,3 +60,49 @@ final class LoginWithPincode extends AuthEvent {
 
   LoginWithPincode({required this.pincode});
 }
+
+final class SendOTPForPasswordReset extends AuthEvent {
+  final int phoneNumber;
+  final int countryCode;
+
+  SendOTPForPasswordReset(
+      {required this.phoneNumber, required this.countryCode});
+}
+
+final class SendOTPForPincodeReset extends AuthEvent {
+  final int phoneNumber;
+  final int countryCode;
+
+  SendOTPForPincodeReset({
+    required this.phoneNumber,
+    required this.countryCode,
+  });
+}
+
+final class ResetPassword extends AuthEvent {
+  final int phoneNumber;
+  final String otp;
+  final int countryCode;
+  final String newPassword;
+
+  ResetPassword({
+    required this.phoneNumber,
+    required this.otp,
+    required this.countryCode,
+    required this.newPassword,
+  });
+}
+
+final class ResetPincode extends AuthEvent {
+  final int phoneNumber;
+  final String otp;
+  final int countryCode;
+  final String newPincode;
+
+  ResetPincode({
+    required this.phoneNumber,
+    required this.otp,
+    required this.countryCode,
+    required this.newPincode,
+  });
+}
