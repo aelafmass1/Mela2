@@ -68,7 +68,7 @@ flutter:
     - assets/images/
     - assets/images/svgs/
     - .env
-    
+
 
   fonts:
     - family: OpenSans

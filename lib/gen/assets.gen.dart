@@ -244,6 +244,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/amount_icon.svg
   String get amountIcon => 'assets/images/svgs/amount_icon.svg';
 
+  /// File path: assets/images/svgs/back_space.svg
+  String get backSpace => 'assets/images/svgs/back_space.svg';
+
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
@@ -309,6 +312,7 @@ class $AssetsImagesSvgsGen {
   List<String> get values => [
         adminIcon,
         amountIcon,
+        backSpace,
         cameraIcon,
         cardPattern,
         checkmarkIcon,

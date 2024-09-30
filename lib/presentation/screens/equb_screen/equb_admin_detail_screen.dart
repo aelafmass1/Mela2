@@ -870,44 +870,71 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return Stack(
       children: [
         SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              const Row(
-                children: [
-                  TextWidget(
-                    text: 'All Members (10)',
-                    fontSize: 16,
-                  ),
-                  Spacer(),
-                  TextWidget(
-                    text: 'Paid',
-                    fontSize: 13,
-                    color: ColorName.green,
-                  ),
-                  SizedBox(width: 22),
-                  TextWidget(
-                    text: 'Unpaid',
-                    fontSize: 13,
-                    color: ColorName.red,
-                  ),
-                  SizedBox(width: 5),
-                ],
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 9, // Example list item count
-                itemBuilder: (context, index) {
-                  return EqubPaymentCard(
-                    index: index,
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 75,
-              ),
-            ],
+          child: BlocBuilder<EqubBloc, EqubState>(
+            builder: (context, state) {
+              if (state is EqubSuccess && state.selectedEqub != null) {
+                return Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    const Row(
+                      children: [
+                        TextWidget(
+                          text: 'All Members (10)',
+                          fontSize: 16,
+                        ),
+                        Spacer(),
+                        TextWidget(
+                          text: 'Paid',
+                          fontSize: 13,
+                          color: ColorName.green,
+                        ),
+                        SizedBox(width: 22),
+                        TextWidget(
+                          text: 'Unpaid',
+                          fontSize: 13,
+                          color: ColorName.red,
+                        ),
+                        SizedBox(width: 5),
+                      ],
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: (state.selectedEqub?.members.length ??
+                          0), // Example list item count
+                      itemBuilder: (context, index) {
+                        return FutureBuilder(
+                            future: getUserByPhoneNumber(
+                              phoneNumber:
+                                  state.selectedEqub!.members[index].username,
+                              contacts: _contacts,
+                            ),
+                            builder: (context, snapshot) {
+                              return EqubPaymentCard(
+                                equbInviteeModel: EqubInviteeModel(
+                                  id: state.selectedEqub!.members[index].userId,
+                                  phoneNumber: snapshot.data?.phoneNumber ??
+                                      state.selectedEqub!.members[index]
+                                          .username,
+                                  status:
+                                      state.selectedEqub!.members[index].status,
+                                  name: snapshot.data?.displayName ??
+                                      state.selectedEqub!.members[index]
+                                          .username,
+                                ),
+                                index: index,
+                              );
+                            });
+                      },
+                    ),
+                    const SizedBox(
+                      height: 75,
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ),
         Positioned(
@@ -944,7 +971,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 25),
+            padding: const EdgeInsets.only(top: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -995,16 +1022,16 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             ),
           ),
           const SizedBox(
-            height: 25,
+            height: 10,
           ),
           if (isJoin)
-            Column(
+            const Column(
               children: [
-                const SizedBox(height: 10),
-                const Row(
+                SizedBox(height: 10),
+                Row(
                   children: [
                     TextWidget(
-                      text: 'All Requests (10)',
+                      text: 'All Requests (0)',
                       fontSize: 16,
                     ),
                     Spacer(),
@@ -1022,54 +1049,19 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     SizedBox(width: 5),
                   ],
                 ),
-                if (members.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: requests.length, // Example list item count
-                    itemBuilder: (context, index) {
-                      return EqubRequestsCard(
-                        index: requests[index],
-                        onAccept: (int rerquestId) {
-                          setState(() {
-                            requests.remove(rerquestId);
-                          });
-                        },
-                      );
-                    },
-                  ),
-                if (members.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        Assets.images.equbImage.image(height: 150),
-                        const SizedBox(height: 20),
-                        const TextWidget(
-                          text: 'oops, You don’t have any requests.',
-                          type: TextType.small,
-                          weight: FontWeight.w500,
-                        ),
-                        const SizedBox(height: 35),
-                      ],
-                    ),
-                  ),
                 const SizedBox(
                   height: 15,
                 ),
               ],
-            ),
-          if (!isJoin)
-            Column(
+            )
+          else
+            const Column(
               children: [
                 const SizedBox(height: 10),
                 const Row(
                   children: [
                     TextWidget(
-                      text: 'All Members (10)',
+                      text: 'All Members (0)',
                       fontSize: 16,
                     ),
                     Spacer(),
@@ -1087,60 +1079,6 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     SizedBox(width: 5),
                   ],
                 ),
-                if (members.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: members.length, // Example list item count
-                    itemBuilder: (context, index) {
-                      return EqubRequestsCard(
-                        index: members[index],
-                        onAccept: (int memberId) {
-                          setState(() {
-                            members.remove(memberId);
-                          });
-                        },
-                      );
-                    },
-                  ),
-                if (members.isEmpty && isJoin)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        Assets.images.equbImage.image(height: 150),
-                        const SizedBox(height: 20),
-                        const TextWidget(
-                          text: 'oops, You don’t have any requests.',
-                          type: TextType.small,
-                          weight: FontWeight.w500,
-                        ),
-                        const SizedBox(height: 35),
-                      ],
-                    ),
-                  ),
-                if (members.isEmpty && !isJoin)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        Assets.images.equbImage.image(height: 150),
-                        const SizedBox(height: 20),
-                        const TextWidget(
-                          text: 'oops, You don’t have any requests.',
-                          type: TextType.small,
-                          weight: FontWeight.w500,
-                        ),
-                        const SizedBox(height: 35),
-                      ],
-                    ),
-                  ),
                 const SizedBox(
                   height: 15,
                 ),

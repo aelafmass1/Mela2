@@ -13,6 +13,7 @@ class ButtonWidget extends StatelessWidget {
   final double? horizontalPadding;
   final Color? color;
   final BorderSide borderSide;
+  final double? elevation;
 
   const ButtonWidget({
     super.key,
@@ -24,6 +25,7 @@ class ButtonWidget extends StatelessWidget {
     this.color,
     this.borderSide = BorderSide.none,
     this.horizontalPadding,
+    this.elevation,
   });
 
   @override
@@ -37,6 +39,7 @@ class ButtonWidget extends StatelessWidget {
               sizingInfo: sizingInfo, mobile: 100.sh, tablet: 50.sh),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
+                elevation: elevation,
                 backgroundColor: color ?? ColorName.primaryColor,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(
