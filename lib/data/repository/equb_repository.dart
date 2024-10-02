@@ -59,7 +59,7 @@ class EqubRepository {
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
     return [processErrorResponse(data)];
   }
@@ -79,7 +79,7 @@ class EqubRepository {
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
     if (data.containsKey('errorResponse')) {
       return [
@@ -110,7 +110,7 @@ class EqubRepository {
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
 
     return processErrorResponse(data);
@@ -135,5 +135,49 @@ class EqubRepository {
       return data;
     }
     return [processErrorResponse(data)];
+  }
+
+  Future<Map> manualAssignWinner({
+    required String accessToken,
+    required int cycleId,
+    required int memberId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+          '$baseUrl/ekub/cycles/$cycleId/assign-winner?memberId=$memberId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data['successResponse'];
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> autoPickWinner({
+    required String accessToken,
+    required int cycleId,
+  }) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/ekub/winner/autoPicker?cycleId=$cycleId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data['successResponse'];
+    }
+    return processErrorResponse(data);
   }
 }

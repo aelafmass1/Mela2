@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
@@ -21,6 +18,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../data/models/contact_model.dart';
 
@@ -56,6 +54,9 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   bool isSearching = false;
   bool agreeToTermAndCondition = false;
   bool isPermissionDenied = false;
+  bool isWebviewLoading = false;
+
+  late WebViewController _controller;
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -85,6 +86,32 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
         adminName = value ?? '';
       });
     });
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..enableZoom(true)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            if (progress == 100) {
+              setState(() {
+                isWebviewLoading = false;
+              });
+            } else {
+              setState(() {
+                isWebviewLoading = true;
+              });
+            }
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://static.melafinance.com/TOS.html'));
     super.initState();
   }
 
@@ -479,7 +506,6 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                 selectedContacts.contains(contact);
                             return CheckboxListTile(
                               activeColor: ColorName.primaryColor,
-                              checkboxShape: const CircleBorder(),
                               contentPadding: EdgeInsets.zero,
                               value: isSelected,
                               secondary: contact.photo == null
@@ -555,7 +581,6 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                         final isSelected = selectedContacts.contains(contact);
                         return CheckboxListTile(
                           activeColor: ColorName.primaryColor,
-                          checkboxShape: const CircleBorder(),
                           contentPadding: EdgeInsets.zero,
                           value: isSelected,
                           secondary: contact.photo == null
@@ -652,24 +677,15 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   ),
                 ],
               ),
-              child: const SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextWidget(
-                      text: 'Terms and Conditions',
-                      fontSize: 16,
-                    ),
-                    SizedBox(height: 10),
-                    TextWidget(
-                      text:
-                          'Lorem ipsum dolor sit amet consectetur. Nullam imperdiet habitant nunc neque molestie tristique. Sed pulvinar lectus pharetra elit. Commodo lacus ipsum egestas penatibus velit amet. Viverra sit hendrerit tempus maecenas eu fusce turpis quam turpis. Nunc eleifend felis iaculis nibh blandit sit. Convallis interdum et et elit malesuada morbi euismod dolor viverra. Pretium facilisi sed mattis aliquet dapibus porttitor purus maecenas pellentesque. Ultrices id consectetur leo donec fringilla integer in. Lacinia neque quisque sit metus neque proin justo. Id nascetur nisi eget et varius in vivamus dolor. Leo vitae id eu enim sit eget. Sed felis sit nibh rhoncus hendrerit.\n\nLorem ipsum dolor sit amet consectetur. Nullam imperdiet habitant nunc neque molestie tristique. Sed pulvinar lectus pharetra elit. Commodo lacus ipsum egestas penatibus velit amet. Viverra sit hendrerit tempus maecenas eu fusce turpis quam turpis. Nunc eleifend felis iaculis nibh blandit sit. Convallis interdum et et elit malesuada morbi euismod dolor viverra. Pretium facilisi sed mattis aliquet dapibus porttitor purus maecenas pellentesque. Ultrices id consectetur leo donec fringilla integer in.',
-                      color: Color(0xFF6D6D6D),
-                      fontSize: 14,
+              child: isWebviewLoading
+                  ? const Center(
+                      child: LoadingWidget(
+                        color: ColorName.primaryColor,
+                      ),
                     )
-                  ],
-                ),
-              ),
+                  : WebViewWidget(
+                      controller: _controller,
+                    ),
             ),
           ),
           const SizedBox(height: 5),

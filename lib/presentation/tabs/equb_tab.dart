@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -97,9 +98,11 @@ class _EqubTabState extends State<EqubTab> {
                     alignment: Alignment.centerLeft,
                     child: TextWidget(text: 'Equb'),
                   ),
-                  const SizedBox(height: 20),
-                  Assets.images.equbImage.image(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
+                  Assets.images.equbImage.image(
+                    width: 250,
+                  ),
+                  const SizedBox(height: 10),
                   const TextWidget(
                     text: 'oops, You don’t have any Equb.',
                     type: TextType.small,
@@ -123,7 +126,37 @@ class _EqubTabState extends State<EqubTab> {
                       ),
                       onPressed: () {
                         context.pushNamed(RouteName.equbCreation);
-                      })
+                      }),
+                  SvgPicture.asset(
+                    Assets.images.svgs.discovery,
+                    width: 150,
+                  ),
+                  const SizedBox(height: 20),
+                  const TextWidget(
+                    text: 'Discover Equb',
+                    type: TextType.small,
+                    weight: FontWeight.w500,
+                  ),
+                  const SizedBox(height: 10),
+                  const TextWidget(
+                    text:
+                        'Start exploring Equbs! Find Equbs that your contacts are participating in right here',
+                    fontSize: 12,
+                    weight: FontWeight.w300,
+                    textAlign: TextAlign.center,
+                  ),
+                  const Expanded(child: SizedBox()),
+                  ButtonWidget(
+                      child: const TextWidget(
+                        text: 'Start Discovering',
+                        color: Colors.white,
+                        type: TextType.small,
+                        weight: FontWeight.w500,
+                      ),
+                      onPressed: () {
+                        //
+                      }),
+                  const SizedBox(height: 10),
                 ],
               ),
             );

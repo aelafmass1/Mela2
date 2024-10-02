@@ -133,7 +133,6 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                         selectedContacts.contains(contact);
                                     return CheckboxListTile(
                                       activeColor: ColorName.primaryColor,
-                                      checkboxShape: const CircleBorder(),
                                       contentPadding: EdgeInsets.zero,
                                       value: isSelected,
                                       secondary: contact.photo == null
@@ -194,7 +193,6 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                     selectedContacts.contains(contact);
                                 return CheckboxListTile(
                                   activeColor: ColorName.primaryColor,
-                                  checkboxShape: const CircleBorder(),
                                   contentPadding: EdgeInsets.zero,
                                   value: isSelected,
                                   secondary: contact.photo == null

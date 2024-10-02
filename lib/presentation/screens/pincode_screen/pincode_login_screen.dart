@@ -146,6 +146,25 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   }
 
   @override
+  void dispose() {
+    pin1Controller.dispose();
+    pin2Controller.dispose();
+    pin3Controller.dispose();
+    pin4Controller.dispose();
+    pin5Controller.dispose();
+    pin6Controller.dispose();
+
+    //pincode dispose
+    pin1Node.dispose();
+    pin2Node.dispose();
+    pin3Node.dispose();
+    pin4Node.dispose();
+    pin5Node.dispose();
+    pin6Node.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,

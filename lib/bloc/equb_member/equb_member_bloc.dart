@@ -15,6 +15,73 @@ part 'equb_member_state.dart';
 class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
   EqubMemberBloc() : super(EqubMemberInitial()) {
     on<InviteEqubMemeber>(_onInviteEqubMember);
+    on<EqubAssignWinner>(_onEqubManualAssignWinner);
+    on<EqubAutoPickWinner>(_onEqubAutoPickWinner);
+  }
+
+  /// Handles the logic for manually assigning a winner to an Equb cycle.
+  ///
+  /// This method is called when the `EqubAssignWinner` event is emitted. It first checks if the current state is not `EqubWinnerLoading`,
+  /// and if so, it emits the `EqubWinnerLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to manually assign the specified member as the winner for the given Equb cycle ID. If the assignment is successful,
+  /// it emits the `EqubWinnerSuccess` state with the details of the winner. If there is an error, it emits the `EqubWinnerFail`
+  /// state with the error reason.
+  _onEqubManualAssignWinner(EqubAssignWinner event, Emitter emit) async {
+    try {
+      if (state is! EqubWinnerLoading) {
+        emit(EqubWinnerLoading());
+        final token = await getToken();
+        final res = await EqubRepository(client: Client()).manualAssignWinner(
+          accessToken: token!,
+          cycleId: event.cycleId,
+          memberId: event.memberId,
+        );
+        if (res.containsKey('error')) {
+          return emit(EqubWinnerFail(reason: res['error']));
+        }
+        emit(EqubWinnerSuccess(
+          cycleNumber: res['cycleNumber'],
+          firstName: res['winner']['user']['firstName'],
+          lastName: res['winner']['user']['lastName'],
+          phoneNumber: res.containsKey('phoneNumber') ? res['phoneNumber'] : '',
+        ));
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(EqubWinnerFail(reason: error.toString()));
+    }
+  }
+
+  /// Handles the logic for automatically picking a winner for an Equb cycle.
+  ///
+  /// This method is called when the `EqubAutoPickWinner` event is emitted. It first checks if the current state is not `EqubWinnerLoading`,
+  /// and if so, it emits the `EqubWinnerLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to automatically pick a winner for the given Equb cycle ID. If the winner selection is successful,
+  /// it emits the `EqubWinnerSuccess` state with the details of the winner. If there is an error, it emits the `EqubWinnerFail`
+  /// state with the error reason.
+  _onEqubAutoPickWinner(EqubAutoPickWinner event, Emitter emit) async {
+    try {
+      if (state is! EqubWinnerLoading) {
+        emit(EqubWinnerLoading());
+        final token = await getToken();
+        final res = await EqubRepository(client: Client()).autoPickWinner(
+          accessToken: token!,
+          cycleId: event.cycleId,
+        );
+        if (res.containsKey('error')) {
+          return emit(EqubWinnerFail(reason: res['error']));
+        }
+        emit(EqubWinnerSuccess(
+          cycleNumber: res['cycleNumber'],
+          firstName: res['winner']['user']['firstName'],
+          lastName: res['winner']['user']['lastName'],
+          phoneNumber: res.containsKey('phoneNumber') ? res['phoneNumber'] : '',
+        ));
+      }
+    } catch (error) {
+      log(error.toString());
+      emit(EqubWinnerFail(reason: error.toString()));
+    }
   }
 
   /// Handles the logic for inviting members to an Equb.

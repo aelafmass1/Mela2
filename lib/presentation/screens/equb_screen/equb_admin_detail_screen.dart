@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
@@ -5,22 +7,21 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/extensions/int_extensions.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/main.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_winners_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../core/utils/get_user_by_phone_number.dart';
+import '../../../core/utils/get_member_contact_info.dart';
 import '../../../core/utils/show_add_member.dart';
 import '../../../data/models/equb_detail_model.dart';
 
@@ -104,8 +105,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTop(),
-            _buildReminder(
-                'Please select the winner for the second round in August.'),
+            // _buildReminder(
+            //     'Please select the winner for the second round in August.'),
             const SizedBox(height: 15),
             _buildTitle(),
             const SizedBox(height: 10),
@@ -385,23 +386,55 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        TextWidget(
-          text: "Equb Group Settings",
-          fontSize: 24,
-          weight: FontWeight.w700,
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextWidget(
+              text: "Equb Group Settings",
+              fontSize: 24,
+              weight: FontWeight.w700,
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 5),
+              child: TextWidget(
+                text: "Please review your Equb details carefully.",
+                weight: FontWeight.w400,
+                fontSize: 14,
+                color: Color(0xFF6D6D6D),
+              ),
+            )
+          ],
         ),
-        Padding(
-          padding: EdgeInsets.only(top: 5),
-          child: TextWidget(
-            text: "Please review your Equb details carefully.",
-            weight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF6D6D6D),
-          ),
-        )
+        // Container(
+        //   width: 40,
+        //   height: 40,
+        //   decoration: BoxDecoration(
+        //     border: Border.all(
+        //       width: 3,
+        //       color: ColorName.primaryColor,
+        //     ),
+        //     shape: BoxShape.circle,
+        //   ),
+        //   child: const Column(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       TextWidget(
+        //         text: '01',
+        //         color: ColorName.primaryColor,
+        //         fontSize: 13,
+        //       ),
+        //       TextWidget(
+        //         text: 'Rounds',
+        //         color: ColorName.primaryColor,
+        //         fontSize: 6,
+        //         weight: FontWeight.w400,
+        //       )
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
@@ -537,8 +570,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                 ),
                 for (var member in state.selectedEqub!.members)
                   FutureBuilder(
-                      future: getUserByPhoneNumber(
-                        phoneNumber: member.username,
+                      future: getMemberContactInfo(
+                        equbUser: member.user!,
                         contacts: _contacts,
                       ),
                       builder: (context, snapshot) {
@@ -694,12 +727,14 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                     ));
                           },
                           equbInviteeModel: EqubInviteeModel(
-                              id: member.userId,
-                              phoneNumber:
-                                  snapshot.data?.phoneNumber ?? member.username,
+                              id: member.userId ?? 0,
+                              phoneNumber: snapshot.data?.phoneNumber ??
+                                  member.username ??
+                                  '',
                               status: member.status,
                               name: snapshot.data?.displayName ??
-                                  member.username),
+                                  member.username ??
+                                  ''),
                         );
                       })
               ],
@@ -742,7 +777,12 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                             ],
                           ),
                           onPressed: () {
-                            //
+                            context.read<EqubMemberBloc>().add(
+                                  EqubAutoPickWinner(
+                                    cycleId: state
+                                        .selectedEqub!.cycles.first.cycleId,
+                                  ),
+                                );
                           },
                         ),
                       ],
@@ -751,9 +791,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         i < (state.selectedEqub?.members ?? []).length;
                         i++)
                       FutureBuilder(
-                          future: getUserByPhoneNumber(
-                            phoneNumber:
-                                state.selectedEqub!.members[i].username,
+                          future: getMemberContactInfo(
+                            equbUser: state.selectedEqub!.members[i].user!,
                             contacts: _contacts,
                           ),
                           builder: (context, snapshot) {
@@ -793,12 +832,14 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                     )),
                               ),
                               equbInviteeModel: EqubInviteeModel(
-                                id: state.selectedEqub!.members[i].userId,
+                                id: state.selectedEqub!.members[i].userId ?? 0,
                                 phoneNumber: snapshot.data?.phoneNumber ??
-                                    state.selectedEqub!.members[i].username,
+                                    state.selectedEqub!.members[i].username ??
+                                    '',
                                 status: state.selectedEqub!.members[i].status,
                                 name: snapshot.data?.displayName ??
-                                    state.selectedEqub!.members[i].username,
+                                    state.selectedEqub!.members[i].username ??
+                                    '',
                               ),
                             );
                           }),
@@ -838,26 +879,63 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             color: activeIndex != -1 ? ColorName.white : null,
             child: SizedBox(
               width: 100.sw - 30,
-              child: ButtonWidget(
-                color: activeIndex != -1
-                    ? ColorName.primaryColor
-                    : ColorName.grey.shade200.withOpacity(0.5),
-                onPressed: () => activeIndex != -1
-                    ? context.pushNamed(RouteName.win, extra: [
-                        '4th',
-                        EqubInviteeModel(
-                          id: -1,
-                          phoneNumber: '+251910101010',
-                          status: '',
-                          name: 'Abebe Kebede',
-                        ),
-                      ])
-                    : null,
-                child: const TextWidget(
-                  text: 'Confirm',
-                  type: TextType.small,
-                  color: Colors.white,
-                ),
+              child: BlocBuilder<EqubBloc, EqubState>(
+                builder: (context, state) {
+                  return BlocConsumer<EqubMemberBloc, EqubMemberState>(
+                    listener: (context, equbMemberState) {
+                      if (equbMemberState is EqubWinnerFail) {
+                        showSnackbar(context,
+                            description: equbMemberState.reason);
+                      } else if (equbMemberState is EqubWinnerSuccess) {
+                        context.pushNamed(RouteName.win, extra: [
+                          '${equbMemberState.cycleNumber}',
+                          EqubInviteeModel(
+                            id: -1,
+                            phoneNumber: equbMemberState.phoneNumber,
+                            status: equbMemberState.role ?? '',
+                            name:
+                                '${equbMemberState.firstName} ${equbMemberState.lastName}',
+                          ),
+                        ]);
+                      }
+                    },
+                    builder: (context, equbMemberState) {
+                      return ButtonWidget(
+                        color: activeIndex != -1
+                            ? ColorName.primaryColor
+                            : ColorName.grey.shade200.withOpacity(0.5),
+                        onPressed: activeIndex != -1
+                            ? () {
+                                if (state is EqubSuccess &&
+                                    state.selectedEqub != null) {
+                                  log(state.selectedEqub!.members[activeIndex]
+                                          .username ??
+                                      '');
+                                  final cycleId =
+                                      state.selectedEqub!.cycles.first.cycleId;
+                                  final memberId = state
+                                      .selectedEqub!.members[activeIndex].id;
+
+                                  context.read<EqubMemberBloc>().add(
+                                        EqubAssignWinner(
+                                          cycleId: cycleId,
+                                          memberId: memberId,
+                                        ),
+                                      );
+                                }
+                              }
+                            : null,
+                        child: equbMemberState is EqubWinnerLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Confirm',
+                                type: TextType.small,
+                                color: Colors.white,
+                              ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),
@@ -904,23 +982,27 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           0), // Example list item count
                       itemBuilder: (context, index) {
                         return FutureBuilder(
-                            future: getUserByPhoneNumber(
-                              phoneNumber:
-                                  state.selectedEqub!.members[index].username,
+                            future: getMemberContactInfo(
+                              equbUser:
+                                  state.selectedEqub!.members[index].user!,
                               contacts: _contacts,
                             ),
                             builder: (context, snapshot) {
                               return EqubPaymentCard(
                                 equbInviteeModel: EqubInviteeModel(
-                                  id: state.selectedEqub!.members[index].userId,
+                                  id: state.selectedEqub!.members[index]
+                                          .userId ??
+                                      0,
                                   phoneNumber: snapshot.data?.phoneNumber ??
                                       state.selectedEqub!.members[index]
-                                          .username,
+                                          .username ??
+                                      '',
                                   status:
                                       state.selectedEqub!.members[index].status,
                                   name: snapshot.data?.displayName ??
                                       state.selectedEqub!.members[index]
-                                          .username,
+                                          .username ??
+                                      '',
                                 ),
                                 index: index,
                               );

@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       initialValue: initialNumber,
                       spaceBetweenSelectorAndTextField: 0,
                       textFieldController: phoneNumberController,
-                      formatInput: true,
+                      formatInput: false,
                       cursorColor: ColorName.primaryColor,
                       keyboardType: TextInputType.phone,
                       inputDecoration: const InputDecoration(

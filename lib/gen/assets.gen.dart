@@ -259,6 +259,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
 
+  /// File path: assets/images/svgs/discovery.svg
+  String get discovery => 'assets/images/svgs/discovery.svg';
+
   /// File path: assets/images/svgs/edit_icon.svg
   String get editIcon => 'assets/images/svgs/edit_icon.svg';
 
@@ -317,6 +320,7 @@ class $AssetsImagesSvgsGen {
         cardPattern,
         checkmarkIcon,
         completeLogo,
+        discovery,
         editIcon,
         endTimeIcon,
         equbIcon,
