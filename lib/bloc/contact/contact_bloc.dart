@@ -3,9 +3,12 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:http/http.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/contact_status_model.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
+
+import '../../core/exceptions/server_exception.dart';
 
 part 'contact_event.dart';
 part 'contact_state.dart';
@@ -44,6 +47,12 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
           ),
         );
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(ContactFail(message: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(ContactFail(message: error.toString()));

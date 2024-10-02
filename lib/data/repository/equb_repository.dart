@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../models/contact_model.dart';
 
 class EqubRepository {
@@ -28,20 +30,15 @@ class EqubRepository {
       },
       body: jsonEncode(body),
     );
+
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return {'error': data['errorResponse']['message']};
-    }
-    if (data.containsKey('error')) {
-      return {'error': data['error']};
-    }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
   Future<List> inviteMembers(
@@ -58,22 +55,13 @@ class EqubRepository {
       body: jsonEncode(body),
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
-    if (data.containsKey('errorResponse')) {
-      return [
-        {'error': data['errorResponse']['message']}
-      ];
-    }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 
   Future<List> fetchEqubs({
@@ -87,13 +75,11 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
     if (data.containsKey('errorResponse')) {
       return [
@@ -105,9 +91,7 @@ class EqubRepository {
         {'error': data['error']}
       ];
     }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 
   Future<Map> fetchEqubDetail({
@@ -122,20 +106,14 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return data['successResponse'];
     }
 
-    if (data.containsKey('errorResponse')) {
-      return {'error': data['errorResponse']['message']};
-    }
-    if (data.containsKey('error')) {
-      return {'error': data['error']};
-    }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
   Future<List> fetchEqubMembers({
@@ -150,26 +128,56 @@ class EqubRepository {
       },
     );
     if (res.statusCode == 500) {
-      return [
-        {'error': 'Internal Server Error'}
-      ];
+      throw ServerException('Internal Server Error');
     }
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
-    if (data.containsKey('errorResponse')) {
-      return [
-        {'error': data['errorResponse']['message']}
-      ];
+    return [processErrorResponse(data)];
+  }
+
+  Future<Map> manualAssignWinner({
+    required String accessToken,
+    required int cycleId,
+    required int memberId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+          '$baseUrl/ekub/cycles/$cycleId/assign-winner?memberId=$memberId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
     }
-    if (data.containsKey('error')) {
-      return [
-        {'error': data['error']}
-      ];
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data['successResponse'];
     }
-    return [
-      {'error': res.body}
-    ];
+    return processErrorResponse(data);
+  }
+
+  Future<Map> autoPickWinner({
+    required String accessToken,
+    required int cycleId,
+  }) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/ekub/winner/autoPicker?cycleId=$cycleId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data['successResponse'];
+    }
+    return processErrorResponse(data);
   }
 }

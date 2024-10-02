@@ -6,6 +6,8 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/contact_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 
@@ -131,7 +133,6 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                         selectedContacts.contains(contact);
                                     return CheckboxListTile(
                                       activeColor: ColorName.primaryColor,
-                                      checkboxShape: const CircleBorder(),
                                       contentPadding: EdgeInsets.zero,
                                       value: isSelected,
                                       secondary: contact.photo == null
@@ -192,7 +193,6 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                     selectedContacts.contains(contact);
                                 return CheckboxListTile(
                                   activeColor: ColorName.primaryColor,
-                                  checkboxShape: const CircleBorder(),
                                   contentPadding: EdgeInsets.zero,
                                   value: isSelected,
                                   secondary: contact.photo == null
@@ -260,14 +260,26 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                 color: Colors.white,
                 padding: const EdgeInsets.only(
                     bottom: 10, left: 15, right: 15, top: 10),
-                child: BlocBuilder<EqubBloc, EqubState>(
+                child: BlocConsumer<EqubMemberBloc, EqubMemberState>(
+                  listener: (context, state) {
+                    if (state is EqubMemberInviteFail) {
+                      showSnackbar(
+                        context,
+                        title: 'error',
+                        description: state.reason,
+                      );
+                    } else if (state is EqubMemberInviteSuccess) {
+                      context.read<EqubBloc>().add(FetchEqub(equbId: equbId));
+                      context.pop();
+                    }
+                  },
                   builder: (context, state) {
                     return ButtonWidget(
                       onPressed: () {
-                        context.read<EqubBloc>().add(
-                              InviteMembers(
+                        context.read<EqubMemberBloc>().add(
+                              InviteEqubMemeber(
                                 equbId: equbId,
-                                contacts: contacts
+                                contacts: selectedContacts
                                     .map((c) => ContactModel(
                                         contactId: c.id,
                                         name: c.displayName,
@@ -276,7 +288,7 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                               ),
                             );
                       },
-                      child: state is EqubLoading
+                      child: state is EqubMemberInviteLoading
                           ? const LoadingWidget()
                           : const TextWidget(
                               text: 'Next',

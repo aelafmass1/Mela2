@@ -13,7 +13,7 @@ final class TransactionSuccess extends TransactionState {
 }
 
 final class TransactionFail extends TransactionState {
-  final String error;
+  final String reason;
 
-  TransactionFail({required this.error});
+  TransactionFail({required this.reason});
 }

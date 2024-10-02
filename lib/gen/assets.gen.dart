@@ -244,6 +244,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/amount_icon.svg
   String get amountIcon => 'assets/images/svgs/amount_icon.svg';
 
+  /// File path: assets/images/svgs/back_space.svg
+  String get backSpace => 'assets/images/svgs/back_space.svg';
+
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
@@ -255,6 +258,9 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
+
+  /// File path: assets/images/svgs/discovery.svg
+  String get discovery => 'assets/images/svgs/discovery.svg';
 
   /// File path: assets/images/svgs/edit_icon.svg
   String get editIcon => 'assets/images/svgs/edit_icon.svg';
@@ -299,6 +305,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
+  /// File path: assets/images/svgs/spin_wheel.svg
+  String get spinWheel => 'assets/images/svgs/spin_wheel.svg';
+
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
@@ -306,10 +315,12 @@ class $AssetsImagesSvgsGen {
   List<String> get values => [
         adminIcon,
         amountIcon,
+        backSpace,
         cameraIcon,
         cardPattern,
         checkmarkIcon,
         completeLogo,
+        discovery,
         editIcon,
         endTimeIcon,
         equbIcon,
@@ -324,6 +335,7 @@ class $AssetsImagesSvgsGen {
         increaseArrow,
         melaLogo,
         sendIcon,
+        spinWheel,
         transactionIcon
       ];
 }

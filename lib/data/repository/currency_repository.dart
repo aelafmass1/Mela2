@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+
+import '../../core/exceptions/server_exception.dart';
 
 class CurrencyRepository {
   static Future<Map<String, dynamic>> fetchPromotionalCurrency(
@@ -16,11 +19,14 @@ class CurrencyRepository {
         'currencyCode': 'USD',
       },
     );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
       return data.first;
     }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
   static Future<List> fetchCurrencies(
@@ -36,12 +42,13 @@ class CurrencyRepository {
         'currencyCode': '',
       },
     );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
       return data;
     }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 }

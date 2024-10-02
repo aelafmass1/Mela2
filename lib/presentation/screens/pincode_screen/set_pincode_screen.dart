@@ -87,14 +87,14 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextWidget(
+            const TextWidget(
               text: 'Set a PIN',
               color: ColorName.primaryColor,
               fontSize: 20,
               weight: FontWeight.w700,
             ),
             const SizedBox(height: 5),
-            TextWidget(
+            const TextWidget(
               text: 'Please remember to keep it secure.',
               fontSize: 14,
               color: ColorName.grey,
@@ -119,7 +119,7 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
             ButtonWidget(
                 color:
                     isValid ? ColorName.primaryColor : ColorName.grey.shade200,
-                child: TextWidget(
+                child: const TextWidget(
                   text: 'Continue',
                   type: TextType.small,
                   color: Colors.white,
@@ -158,6 +158,7 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
             ),
         textAlign: TextAlign.center,
         inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),
         ],
         keyboardType: TextInputType.phone,

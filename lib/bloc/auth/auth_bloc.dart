@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
@@ -20,12 +22,181 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<VerfiyOTP>(_onVerifyOTP);
     on<UploadProfilePicture>(_onUploadProfilePicture);
     on<LoginWithPincode>(_onLoginWithPincode);
+    on<SendOTPForPasswordReset>(_onSendOTPForPasswordReset);
+    on<SendOTPForPincodeReset>(_onSendOTPForPincodeReset);
+    on<ResetPassword>(_onResetPassword);
+    on<ResetPincode>(_onResetPincode);
   }
 
-  /// Handles the login process using a pincode.
+  /// Handles the logic for sending an OTP (One-Time Password) for password reset.
   ///
-  /// This method is responsible for authenticating a user using a pincode. It first retrieves the user's country code and phone number, then calls the `AuthRepository.loginWithPincode()` method to verify the pincode. If the login is successful, the method stores the JWT token and emits a `LoginWithPincodeSuccess` state. If there is an error, it emits a `LoginWithPincodeFail` state with the error reason.
-  _onLoginWithPincode(LoginWithPincode event, Emitter emit) async {
+  /// This method is called when the `SendOTPForPasswordReset` event is dispatched.
+  /// It first checks if the current state is not `SendOTPLoading`, and if so, it emits
+  /// the `SendOTPLoading` state. It then calls the `sendOtpForPasswordReset` method
+  /// of the `AuthRepository` to send the OTP. If the response contains an 'error' key,
+  /// it emits the `SendOTPFail` state with the error reason. Otherwise, it emits the
+  /// `SendOTPSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `SendOTPFail`
+  /// state with the error message.
+  _onSendOTPForPasswordReset(
+    SendOTPForPasswordReset event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! SendOTPLoading) {
+        emit(SendOTPLoading());
+        final res = await AuthRepository.sendOtpForPasswordReset(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
+        emit(SendOTPSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(SendOTPFail(reason: error.toString()));
+    }
+  }
+
+  /// Handles the logic for sending an OTP (One-Time Password) for pincode reset.
+  ///
+  /// This method is called when the `SendOTPForPincodeReset` event is dispatched.
+  /// It first checks if the current state is not `SendOTPLoading`, and if so, it emits
+  /// the `SendOTPLoading` state. It then calls the `sendOtpForPincodeReset` method
+  /// of the `AuthRepository` to send the OTP. If the response contains an 'error' key,
+  /// it emits the `SendOTPFail` state with the error reason. Otherwise, it emits the
+  /// `SendOTPSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `SendOTPFail`
+  /// state with the error message.
+  _onSendOTPForPincodeReset(
+    SendOTPForPincodeReset event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! SendOTPLoading) {
+        emit(SendOTPLoading());
+        final res = await AuthRepository.sendOtpForPincodeReset(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
+        emit(SendOTPSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(SendOTPFail(reason: error.toString()));
+    }
+  }
+
+  /// Handles the logic for resetting the user's password.
+  ///
+  /// This method is called when the `ResetPassword` event is dispatched.
+  /// It first checks if the current state is not `ResetLoading`, and if so, it emits
+  /// the `ResetLoading` state. It then calls the `resetPassword` method
+  /// of the `AuthRepository` to reset the password. If the response contains an 'error' key,
+  /// it emits the `ResetFail` state with the error reason. Otherwise, it emits the
+  /// `ResetSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `ResetFail`
+  /// state with the error message.
+  _onResetPassword(
+    ResetPassword event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! ResetLoading) {
+        emit(ResetLoading());
+        final res = await AuthRepository.resetPassword(
+          phoneNumber: event.phoneNumber,
+          otp: event.otp,
+          countryCode: event.countryCode,
+          newPassword: event.newPassword,
+        );
+        if (res.containsKey('error')) {
+          return emit(ResetFail(reason: res['error']));
+        }
+        emit(ResetSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(ResetFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(ResetFail(reason: error.toString()));
+    }
+  }
+
+  /// Handles the logic for resetting the user's pincode.
+  ///
+  /// This method is called when the `ResetPincode` event is dispatched.
+  /// It first checks if the current state is not `ResetLoading`, and if so, it emits
+  /// the `ResetLoading` state. It then calls the `resetPincode` method
+  /// of the `AuthRepository` to reset the pincode. If the response contains an 'error' key,
+  /// it emits the `ResetFail` state with the error reason. Otherwise, it emits the
+  /// `ResetSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `ResetFail`
+  /// state with the error message.
+  _onResetPincode(
+    ResetPincode event,
+    Emitter emit,
+  ) async {
+    try {
+      if (state is! ResetLoading) {
+        emit(ResetLoading());
+        final res = await AuthRepository.resetPincode(
+          phoneNumber: event.phoneNumber,
+          otp: event.otp,
+          countryCode: event.countryCode,
+          newPincode: event.newPincode,
+        );
+        if (res.containsKey('error')) {
+          return emit(ResetFail(reason: res['error']));
+        }
+        emit(ResetSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(ResetFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(ResetFail(reason: error.toString()));
+    }
+  }
+
+  /// Logs in a user with the provided pincode.
+  ///
+  /// This method is responsible for authenticating a user with the application using a pincode. It first checks if the `LoginWithPincodeLoading` state is not already set, and if so, it emits the `LoginWithPincodeLoading` state. It then retrieves the user's country code and phone number, and calls the `AuthRepository.loginWithPincode()` method, passing the provided `pincode`, `countryCode`, and `phoneNumber` parameters.
+  ///
+  /// If the login is successful, it stores the returned JWT token and emits the `LoginWithPincodeSuccess` state. If an error occurs during the process, it logs the error and emits the `LoginWithPincodeFail` state with the error message.
+  _onLoginWithPincode(
+    LoginWithPincode event,
+    Emitter emit,
+  ) async {
     try {
       if (state is! LoginWithPincodeLoading) {
         emit(LoginWithPincodeLoading());
@@ -44,6 +215,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         storeToken(token);
         emit(LoginWithPincodeSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(LoginWithPincodeFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(LoginWithPincodeFail(reason: error.toString()));
@@ -51,31 +228,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   _onUploadProfilePicture(UploadProfilePicture event, Emitter emit) async {
-    // try {
-    //   emit(UploadProfileLoading());
-    //   // upload user profile picutre
-    //   final storageRef = FirebaseStorage.instance.ref();
-    //   final imagesRef =
-    //       storageRef.child('profilePictures/${event.phoneNumber}');
-    //   await imagesRef.putFile(File(event.profilePicture.path));
-    //   final downloadUrl = await imagesRef.getDownloadURL();
-
-    //   // await _auth.currentUser!.updatePhotoURL(downloadUrl);
-    //   emit(UploadProfileSuccess());
-    // } catch (error) {
-    //   log(error.toString());
-    //   emit(UploadProfileFail(reason: error.toString()));
-    // }
+    //
   }
 
+  /// Verifies the provided OTP (One-Time Password) for the given phone number and country code.
+  ///
+  /// This method is responsible for verifying the OTP entered by the user. It first checks if the `OTPVerificationLoading` state is not already set, and if so, it emits the `OTPVerificationLoading` state. It then calls the `AuthRepository.verifyOtp()` method, passing the provided `phoneNumber`, `code`, and `countryCode` parameters.
+  ///
+  /// If the response from `AuthRepository.verifyOtp()` contains an 'error' key, the method emits the `OTPVerificationFail` state with the error reason. If the response contains a 'response' key, the method emits the `OTPVerificationSuccess` state with the user ID. Otherwise, it emits the `OTPVerificationSuccess` state without any additional data.
+  ///
+  /// If an exception occurs during the process, the method emits the `OTPVerificationFail` state with the error reason.
   _onVerifyOTP(VerfiyOTP event, Emitter emit) async {
     try {
       if (state is! OTPVerificationLoading) {
         emit(OTPVerificationLoading());
-        final accessToken = await getToken();
 
         final res = await AuthRepository.verifyOtp(
-          accessToken: accessToken!,
           phoneNumber: event.phoneNumber,
           code: event.code,
           countryCode: event.conutryCode,
@@ -83,8 +251,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (res.containsKey('error')) {
           return emit(OTPVerificationFail(reason: res['error']));
         }
+        if (res.containsKey('response')) {
+          return emit(OTPVerificationSuccess(userId: res['response']));
+        }
         emit(OTPVerificationSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(OTPVerificationFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(OTPVerificationFail(reason: error.toString()));
@@ -93,14 +270,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onUpdateUser(UpdateUser event, Emitter emit) async {
     try {
-      // emit(UpdateLoading());
-      // final auth = FirebaseAuth.instance;
-      // await auth.currentUser?.updateDisplayName(event.fullName);
-      // FirebaseFirestore firestore = FirebaseFirestore.instance;
-      // await firestore.collection('users').doc(auth.currentUser?.uid).update({
-      //   'email': event.email,
-      // });
-      // emit(UpdateSuccess());
       //
     } catch (error) {
       log(error.toString());
@@ -110,35 +279,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onDeleteUser(DeleteUser event, Emitter emit) async {
     try {
-      // emit(AuthLoading());
-
-      // final currentUser = _auth.currentUser;
-      // if (currentUser != null) {
-      //   // Delete the user's document from Firestore
-      //   FirebaseFirestore firestore = FirebaseFirestore.instance;
-      //   await firestore.collection('users').doc(currentUser.uid).delete();
-
-      //   // Check if the user has a profile picture and delete it from Firebase Storage
-      //   if (currentUser.photoURL != null) {
-      //     final storageRef = FirebaseStorage.instance.ref();
-      //     final phoneNumber = currentUser.email!.split('@').first;
-      //     final imagesRef = storageRef.child('profilePictures/$phoneNumber');
-      //     await imagesRef.delete();
-      //   }
-
-      //   // Delete the user from Firebase Authentication
-      //   await _auth.currentUser?.reload();
-      //   await currentUser.delete();
-
-      //   emit(AuthSuccess());
-      // } else {
-      //   emit(AuthFail(reason: "No user is currently signed in."));
-      // }
+      //
     } catch (error) {
       emit(AuthFail(reason: error.toString()));
     }
   }
 
+  /// Logs in a user with the provided phone number and password.
+  ///
+  /// This method is responsible for authenticating a user with the application. It first checks if the `LoginUserLoading` state is not already set, and if so, it emits the `LoginUserLoading` state. It then calls the `AuthRepository.loginUser()` method, passing the provided `phoneNumber`, `countryCode`, and `password` parameters.
+  ///
+  /// If the response from `AuthRepository.loginUser()` contains an 'error' key, the method emits the `LoginUserFail` state with the error reason. Otherwise, it stores the returned JWT token, the user's display name, and phone number, and emits the `LoginUserSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method emits the `LoginUserFail` state with the error reason.
   _onLoginUser(LoginUser event, Emitter emit) async {
     try {
       if (state is! LoginUserLoading) {
@@ -160,11 +313,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         storePhoneNumber(event.phoneNumber);
         emit(LoginUserSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(LoginUserFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(LoginUserFail(reason: error.toString()));
     }
   }
 
+  /// Creates a new user account.
+  ///
+  /// This method is responsible for registering a new user with the application. It first checks if the `RegisterUserLoaing` state is not already set, and if so, it emits the `RegisterUserLoaing` state. It then calls the `AuthRepository.registerUser()` method, passing the provided `userModel` parameter.
+  ///
+  /// If the response from `AuthRepository.registerUser()` contains an 'error' key, the method emits the `RegisterUserFail` state with the error reason and, if available, the field name that caused the error. Otherwise, it stores the returned JWT token, the user's display name, phone number, and country code, and emits the `RegisterUserSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method emits the `RegisterUserFail` state with the error reason.
   _onCreateAccount(CreateAccount event, Emitter emit) async {
     try {
       if (state is! RegisterUserLoaing) {
@@ -173,17 +339,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.userModel,
         );
         if (res.containsKey('error')) {
-          List errorResponse = res['data']['errorResponse'];
-          String fieldName = '';
-          if (errorResponse.isNotEmpty) {
-            if (errorResponse.first.containsKey('field')) {
-              fieldName = errorResponse.first['field'];
+          if (res['error'] is String) {
+            return emit(RegisterUserFail(reason: res['error']));
+          } else {
+            List errorResponse = res['data']['errorResponse'];
+            String fieldName = '';
+            if (errorResponse.isNotEmpty) {
+              if (errorResponse.first.containsKey('field')) {
+                fieldName = errorResponse.first['field'];
+              }
             }
+            return emit(RegisterUserFail(
+              reason: res['error'],
+              field: fieldName,
+            ));
           }
-          return emit(RegisterUserFail(
-            reason: res['error'],
-            field: fieldName,
-          ));
         }
         final token = res['successResponse']['jwtToken'];
         storeToken(token);
@@ -193,27 +363,44 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         setCountryCode(event.userModel.countryCode!);
         emit(RegisterUserSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(RegisterUserFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(RegisterUserFail(reason: error.toString()));
     }
   }
 
+  /// Sends an OTP (One-Time Password) to the user's phone number.
+  ///
+  /// This method is responsible for initiating the OTP sending process. It first checks if the `SendOTPLoading` state is not already set, and if so, it emits the `SendOTPLoading` state. It then calls the `AuthRepository.sendOtp()` method, passing the provided `phoneNumber` and `countryCode` parameters.
+  ///
+  /// If the response from `AuthRepository.sendOtp()` contains an 'error' key, the method emits the `SendOTPFail` state with the error reason. Otherwise, it emits the `SendOTPSuccess` state.
+  ///
+  /// If an exception occurs during the process, the method logs the error and emits the `SendOTPFail` state with the error reason.
   _onSendOTP(SendOTP event, Emitter emit) async {
     try {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
-        // final accessToken = await getToken();
 
-        // final res = await AuthRepository.sendOtp(
-        //   accessToken!,
-        //   event.phoneNumber,
-        //   event.countryCode,
-        // );
-        // if (res.containsKey('error')) {
-        //   return emit(SendOTPFail(reason: res['error']));
-        // }
+        final res = await AuthRepository.sendOtp(
+          event.phoneNumber,
+          event.countryCode,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendOTPFail(reason: res['error']));
+        }
         emit(SendOTPSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendOTPFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(SendOTPFail(reason: error.toString()));

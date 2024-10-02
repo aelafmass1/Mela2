@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/fee_models.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'fee_event.dart';
@@ -30,6 +32,12 @@ class FeeBloc extends Bloc<FeeEvent, FeeState> {
           ),
         );
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(FeeFailed(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(FeeFailed(reason: error.toString()));

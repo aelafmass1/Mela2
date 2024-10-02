@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+
+import '../../core/exceptions/server_exception.dart';
 
 /// Repository class responsible for interacting with payment intent related API endpoints.
 class PaymentIntentRepository {
@@ -30,10 +33,13 @@ class PaymentIntentRepository {
         },
       ),
     );
+    if (res.statusCode == 500) {
+      throw ServerException('Internal Server Error');
+    }
+    final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      final data = jsonDecode(res.body);
       return data;
     }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 }

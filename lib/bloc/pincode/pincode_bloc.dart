@@ -1,8 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
+
+import '../../core/exceptions/server_exception.dart';
 
 part 'pincode_event.dart';
 part 'pincode_state.dart';
@@ -27,6 +30,12 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         }
         emit(PinSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PinFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());
@@ -44,6 +53,12 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         }
         emit(PinSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PinFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());

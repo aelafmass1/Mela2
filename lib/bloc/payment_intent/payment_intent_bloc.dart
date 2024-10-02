@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'payment_intent_event.dart';
@@ -40,6 +42,12 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
           emit(PaymentIntentFail(reason: 'Please login first'));
         }
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PaymentIntentFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(PaymentIntentFail(reason: error.toString()));

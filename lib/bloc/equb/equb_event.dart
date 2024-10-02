@@ -10,13 +10,6 @@ final class AddEqub extends EqubEvent {
 
 final class FetchAllEqubs extends EqubEvent {}
 
-final class InviteMembers extends EqubEvent {
-  final int equbId;
-  final List<ContactModel> contacts;
-
-  InviteMembers({required this.equbId, required this.contacts});
-}
-
 final class FetchEqub extends EqubEvent {
   final int equbId;
 
