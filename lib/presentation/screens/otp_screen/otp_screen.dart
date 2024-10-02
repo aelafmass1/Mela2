@@ -12,7 +12,9 @@ import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/keypad_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/pin_entry_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../gen/colors.gen.dart';
@@ -37,44 +39,30 @@ class _OTPScreenState extends State<OTPScreen> {
   int minute = 1;
   int second = 60;
   Timer? timer;
+  validate() {
+    final pins = getAllPins();
+    final valid = pins.length == 6;
+
+    setState(() {
+      isValid = valid;
+    });
+  }
 
   List<String> getAllPins() {
-    String pin1 = pin1Controller.text;
-    String pin2 = pin2Controller.text;
-    String pin3 = pin3Controller.text;
-    String pin4 = pin4Controller.text;
-    String pin5 = pin5Controller.text;
-    String pin6 = pin6Controller.text;
-    if (pin1.isNotEmpty &&
-        pin2.isNotEmpty &&
-        pin3.isNotEmpty &&
-        pin4.isNotEmpty &&
-        pin5.isNotEmpty &&
-        pin6.isNotEmpty) {
-      if (mounted) {
-        setState(() {
-          isValid = true;
-        });
-      }
-
-      return [pin1, pin2, pin3, pin4, pin5, pin6];
-    }
-    if (mounted) {
-      setState(() {
-        isValid = false;
-      });
-    }
-
-    return [];
+    final pin = pinEntryWidgetKey.currentState?.getAllPins();
+    return pin ?? <String>[];
   }
 
   clearPins() {
-    pin1Controller.clear();
-    pin2Controller.clear();
-    pin3Controller.clear();
-    pin4Controller.clear();
-    pin5Controller.clear();
-    pin6Controller.clear();
+    pinEntryWidgetKey.currentState?.clearAll();
+  }
+
+  void insertPin(String pin) {
+    pinEntryWidgetKey.currentState?.addPin(pin);
+  }
+
+  void removeLast() {
+    pinEntryWidgetKey.currentState?.clearLast();
   }
 
   void startTimer() {
@@ -127,6 +115,8 @@ class _OTPScreenState extends State<OTPScreen> {
     super.dispose();
   }
 
+  final pinEntryWidgetKey = GlobalKey<PinEntryWidgetState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,19 +150,10 @@ class _OTPScreenState extends State<OTPScreen> {
               weight: FontWeight.w400,
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildPinBox(controller: pin1Controller),
-                  _buildPinBox(controller: pin2Controller),
-                  _buildPinBox(controller: pin3Controller),
-                  _buildPinBox(controller: pin4Controller),
-                  _buildPinBox(controller: pin5Controller),
-                  _buildPinBox(controller: pin6Controller),
-                ],
-              ),
-            ),
+                padding: const EdgeInsets.only(top: 40),
+                child: PinEntryWidget(
+                  key: pinEntryWidgetKey,
+                )),
             const SizedBox(height: 20),
             showResendButton
                 ? Row(
@@ -276,46 +257,18 @@ class _OTPScreenState extends State<OTPScreen> {
                       }
                     });
               },
+            ),
+            const Spacer(),
+            SafeArea(
+              child: KeypadWidget(onBackPressed: () {
+                removeLast();
+                validate();
+              }, onKeyPressed: (val) {
+                insertPin(val);
+                validate();
+              }),
             )
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPinBox({required TextEditingController controller}) {
-    return SizedBox(
-      height: 70,
-      width: 13.sw,
-      child: TextFormField(
-        controller: controller,
-        onChanged: (value) {
-          getAllPins();
-          if (value.length == 1) {
-            FocusScope.of(context).nextFocus();
-          }
-        },
-        style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              color: ColorName.primaryColor,
-              // color: isValid ? Colors.white : Colors.black,
-            ),
-        textAlign: TextAlign.center,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          LengthLimitingTextInputFormatter(1),
-        ],
-        keyboardType: TextInputType.phone,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 20),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: const BorderSide(
-                color: ColorName.primaryColor,
-                width: 2,
-              )),
         ),
       ),
     );
