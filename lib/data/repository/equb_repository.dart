@@ -19,6 +19,7 @@ class EqubRepository {
       "numberOfMembers": equb.numberOfMembers,
       "contributionAmount": equb.contributionAmount.toInt(),
       "frequency": equb.frequency,
+      "currency": "USD",
       "startDate":
           "${equb.startDate.year}-${equb.startDate.month.toString().padLeft(2, '0')}-${equb.startDate.day.toString().padLeft(2, '0')}"
     };

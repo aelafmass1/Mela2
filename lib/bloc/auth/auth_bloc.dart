@@ -339,26 +339,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.userModel,
         );
         if (res.containsKey('error')) {
-          if (res['error'] is String) {
-            return emit(RegisterUserFail(reason: res['error']));
-          } else {
-            List errorResponse = res['data']['errorResponse'];
-            String fieldName = '';
-            if (errorResponse.isNotEmpty) {
-              if (errorResponse.first.containsKey('field')) {
-                fieldName = errorResponse.first['field'];
-              }
-            }
-            return emit(RegisterUserFail(
-              reason: res['error'],
-              field: fieldName,
-            ));
-          }
+          return emit(RegisterUserFail(reason: res['error']));
         }
-        final token = res['successResponse']['jwtToken'];
+        final token = res['response']['jwtToken'];
         storeToken(token);
         storeDisplayName(
-            '${event.userModel.firstName} ${event.userModel.lastName}');
+          '${event.userModel.firstName} ${event.userModel.lastName}',
+        );
         storePhoneNumber(event.userModel.phoneNumber!);
         setCountryCode(event.userModel.countryCode!);
         emit(RegisterUserSuccess());
