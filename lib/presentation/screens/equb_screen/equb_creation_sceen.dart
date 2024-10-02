@@ -1182,15 +1182,17 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                                     .split('')
                                     .first
                                     .toUpperCase()
-                                : nameController.text
-                                    .split(' ')
-                                    .map((e) => e[0])
-                                    .join()
-                                    .toUpperCase(),
+                                : nameController.text.split(' ').isNotEmpty
+                                    ? nameController.text
+                                        .split(' ')
+                                        .map((e) => e[0])
+                                        .join()
+                                        .toUpperCase()
+                                    : nameController.text[0],
                             color: Colors.white,
                             fontSize: 14,
                           )
-                        : SizedBox.shrink(),
+                        : const SizedBox.shrink(),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1198,7 +1200,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextWidget(
-                      text: nameController.text,
+                      text: nameController.text.trim(),
                       color: Colors.white,
                     ),
                     TextWidget(
