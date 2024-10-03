@@ -9,12 +9,14 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
+import 'package:transaction_mobile_app/presentation/widgets/pin_entry_widget.dart';
 
 import '../../../bloc/auth/auth_bloc.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../widgets/button_widget.dart';
+import '../../widgets/keypad_widget.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/text_widget.dart';
 
@@ -36,36 +38,33 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
   final pin6Controller = TextEditingController();
   bool isValid = false;
 
+  final pinEntryWidgetKey = GlobalKey<PinEntryWidgetState>();
+
   String firstPincode = '';
+  validate() {
+    final pins = getAllPins();
+    final valid = pins.length == 6;
+
+    setState(() {
+      isValid = valid;
+    });
+  }
 
   List<String> getAllPins() {
-    String pin1 = pin1Controller.text;
-    String pin2 = pin2Controller.text;
-    String pin3 = pin3Controller.text;
-    String pin4 = pin4Controller.text;
-    String pin5 = pin5Controller.text;
-    String pin6 = pin6Controller.text;
-    if (pin1.isNotEmpty &&
-        pin2.isNotEmpty &&
-        pin3.isNotEmpty &&
-        pin4.isNotEmpty &&
-        pin5.isNotEmpty &&
-        pin6.isNotEmpty) {
-      if (mounted) {
-        setState(() {
-          isValid = true;
-        });
-      }
+    final pin = pinEntryWidgetKey.currentState?.getAllPins();
+    return pin ?? <String>[];
+  }
 
-      return [pin1, pin2, pin3, pin4, pin5, pin6];
-    }
-    if (mounted) {
-      setState(() {
-        isValid = false;
-      });
-    }
+  clearPins() {
+    pinEntryWidgetKey.currentState?.clearAll();
+  }
 
-    return [];
+  void insertPin(String pin) {
+    pinEntryWidgetKey.currentState?.addPin(pin);
+  }
+
+  void removeLast() {
+    pinEntryWidgetKey.currentState?.clearLast();
   }
 
   @override
@@ -101,19 +100,10 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
               weight: FontWeight.w400,
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildPinBox(controller: pin1Controller),
-                  _buildPinBox(controller: pin2Controller),
-                  _buildPinBox(controller: pin3Controller),
-                  _buildPinBox(controller: pin4Controller),
-                  _buildPinBox(controller: pin5Controller),
-                  _buildPinBox(controller: pin6Controller),
-                ],
-              ),
-            ),
+                padding: const EdgeInsets.only(top: 40),
+                child: PinEntryWidget(
+                  key: pinEntryWidgetKey,
+                )),
             const SizedBox(height: 20),
             const SizedBox(height: 30),
             ButtonWidget(
@@ -133,7 +123,17 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
                     ]);
                   }
                   //
-                })
+                }),
+            const Spacer(),
+            SafeArea(
+              child: KeypadWidget(onBackPressed: () {
+                removeLast();
+                validate();
+              }, onKeyPressed: (val) {
+                insertPin(val);
+                validate();
+              }),
+            )
           ],
         ),
       ),
