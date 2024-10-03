@@ -104,6 +104,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       pin6Node.requestFocus();
     } else if (pin6Node.hasFocus) {
       pin6Controller.text = value;
+      pin1Node.requestFocus();
     }
 
     getAllPins();

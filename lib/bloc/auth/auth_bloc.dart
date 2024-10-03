@@ -49,6 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final res = await AuthRepository.sendOtpForPasswordReset(
           event.phoneNumber,
           event.countryCode,
+          event.signature,
         );
         if (res.containsKey('error')) {
           return emit(SendOTPFail(reason: res['error']));
@@ -88,6 +89,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final res = await AuthRepository.sendOtpForPincodeReset(
           event.phoneNumber,
           event.countryCode,
+          event.signature,
         );
         if (res.containsKey('error')) {
           return emit(SendOTPFail(reason: res['error']));
@@ -376,6 +378,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final res = await AuthRepository.sendOtp(
           event.phoneNumber,
           event.countryCode,
+          event.signature,
         );
         if (res.containsKey('error')) {
           return emit(SendOTPFail(reason: res['error']));
