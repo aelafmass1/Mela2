@@ -5,8 +5,13 @@ sealed class AuthEvent {}
 final class SendOTP extends AuthEvent {
   final int phoneNumber;
   final int countryCode;
+  final String signature;
 
-  SendOTP({required this.phoneNumber, required this.countryCode});
+  SendOTP({
+    required this.phoneNumber,
+    required this.countryCode,
+    required this.signature,
+  });
 }
 
 final class CreateAccount extends AuthEvent {
@@ -64,18 +69,24 @@ final class LoginWithPincode extends AuthEvent {
 final class SendOTPForPasswordReset extends AuthEvent {
   final int phoneNumber;
   final int countryCode;
+  final String signature;
 
-  SendOTPForPasswordReset(
-      {required this.phoneNumber, required this.countryCode});
+  SendOTPForPasswordReset({
+    required this.phoneNumber,
+    required this.countryCode,
+    required this.signature,
+  });
 }
 
 final class SendOTPForPincodeReset extends AuthEvent {
   final int phoneNumber;
   final int countryCode;
+  final String signature;
 
   SendOTPForPincodeReset({
     required this.phoneNumber,
     required this.countryCode,
+    required this.signature,
   });
 }
 

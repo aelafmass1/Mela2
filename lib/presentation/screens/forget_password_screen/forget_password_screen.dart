@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -200,7 +203,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                               type: TextType.small,
                               color: Colors.white,
                             ),
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           final phoneN = selectedNumber.phoneNumber!.replaceAll(
                             selectedNumber.dialCode!,
@@ -208,11 +211,13 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                           );
                           final countryCode =
                               selectedNumber.dialCode!.substring(1);
+                          final signature = await SmsAutoFill().getAppSignature;
                           if (widget.routeName == RouteName.newPassword) {
                             context.read<AuthBloc>().add(
                                   SendOTPForPasswordReset(
                                     phoneNumber: int.tryParse(phoneN) ?? 0,
                                     countryCode: int.tryParse(countryCode) ?? 0,
+                                    signature: signature,
                                   ),
                                 );
                           } else if (widget.routeName == RouteName.newPincode) {
@@ -220,6 +225,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                                   SendOTPForPincodeReset(
                                     phoneNumber: int.tryParse(phoneN) ?? 0,
                                     countryCode: int.tryParse(countryCode) ?? 0,
+                                    signature: signature,
                                   ),
                                 );
                           }

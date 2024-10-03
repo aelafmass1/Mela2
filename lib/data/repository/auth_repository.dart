@@ -196,7 +196,8 @@ class AuthRepository {
   ///
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
-  static Future<Map> sendOtp(int phoneNumber, int countryCode) async {
+  static Future<Map> sendOtp(
+      int phoneNumber, int countryCode, String signature) async {
     final res = await http.post(
       Uri.parse('$baseUrl/auth/phone/start-verification'),
       headers: {
@@ -206,6 +207,7 @@ class AuthRepository {
         {
           "phoneNumber": phoneNumber,
           "countryCode": countryCode,
+          "signature": signature,
         },
       ),
     );
@@ -287,14 +289,18 @@ class AuthRepository {
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
   static Future<Map> sendOtpForPasswordReset(
-      int phoneNumber, int countryCode) async {
+      int phoneNumber, int countryCode, String signature) async {
     final res = await http.post(
       Uri.parse('$baseUrl/auth/password/forgot/request-otp'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: jsonEncode(
-        {"countryCode": countryCode, "phoneNumber": phoneNumber},
+        {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "signature": signature,
+        },
       ),
     );
     if (res.statusCode == 500) {
@@ -330,14 +336,21 @@ class AuthRepository {
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
   static Future<Map> sendOtpForPincodeReset(
-      int phoneNumber, int countryCode) async {
+    int phoneNumber,
+    int countryCode,
+    String signature,
+  ) async {
     final res = await http.post(
       Uri.parse('$baseUrl/auth/pin/forgot/request-otp'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: jsonEncode(
-        {"countryCode": countryCode, "phoneNumber": phoneNumber},
+        {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "signature": signature,
+        },
       ),
     );
     if (res.statusCode == 500) {

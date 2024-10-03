@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -25,7 +26,7 @@ class OTPScreen extends StatefulWidget {
   State<OTPScreen> createState() => _OTPScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
@@ -34,7 +35,7 @@ class _OTPScreenState extends State<OTPScreen> {
   final pin5Controller = TextEditingController();
   final pin6Controller = TextEditingController();
   bool isValid = false;
-  int minute = 1;
+  int minute = 0;
   int second = 60;
   Timer? timer;
 
@@ -114,17 +115,42 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   @override
+
+  /// Updates the OTP pin fields with the provided code.
+  ///
+  /// This method is used to automatically populate the OTP pin fields when the
+  /// user receives the OTP code. It splits the code string into individual
+  /// characters and sets the text of each pin field controller accordingly.
+  ///
+  /// If the [code] parameter is null, this method does nothing.
+  void codeUpdated() {
+    if (code != null) {
+      final pins = code!.trim().split('');
+      if (code!.trim().length == 6) {
+        pin1Controller.text = pins[0];
+        pin2Controller.text = pins[1];
+        pin3Controller.text = pins[2];
+        pin4Controller.text = pins[3];
+        pin5Controller.text = pins[4];
+        pin6Controller.text = pins[5];
+      }
+    }
+  }
+
+  @override
   void initState() {
     startTimer();
     super.initState();
+    SmsAutoFill().listenForCode();
   }
 
   @override
   void dispose() {
+    super.dispose();
     if (timer?.isActive ?? false) {
       timer?.cancel();
     }
-    super.dispose();
+    SmsAutoFill().unregisterListener();
   }
 
   @override
@@ -184,14 +210,17 @@ class _OTPScreenState extends State<OTPScreen> {
                         weight: FontWeight.w400,
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           clearPins();
+                          final signature = await SmsAutoFill().getAppSignature;
+                          // ignore: use_build_context_synchronously
                           context.read<AuthBloc>().add(
                                 SendOTP(
                                   phoneNumber: int.tryParse(
                                           widget.userModel.phoneNumber!) ??
                                       0,
                                   countryCode: widget.userModel.countryCode!,
+                                  signature: signature,
                                 ),
                               );
                         },

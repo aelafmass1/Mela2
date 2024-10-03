@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -326,7 +327,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     color: Colors.white,
                                     type: TextType.small,
                                   ),
-                        onPressed: () {
+                        onPressed: () async {
                           try {
                             if (_formKey.currentState!.validate()) {
                               log(selectedNumber.toString());
@@ -349,11 +350,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                       ),
                                     );
                               } else {
+                                final signature =
+                                    await SmsAutoFill().getAppSignature;
                                 context.read<AuthBloc>().add(
                                       SendOTP(
                                         phoneNumber: int.tryParse(phoneN) ?? 0,
                                         countryCode:
                                             int.tryParse(countryCode) ?? 0,
+                                        signature: signature,
                                       ),
                                     );
                               }
