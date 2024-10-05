@@ -126,6 +126,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           if (text!.isEmpty) {
                             return 'First Name is Empty';
                           }
+                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(text)) {
+                            return 'First Name should only contain letters';
+                          }
                           return null;
                         },
                         controller: firstNameController,
@@ -146,6 +149,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'Last Name is Empty';
+                          }
+                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(text)) {
+                            return 'Last Name should only contain letters';
                           }
                           return null;
                         },

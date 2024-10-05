@@ -38,6 +38,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   final _phoneNumberNode = FocusNode();
   bool isPhoneNumberFocused = false;
+  bool isPhoneNumberValid = false;
 
   @override
   void initState() {
@@ -133,6 +134,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     if (value!.isEmpty) {
                       return 'Phone Number is empty';
                     }
+                    if (!isPhoneNumberValid) {
+                      return 'Please enter a valid phone number';
+                    }
                     return null;
                   },
                   selectorConfig: const SelectorConfig(
@@ -147,6 +151,11 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
+                  onInputValidated: (bool value) {
+                    setState(() {
+                      isPhoneNumberValid = value;
+                    });
+                  },
                   ignoreBlank: false,
                   autoValidateMode: AutovalidateMode.disabled,
                   initialValue: initialNumber,

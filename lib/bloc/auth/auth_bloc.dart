@@ -381,7 +381,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.signature,
         );
         if (res.containsKey('error')) {
-          return emit(SendOTPFail(reason: res['error']));
+          return emit(SendOTPFail(reason: res['error'], userId: res['userId']));
         }
         emit(SendOTPSuccess());
       }

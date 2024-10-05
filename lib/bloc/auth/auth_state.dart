@@ -41,9 +41,10 @@ final class OTPVerificationSuccess extends AuthState {
 final class SendOTPLoading extends AuthState {}
 
 final class SendOTPFail extends AuthState {
+  final String? userId;
   final String reason;
 
-  SendOTPFail({required this.reason});
+  SendOTPFail({required this.reason, this.userId});
 }
 
 final class SendOTPSuccess extends AuthState {}

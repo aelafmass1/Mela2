@@ -40,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isPhoneNumberFocused = false;
   bool showPassword = false;
+  bool isPhoneNumberValid = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -152,7 +153,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (value!.isEmpty) {
                           return 'Phone Number is empty';
                         }
+                        if (!isPhoneNumberValid) {
+                          return 'Please enter a valid phone number';
+                        }
                         return null;
+                      },
+                      onInputValidated: (bool value) {
+                        setState(() {
+                          isPhoneNumberValid = value;
+                        });
                       },
                       selectorButtonOnErrorPadding: 0,
                       selectorTextStyle: const TextStyle(
@@ -206,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                         return null;
                       },
-                      obscurePassword: showPassword,
+                      obscurePassword: showPassword == false,
                       controller: passwordController,
                       hintText: 'Password',
                       suffix: Padding(
@@ -214,8 +223,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: IconButton(
                           icon: Icon(
                             showPassword
-                                ? Icons.remove_red_eye_outlined
-                                : Icons.remove_red_eye,
+                                ? Icons.remove_red_eye
+                                : Icons.remove_red_eye_outlined,
                             color: ColorName.grey,
                           ),
                           onPressed: () {

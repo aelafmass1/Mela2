@@ -104,7 +104,9 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       pin6Node.requestFocus();
     } else if (pin6Node.hasFocus) {
       pin6Controller.text = value;
-      pin1Node.requestFocus();
+      if (pin1Controller.text.isEmpty) {
+        pin1Node.requestFocus();
+      }
     }
 
     getAllPins();
@@ -172,7 +174,19 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         toolbarHeight: 70,
+        leading: const SizedBox.shrink(),
         actions: [
+          IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                deleteToken();
+                deleteDisplayName();
+                deletePhoneNumber();
+                deleteLogInStatus();
+                deleteCountryCode();
+                context.goNamed(RouteName.login);
+              }),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.only(right: 15),
             child: SvgPicture.asset(
