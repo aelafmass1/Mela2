@@ -14,22 +14,45 @@ final class EqubMemberInviteFail extends EqubMemberState {
 
 final class EqubMemberInviteSuccess extends EqubMemberState {}
 
-final class EqubWinnerLoading extends EqubMemberState {}
+final class EqubManualWinnerLoading extends EqubMemberState {}
 
-final class EqubWinnerFail extends EqubMemberState {
+final class EqubManualWinnerFail extends EqubMemberState {
   final String reason;
 
-  EqubWinnerFail({required this.reason});
+  EqubManualWinnerFail({required this.reason});
 }
 
-final class EqubWinnerSuccess extends EqubMemberState {
+final class EqubManualWinnerSuccess extends EqubMemberState {
   final int cycleNumber;
   final String? firstName;
   final String? lastName;
   final String phoneNumber;
   final String? role;
 
-  EqubWinnerSuccess(
+  EqubManualWinnerSuccess(
+      {required this.cycleNumber,
+      this.firstName,
+      this.lastName,
+      this.role,
+      required this.phoneNumber});
+}
+
+final class EqubAutoWinnerLoading extends EqubMemberState {}
+
+final class EqubAutoWinnerFail extends EqubMemberState {
+  final String reason;
+
+  EqubAutoWinnerFail({required this.reason});
+}
+
+final class EqubAutoWinnerSuccess extends EqubMemberState {
+  final int cycleNumber;
+  final String? firstName;
+  final String? lastName;
+  final String phoneNumber;
+  final String? role;
+
+  EqubAutoWinnerSuccess(
       {required this.cycleNumber,
       this.firstName,
       this.lastName,

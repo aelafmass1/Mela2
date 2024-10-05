@@ -212,6 +212,11 @@ class AuthRepository {
       ),
     );
     if (res.statusCode == 500) {
+      final data = jsonDecode(res.body);
+      if (data['message'] == 'Failed to send SMS.') {
+        return {'error': 'Failed to send SMS', 'userId': data['errorResponse']};
+      }
+
       throw ServerException('Internal Server Error');
     }
 
@@ -219,7 +224,10 @@ class AuthRepository {
     if (res.statusCode == 200 || res.statusCode == 201) {
       if (data.containsKey('status')) {
         if (data['message'] == 'Failed to send SMS.') {
-          return {'error': 'Failed to send SMS'};
+          return {
+            'error': 'Failed to send SMS',
+            'userId': data['errorResponse']
+          };
         }
         if (data['status'] == 'error') {
           return processErrorResponse(data);

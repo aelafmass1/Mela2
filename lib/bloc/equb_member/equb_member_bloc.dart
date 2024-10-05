@@ -28,8 +28,8 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
   /// state with the error reason.
   _onEqubManualAssignWinner(EqubAssignWinner event, Emitter emit) async {
     try {
-      if (state is! EqubWinnerLoading) {
-        emit(EqubWinnerLoading());
+      if (state is! EqubManualWinnerLoading) {
+        emit(EqubManualWinnerLoading());
         final token = await getToken();
         final res = await EqubRepository(client: Client()).manualAssignWinner(
           accessToken: token!,
@@ -37,9 +37,9 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
           memberId: event.memberId,
         );
         if (res.containsKey('error')) {
-          return emit(EqubWinnerFail(reason: res['error']));
+          return emit(EqubManualWinnerFail(reason: res['error']));
         }
-        emit(EqubWinnerSuccess(
+        emit(EqubManualWinnerSuccess(
           cycleNumber: res['cycleNumber'],
           firstName: res['winner']['user']['firstName'],
           lastName: res['winner']['user']['lastName'],
@@ -48,7 +48,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       }
     } catch (error) {
       log(error.toString());
-      emit(EqubWinnerFail(reason: error.toString()));
+      emit(EqubManualWinnerFail(reason: error.toString()));
     }
   }
 
@@ -61,17 +61,17 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
   /// state with the error reason.
   _onEqubAutoPickWinner(EqubAutoPickWinner event, Emitter emit) async {
     try {
-      if (state is! EqubWinnerLoading) {
-        emit(EqubWinnerLoading());
+      if (state is! EqubAutoWinnerLoading) {
+        emit(EqubAutoWinnerLoading());
         final token = await getToken();
         final res = await EqubRepository(client: Client()).autoPickWinner(
           accessToken: token!,
           cycleId: event.cycleId,
         );
         if (res.containsKey('error')) {
-          return emit(EqubWinnerFail(reason: res['error']));
+          return emit(EqubAutoWinnerFail(reason: res['error']));
         }
-        emit(EqubWinnerSuccess(
+        emit(EqubAutoWinnerSuccess(
           cycleNumber: res['cycleNumber'],
           firstName: res['winner']['user']['firstName'],
           lastName: res['winner']['user']['lastName'],
@@ -80,7 +80,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       }
     } catch (error) {
       log(error.toString());
-      emit(EqubWinnerFail(reason: error.toString()));
+      emit(EqubAutoWinnerFail(reason: error.toString()));
     }
   }
 

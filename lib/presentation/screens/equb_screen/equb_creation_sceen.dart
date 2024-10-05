@@ -833,74 +833,46 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   description: state.reason,
                 );
               } else if (state is EqubSuccess) {
-                if (state.addedEqubId != null) {
-                  context.read<EqubMemberBloc>().add(
-                        InviteEqubMemeber(
-                          equbId: state.addedEqubId!,
-                          contacts: selectedContacts
-                              .map((c) => ContactModel(
-                                  contactId: c.id,
-                                  name: c.displayName,
-                                  phoneNumber: c.phones.first.number))
-                              .toList(),
-                        ),
-                      );
-                }
+                context.pushNamed(
+                  RouteName.completePage,
+                  extra: nameController.text,
+                );
               }
             },
             builder: (context, state) {
               return Padding(
                 padding: const EdgeInsets.only(top: 5, bottom: 0),
-                child: BlocConsumer<EqubMemberBloc, EqubMemberState>(
-                  listener: (context, state) {
-                    if (state is EqubMemberInviteFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is EqubMemberInviteSuccess) {
-                      context.pushNamed(
-                        RouteName.completePage,
-                        extra: nameController.text,
-                      );
-                    }
-                  },
-                  builder: (context, equbMemberState) {
-                    return ButtonWidget(
-                        child: state is EqubLoading ||
-                                equbMemberState is EqubMemberInviteLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Confirm',
-                                color: Colors.white,
-                                type: TextType.small,
+                child: ButtonWidget(
+                  child: state is EqubLoading
+                      ? const LoadingWidget()
+                      : const TextWidget(
+                          text: 'Confirm',
+                          color: Colors.white,
+                          type: TextType.small,
+                        ),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      context.read<EqubBloc>().add(
+                            AddEqub(
+                              equbModel: EqubModel(
+                                name: nameController.text,
+                                contributionAmount:
+                                    double.parse(amountController.text),
+                                frequency: selectedFrequency!,
+                                numberOfMembers:
+                                    int.parse(numberOfMembersController.text),
+                                startDate: startingDate!,
+                                members: selectedContacts
+                                    .map((c) => ContactModel(
+                                          contactId: c.id,
+                                          name: c.displayName,
+                                          phoneNumber: c.phones.first.number,
+                                        ))
+                                    .toList(),
                               ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            context.read<EqubBloc>().add(
-                                  AddEqub(
-                                    equbModel: EqubModel(
-                                      name: nameController.text,
-                                      contributionAmount:
-                                          double.parse(amountController.text),
-                                      frequency: selectedFrequency!,
-                                      numberOfMembers: int.parse(
-                                          numberOfMembersController.text),
-                                      startDate: startingDate!,
-                                      members: selectedContacts
-                                          .map((c) => ContactModel(
-                                                contactId: c.id,
-                                                name: c.displayName,
-                                                phoneNumber:
-                                                    c.phones.first.number,
-                                              ))
-                                          .toList(),
-                                    ),
-                                  ),
-                                );
-                          }
-                        });
+                            ),
+                          );
+                    }
                   },
                 ),
               );

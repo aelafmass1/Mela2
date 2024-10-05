@@ -17,6 +17,7 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/componen
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/equb_member_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -472,6 +473,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
               ],
             ),
           ),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -524,6 +526,46 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return SingleChildScrollView(
       child: BlocBuilder<EqubBloc, EqubState>(
         builder: (context, state) {
+          if (state is EqubLoading) {
+            return Column(
+              children: [
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const TextWidget(
+                      text: 'All Members (--)',
+                      fontSize: 16,
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 0)),
+                      onPressed: null,
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.add,
+                            color: ColorName.primaryColor,
+                          ),
+                          SizedBox(width: 3),
+                          TextWidget(
+                            text: 'Add Member',
+                            fontSize: 13,
+                            color: ColorName.primaryColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                const EqubMemberShimmer(),
+                const EqubMemberShimmer(),
+                const EqubMemberShimmer(),
+                const EqubMemberShimmer(),
+              ],
+            );
+          }
           if (state is EqubSuccess && state.selectedEqub != null) {
             return Column(
               children: [
@@ -753,18 +795,18 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
         SingleChildScrollView(
           child: BlocBuilder<EqubBloc, EqubState>(
             builder: (context, state) {
-              if (state is EqubSuccess && state.selectedEqub != null) {
+              if (state is EqubLoading) {
                 return Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextWidget(
-                          text:
-                              'All Members (${state.selectedEqub?.members.length ?? 0})',
+                        const TextWidget(
+                          text: 'All Members (--)',
                           fontSize: 16,
                         ),
                         TextButton(
+                          onPressed: null,
                           child: Row(
                             children: [
                               SvgPicture.asset(Assets.images.svgs.spinWheel),
@@ -776,13 +818,55 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                               ),
                             ],
                           ),
-                          onPressed: () {
-                            context.read<EqubMemberBloc>().add(
-                                  EqubAutoPickWinner(
-                                    cycleId: state
-                                        .selectedEqub!.cycles.first.cycleId,
-                                  ),
-                                );
+                        ),
+                        const EqubMemberShimmer(),
+                        const EqubMemberShimmer(),
+                        const EqubMemberShimmer(),
+                        const EqubMemberShimmer(),
+                      ],
+                    ),
+                  ],
+                );
+              }
+              if (state is EqubSuccess && state.selectedEqub != null) {
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextWidget(
+                          text:
+                              'All Members (${state.selectedEqub?.members.length ?? 0})',
+                          fontSize: 16,
+                        ),
+                        BlocBuilder<EqubMemberBloc, EqubMemberState>(
+                          builder: (context, equbMemberState) {
+                            return TextButton(
+                              onPressed: () {
+                                context.read<EqubMemberBloc>().add(
+                                      EqubAutoPickWinner(
+                                        cycleId: state
+                                            .selectedEqub!.cycles.first.cycleId,
+                                      ),
+                                    );
+                              },
+                              child: equbMemberState is EqubAutoWinnerLoading
+                                  ? const LoadingWidget(
+                                      color: ColorName.primaryColor,
+                                    )
+                                  : Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                            Assets.images.svgs.spinWheel),
+                                        const SizedBox(width: 5),
+                                        const TextWidget(
+                                          text: 'Auto Pick',
+                                          fontSize: 13,
+                                          color: ColorName.green,
+                                        ),
+                                      ],
+                                    ),
+                            );
                           },
                         ),
                       ],
@@ -883,10 +967,24 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                 builder: (context, state) {
                   return BlocConsumer<EqubMemberBloc, EqubMemberState>(
                     listener: (context, equbMemberState) {
-                      if (equbMemberState is EqubWinnerFail) {
+                      if (equbMemberState is EqubManualWinnerFail) {
                         showSnackbar(context,
                             description: equbMemberState.reason);
-                      } else if (equbMemberState is EqubWinnerSuccess) {
+                      } else if (equbMemberState is EqubManualWinnerSuccess) {
+                        context.pushNamed(RouteName.win, extra: [
+                          '${equbMemberState.cycleNumber}',
+                          EqubInviteeModel(
+                            id: -1,
+                            phoneNumber: equbMemberState.phoneNumber,
+                            status: equbMemberState.role ?? '',
+                            name:
+                                '${equbMemberState.firstName} ${equbMemberState.lastName}',
+                          ),
+                        ]);
+                      } else if (equbMemberState is EqubAutoWinnerFail) {
+                        showSnackbar(context,
+                            description: equbMemberState.reason);
+                      } else if (equbMemberState is EqubAutoWinnerSuccess) {
                         context.pushNamed(RouteName.win, extra: [
                           '${equbMemberState.cycleNumber}',
                           EqubInviteeModel(
@@ -925,7 +1023,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                 }
                               }
                             : null,
-                        child: equbMemberState is EqubWinnerLoading
+                        child: equbMemberState is EqubManualWinnerLoading
                             ? const LoadingWidget()
                             : const TextWidget(
                                 text: 'Confirm',

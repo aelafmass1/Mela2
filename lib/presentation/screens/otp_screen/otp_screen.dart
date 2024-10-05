@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -213,16 +215,43 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                         onPressed: () async {
                           clearPins();
                           final signature = await SmsAutoFill().getAppSignature;
-                          // ignore: use_build_context_synchronously
-                          context.read<AuthBloc>().add(
-                                SendOTP(
-                                  phoneNumber: int.tryParse(
-                                          widget.userModel.phoneNumber!) ??
-                                      0,
-                                  countryCode: widget.userModel.countryCode!,
-                                  signature: signature,
-                                ),
-                              );
+                          if (widget.userModel.toScreen == null) {
+                            context.read<AuthBloc>().add(
+                                  SendOTP(
+                                    phoneNumber: int.tryParse(
+                                            widget.userModel.phoneNumber!) ??
+                                        0,
+                                    countryCode: widget.userModel.countryCode!,
+                                    signature: signature,
+                                  ),
+                                );
+                          } else {
+                            if (widget.userModel.toScreen ==
+                                RouteName.newPassword) {
+                              context.read<AuthBloc>().add(
+                                    SendOTPForPasswordReset(
+                                      phoneNumber: int.tryParse(
+                                              widget.userModel.phoneNumber!) ??
+                                          0,
+                                      countryCode:
+                                          widget.userModel.countryCode!,
+                                      signature: signature,
+                                    ),
+                                  );
+                            } else if (widget.userModel.toScreen ==
+                                RouteName.newPincode) {
+                              context.read<AuthBloc>().add(
+                                    SendOTPForPincodeReset(
+                                      phoneNumber: int.tryParse(
+                                              widget.userModel.phoneNumber!) ??
+                                          0,
+                                      countryCode:
+                                          widget.userModel.countryCode!,
+                                      signature: signature,
+                                    ),
+                                  );
+                            }
+                          }
                         },
                         child: const TextWidget(
                           text: 'Resend',
