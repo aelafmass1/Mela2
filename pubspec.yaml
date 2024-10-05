@@ -1,7 +1,7 @@
 name: transaction_mobile_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.0.2
+version: 2.0.9
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
