@@ -12,7 +12,8 @@ part 'banks_event.dart';
 part 'banks_state.dart';
 
 class BanksBloc extends Bloc<BanksEvent, BanksState> {
-  BanksBloc() : super(BanksInitial()) {
+  BanksRepository repository;
+  BanksBloc({required this.repository}) : super(BanksInitial()) {
     on<FetchBanks>(_onFetchBanks);
   }
 
@@ -22,7 +23,7 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
         emit(BanksLoading());
         final token = await getToken();
 
-        final res = await BanksRepository.fetchBanks(token!);
+        final res = await repository.fetchBanks(token!);
         if (res.first.containsKey('error')) {
           return emit(BanksFail(reason: res.first['error']));
         }

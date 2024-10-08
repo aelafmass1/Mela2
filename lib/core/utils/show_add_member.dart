@@ -27,9 +27,9 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
     context: context,
     isScrollControlled: true,
     builder: (context) => StatefulBuilder(builder: (context, setState) {
-      return ColoredBox(
-        color: Colors.white,
-        child: Stack(
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 15, right: 15, top: 40),
@@ -69,7 +69,7 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                           filteredContacts = contacts
                               .where((contact) => contact.displayName
                                   .toLowerCase()
-                                  .contains(value.toLowerCase()))
+                                  .startsWith(value.toLowerCase()))
                               .toList();
                           setState(() {
                             filteredContacts = filteredContacts;
@@ -175,6 +175,11 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                           if (selectedContacts.length <
                                               numberOfMembers) {
                                             selectedContacts.add(contact);
+                                          } else {
+                                            showSnackbar(
+                                              context,
+                                              description: 'members are full',
+                                            );
                                           }
                                         } else {
                                           selectedContacts.remove(contact);
@@ -236,6 +241,11 @@ Future<List<Contact>> showAddMember(BuildContext context, int numberOfMembers,
                                         if (selectedContacts.length <
                                             numberOfMembers) {
                                           selectedContacts.add(contact);
+                                        } else {
+                                          showSnackbar(
+                                            context,
+                                            description: 'members are full',
+                                          );
                                         }
                                       } else {
                                         selectedContacts.remove(contact);

@@ -1,3 +1,4 @@
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,12 +6,13 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
-import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/core/utils/show_cupertino_date_picker.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -36,9 +38,11 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   final numberOfMembersController = TextEditingController();
   final dateController = TextEditingController();
   final searchingController = TextEditingController();
-  String selectedCurrency = 'usd';
+  String selectedCurrencyCode = 'USD';
+  Currency? selectedCurrency;
   String? selectedFrequency;
   String adminName = '';
+  String? selectedCurrencyFlag;
   int index = 0;
 
   final _formKey = GlobalKey<FormState>();
@@ -59,20 +63,25 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   late WebViewController _controller;
 
   Future<void> _fetchContacts() async {
+    if (await Permission.contacts.isDenied) {
+      await Future.delayed(const Duration(seconds: 10));
+    }
     if (await FlutterContacts.requestPermission(readonly: true)) {
       List<Contact> contacts =
           await FlutterContacts.getContacts(withProperties: true);
       setState(() {
+        isPermissionDenied = false;
         _contacts = contacts;
       });
+      // ignore: use_build_context_synchronously
       context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
     } else {
-      context.pushNamed(RouteName.contactPermission, extra: () {
-        setState(() {
-          index = 0;
-          sliderWidth = 30.sw;
-        });
-      });
+      // context.pushNamed(RouteName.contactPermission, extra: () {
+      //   setState(() {
+      //     index = 0;
+      //     sliderWidth = 30.sw;
+      //   });
+      // });
       setState(() {
         isPermissionDenied = true;
       });
@@ -251,35 +260,39 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: Visibility(
                   visible: index != 3,
-                  child: ButtonWidget(
-                      onPressed: (index == 1 && (selectedContacts.isEmpty)) ||
-                              (index == 2 && agreeToTermAndCondition == false)
-                          ? null
-                          : () {
-                              if (_formKey.currentState!.validate()) {
-                                if (index == 0) {
-                                  _fetchContacts();
-                                  setState(() {
-                                    index = 1;
-                                    sliderWidth = 60.sw;
-                                  });
-                                } else if (index == 1) {
-                                  setState(() {
-                                    index = 2;
-                                    sliderWidth = 100.sw;
-                                  });
-                                } else if (index == 2) {
-                                  setState(() {
-                                    index = 3;
-                                  });
-                                }
-                              }
-                            },
-                      child: const TextWidget(
-                        text: 'Next',
-                        type: TextType.small,
-                        color: Colors.white,
-                      )),
+                  child: (index == 1 && isPermissionDenied)
+                      ? const SizedBox.shrink()
+                      : ButtonWidget(
+                          onPressed:
+                              (index == 1 && (selectedContacts.isEmpty)) ||
+                                      (index == 2 &&
+                                          agreeToTermAndCondition == false)
+                                  ? null
+                                  : () {
+                                      if (_formKey.currentState!.validate()) {
+                                        if (index == 0) {
+                                          setState(() {
+                                            index = 1;
+                                            sliderWidth = 60.sw;
+                                          });
+                                          _fetchContacts();
+                                        } else if (index == 1) {
+                                          setState(() {
+                                            index = 2;
+                                            sliderWidth = 100.sw;
+                                          });
+                                        } else if (index == 2) {
+                                          setState(() {
+                                            index = 3;
+                                          });
+                                        }
+                                      }
+                                    },
+                          child: const TextWidget(
+                            text: 'Next',
+                            type: TextType.small,
+                            color: Colors.white,
+                          )),
                 ),
               )
             ],
@@ -371,10 +384,12 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
     bool? enabled,
     bool showOnlyNumber = false,
     String? Function(String? text)? validator,
+    bool readOnly = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 20),
       child: TextFormField(
+        readOnly: readOnly,
         validator: validator,
         onTap: onTab,
         controller: controller,
@@ -430,6 +445,11 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             const SizedBox(height: 10),
             TextField(
               controller: searchingController,
+              onTap: () {
+                if (isPermissionDenied) {
+                  _fetchContacts();
+                }
+              },
               onChanged: (value) {
                 if (value.isEmpty) {
                   setState(() {
@@ -484,172 +504,233 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            Expanded(
-              child: isSearching
-                  ? filteredContacts.isEmpty
-                      ? Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          alignment: Alignment.topCenter,
-                          child: TextWidget(
-                            text: '${searchingController.text} not Found',
-                            type: TextType.small,
-                            weight: FontWeight.w300,
-                            textAlign: TextAlign.center,
-                            color: const Color(0xFF6D6D6D),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: filteredContacts.length,
-                          itemBuilder: (context, index) {
-                            final contact = filteredContacts[index];
-                            final isSelected =
-                                selectedContacts.contains(contact);
-                            return CheckboxListTile(
-                              activeColor: ColorName.primaryColor,
-                              contentPadding: EdgeInsets.zero,
-                              value: isSelected,
-                              secondary: contact.photo == null
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(100),
-                                      child: Container(
-                                        width: 50,
-                                        height: 50,
-                                        color: ColorName.primaryColor,
-                                        alignment: Alignment.center,
-                                        child: TextWidget(
-                                          text: contact.displayName[0],
-                                          color: Colors.white,
+            if (isPermissionDenied)
+              Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Assets.images.contactPageImage.image(
+                      width: 200,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: TextWidget(
+                      text: 'Enable Contact Permission',
+                      weight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: 80.sw,
+                    child: const TextWidget(
+                      text:
+                          'This is going to be the settings path on the users device to enable the contact permission for our App.',
+                      type: TextType.small,
+                      textAlign: TextAlign.center,
+                      fontSize: 12,
+                      weight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 80.sw,
+                    child: const TextWidget(
+                      text:
+                          'Go to Settings > Apps > Mela Fi > Contact > Select Full Access',
+                      type: TextType.small,
+                      textAlign: TextAlign.center,
+                      fontSize: 12,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 10,
+                    ),
+                    child: ButtonWidget(
+                        child: const TextWidget(
+                          text: 'Enable Permission',
+                          type: TextType.small,
+                          color: Colors.white,
+                        ),
+                        onPressed: () async {
+                          await openAppSettings();
+                        }),
+                  )
+                ],
+              )
+            else
+              Expanded(
+                child: isSearching
+                    ? filteredContacts.isEmpty
+                        ? Container(
+                            margin: const EdgeInsets.only(top: 10),
+                            alignment: Alignment.topCenter,
+                            child: TextWidget(
+                              text: '${searchingController.text} not Found',
+                              type: TextType.small,
+                              weight: FontWeight.w300,
+                              textAlign: TextAlign.center,
+                              color: const Color(0xFF6D6D6D),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredContacts.length,
+                            itemBuilder: (context, index) {
+                              final contact = filteredContacts[index];
+                              final isSelected =
+                                  selectedContacts.contains(contact);
+                              return CheckboxListTile(
+                                activeColor: ColorName.primaryColor,
+                                contentPadding: EdgeInsets.zero,
+                                value: isSelected,
+                                secondary: contact.photo == null
+                                    ? ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          color: ColorName.primaryColor,
+                                          alignment: Alignment.center,
+                                          child: TextWidget(
+                                            text: contact.displayName[0],
+                                            color: Colors.white,
+                                          ),
                                         ),
+                                      )
+                                    : ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        child: Image.memory(
+                                          contact.photo!,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        )),
+                                title: Row(
+                                  children: [
+                                    TextWidget(
+                                      text: contact.displayName,
+                                      fontSize: 16,
+                                      weight: FontWeight.w400,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Visibility(
+                                      visible: melaMemberContacts
+                                          .contains(contact.id),
+                                      child: SvgPicture.asset(
+                                        Assets.images.svgs.checkmarkIcon,
+                                        width: 18,
+                                        height: 18,
                                       ),
-                                    )
-                                  : ClipRRect(
-                                      borderRadius: BorderRadius.circular(100),
-                                      child: Image.memory(
-                                        contact.photo!,
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                      )),
-                              title: Row(
-                                children: [
-                                  TextWidget(
-                                    text: contact.displayName,
-                                    fontSize: 16,
-                                    weight: FontWeight.w400,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Visibility(
-                                    visible:
-                                        melaMemberContacts.contains(contact.id),
-                                    child: SvgPicture.asset(
-                                      Assets.images.svgs.checkmarkIcon,
-                                      width: 18,
-                                      height: 18,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              subtitle: TextWidget(
-                                text: contact.phones.first.number,
-                                type: TextType.small,
-                                fontSize: 14,
-                                weight: FontWeight.w300,
-                              ),
-                              onChanged: (bool? selected) {
-                                setState(() {
-                                  if (selected == true) {
-                                    if (selectedContacts.length <
-                                        (int.tryParse(numberOfMembersController
-                                                .text) ??
-                                            0)) {
-                                      selectedContacts.add(contact);
-                                    }
-                                  } else {
-                                    selectedContacts.remove(contact);
-                                  }
-                                });
-                                setState(() {
-                                  selectedContacts = selectedContacts;
-                                });
-                              },
-                            );
-                          })
-                  : ListView.builder(
-                      itemCount: _contacts.length,
-                      itemBuilder: (context, index) {
-                        final contact = _contacts[index];
-                        final isSelected = selectedContacts.contains(contact);
-                        return CheckboxListTile(
-                          activeColor: ColorName.primaryColor,
-                          contentPadding: EdgeInsets.zero,
-                          value: isSelected,
-                          secondary: contact.photo == null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Container(
-                                    width: 50,
-                                    height: 50,
-                                    color: ColorName.primaryColor,
-                                    alignment: Alignment.center,
-                                    child: TextWidget(
-                                      text: contact.displayName[0],
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Image.memory(
-                                    contact.photo!,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                  )),
-                          title: Row(
-                            children: [
-                              TextWidget(
-                                text: contact.displayName,
-                                fontSize: 16,
-                                weight: FontWeight.w400,
-                              ),
-                              const SizedBox(width: 5),
-                              Visibility(
-                                visible:
-                                    melaMemberContacts.contains(contact.id),
-                                child: SvgPicture.asset(
-                                  Assets.images.svgs.checkmarkIcon,
-                                  width: 18,
-                                  height: 18,
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          subtitle: TextWidget(
-                            text: contact.phones.first.number,
-                            type: TextType.small,
-                            fontSize: 14,
-                            weight: FontWeight.w300,
-                          ),
-                          onChanged: (bool? selected) {
-                            setState(() {
-                              if (selected == true) {
-                                if (selectedContacts.length <
-                                    (int.tryParse(
-                                            numberOfMembersController.text) ??
-                                        0)) {
-                                  selectedContacts.add(contact);
+                                subtitle: TextWidget(
+                                  text: contact.phones.first.number,
+                                  type: TextType.small,
+                                  fontSize: 14,
+                                  weight: FontWeight.w300,
+                                ),
+                                onChanged: (bool? selected) {
+                                  setState(() {
+                                    if (selected == true) {
+                                      if (selectedContacts.length <
+                                          (int.tryParse(
+                                                  numberOfMembersController
+                                                      .text) ??
+                                              0)) {
+                                        selectedContacts.add(contact);
+                                      }
+                                    } else {
+                                      selectedContacts.remove(contact);
+                                    }
+                                  });
+                                  setState(() {
+                                    selectedContacts = selectedContacts;
+                                  });
+                                },
+                              );
+                            })
+                    : ListView.builder(
+                        itemCount: _contacts.length,
+                        itemBuilder: (context, index) {
+                          final contact = _contacts[index];
+                          final isSelected = selectedContacts.contains(contact);
+                          return CheckboxListTile(
+                            activeColor: ColorName.primaryColor,
+                            contentPadding: EdgeInsets.zero,
+                            value: isSelected,
+                            secondary: contact.photo == null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      color: ColorName.primaryColor,
+                                      alignment: Alignment.center,
+                                      child: TextWidget(
+                                        text: contact.displayName[0],
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.memory(
+                                      contact.photo!,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )),
+                            title: Row(
+                              children: [
+                                TextWidget(
+                                  text: contact.displayName,
+                                  fontSize: 16,
+                                  weight: FontWeight.w400,
+                                ),
+                                const SizedBox(width: 5),
+                                Visibility(
+                                  visible:
+                                      melaMemberContacts.contains(contact.id),
+                                  child: SvgPicture.asset(
+                                    Assets.images.svgs.checkmarkIcon,
+                                    width: 18,
+                                    height: 18,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: TextWidget(
+                              text: contact.phones.first.number,
+                              type: TextType.small,
+                              fontSize: 14,
+                              weight: FontWeight.w300,
+                            ),
+                            onChanged: (bool? selected) {
+                              setState(() {
+                                if (selected == true) {
+                                  if (selectedContacts.length <
+                                      (int.tryParse(
+                                              numberOfMembersController.text) ??
+                                          0)) {
+                                    selectedContacts.add(contact);
+                                  }
+                                } else {
+                                  selectedContacts.remove(contact);
                                 }
-                              } else {
-                                selectedContacts.remove(contact);
-                              }
-                            });
-                            setState(() {
-                              selectedContacts = selectedContacts;
-                            });
-                          },
-                        );
-                      }),
-            )
+                              });
+                              setState(() {
+                                selectedContacts = selectedContacts;
+                              });
+                            },
+                          );
+                        }),
+              )
           ],
         ),
       ),
@@ -854,6 +935,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                     if (_formKey.currentState!.validate()) {
                       context.read<EqubBloc>().add(
                             AddEqub(
+                              currencyCode: selectedCurrencyCode,
                               equbModel: EqubModel(
                                 name: nameController.text,
                                 contributionAmount:
@@ -955,66 +1037,57 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   ),
                 ),
               ),
-              child: Center(
-                child: DropdownButton(
-                  padding: EdgeInsets.zero,
-                  elevation: 0,
-                  underline: const SizedBox.shrink(),
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down_outlined,
-                  ),
-                  value: selectedCurrency,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedCurrency = value;
-                      });
-                    }
+              child: InkWell(
+                  onTap: () {
+                    showCurrencyPicker(
+                        context: context,
+                        showFlag: true,
+                        showCurrencyName: true,
+                        showCurrencyCode: true,
+                        favorite: ['USD', 'ETB'],
+                        theme: CurrencyPickerThemeData(
+                            backgroundColor: Colors.white,
+                            inputDecoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Bootstrap.search,
+                                size: 20,
+                              ),
+                              hintText: 'Search Currency',
+                              hintStyle: const TextStyle(
+                                fontSize: 15,
+                                color: Color(0xFF8E8E8E),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                  borderSide: const BorderSide(
+                                    color: ColorName.primaryColor,
+                                    width: 2,
+                                  )),
+                            )),
+                        onSelect: (Currency currency) {
+                          setState(() {
+                            selectedCurrencyCode = currency.code;
+                            selectedCurrency = currency;
+                          });
+                        });
                   },
-                  items: [
-                    DropdownMenuItem(
-                      value: 'etb',
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Assets.images.ethiopianFlag.image(
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const TextWidget(
-                            text: 'ETB',
-                            fontSize: 12,
-                          ),
-                        ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextWidget(
+                        text:
+                            '${selectedCurrency == null ? '🇺🇸' : CurrencyUtils.currencyToEmoji(selectedCurrency!)} $selectedCurrencyCode',
+                        type: TextType.small,
                       ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'usd',
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Assets.images.usaFlag.image(
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const TextWidget(
-                            text: 'USD',
-                            fontSize: 12,
-                          ),
-                        ],
+                      const Icon(
+                        Icons.keyboard_arrow_down_outlined,
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  )),
             )),
         Row(
           children: [
@@ -1086,6 +1159,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             }
             return null;
           },
+          readOnly: true,
           controller: dateController,
           hintText: 'Select the Starting date for the Equb.',
           suffix: const Icon(
@@ -1093,15 +1167,12 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             color: Color(0xFF646464),
           ),
           onTab: () async {
-            startingDate = await showDatePicker(
-              context: context,
-              firstDate: DateTime.now(),
-              lastDate: DateTime(3000),
-            );
+            startingDate = await showCupertinoDatePicker(context);
+
             if (startingDate != null) {
               setState(() {
                 dateController.text =
-                    '${startingDate!.day}-${startingDate!.month}-${startingDate!.year}';
+                    '${startingDate?.day}-${startingDate?.month}-${startingDate?.year}';
               });
             }
           },

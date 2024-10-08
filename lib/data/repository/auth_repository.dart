@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http_interceptor.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
-import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
 class AuthRepository {
+  InterceptedClient client;
+  AuthRepository({required this.client});
+
   /// Registers a new user with the provided [UserModel] data.
   ///
   /// This method sends a POST request to the '/auth/register' endpoint with the user data
@@ -21,8 +23,8 @@ class AuthRepository {
   ///
   /// Returns:
   /// A [Map] containing the response data or an error message.
-  static Future<Map> registerUser(UserModel user) async {
-    final res = await http.post(
+  Future<Map> registerUser(UserModel user) async {
+    final res = await client.post(
       Uri.parse(
         '$baseUrl/auth/register',
       ),
@@ -33,9 +35,7 @@ class AuthRepository {
         user.toMap(),
       ),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -60,12 +60,12 @@ class AuthRepository {
   ///
   /// Returns:
   /// A [Map] containing the response data or an error message.
-  static Future<Map> loginUser({
+  Future<Map> loginUser({
     required int phoneNumber,
     required int countryCode,
     required String password,
   }) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse(
         '$baseUrl/auth/login',
       ),
@@ -79,9 +79,7 @@ class AuthRepository {
         "phoneNumberLogin": true,
       }),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -106,12 +104,12 @@ class AuthRepository {
   ///
   /// Returns:
   /// A [Map] containing the response data or an error message.
-  static Future<Map> loginWithPincode({
+  Future<Map> loginWithPincode({
     required String pincode,
     required int phoneNumber,
     required int countryCode,
   }) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse(
         '$baseUrl/auth/login-by-pin',
       ),
@@ -124,9 +122,7 @@ class AuthRepository {
         "pin": pincode,
       }),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body) as Map;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -134,15 +130,8 @@ class AuthRepository {
     return processErrorResponse(data);
   }
 
-  static Future<Map> deleteUser(
-      String accessToken, String phoneNumber, String code) async {
-    return {
-      //
-    };
-  }
-
-  static Future<Map> setPincode(String accessToken, String pincode) async {
-    final res = await http.post(
+  Future<Map> setPincode(String accessToken, String pincode) async {
+    final res = await client.post(
       Uri.parse('$baseUrl/auth/set-pin'),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -152,9 +141,7 @@ class AuthRepository {
         "pin": pincode,
       }),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -162,8 +149,8 @@ class AuthRepository {
     return processErrorResponse(data);
   }
 
-  static Future<Map> verfiyPincode(String accessToken, String pincode) async {
-    final res = await http.post(
+  Future<Map> verfiyPincode(String accessToken, String pincode) async {
+    final res = await client.post(
       Uri.parse('$baseUrl/auth/confirm-pin'),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -173,9 +160,7 @@ class AuthRepository {
         "pin": pincode,
       }),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -196,9 +181,9 @@ class AuthRepository {
   ///
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
-  static Future<Map> sendOtp(
+  Future<Map> sendOtp(
       int phoneNumber, int countryCode, String signature) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse('$baseUrl/auth/phone/start-verification'),
       headers: {
         'Content-Type': 'application/json',
@@ -211,14 +196,6 @@ class AuthRepository {
         },
       ),
     );
-    if (res.statusCode == 500) {
-      final data = jsonDecode(res.body);
-      if (data['message'] == 'Failed to send SMS.') {
-        return {'error': 'Failed to send SMS', 'userId': data['errorResponse']};
-      }
-
-      throw ServerException('Internal Server Error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -234,6 +211,9 @@ class AuthRepository {
         }
       }
       return data;
+    }
+    if (data['message'] == 'Failed to send SMS.') {
+      return {'error': 'Failed to send SMS', 'userId': data['errorResponse']};
     }
     return processErrorResponse(data);
   }
@@ -252,12 +232,12 @@ class AuthRepository {
   ///
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
-  static Future<Map> verifyOtp({
+  Future<Map> verifyOtp({
     required int phoneNumber,
     required String code,
     required int countryCode,
   }) async {
-    final res = await http.post(Uri.parse('$baseUrl/auth/phone/verify-otp'),
+    final res = await client.post(Uri.parse('$baseUrl/auth/phone/verify-otp'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -268,9 +248,6 @@ class AuthRepository {
             "code": code,
           },
         ));
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -296,9 +273,9 @@ class AuthRepository {
   ///
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
-  static Future<Map> sendOtpForPasswordReset(
+  Future<Map> sendOtpForPasswordReset(
       int phoneNumber, int countryCode, String signature) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse('$baseUrl/auth/password/forgot/request-otp'),
       headers: {
         'Content-Type': 'application/json',
@@ -311,9 +288,6 @@ class AuthRepository {
         },
       ),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Unexpected error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -343,15 +317,17 @@ class AuthRepository {
   ///
   /// Returns:
   /// A `Future<Map>` containing the response data or an error message.
-  static Future<Map> sendOtpForPincodeReset(
+  Future<Map> sendOtpForPincodeReset(
     int phoneNumber,
     int countryCode,
     String signature,
+    String accessToken,
   ) async {
-    final res = await http.post(
+    final res = await post(
       Uri.parse('$baseUrl/auth/pin/forgot/request-otp'),
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
       },
       body: jsonEncode(
         {
@@ -361,9 +337,6 @@ class AuthRepository {
         },
       ),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -391,14 +364,14 @@ class AuthRepository {
   /// If the request is successful (status code 200 or 201), the method returns the response data. If the response has a 'status' field with a value of 'error', the method returns an error object with the error message. If the request fails (status code 500), the method returns an error object with the message 'Unexpected error'.
   ///
   /// The method uses the `http` package to make the POST request and the `jsonDecode` function to parse the response body.
-  static Future<Map> resetPassword({
+  Future<Map> resetPassword({
     required int phoneNumber,
     required String otp,
     required int countryCode,
     required String newPassword,
   }) async {
     final res =
-        await http.post(Uri.parse('$baseUrl/auth/password/forgot/reset'),
+        await client.post(Uri.parse('$baseUrl/auth/password/forgot/reset'),
             headers: {
               'Content-Type': 'application/json',
             },
@@ -408,9 +381,6 @@ class AuthRepository {
               "otpCode": otp,
               "newPassword": newPassword,
             }));
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -434,13 +404,13 @@ class AuthRepository {
   /// If the request is successful (status code 200 or 201), the method returns the response data. If the response has a 'status' field with a value of 'error', the method returns an error object with the error message. If the request fails (status code 500), the method returns an error object with the message 'Unexpected error'.
   ///
   /// The method uses the `http` package to make the POST request and the `jsonDecode` function to parse the response body.
-  static Future<Map> resetPincode({
+  Future<Map> resetPincode({
     required int phoneNumber,
     required String otp,
     required int countryCode,
     required String newPincode,
   }) async {
-    final res = await http.post(Uri.parse('$baseUrl/auth/pin/forgot/reset'),
+    final res = await client.post(Uri.parse('$baseUrl/auth/pin/forgot/reset'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -450,9 +420,6 @@ class AuthRepository {
           "otpCode": otp,
           "newPin": newPincode
         }));
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -461,6 +428,22 @@ class AuthRepository {
       } else {
         return data;
       }
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> deleteUser({required String accessToken}) async {
+    final res = await client.delete(
+      Uri.parse('$baseUrl/user/me/delete'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      return data;
     }
     return processErrorResponse(data);
   }

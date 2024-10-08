@@ -12,7 +12,8 @@ part 'bank_fee_event.dart';
 part 'bank_fee_state.dart';
 
 class BankFeeBloc extends Bloc<BankFeeEvent, BankFeeState> {
-  BankFeeBloc() : super(BankFeeInitial()) {
+  final BanksRepository repository;
+  BankFeeBloc({required this.repository}) : super(BankFeeInitial()) {
     on<FetchBankFee>(_onFetchBankFee);
   }
   _onFetchBankFee(FetchBankFee evene, Emitter emit) async {
@@ -21,7 +22,7 @@ class BankFeeBloc extends Bloc<BankFeeEvent, BankFeeState> {
         emit(BankFeeLoading());
         final token = await getToken();
 
-        final res = await BanksRepository.fetchBankFee(token!);
+        final res = await repository.fetchBankFee(token!);
         if (res.first.containsKey('error')) {
           return emit(BankFeeFail(reason: res.first['error']));
         }

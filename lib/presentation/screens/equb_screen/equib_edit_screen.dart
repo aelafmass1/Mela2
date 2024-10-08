@@ -1,23 +1,29 @@
-import 'dart:typed_data';
-
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/gen/assets.gen.dart';
+import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../core/utils/get_member_contact_info.dart';
+import '../../../core/utils/show_add_member.dart';
+import '../../../core/utils/show_cupertino_date_picker.dart';
+import '../../../data/models/invitee_model.dart';
+
 class EqubEditScreen extends StatefulWidget {
-  const EqubEditScreen({super.key});
+  final EqubDetailModel equb;
+  const EqubEditScreen({super.key, required this.equb});
 
   @override
   State<EqubEditScreen> createState() => _EqubEditScreenState();
@@ -25,7 +31,58 @@ class EqubEditScreen extends StatefulWidget {
 
 class _EqubEditScreenState extends State<EqubEditScreen> {
   String? selectedFrequency;
-  String? selectedCurrency;
+  String? selectedCurrencyCode;
+  Currency? selectedCurrency;
+
+  final equbNameController = TextEditingController();
+  final amountController = TextEditingController();
+  final numberOfMembersController = TextEditingController();
+  final stringDateController = TextEditingController();
+  final frequencyController = TextEditingController();
+
+  List<Contact> _contacts = [];
+
+  DateTime? startingDate;
+
+  Future<void> _fetchContacts() async {
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        _contacts = contacts;
+      });
+    } else {
+      // ignore: use_build_context_synchronously
+      context.pushNamed(RouteName.contactPermission, extra: () {});
+    }
+  }
+
+  @override
+  void initState() {
+    equbNameController.text = widget.equb.name;
+    amountController.text = widget.equb.contributionAmount.toString();
+    numberOfMembersController.text = widget.equb.numberOfMembers.toString();
+    stringDateController.text =
+        '${widget.equb.startDate.day}-${widget.equb.startDate.month}-${widget.equb.startDate.year}';
+    selectedFrequency = widget.equb.frequency;
+    startingDate = widget.equb.startDate;
+    setState(() {
+      selectedCurrencyCode = widget.equb.currency;
+    });
+    _fetchContacts();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    equbNameController.dispose();
+    amountController.dispose();
+    numberOfMembersController.dispose();
+    stringDateController.dispose();
+    frequencyController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,65 +141,40 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
                                 ),
                               ],
                             ),
-                            onPressed: () {
-                              // setState(() {
-                              //   index = 1;
-                              //   sliderWidth = 60.sw;
-                              // });
-                            })
+                            onPressed: () async {
+                              await _fetchContacts();
+
+                              showAddMember(
+                                // ignore: use_build_context_synchronously
+                                context,
+                                int.tryParse(numberOfMembersController.text) ??
+                                    3,
+                                _contacts,
+                                widget.equb.id,
+                              );
+                            }),
                       ],
                     ),
                     const SizedBox(height: 15),
-                    for (var contact in [1, 2, 3, 4, 5, 6, 7, 8, 9])
-                      CheckboxListTile(
-                        activeColor: ColorName.primaryColor,
-                        checkboxShape: const CircleBorder(),
-                        contentPadding: EdgeInsets.zero,
-                        value: true,
-                        secondary: true
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  color: ColorName.primaryColor,
-                                  alignment: Alignment.center,
-                                  child: const TextWidget(
-                                    text: "",
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.memory(
-                                  Uint8List(0),
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                )),
-                        title: const TextWidget(
-                          text: "Name",
-                          fontSize: 16,
-                          weight: FontWeight.w400,
-                        ),
-                        subtitle: const TextWidget(
-                          text: "+251912345678",
-                          type: TextType.small,
-                          fontSize: 14,
-                          weight: FontWeight.w300,
-                        ),
-                        onChanged: (bool? selected) {
-                          // setState(() {
-                          //   if (selected == true) {
-                          //     selectedContacts.add(contact);
-                          //   } else {
-                          //     selectedContacts.remove(contact);
-                          //   }
-                          // });
-                          setState(() {});
-                        },
-                      ),
+                    for (var member in widget.equb.members)
+                      FutureBuilder(
+                          future: getMemberContactInfo(
+                            equbUser: member.user!,
+                            contacts: _contacts,
+                          ),
+                          builder: (context, snapshot) {
+                            return EqubMemberTile(
+                              equbInviteeModel: EqubInviteeModel(
+                                  id: member.userId ?? 0,
+                                  phoneNumber: snapshot.data?.phoneNumber ??
+                                      member.username ??
+                                      '',
+                                  status: member.status,
+                                  name: snapshot.data?.displayName ??
+                                      member.username ??
+                                      ''),
+                            );
+                          })
                   ],
                 ),
               ),
@@ -214,7 +246,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
           weight: FontWeight.w700,
         ),
         Padding(
-          padding: EdgeInsets.only(top: 5),
+          padding: EdgeInsets.only(top: 5, bottom: 15),
           child: TextWidget(
             text: "Please review your Equb details carefully.",
             weight: FontWeight.w400,
@@ -254,7 +286,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
             }
             return null;
           },
-          controller: TextEditingController(),
+          controller: equbNameController,
           hintText: 'Enter your Equb Group Name',
         ),
         Row(
@@ -281,7 +313,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
             }
             return null;
           },
-          controller: TextEditingController(),
+          controller: amountController,
           showOnlyNumber: true,
           hintText: 'Enter Equb per-member collections',
           suffix: Container(
@@ -298,66 +330,56 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
                 ),
               ),
             ),
-            child: Center(
-              child: DropdownButton(
-                padding: EdgeInsets.zero,
-                elevation: 0,
-                underline: const SizedBox.shrink(),
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_outlined,
-                ),
-                value: selectedCurrency,
-                onChanged: (value) {
-                  // if (value != null) {
-                  //   setState(() {
-                  //     selectedCurrency = value;
-                  //   });
-                  // }
+            child: InkWell(
+                onTap: () {
+                  showCurrencyPicker(
+                      context: context,
+                      showFlag: true,
+                      showCurrencyName: true,
+                      showCurrencyCode: true,
+                      theme: CurrencyPickerThemeData(
+                          backgroundColor: Colors.white,
+                          inputDecoration: InputDecoration(
+                            prefixIcon: const Icon(
+                              Bootstrap.search,
+                              size: 20,
+                            ),
+                            hintText: 'Search Currency',
+                            hintStyle: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF8E8E8E),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                                borderSide: const BorderSide(
+                                  color: ColorName.primaryColor,
+                                  width: 2,
+                                )),
+                          )),
+                      onSelect: (Currency currency) {
+                        setState(() {
+                          selectedCurrencyCode = currency.code;
+                          selectedCurrency = currency;
+                        });
+                      });
                 },
-                items: [
-                  DropdownMenuItem(
-                    value: 'etb',
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(40),
-                          child: Assets.images.ethiopianFlag.image(
-                            width: 20,
-                            height: 20,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const TextWidget(
-                          text: 'ETB',
-                          fontSize: 12,
-                        ),
-                      ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextWidget(
+                      text:
+                          '${selectedCurrency == null ? '' : CurrencyUtils.currencyToEmoji(selectedCurrency!)} $selectedCurrencyCode',
+                      type: TextType.small,
                     ),
-                  ),
-                  DropdownMenuItem(
-                    value: 'usd',
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(40),
-                          child: Assets.images.usaFlag.image(
-                            width: 20,
-                            height: 20,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const TextWidget(
-                          text: 'USD',
-                          fontSize: 12,
-                        ),
-                      ],
+                    const Icon(
+                      Icons.keyboard_arrow_down_outlined,
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                )),
           ),
         ),
         Row(
@@ -402,7 +424,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
             }
             return null;
           },
-          controller: TextEditingController(),
+          controller: numberOfMembersController,
           hintText: 'Enter the number of members',
           showOnlyNumber: true,
         ),
@@ -430,23 +452,22 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
             }
             return null;
           },
-          controller: TextEditingController(),
+          readOnly: true,
+          controller: stringDateController,
           hintText: 'Select the Starting date for the Equb.',
           suffix: const Icon(
             Icons.date_range,
             color: Color(0xFF646464),
           ),
           onTab: () async {
-            // startingDate = await showDatePicker(
-            //   context: context,
-            //   firstDate: DateTime.now(),
-            //   lastDate: DateTime(3000),
-            // );
-            // if (startingDate != null) {
-            //   setState(() {
-            //     dateController.text = '${startingDate!.day}-${startingDate!.month}-${startingDate!.year}';
-            //   });
-            // }
+            startingDate = await showCupertinoDatePicker(context);
+
+            if (startingDate != null) {
+              setState(() {
+                stringDateController.text =
+                    '${startingDate?.day}-${startingDate?.month}-${startingDate?.year}';
+              });
+            }
           },
         ),
       ],
@@ -460,6 +481,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
     Widget? suffix,
     bool? enabled,
     bool showOnlyNumber = false,
+    bool readOnly = false,
     String? Function(String? text)? validator,
   }) {
     return Padding(
@@ -467,6 +489,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
       child: TextFormField(
         validator: validator,
         onTap: onTab,
+        readOnly: readOnly,
         controller: controller,
         keyboardType: showOnlyNumber ? TextInputType.phone : null,
         inputFormatters: showOnlyNumber
@@ -482,7 +505,8 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
           enabled: enabled ?? true,
           suffixIcon: suffix,
           hintText: hintText,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
           ),
@@ -500,6 +524,8 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
       child: SizedBox(
         width: 100.sh,
         child: DropdownButtonFormField(
+          isDense: true,
+          isExpanded: false,
           validator: (value) {
             if (value?.isEmpty ?? true) {
               return 'frequency not selected';
@@ -515,7 +541,8 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
           icon: const Icon(Icons.keyboard_arrow_down_outlined),
           decoration: InputDecoration(
               // suffixIcon: const Icon(Icons.keyboard_arrow_down_outlined),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
               hintStyle: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
@@ -526,18 +553,18 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
 
           // width: isReviewPage ? 80.sw : 90.sw,
           onChanged: (value) {
-            // setState(() {
-            //   selectedFrequency = value;
-            // });
+            setState(() {
+              selectedFrequency = value;
+            });
           },
           items: const [
-            DropdownMenuItem(
-              value: 'DAILY',
-              child: TextWidget(
-                text: 'Daily',
-                type: TextType.small,
-              ),
-            ),
+            // DropdownMenuItem(
+            //   value: 'DAILY',
+            //   child: TextWidget(
+            //     text: 'Daily',
+            //     type: TextType.small,
+            //   ),
+            // ),
             DropdownMenuItem(
               value: 'WEEKLY',
               child: TextWidget(

@@ -99,3 +99,13 @@ final class ResetFail extends AuthState {
 }
 
 final class ResetSuccess extends AuthState {}
+
+final class DeleteUserLoading extends AuthState {}
+
+final class DeleteUserFail extends AuthState {
+  final String reason;
+
+  DeleteUserFail({required this.reason});
+}
+
+final class DeleteUserSucess extends AuthState {}

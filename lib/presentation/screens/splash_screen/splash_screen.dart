@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
         context.goNamed(RouteName.loginPincode);
       } else {
         context.read<LocationBloc>().add(GetLocation());
-        context.goNamed(RouteName.login);
+        context.goNamed(RouteName.signup);
       }
     } else {
       context.read<LocationBloc>().add(GetLocation());

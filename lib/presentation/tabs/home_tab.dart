@@ -55,12 +55,16 @@ class _HomeTabState extends State<HomeTab> {
       });
     });
     getDisplayName().then((value) {
-      setState(() {
-        displayName = value;
-      });
+      final names = value?.split(' ');
+      if (names?.isNotEmpty ?? false) {
+        setState(() {
+          displayName = names?.first.toUpperCase();
+        });
+      }
     });
     context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
+
     super.initState();
   }
 

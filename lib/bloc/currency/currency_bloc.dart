@@ -10,7 +10,8 @@ part 'currency_event.dart';
 part 'currency_state.dart';
 
 class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
-  CurrencyBloc() : super(CurrencyInitial()) {
+  final CurrencyRepository repository;
+  CurrencyBloc({required this.repository}) : super(CurrencyInitial()) {
     on<FetchPromotionalCurrency>(_onFetchPromotinalCurrency);
     on<FetchAllCurrencies>(_onFetchAllCurrencies);
   }
@@ -21,7 +22,7 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
         final token = await getToken();
 
         if (token != null) {
-          final res = await CurrencyRepository.fetchCurrencies(token);
+          final res = await repository.fetchCurrencies(token);
           if (res.first.containsKey('error')) {
             return emit(CurrencyFail(reason: res.first['error']));
           }
@@ -51,7 +52,7 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
         final token = await getToken();
 
         if (token != null) {
-          final res = await CurrencyRepository.fetchPromotionalCurrency(token);
+          final res = await repository.fetchPromotionalCurrency(token);
           if (res.containsKey('error')) {
             return emit(CurrencyFail(reason: res['error']));
           }

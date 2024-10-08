@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http_interceptor.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
-class MockHttpClient extends Mock implements http.Client {}
+class MockHttpClient extends Mock implements InterceptedClient {}
 
 void main() {
   late EqubRepository equbRepository;
@@ -42,15 +42,15 @@ void main() {
         'should return EqubModel when the response code is 201 (Created)',
         () async {
           // arrange
-          when(() =>
-              mockClient.post(Uri.parse('$baseUrl/ekub/create'),
-                  headers: any(named: 'headers'),
-                  body: any(named: 'body'))).thenAnswer(
-              (_) async => http.Response(json.encode(tEqubJson), 200, headers: {
-                    'Content-Type': 'application/json',
-                  }));
+          when(() => mockClient.post(Uri.parse('$baseUrl/ekub/create'),
+                  headers: any(named: 'headers'), body: any(named: 'body')))
+              .thenAnswer(
+                  (_) async => Response(json.encode(tEqubJson), 200, headers: {
+                        'Content-Type': 'application/json',
+                      }));
           // act
-          final result = await equbRepository.createEqub(tEqubModel, 'token');
+          final result =
+              await equbRepository.createEqub(tEqubModel, 'token', 'USD');
           // assert
           expect(result, equals(tEqubModel.toMap()));
         },
@@ -61,7 +61,7 @@ void main() {
           // arrange
           when(() => mockClient.post(Uri.parse('$baseUrl/ekub/create'),
               headers: any(named: 'headers'),
-              body: any(named: 'body'))).thenAnswer((_) async => http.Response(
+              body: any(named: 'body'))).thenAnswer((_) async => Response(
                   json.encode({
                     "errorResponse": {"message": "Server Error"}
                   }),
@@ -70,7 +70,8 @@ void main() {
                     'Content-Type': 'application/json',
                   }));
           // act
-          final result = await equbRepository.createEqub(tEqubModel, 'token');
+          final result =
+              await equbRepository.createEqub(tEqubModel, 'token', 'USD');
           log(result.toString());
           // assert
           expect(result, {'error': "Server Error"});
@@ -85,8 +86,7 @@ void main() {
           // arrange
           when(() => mockClient.get(Uri.parse('$baseUrl/ekub/all'),
                   headers: any(named: 'headers')))
-              .thenAnswer((_) async => http.Response(
-                  json.encode([tEqubJson]), 200,
+              .thenAnswer((_) async => Response(json.encode([tEqubJson]), 200,
                   headers: {'Content-Type': 'application/json'}));
           // act
           final result = await equbRepository.fetchEqubs(accessToken: 'token');
@@ -99,9 +99,10 @@ void main() {
         'should return a ServerFailure when the response code is 400 or 500',
         () async {
           // arrange
-          when(() => mockClient.get(Uri.parse('$baseUrl/ekub/all'),
-                  headers: any(named: 'headers')))
-              .thenAnswer((_) async => http.Response(
+          when(() =>
+                  mockClient.get(Uri.parse('$baseUrl/ekub/all'),
+                      headers: any(named: 'headers')))
+              .thenAnswer((_) async => Response(
                   json.encode({
                     "errorResponse": {"message": "Server Error"}
                   }),
@@ -124,10 +125,11 @@ void main() {
         'should return a List when the response code is 201 ',
         () async {
           // arrange
-          when(() => mockClient.post(Uri.parse('$baseUrl/ekub/1/invite'),
-                  headers: any(named: 'headers'), body: any(named: 'body')))
-              .thenAnswer((_) async =>
-                  http.Response(json.encode([tEqubJson]), 200, headers: {
+          when(() =>
+              mockClient.post(Uri.parse('$baseUrl/ekub/1/invite'),
+                  headers: any(named: 'headers'),
+                  body: any(named: 'body'))).thenAnswer(
+              (_) async => Response(json.encode([tEqubJson]), 200, headers: {
                     'Content-Type': 'application/json',
                   }));
           // act
@@ -146,7 +148,7 @@ void main() {
           // arrange
           when(() => mockClient.post(Uri.parse('$baseUrl/ekub/1/invite'),
               headers: any(named: 'headers'),
-              body: any(named: 'body'))).thenAnswer((_) async => http.Response(
+              body: any(named: 'body'))).thenAnswer((_) async => Response(
                   json.encode([
                     {'error': "something is wrong"}
                   ]),

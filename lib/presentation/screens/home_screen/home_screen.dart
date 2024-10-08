@@ -182,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen>
       imageUrl = value;
     });
     reviewTheApp();
+    context.read<NavigationBloc>().add(NavigateTo(index: 0));
     // getPackageData().then((value) {
     //   _checkForUpdate();
     // });

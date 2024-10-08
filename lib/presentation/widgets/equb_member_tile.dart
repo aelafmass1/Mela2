@@ -71,7 +71,8 @@ class EqubMemberTile extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                equbInviteeModel.status.isEmpty
+                equbInviteeModel.status.isEmpty ||
+                        equbInviteeModel.status == 'NOT_INVITED'
                     ? _buildInviteButton(context)
                     : TextWidget(
                         text: equbInviteeModel.status == 'INVITED'

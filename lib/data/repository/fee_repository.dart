@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'package:http/http.dart';
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
-import '../../core/exceptions/server_exception.dart';
-
 /// A repository class for fetching fee data from an API.
 class FeeRepository {
-  final Client client;
+  final InterceptedClient client;
 
   FeeRepository({required this.client});
 
@@ -26,9 +24,7 @@ class FeeRepository {
         'Content-Type': 'application/json',
       },
     );
-    if (response.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(response.body) as List<dynamic>;
     if (response.statusCode == 200) {
       return data;

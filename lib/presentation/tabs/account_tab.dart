@@ -64,14 +64,19 @@ class _AccountTabState extends State<AccountTab> {
           listener: (context, state) {
             if (mounted) {
               if (context.mounted) {
-                if (state is AuthLoading) {
+                if (state is DeleteUserLoading) {
                   showDialog(
                     context: context,
                     builder: (_) => const Align(child: LoadingWidget()),
                   );
-                } else if (state is AuthSuccess) {
-                  context.goNamed(RouteName.login);
-                } else if (state is AuthFail) {
+                } else if (state is DeleteUserSucess) {
+                  deleteToken();
+                  deleteDisplayName();
+                  deletePhoneNumber();
+                  deleteLogInStatus();
+                  deleteCountryCode();
+                  context.goNamed(RouteName.signup);
+                } else if (state is DeleteUserFail) {
                   context.pop();
                   showSnackbar(
                     context,
@@ -272,13 +277,12 @@ class _AccountTabState extends State<AccountTab> {
                         title: 'Logout',
                         isLogout: true,
                         onTab: () {
-                          // FirebaseAuth.instance.signOut();
                           deleteToken();
                           deleteDisplayName();
                           deletePhoneNumber();
                           deleteLogInStatus();
                           deleteCountryCode();
-                          context.goNamed(RouteName.login);
+                          context.goNamed(RouteName.signup);
                         },
                       ),
                     ],

@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
-import '../../core/exceptions/server_exception.dart';
-
 class PaymentCardRepository {
+  final InterceptedClient client;
+
+  PaymentCardRepository({required this.client});
+
   /// Adds a new payment card to the user's account.
   ///
   /// This method sends a POST request to the `$baseUrl/payment-methods/add-card` endpoint
@@ -22,11 +24,11 @@ class PaymentCardRepository {
   ///
   /// Returns:
   /// A `Future<Map<String, dynamic>>` containing the payment card data or an error response.
-  static Future<Map<String, dynamic>> addPaymentCard({
+  Future<Map<String, dynamic>> addPaymentCard({
     required String accessToken,
     required String token,
   }) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse('$baseUrl/payment-methods/add-card'),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -38,9 +40,7 @@ class PaymentCardRepository {
         },
       ),
     );
-    if (res.statusCode == 500) {
-      return {'error': 'Internal Server Error'};
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -61,19 +61,17 @@ class PaymentCardRepository {
   ///
   /// Returns:
   /// A `Future<List>` containing the payment card data or an error response.
-  static Future<List> fetchPaymentCards({
+  Future<List> fetchPaymentCards({
     required String accessToken,
   }) async {
-    final res = await http.get(
+    final res = await client.get(
       Uri.parse('$baseUrl/payment-methods/list'),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       },
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

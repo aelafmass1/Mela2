@@ -4,8 +4,9 @@ sealed class EqubEvent {}
 
 final class AddEqub extends EqubEvent {
   final EqubModel equbModel;
+  final String currencyCode;
 
-  AddEqub({required this.equbModel});
+  AddEqub({required this.equbModel, required this.currencyCode});
 }
 
 final class FetchAllEqubs extends EqubEvent {}

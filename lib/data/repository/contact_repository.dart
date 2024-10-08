@@ -1,14 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:http/http.dart';
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 import '../../core/constants/url_constants.dart';
-import '../../core/exceptions/server_exception.dart';
 
 class ContactRepository {
-  final Client client;
+  final InterceptedClient client;
 
   ContactRepository({required this.client});
 
@@ -82,9 +81,7 @@ class ContactRepository {
         body,
       ),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

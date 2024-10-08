@@ -82,11 +82,13 @@ final class SendOTPForPincodeReset extends AuthEvent {
   final int phoneNumber;
   final int countryCode;
   final String signature;
+  final String accessToken;
 
   SendOTPForPincodeReset({
     required this.phoneNumber,
     required this.countryCode,
     required this.signature,
+    required this.accessToken,
   });
 }
 

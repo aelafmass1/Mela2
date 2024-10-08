@@ -11,7 +11,9 @@ part 'payment_intent_event.dart';
 part 'payment_intent_state.dart';
 
 class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
-  PaymentIntentBloc() : super(PaymentIntentInitial()) {
+  final PaymentIntentRepository repository;
+  PaymentIntentBloc({required this.repository})
+      : super(PaymentIntentInitial()) {
     on<FetchClientSecret>(_onFetchClientSecret);
   }
 
@@ -25,7 +27,7 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
         final token = await getToken();
 
         if (token != null) {
-          final res = await PaymentIntentRepository.createPaymentIntent(
+          final res = await repository.createPaymentIntent(
             currency: event.currency,
             amount: event.amount,
             accessToken: token,

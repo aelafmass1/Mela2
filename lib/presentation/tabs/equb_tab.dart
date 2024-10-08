@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
@@ -23,6 +24,9 @@ class EqubTab extends StatefulWidget {
 }
 
 class _EqubTabState extends State<EqubTab> {
+  List<EqubDetailModel> yourEqubs = [];
+  List<EqubDetailModel> invitedEqubs = [];
+  List<EqubDetailModel> otherEqubs = [];
   @override
   void initState() {
     context.read<EqubBloc>().add(FetchAllEqubs());
@@ -39,13 +43,17 @@ class _EqubTabState extends State<EqubTab> {
         toolbarHeight: 30,
       ),
       body: BlocConsumer<EqubBloc, EqubState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is EqubFail) {
             showSnackbar(
               context,
               title: 'Error',
               description: state.reason,
             );
+          } else if (state is EqubSuccess) {
+            final countryCode = await getCountryCode();
+            final phoneNumber = await getPhoneNumber();
+            //
           }
         },
         builder: (context, state) {
@@ -210,17 +218,13 @@ class _EqubTabState extends State<EqubTab> {
                         if (state.equbList.length == 1)
                           EqubCard(equb: state.equbList.first)
                         else
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (var equb in state.equbList)
-                                  EqubCard(
-                                    equb: equb,
-                                    onCarousel: true,
-                                  ),
-                              ],
-                            ),
+                          Column(
+                            children: [
+                              for (var equb in state.equbList)
+                                EqubCard(
+                                  equb: equb,
+                                ),
+                            ],
                           ),
                         Container(
                           padding: const EdgeInsets.only(left: 15, top: 15),
@@ -235,6 +239,7 @@ class _EqubTabState extends State<EqubTab> {
                           showJoinRequestButton: true,
                           onTab: () {
                             final detail = EqubDetailModel(
+                              currency: 'USD',
                               id: -1,
                               name: 'Member Test Another',
                               numberOfMembers: 10,
@@ -256,6 +261,7 @@ class _EqubTabState extends State<EqubTab> {
                                 extra: detail);
                           },
                           equb: EqubDetailModel(
+                            currency: 'USD',
                             id: -1,
                             name: 'Member Test Another',
                             numberOfMembers: 10,
