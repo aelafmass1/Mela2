@@ -51,8 +51,6 @@ class _EqubTabState extends State<EqubTab> {
               description: state.reason,
             );
           } else if (state is EqubSuccess) {
-            final countryCode = await getCountryCode();
-            final phoneNumber = await getPhoneNumber();
             //
           }
         },

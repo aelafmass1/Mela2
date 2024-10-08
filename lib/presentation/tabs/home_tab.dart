@@ -217,35 +217,34 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     child: Center(
                       child: DropdownButton(
-                          value: 'usd',
-                          elevation: 0,
-                          underline: const SizedBox.shrink(),
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          items: [
-                            DropdownMenuItem(
-                              value: 'usd',
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Assets.images.usaFlag.image(
-                                      width: 20,
-                                      height: 20,
-                                      fit: BoxFit.cover,
-                                    ),
+                        value: 'usd',
+                        elevation: 0,
+                        underline: const SizedBox.shrink(),
+                        icon: const SizedBox.shrink(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'usd',
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Assets.images.usaFlag.image(
+                                    width: 20,
+                                    height: 20,
+                                    fit: BoxFit.cover,
                                   ),
-                                  const SizedBox(width: 5),
-                                  const TextWidget(
-                                    text: 'USD',
-                                    fontSize: 12,
-                                  )
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 5),
+                                const TextWidget(
+                                  text: 'USD',
+                                  fontSize: 12,
+                                )
+                              ],
                             ),
-                          ],
-                          onChanged: (value) {
-                            //
-                          }),
+                          ),
+                        ],
+                        onChanged: null,
+                      ),
                     ),
                   ),
                   errorBorder: OutlineInputBorder(

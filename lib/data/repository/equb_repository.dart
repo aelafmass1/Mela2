@@ -166,4 +166,21 @@ class EqubRepository {
     }
     return processErrorResponse(data);
   }
+
+  Future<Map> fetchEqubCurrencies({
+    required String accessToken,
+  }) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/ekub/currency/all'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
 }

@@ -27,7 +27,7 @@ class ServerResponseInterceptor implements InterceptorContract {
   @override
   FutureOr<BaseResponse> interceptResponse({required BaseResponse response}) {
     if (_serverErrorStatusCodes.contains(response.statusCode)) {
-      throw ServerException('Unexpected Error', response.statusCode);
+      throw ServerException('Oops! Something went wrong.', response.statusCode);
     }
     return response;
   }

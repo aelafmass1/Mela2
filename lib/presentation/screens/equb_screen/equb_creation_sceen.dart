@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
+import 'package:transaction_mobile_app/bloc/equb_currencies/equb_currencies_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_cupertino_date_picker.dart';
@@ -90,6 +91,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
 
   @override
   void initState() {
+    context.read<EqubCurrenciesBloc>().add(FetchEqubCurrencies());
     getDisplayName().then((value) {
       setState(() {
         adminName = value ?? '';
@@ -423,9 +425,23 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   _buildEqubForm() {
     return Visibility(
       visible: index == 0,
-      child: SingleChildScrollView(
-        child: _buildEqubTextFeilds(),
-      ),
+      child: BlocBuilder<EqubCurrenciesBloc, EqubCurrenciesState>(
+          builder: (context, state) {
+        if (state is EqubCurrenciesSuccess) {
+          return SingleChildScrollView(
+            child: _buildEqubTextFeilds(
+              state: state,
+            ),
+          );
+        } else if (state is EqubCurrenciesLoading) {
+          return const Center(
+            child: LoadingWidget(
+              color: ColorName.primaryColor,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }),
     );
   }
 
@@ -939,10 +955,11 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                               equbModel: EqubModel(
                                 name: nameController.text,
                                 contributionAmount:
-                                    double.parse(amountController.text),
+                                    double.tryParse(amountController.text) ?? 0,
                                 frequency: selectedFrequency!,
-                                numberOfMembers:
-                                    int.parse(numberOfMembersController.text),
+                                numberOfMembers: int.tryParse(
+                                        numberOfMembersController.text) ??
+                                    0,
                                 startDate: startingDate!,
                                 members: selectedContacts
                                     .map((c) => ContactModel(
@@ -965,7 +982,8 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
     );
   }
 
-  _buildEqubTextFeilds({bool isReviewPage = false}) {
+  _buildEqubTextFeilds(
+      {bool isReviewPage = false, required EqubCurrenciesSuccess state}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1044,7 +1062,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                         showFlag: true,
                         showCurrencyName: true,
                         showCurrencyCode: true,
-                        favorite: ['USD', 'ETB'],
+                        currencyFilter: state.currencies,
                         theme: CurrencyPickerThemeData(
                             backgroundColor: Colors.white,
                             inputDecoration: InputDecoration(
@@ -1399,7 +1417,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                     const Expanded(child: SizedBox()),
                     TextWidget(
                       text: numberOfMembersController.text.isNotEmpty
-                          ? '\$${int.parse(numberOfMembersController.text) * int.parse(amountController.text)}'
+                          ? '\$${(int.tryParse(numberOfMembersController.text) ?? 0) * (int.tryParse(amountController.text) ?? 0)}'
                           : '',
                       fontSize: 14,
                       color: const Color(0xfF6D6D6D),
