@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -432,7 +433,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
               // color: isValid ? Colors.white : Colors.black,
             ),
         textAlign: TextAlign.center,
-        readOnly: true,
+        readOnly: kIsWeb ? false : true,
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),

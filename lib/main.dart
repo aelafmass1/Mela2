@@ -1,6 +1,8 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -45,30 +47,32 @@ import 'data/services/api/api_service.dart';
 //main method
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  if (kIsWeb == false) {
+    await dotenv.load(fileName: ".env");
 
-  // Set the Stripe publishable key, which is necessary to identify your Stripe account.
-  Stripe.publishableKey = dotenv.env['PUBLISHABLE_KEY']!;
+    // Set the Stripe publishable key, which is necessary to identify your Stripe account.
+    Stripe.publishableKey = dotenv.env['PUBLISHABLE_KEY']!;
 
-  // Set the Stripe merchant identifier, which is required for Apple Pay integration.
-  Stripe.merchantIdentifier = 'Mela Fi';
+    // Set the Stripe merchant identifier, which is required for Apple Pay integration.
+    Stripe.merchantIdentifier = 'Mela Fi';
 
-  // Apply Stripe settings to ensure the configuration is set up properly.
-  await Stripe.instance.applySettings();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    // Apply Stripe settings to ensure the configuration is set up properly.
+    await Stripe.instance.applySettings();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  // Initialize Firebase Analytics instance to track user interactions and app events.
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+    // Initialize Firebase Analytics instance to track user interactions and app events.
+    FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-  // Enable analytics data collection and log an event for app open.
-  await analytics.setAnalyticsCollectionEnabled(true);
-  await analytics.logAppOpen();
+    // Enable analytics data collection and log an event for app open.
+    await analytics.setAnalyticsCollectionEnabled(true);
+    await analytics.logAppOpen();
 
-  // Initialize Firebase Crashlytics instance to capture and report crash data.
-  FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
-  FlutterError.onError = crashlytics.recordFlutterError;
+    // Initialize Firebase Crashlytics instance to capture and report crash data.
+    FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
+    FlutterError.onError = crashlytics.recordFlutterError;
+  }
 
   /// Initialize Sentry for crash reporting and error tracking.
   await SentryFlutter.init(
@@ -83,7 +87,8 @@ void main() async {
       // Setting to 1.0 will profile 100% of sampled transactions:
       options.profilesSampleRate = 1.0;
     },
-    appRunner: () => runApp(const MainApp()),
+    appRunner: () =>
+        runApp(DevicePreview(enabled: kIsWeb, builder: (_) => const MainApp())),
   );
 }
 

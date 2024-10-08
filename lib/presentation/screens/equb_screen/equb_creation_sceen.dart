@@ -1,4 +1,5 @@
 import 'package:currency_picker/currency_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,6 +65,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
   late WebViewController _controller;
 
   Future<void> _fetchContacts() async {
+    if (kIsWeb) return;
     if (await Permission.contacts.isDenied) {
       await Future.delayed(const Duration(seconds: 10));
     }
@@ -97,32 +99,35 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
         adminName = value ?? '';
       });
     });
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..enableZoom(true)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            if (progress == 100) {
-              setState(() {
-                isWebviewLoading = false;
-              });
-            } else {
-              setState(() {
-                isWebviewLoading = true;
-              });
-            }
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse('https://static.melafinance.com/TOS.html'));
+    if (kIsWeb == false) {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..enableZoom(true)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int progress) {
+              if (progress == 100) {
+                setState(() {
+                  isWebviewLoading = false;
+                });
+              } else {
+                setState(() {
+                  isWebviewLoading = true;
+                });
+              }
+            },
+            onPageStarted: (String url) {},
+            onPageFinished: (String url) {},
+            onHttpError: (HttpResponseError error) {},
+            onWebResourceError: (WebResourceError error) {},
+            onNavigationRequest: (NavigationRequest request) {
+              return NavigationDecision.navigate;
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse('https://static.melafinance.com/TOS.html'));
+    }
+
     super.initState();
   }
 
@@ -780,9 +785,13 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                         color: ColorName.primaryColor,
                       ),
                     )
-                  : WebViewWidget(
-                      controller: _controller,
-                    ),
+                  : SizedBox(),
+              // Visibility(
+              //     visible: kIsWeb == false,
+              //     child: WebViewWidget(
+              //       controller: _controller,
+              //     ),
+              //   ),
             ),
           ),
           const SizedBox(height: 5),

@@ -1,4 +1,5 @@
 import 'package:currency_picker/currency_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +46,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
   DateTime? startingDate;
 
   Future<void> _fetchContacts() async {
+    if (kIsWeb) return;
     if (await FlutterContacts.requestPermission(readonly: true)) {
       List<Contact> contacts =
           await FlutterContacts.getContacts(withProperties: true);

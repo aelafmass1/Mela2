@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -134,6 +135,7 @@ class _SentTabState extends State<SentTab> {
   /// If permission has been asked before and denied, it sets [isPermissionDenied] to true.
   /// If permission has been granted, it fetches contacts and updates the [contacts] list.
   Future<void> _fetchContacts() async {
+    if (kIsWeb) return;
     if (await isPermissionAsked() == false) {
       // Permission has not been asked before
       if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -306,6 +308,9 @@ class _SentTabState extends State<SentTab> {
 
   @override
   void initState() {
+    if (kIsWeb) {
+      isPermissionDenied = true;
+    }
     _streamEvent = PlaidLink.onEvent.listen(_onEvent);
     _streamExit = PlaidLink.onExit.listen(_onExit);
     _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
@@ -1272,6 +1277,8 @@ class _SentTabState extends State<SentTab> {
                                   children: [
                                     if (bank.bankLogo != null)
                                       CachedNetworkImage(
+                                        width: 24,
+                                        height: 24,
                                         imageUrl: bank.bankLogo ?? '',
                                         errorWidget: (context, x, y) =>
                                             const SizedBox(

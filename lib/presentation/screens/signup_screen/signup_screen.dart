@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -152,6 +153,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           return 'Phone Number is empty';
                         }
                         if (!isPhoneNumberValid) {
+                          if (kIsWeb) {
+                            return null;
+                          }
                           return 'Please enter a valid phone number';
                         }
                         return null;

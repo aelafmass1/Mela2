@@ -80,7 +80,7 @@ class EqubDetailModel {
       contributionAmount: map['contributionAmount'] as double,
       frequency: map['frequency'] as String,
       startDate: DateTime.parse(map['startDate']),
-      currency: map['currency'] as String,
+      currency: map['currency'] == null ? '' : map['currency'] as String,
       members: List<EqubMemberModel>.from(
         (map['members'] as List).map<EqubMemberModel>(
           (x) => EqubMemberModel.fromMap(x),

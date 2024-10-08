@@ -106,7 +106,7 @@ class _EqubTabState extends State<EqubTab> {
                   ),
                   const SizedBox(height: 10),
                   Assets.images.equbImage.image(
-                    width: 250,
+                    width: 150,
                   ),
                   const SizedBox(height: 10),
                   const TextWidget(
@@ -133,6 +133,7 @@ class _EqubTabState extends State<EqubTab> {
                       onPressed: () {
                         context.pushNamed(RouteName.equbCreation);
                       }),
+                  const SizedBox(height: 20),
                   SvgPicture.asset(
                     Assets.images.svgs.discovery,
                     width: 150,

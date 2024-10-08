@@ -153,7 +153,7 @@ class EqubCard extends StatelessWidget {
                             width: 20.sw,
                             child: TextWidget(
                               text: 'ETB ${equb.contributionAmount}',
-                              fontSize: 12,
+                              fontSize: 10,
                               color: ColorName.primaryColor,
                               weight: FontWeight.bold,
                             ),
@@ -185,7 +185,7 @@ class EqubCard extends StatelessWidget {
                             child: TextWidget(
                               text:
                                   'ETB ${equb.contributionAmount * equb.numberOfMembers}',
-                              fontSize: 12,
+                              fontSize: 10,
                               color: ColorName.primaryColor,
                               weight: FontWeight.bold,
                             ),
@@ -207,7 +207,7 @@ class EqubCard extends StatelessWidget {
                           TextWidget(
                             text:
                                 '${(equb.startDate.day + (getFrequencyDay(equb.frequency) ?? 0)).toString().padLeft(2, '0')}-${equb.startDate.month.toString().padLeft(2, '0')}-${equb.startDate.year}',
-                            fontSize: 14,
+                            fontSize: 10,
                             color: ColorName.primaryColor,
                             weight: FontWeight.bold,
                           )
@@ -289,7 +289,7 @@ class EqubCard extends StatelessWidget {
                             mergeMode: true,
                             onGetText: (value) {
                               return Text(
-                                '${value.toInt()}\nDays',
+                                '${value.toInt()}\n${remainingDay == 1 ? 'Day' : 'Days'}',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
