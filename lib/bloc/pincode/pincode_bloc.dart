@@ -11,7 +11,8 @@ part 'pincode_event.dart';
 part 'pincode_state.dart';
 
 class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
-  PincodeBloc() : super(PinInitial()) {
+  final AuthRepository repository;
+  PincodeBloc({required this.repository}) : super(PinInitial()) {
     on<SetPinCode>(_onSetPincode);
     on<VerifyPincode>(_onVerifyPincode);
   }
@@ -21,7 +22,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         emit(PinLoading());
         final token = await getToken();
 
-        final res = await AuthRepository.verfiyPincode(
+        final res = await repository.verfiyPincode(
           token ?? '',
           event.pincode,
         );
@@ -47,7 +48,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
       if (state is! PinLoading) {
         emit(PinLoading());
         final token = await getToken();
-        final res = await AuthRepository.setPincode(token ?? '', event.pincode);
+        final res = await repository.setPincode(token ?? '', event.pincode);
         if (res.containsKey('error')) {
           return emit(PinFail(reason: res['error']));
         }

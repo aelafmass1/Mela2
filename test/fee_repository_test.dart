@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:http/http.dart' as http;
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/data/models/fee_models.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 
-class MockHttpClient extends Mock implements http.Client {}
+class MockHttpClient extends Mock implements InterceptedClient {}
 
 /// Tests the behavior of the [FeeRepository] class.
 ///
@@ -41,7 +41,7 @@ void main() {
       // arrange
       when(() => mockClient.get(Uri.parse('$baseUrl/api/fees/all'),
               headers: any(named: 'headers')))
-          .thenAnswer((_) async => http.Response(json.encode([tfeeJson]), 200,
+          .thenAnswer((_) async => Response(json.encode([tfeeJson]), 200,
               headers: {'Content-Type': 'application/json'}));
       // act
       final result = await feeRepository.fetchFees('token');
@@ -50,14 +50,14 @@ void main() {
     });
     test('should return a List of Fee when fetching is failed', () async {
       // arrange
-      when(() => mockClient.get(Uri.parse('$baseUrl/api/fees/all'),
-              headers: any(named: 'headers')))
-          .thenAnswer((_) async => http.Response(
-              json.encode([
-                {'error': "Something went wrong"}
-              ]),
-              400,
-              headers: {'Content-Type': 'application/json'}));
+      when(() =>
+          mockClient.get(Uri.parse('$baseUrl/api/fees/all'),
+              headers: any(named: 'headers'))).thenAnswer((_) async => Response(
+          json.encode([
+            {'error': "Something went wrong"}
+          ]),
+          400,
+          headers: {'Content-Type': 'application/json'}));
       // act
       final result = await feeRepository.fetchFees('token');
       // assert

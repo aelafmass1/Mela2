@@ -233,7 +233,10 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           // setState(() {
                           //   index = 0;
                           // });
-                          context.pushNamed(RouteName.equbEdit);
+                          context.pushNamed(
+                            RouteName.equbEdit,
+                            extra: widget.equbDetailModel,
+                          );
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -600,6 +603,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
                         if (isPermissionDenied == false) {
                           showAddMember(
+                            // ignore: use_build_context_synchronously
                             context,
                             int.tryParse(numberOfMembersController.text) ?? 3,
                             _contacts,

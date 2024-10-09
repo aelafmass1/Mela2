@@ -13,7 +13,8 @@ part 'equb_member_event.dart';
 part 'equb_member_state.dart';
 
 class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
-  EqubMemberBloc() : super(EqubMemberInitial()) {
+  final EqubRepository repository;
+  EqubMemberBloc({required this.repository}) : super(EqubMemberInitial()) {
     on<InviteEqubMemeber>(_onInviteEqubMember);
     on<EqubAssignWinner>(_onEqubManualAssignWinner);
     on<EqubAutoPickWinner>(_onEqubAutoPickWinner);
@@ -31,7 +32,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       if (state is! EqubManualWinnerLoading) {
         emit(EqubManualWinnerLoading());
         final token = await getToken();
-        final res = await EqubRepository(client: Client()).manualAssignWinner(
+        final res = await repository.manualAssignWinner(
           accessToken: token!,
           cycleId: event.cycleId,
           memberId: event.memberId,
@@ -64,7 +65,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       if (state is! EqubAutoWinnerLoading) {
         emit(EqubAutoWinnerLoading());
         final token = await getToken();
-        final res = await EqubRepository(client: Client()).autoPickWinner(
+        final res = await repository.autoPickWinner(
           accessToken: token!,
           cycleId: event.cycleId,
         );
@@ -97,7 +98,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
 
         final token = await getToken();
 
-        final res = await EqubRepository(client: Client()).inviteMembers(
+        final res = await repository.inviteMembers(
           accessToken: token!,
           equbId: event.equbId,
           members: event.contacts,

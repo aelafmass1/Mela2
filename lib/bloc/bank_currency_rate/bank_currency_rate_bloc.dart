@@ -14,7 +14,9 @@ part 'bank_currency_rate_state.dart';
 
 class BankCurrencyRateBloc
     extends Bloc<BankCurrencyRateEvent, BankCurrencyRateState> {
-  BankCurrencyRateBloc() : super(BankCurrencyRateInitial()) {
+  final CurrencyRateRepository repository;
+  BankCurrencyRateBloc({required this.repository})
+      : super(BankCurrencyRateInitial()) {
     on<FetchCurrencyRate>(_onFetchCurrencyRate);
   }
   _onFetchCurrencyRate(
@@ -24,7 +26,7 @@ class BankCurrencyRateBloc
         emit(BankCurrencyRateLoading());
 
         final token = await getToken();
-        final res = await CurrencyRateRepository.fetchCurrencyRate(token!);
+        final res = await repository.fetchCurrencyRate(token!);
         final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
         emit(BankCurrencyRateSuccess(rates: rates));
       }

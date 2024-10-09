@@ -44,6 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  Timer? _debounceTimer;
+
+  debounceValidation(GlobalKey<FormFieldState> formKey) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 600), () {
+      // Trigger validation after 600ms of inactivity (debounce period)
+
+      formKey.currentState?.validate();
+    });
+  }
+
   @override
   void initState() {
     final countryCode = context.read<LocationBloc>().state.countryCode;
@@ -75,17 +86,6 @@ class _LoginScreenState extends State<LoginScreen> {
     passwordController.dispose();
     _phoneNumberNode.dispose();
     super.dispose();
-  }
-
-  Timer? _debounceTimer;
-
-  debounceValidation(GlobalKey<FormFieldState> formKey) {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 600), () {
-      // Trigger validation after 600ms of inactivity (debounce period)
-
-      formKey.currentState?.validate();
-    });
   }
 
   @override
@@ -210,8 +210,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       validator: (text) {
                         if (text!.isEmpty) {
                           return 'password is empty';
-                        } else if (text.length < 8) {
-                          return 'Password must be at least 8 characters long.';
+                        } else if (text.length < 6) {
+                          return 'Password must be at least 6 characters long.';
                         }
                         return null;
                       },
@@ -272,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         setFirstTime(false);
 
-                        context.pushNamed(RouteName.loginPincode);
+                        context.goNamed(RouteName.loginPincode);
                       }
                     },
                     builder: (context, state) {

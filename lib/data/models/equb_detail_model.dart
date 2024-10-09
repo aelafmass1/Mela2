@@ -14,10 +14,10 @@ class EqubDetailModel {
   final double contributionAmount;
   final String frequency;
   final DateTime startDate;
+  final String currency;
   final List<EqubMemberModel> members;
   final List<EqubInviteeModel> invitees;
   final List<EqubCycleModel> cycles;
-
   EqubDetailModel({
     required this.id,
     required this.name,
@@ -25,6 +25,7 @@ class EqubDetailModel {
     required this.contributionAmount,
     required this.frequency,
     required this.startDate,
+    required this.currency,
     required this.members,
     required this.invitees,
     required this.cycles,
@@ -37,6 +38,7 @@ class EqubDetailModel {
     double? contributionAmount,
     String? frequency,
     DateTime? startDate,
+    String? currency,
     List<EqubMemberModel>? members,
     List<EqubInviteeModel>? invitees,
     List<EqubCycleModel>? cycles,
@@ -48,6 +50,7 @@ class EqubDetailModel {
       contributionAmount: contributionAmount ?? this.contributionAmount,
       frequency: frequency ?? this.frequency,
       startDate: startDate ?? this.startDate,
+      currency: currency ?? this.currency,
       members: members ?? this.members,
       invitees: invitees ?? this.invitees,
       cycles: cycles ?? this.cycles,
@@ -62,6 +65,7 @@ class EqubDetailModel {
       'contributionAmount': contributionAmount,
       'frequency': frequency,
       'startDate': startDate.millisecondsSinceEpoch,
+      'currency': currency,
       'members': members.map((x) => x.toMap()).toList(),
       'invitees': invitees.map((x) => x.toMap()).toList(),
       'cycles': cycles.map((x) => x.toMap()).toList(),
@@ -75,18 +79,14 @@ class EqubDetailModel {
       numberOfMembers: map['numberOfMembers'] as int,
       contributionAmount: map['contributionAmount'] as double,
       frequency: map['frequency'] as String,
-      startDate: DateTime.parse(map['startDate'] as String),
+      startDate: DateTime.parse(map['startDate']),
+      currency: map['currency'] as String,
       members: List<EqubMemberModel>.from(
         (map['members'] as List).map<EqubMemberModel>(
           (x) => EqubMemberModel.fromMap(x),
         ),
       ),
       invitees: [],
-      //  List<EqubInviteeModel>.from(
-      //   (map['invitees'] as List).map<EqubInviteeModel>(
-      //     (x) => EqubInviteeModel.fromMap(x),
-      //   ),
-      // ),
       cycles: map['cycles'] == null
           ? []
           : List<EqubCycleModel>.from(
@@ -104,7 +104,7 @@ class EqubDetailModel {
 
   @override
   String toString() {
-    return 'EqubDetailModel(id: $id, name: $name, numberOfMembers: $numberOfMembers, contributionAmount: $contributionAmount, frequency: $frequency, startDate: $startDate, members: $members, invitees: $invitees, cycles: $cycles)';
+    return 'EqubDetailModel(id: $id, name: $name, numberOfMembers: $numberOfMembers, contributionAmount: $contributionAmount, frequency: $frequency, startDate: $startDate, currency: $currency, members: $members, invitees: $invitees, cycles: $cycles)';
   }
 
   @override
@@ -117,6 +117,7 @@ class EqubDetailModel {
         other.contributionAmount == contributionAmount &&
         other.frequency == frequency &&
         other.startDate == startDate &&
+        other.currency == currency &&
         listEquals(other.members, members) &&
         listEquals(other.invitees, invitees) &&
         listEquals(other.cycles, cycles);
@@ -130,6 +131,7 @@ class EqubDetailModel {
         contributionAmount.hashCode ^
         frequency.hashCode ^
         startDate.hashCode ^
+        currency.hashCode ^
         members.hashCode ^
         invitees.hashCode ^
         cycles.hashCode;

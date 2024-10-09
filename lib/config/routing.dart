@@ -118,7 +118,9 @@ final goRouting = GoRouter(
         GoRoute(
           path: 'equb_edit',
           name: RouteName.equbEdit,
-          builder: (context, state) => const EqubEditScreen(),
+          builder: (context, state) => EqubEditScreen(
+            equb: state.extra as EqubDetailModel,
+          ),
         ),
         GoRoute(
           path: 'equb_action_completed',

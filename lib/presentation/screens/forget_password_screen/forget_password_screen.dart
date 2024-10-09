@@ -8,6 +8,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/core/utils/show_login_page.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -230,13 +232,27 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                                   ),
                                 );
                           } else if (widget.routeName == RouteName.newPincode) {
-                            context.read<AuthBloc>().add(
-                                  SendOTPForPincodeReset(
-                                    phoneNumber: int.tryParse(phoneN) ?? 0,
-                                    countryCode: int.tryParse(countryCode) ?? 0,
-                                    signature: signature,
-                                  ),
-                                );
+                            final isLoggedIn = await showLoginPage(
+                              context,
+                              phoneNumber: phoneNumberController.text,
+                              isoCode: selectedNumber.isoCode ?? '',
+                              dialCode: selectedNumber.dialCode ?? '',
+                            );
+
+                            if (isLoggedIn) {
+                              final token = await getToken();
+                              if (token != null) {
+                                context.read<AuthBloc>().add(
+                                      SendOTPForPincodeReset(
+                                        accessToken: token,
+                                        phoneNumber: int.tryParse(phoneN) ?? 0,
+                                        countryCode:
+                                            int.tryParse(countryCode) ?? 0,
+                                        signature: signature,
+                                      ),
+                                    );
+                              }
+                            }
                           }
                         }
                       });

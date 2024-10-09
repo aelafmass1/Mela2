@@ -11,6 +11,7 @@ import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
+import 'package:transaction_mobile_app/bloc/equb_currencies/equb_currencies_bloc.dart';
 import 'package:transaction_mobile_app/bloc/location/location_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
@@ -23,10 +24,23 @@ import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.d
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
+import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
+import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
+import 'package:transaction_mobile_app/data/repository/currency_repository.dart';
+import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
+import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
+import 'package:transaction_mobile_app/data/repository/money_transfer_repository.dart';
+import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
+import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
+import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
+import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'config/routing.dart';
+import 'data/repository/auth_repository.dart';
+import 'data/services/api/api_service.dart';
 
 //main method
 void main() async {
@@ -61,6 +75,7 @@ void main() async {
     (options) {
       options.dsn =
           'https://b3a58e9d555b70af3cdc4783b47a74ad@o4508032233308160.ingest.us.sentry.io/4508032245235712';
+
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for trWacing.
       // We recommend adjusting this value in production.
       options.tracesSampleRate = 1.0;
@@ -80,27 +95,64 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
+  final client = ApiService().client;
+  late AuthRepository authRepo;
+  late BanksRepository banksRepository;
+  late ContactRepository contactRepository;
+  late CurrencyRateRepository currencyRateRepository;
+  late CurrencyRepository currencyRepository;
+  late EqubRepository equbRepository;
+  late FeeRepository feeRepository;
+  late MoneyTransferRepository moneyTransferRepository;
+  late PaymentCardRepository paymentCardRepository;
+  late PaymentIntentRepository paymentIntentRepository;
+  late PlaidRepository plaidRepository;
+  late TransactionRepository transactionRepository;
+
+  @override
+  void initState() {
+    authRepo = AuthRepository(client: client);
+    banksRepository = BanksRepository(client: client);
+    contactRepository = ContactRepository(client: client);
+    currencyRateRepository = CurrencyRateRepository(client: client);
+    currencyRepository = CurrencyRepository(client: client);
+    equbRepository = EqubRepository(client: client);
+    feeRepository = FeeRepository(client: client);
+    moneyTransferRepository = MoneyTransferRepository(client: client);
+    paymentCardRepository = PaymentCardRepository(client: client);
+    paymentIntentRepository = PaymentIntentRepository(client: client);
+    plaidRepository = PlaidRepository(client: client);
+    transactionRepository = TransactionRepository(client: client);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => BankCurrencyRateBloc(),
+          create: (context) => BankCurrencyRateBloc(
+            repository: currencyRateRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => EqubBloc(),
+          create: (context) => EqubBloc(repository: equbRepository),
         ),
         BlocProvider(
-          create: (context) => AuthBloc(),
+          create: (context) => AuthBloc(repository: authRepo),
         ),
         BlocProvider(
-          create: (context) => TransactionBloc(),
+          create: (context) =>
+              TransactionBloc(repository: transactionRepository),
         ),
         BlocProvider(
-          create: (context) => MoneyTransferBloc(),
+          create: (context) =>
+              MoneyTransferBloc(repository: moneyTransferRepository),
         ),
         BlocProvider(
-          create: (context) => CurrencyBloc(),
+          create: (context) => CurrencyBloc(
+            repository: currencyRepository,
+          ),
         ),
         BlocProvider(
           create: (context) => NavigationBloc(
@@ -108,31 +160,54 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
           ),
         ),
         BlocProvider(
-          create: (context) => PaymentIntentBloc(),
+          create: (context) => PaymentIntentBloc(
+            repository: paymentIntentRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => PaymentCardBloc(),
+          create: (context) => PaymentCardBloc(
+            repository: paymentCardRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => FeeBloc(),
+          create: (context) => FeeBloc(
+            feeRepository: feeRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => PlaidBloc(),
+          create: (context) => PlaidBloc(
+            repository: plaidRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => PincodeBloc(),
+          create: (context) => PincodeBloc(
+            repository: authRepo,
+          ),
         ),
         BlocProvider(
-          create: (context) => BanksBloc(),
+          create: (context) => BanksBloc(
+            repository: banksRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => BankFeeBloc(),
+          create: (context) => BankFeeBloc(
+            repository: banksRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => ContactBloc(),
+          create: (context) => ContactBloc(
+            repository: contactRepository,
+          ),
         ),
         BlocProvider(
-          create: (context) => EqubMemberBloc(),
+          create: (context) => EqubMemberBloc(
+            repository: equbRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => EqubCurrenciesBloc(
+            repository: equbRepository,
+          ),
         ),
         BlocProvider(
           create: (context) => LocationBloc(),

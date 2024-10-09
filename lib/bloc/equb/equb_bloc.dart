@@ -15,6 +15,8 @@ part 'equb_event.dart';
 part 'equb_state.dart';
 
 class EqubBloc extends Bloc<EqubEvent, EqubState> {
+  final EqubRepository repository;
+
   /// Constructs an [EqubBloc] instance, which is a Bloc implementation for managing the state of Equb-related functionality.
   ///
   /// The [EqubBloc] initializes with an [EqubState] that has an empty [equbList]. It then registers event handlers for the following events:
@@ -23,7 +25,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
   /// - [InviteMembers]: Handles the invitation of members to an Equb.
   /// - [FetchEqub]: Handles the fetching of details for a specific Equb.
   /// - [FetchEqubMembers]: Handles the fetching of members for a specific Equb.
-  EqubBloc()
+  EqubBloc({required this.repository})
       : super(EqubState(
           equbList: [],
         )) {
@@ -46,7 +48,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         emit(EqubLoading(equbList: state.equbList));
         final token = await getToken();
 
-        final res = await EqubRepository(client: Client()).fetchEqubMembers(
+        final res = await repository.fetchEqubMembers(
           accessToken: token!,
           equbId: event.equbId,
         );
@@ -79,7 +81,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         emit(EqubLoading(equbList: state.equbList));
         final token = await getToken();
 
-        final res = await EqubRepository(client: Client()).fetchEqubDetail(
+        final res = await repository.fetchEqubDetail(
           accessToken: token!,
           equbId: event.equbId,
         );
@@ -121,7 +123,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         emit(EqubLoading(equbList: state.equbList));
         final token = await getToken();
 
-        final res = await EqubRepository(client: Client()).fetchEqubs(
+        final res = await repository.fetchEqubs(
           accessToken: token!,
         );
         if (res.isEmpty) {
@@ -166,8 +168,9 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         List<EqubDetailModel> equbs = state.equbList;
 
         final token = await getToken();
-        final res = await EqubRepository(client: Client()).createEqub(
+        final res = await repository.createEqub(
           event.equbModel,
+          event.currencyCode,
           token!,
         );
         if (res.containsKey('error')) {
@@ -175,7 +178,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         }
         int equbId = res['successResponse']['id'];
 
-        final inviteRes = await EqubRepository(client: Client()).inviteMembers(
+        final inviteRes = await repository.inviteMembers(
           accessToken: token,
           equbId: equbId,
           members: event.equbModel.members,

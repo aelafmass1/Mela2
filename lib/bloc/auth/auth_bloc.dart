@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
+import 'package:transaction_mobile_app/core/utils/check_connectivity.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 
 import '../../data/repository/auth_repository.dart';
 
@@ -13,7 +15,8 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial()) {
+  AuthRepository repository;
+  AuthBloc({required this.repository}) : super(AuthInitial()) {
     on<SendOTP>(_onSendOTP);
     on<CreateAccount>(_onCreateAccount);
     on<LoginUser>(_onLoginUser);
@@ -46,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
-        final res = await AuthRepository.sendOtpForPasswordReset(
+        final res = await repository.sendOtpForPasswordReset(
           event.phoneNumber,
           event.countryCode,
           event.signature,
@@ -86,10 +89,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
-        final res = await AuthRepository.sendOtpForPincodeReset(
+        final res = await repository.sendOtpForPincodeReset(
           event.phoneNumber,
           event.countryCode,
           event.signature,
+          event.accessToken,
         );
         if (res.containsKey('error')) {
           return emit(SendOTPFail(reason: res['error']));
@@ -126,7 +130,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! ResetLoading) {
         emit(ResetLoading());
-        final res = await AuthRepository.resetPassword(
+        final res = await repository.resetPassword(
           phoneNumber: event.phoneNumber,
           otp: event.otp,
           countryCode: event.countryCode,
@@ -167,7 +171,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! ResetLoading) {
         emit(ResetLoading());
-        final res = await AuthRepository.resetPincode(
+        final res = await repository.resetPincode(
           phoneNumber: event.phoneNumber,
           otp: event.otp,
           countryCode: event.countryCode,
@@ -205,7 +209,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final countryCode = await getCountryCode();
         final phoneNumber = await getPhoneNumber();
         int phoneNumberInt = int.parse(phoneNumber!);
-        final res = await AuthRepository.loginWithPincode(
+        final res = await repository.loginWithPincode(
           pincode: event.pincode,
           countryCode: countryCode!,
           phoneNumber: phoneNumberInt,
@@ -245,7 +249,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (state is! OTPVerificationLoading) {
         emit(OTPVerificationLoading());
 
-        final res = await AuthRepository.verifyOtp(
+        final res = await repository.verifyOtp(
           phoneNumber: event.phoneNumber,
           code: event.code,
           countryCode: event.conutryCode,
@@ -281,7 +285,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onDeleteUser(DeleteUser event, Emitter emit) async {
     try {
-      //
+      if (state is! DeleteUserLoading) {
+        emit(DeleteUserLoading());
+        final token = await getToken();
+        final res = await repository.deleteUser(accessToken: token ?? '');
+        if (res.containsKey('error')) {
+          return emit(DeleteUserFail(reason: res['error']));
+        }
+        emit(DeleteUserSucess());
+      }
     } catch (error) {
       emit(AuthFail(reason: error.toString()));
     }
@@ -299,7 +311,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (state is! LoginUserLoading) {
         emit(LoginUserLoading());
         final phoneNumber = int.parse(event.phoneNumber.trim());
-        final res = await AuthRepository.loginUser(
+        final res = await repository.loginUser(
           phoneNumber: phoneNumber,
           countryCode: event.countryCode,
           password: event.password,
@@ -337,7 +349,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! RegisterUserLoaing) {
         emit(RegisterUserLoaing());
-        final res = await AuthRepository.registerUser(
+        final res = await repository.registerUser(
           event.userModel,
         );
         if (res.containsKey('error')) {
@@ -375,7 +387,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (state is! SendOTPLoading) {
         emit(SendOTPLoading());
 
-        final res = await AuthRepository.sendOtp(
+        final res = await repository.sendOtp(
           event.phoneNumber,
           event.countryCode,
           event.signature,

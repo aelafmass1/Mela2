@@ -12,7 +12,8 @@ part 'payment_card_event.dart';
 part 'payment_card_state.dart';
 
 class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
-  PaymentCardBloc()
+  final PaymentCardRepository repository;
+  PaymentCardBloc({required this.repository})
       : super(PaymentCardInitial(
           paymentCards: [],
         )) {
@@ -26,7 +27,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
 
-        final res = await PaymentCardRepository.fetchPaymentCards(
+        final res = await repository.fetchPaymentCards(
           accessToken: token!,
         );
         if (res.isNotEmpty) {
@@ -77,7 +78,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
 
-        final res = await PaymentCardRepository.addPaymentCard(
+        final res = await repository.addPaymentCard(
           accessToken: token!,
           token: event.token,
         );

@@ -106,6 +106,8 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       pin6Controller.text = value;
       if (pin1Controller.text.isEmpty) {
         pin1Node.requestFocus();
+      } else {
+        pin6Node.unfocus();
       }
     }
 
@@ -138,6 +140,9 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
     } else if (pin6Node.hasFocus) {
       pin6Controller.text = '';
       pin5Node.requestFocus();
+    } else {
+      pin5Node.requestFocus();
+      pin6Controller.text = '';
     }
     getAllPins();
   }
@@ -184,7 +189,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                 deletePhoneNumber();
                 deleteLogInStatus();
                 deleteCountryCode();
-                context.goNamed(RouteName.login);
+                context.goNamed(RouteName.signup);
               }),
           const Spacer(),
           Padding(
@@ -357,6 +362,16 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
               _buildKey('0'),
               GestureDetector(
                 onTap: _onBackspace,
+                onLongPress: () {
+                  pin1Controller.clear();
+                  pin2Controller.clear();
+                  pin3Controller.clear();
+                  pin4Controller.clear();
+                  pin5Controller.clear();
+                  pin6Controller.clear();
+                  pin1Node.requestFocus();
+                  getAllPins();
+                },
                 child: Container(
                   width: 100,
                   height: 65,

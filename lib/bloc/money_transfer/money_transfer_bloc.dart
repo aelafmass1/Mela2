@@ -12,7 +12,9 @@ part 'money_transfer_event.dart';
 part 'money_transfer_state.dart';
 
 class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
-  MoneyTransferBloc() : super(MoneyTransferInitial()) {
+  final MoneyTransferRepository repository;
+  MoneyTransferBloc({required this.repository})
+      : super(MoneyTransferInitial()) {
     on<SendMoney>(_onSendMoney);
   }
   _onSendMoney(SendMoney event, Emitter emit) async {
@@ -22,7 +24,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         final token = await getToken();
 
         if (token != null) {
-          final res = await MoneyTransferRepository.sendMoney(
+          final res = await repository.sendMoney(
             accessToken: token,
             receiverInfo: event.receiverInfo,
             paymentId: event.paymentId,

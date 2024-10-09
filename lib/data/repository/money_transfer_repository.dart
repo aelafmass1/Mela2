@@ -1,13 +1,15 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 
-import '../../core/exceptions/server_exception.dart';
-
 class MoneyTransferRepository {
+  final InterceptedClient client;
+
+  MoneyTransferRepository({required this.client});
+
   /// Sends money to a receiver using the provided information.
   ///
   /// [accessToken] is the authentication token required to make the request.
@@ -16,13 +18,13 @@ class MoneyTransferRepository {
   /// [savedPaymentId] is the ID of the saved payment method.
   ///
   /// Returns a map with either a 'success' key containing the response data, or an 'error' key containing an error message.
-  static Future<Map> sendMoney({
+  Future<Map> sendMoney({
     required String accessToken,
     required ReceiverInfo receiverInfo,
     required String paymentId,
     required String savedPaymentId,
   }) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse(
         '$baseUrl/api/v1/money-transfer/send',
       ),
@@ -43,10 +45,6 @@ class MoneyTransferRepository {
         "savedPaymentId": savedPaymentId,
       }),
     );
-
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
 
     String data = res.body;
     if (res.statusCode == 200 || res.statusCode == 201) {

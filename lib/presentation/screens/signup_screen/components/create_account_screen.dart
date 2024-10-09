@@ -292,8 +292,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         validator: (password) {
                           if (password!.isEmpty) {
                             return 'password is empty';
-                          } else if (password.length < 8) {
-                            return 'Password must be at least 8 characters long.';
+                          } else if (password.length < 6) {
+                            return 'Password must be at least 6 characters long.';
                           }
 
                           return null;

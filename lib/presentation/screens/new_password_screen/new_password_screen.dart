@@ -8,8 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/main.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
@@ -107,8 +105,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'password is empty';
-                          } else if (text.length < 8) {
-                            return 'Password must be at least 8 characters long.';
+                          } else if (text.length < 6) {
+                            return 'Password must be at least 6 characters long.';
                           }
                           return null;
                         },
@@ -147,8 +145,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'password is empty';
-                          } else if (text.length < 8) {
-                            return 'Password must be at least 8 characters long.';
+                          } else if (text.length < 6) {
+                            return 'Password must be at least 6 characters long.';
                           } else if (password1Controller.text.trim() !=
                               password2Controller.text.trim()) {
                             return "The passwords you entered don't match";
@@ -183,7 +181,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                             Icon(Icons.check, size: 20),
                             SizedBox(width: 5),
                             TextWidget(
-                              text: 'Has at least 8 characters',
+                              text: 'Has at least 6 characters',
                               type: TextType.small,
                               weight: FontWeight.w400,
                             ),

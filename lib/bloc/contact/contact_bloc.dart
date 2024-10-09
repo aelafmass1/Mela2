@@ -14,7 +14,8 @@ part 'contact_event.dart';
 part 'contact_state.dart';
 
 class ContactBloc extends Bloc<ContactEvent, ContactState> {
-  ContactBloc() : super(ContactInitial()) {
+  final ContactRepository repository;
+  ContactBloc({required this.repository}) : super(ContactInitial()) {
     on<CheckMyContacts>(_onCheckMyContacts);
   }
 
@@ -28,7 +29,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
       if (state is! ContactLoading) {
         emit(ContactLoading());
         final token = await getToken();
-        final res = await ContactRepository(client: Client()).checkMyContacts(
+        final res = await repository.checkMyContacts(
           accessToken: token!,
           contacts: event.contacts,
         );

@@ -1,15 +1,16 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
-import '../../core/exceptions/server_exception.dart';
-
 class CurrencyRepository {
-  static Future<Map<String, dynamic>> fetchPromotionalCurrency(
+  final InterceptedClient client;
+
+  CurrencyRepository({required this.client});
+  Future<Map<String, dynamic>> fetchPromotionalCurrency(
       String accessToken) async {
-    final res = await http.get(
+    final res = await client.get(
       Uri.parse(
         '$baseUrl/api/exchange-rates',
       ),
@@ -19,9 +20,7 @@ class CurrencyRepository {
         'currencyCode': 'USD',
       },
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
       return data.first;
@@ -29,10 +28,10 @@ class CurrencyRepository {
     return processErrorResponse(data);
   }
 
-  static Future<List> fetchCurrencies(
+  Future<List> fetchCurrencies(
     String accessToken,
   ) async {
-    final res = await http.get(
+    final res = await client.get(
       Uri.parse(
         '$baseUrl/api/exchange-rates',
       ),
@@ -42,9 +41,7 @@ class CurrencyRepository {
         'currencyCode': '',
       },
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
       return data;

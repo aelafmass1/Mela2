@@ -1,13 +1,15 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
-import '../../core/exceptions/server_exception.dart';
-
 /// Repository class responsible for interacting with payment intent related API endpoints.
 class PaymentIntentRepository {
+  InterceptedClient client;
+
+  PaymentIntentRepository({required this.client});
+
   /// Creates a payment intent on the server.
   ///
   /// [currency] - The currency of the payment intent.
@@ -15,12 +17,12 @@ class PaymentIntentRepository {
   /// [accessToken] - The access token of the authenticated user.
   ///
   /// Returns a [Map] containing the payment intent details if successful, otherwise returns a [Map] with an error message.
-  static Future<Map> createPaymentIntent({
+  Future<Map> createPaymentIntent({
     required String currency,
-    required double amount,
     required String accessToken,
+    required double amount,
   }) async {
-    final res = await http.post(
+    final res = await client.post(
       Uri.parse('$baseUrl/payment/create-intent'),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -33,9 +35,7 @@ class PaymentIntentRepository {
         },
       ),
     );
-    if (res.statusCode == 500) {
-      throw ServerException('Internal Server Error');
-    }
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

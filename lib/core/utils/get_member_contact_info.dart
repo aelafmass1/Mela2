@@ -20,11 +20,6 @@ Future<ContactEqubMember> getMemberContactInfo({
   required EqubUser equbUser,
   required List<Contact> contacts,
 }) async {
-  if (equbUser.firstName != null && equbUser.lastName != null) {
-    return ContactEqubMember(
-        displayName: '${equbUser.firstName} ${equbUser.lastName}',
-        phoneNumber: '+${equbUser.countryCode}${equbUser.phoneNumber}');
-  }
   final phoneN = await removeCountryCode(
       '+${equbUser.countryCode}${equbUser.phoneNumber}');
 
@@ -38,6 +33,11 @@ Future<ContactEqubMember> getMemberContactInfo({
     final phoneNumber = user.first.phones.first.number;
     final userName = user.first.displayName;
     return ContactEqubMember(displayName: userName, phoneNumber: phoneNumber);
+  }
+  if (equbUser.firstName != null && equbUser.lastName != null) {
+    return ContactEqubMember(
+        displayName: '${equbUser.firstName} ${equbUser.lastName}',
+        phoneNumber: '+${equbUser.countryCode}${equbUser.phoneNumber}');
   }
   return ContactEqubMember(displayName: 'PENDING USER', phoneNumber: '---');
 }

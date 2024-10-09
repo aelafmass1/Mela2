@@ -18,6 +18,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../core/utils/settings.dart';
 import '../../../gen/colors.gen.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -240,16 +241,20 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                                   );
                             } else if (widget.userModel.toScreen ==
                                 RouteName.newPincode) {
-                              context.read<AuthBloc>().add(
-                                    SendOTPForPincodeReset(
-                                      phoneNumber: int.tryParse(
-                                              widget.userModel.phoneNumber!) ??
-                                          0,
-                                      countryCode:
-                                          widget.userModel.countryCode!,
-                                      signature: signature,
-                                    ),
-                                  );
+                              final token = await getToken();
+                              if (token != null) {
+                                context.read<AuthBloc>().add(
+                                      SendOTPForPincodeReset(
+                                        accessToken: token,
+                                        phoneNumber: int.tryParse(widget
+                                                .userModel.phoneNumber!) ??
+                                            0,
+                                        countryCode:
+                                            widget.userModel.countryCode!,
+                                        signature: signature,
+                                      ),
+                                    );
+                              }
                             }
                           }
                         },

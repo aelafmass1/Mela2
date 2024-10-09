@@ -13,7 +13,8 @@ part 'transaction_event.dart';
 part 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
-  TransactionBloc() : super(TransactionInitial()) {
+  final TransactionRepository repository;
+  TransactionBloc({required this.repository}) : super(TransactionInitial()) {
     on<FetchTrasaction>(_onFetchTransaction);
   }
 
@@ -33,7 +34,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         emit(TransactionLoading());
         final token = await getToken();
 
-        final res = await TransactionRepository.fetchTransaction(
+        final res = await repository.fetchTransaction(
           token!,
         );
         if (res.containsKey('error')) {

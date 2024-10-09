@@ -11,7 +11,8 @@ part 'plaid_event.dart';
 part 'plaid_state.dart';
 
 class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
-  PlaidBloc() : super(PlaidInitial()) {
+  final PlaidRepository repository;
+  PlaidBloc({required this.repository}) : super(PlaidInitial()) {
     on<CreateLinkToken>(_onCreateLinkToken);
     on<ExchangePublicToken>(_onExchangePublicToken);
   }
@@ -21,8 +22,8 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         emit(PlaidPublicTokenLoading());
         final token = await getToken();
 
-        final res = await PlaidRepository.exchangePublicToken(
-            token!, event.publicToken);
+        final res =
+            await repository.exchangePublicToken(token!, event.publicToken);
         if (res.containsKey('error')) {
           return emit(PlaidPublicTokenFail(reason: res['error']));
         }
@@ -46,7 +47,7 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         emit(PlaidLinkTokenLoading());
         final token = await getToken();
 
-        final res = await PlaidRepository.createLinkToken(token!);
+        final res = await repository.createLinkToken(token!);
         if (res.containsKey('error')) {
           return emit(PlaidLinkTokenFail(reason: res['error']));
         }
