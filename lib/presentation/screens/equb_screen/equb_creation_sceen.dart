@@ -1238,18 +1238,25 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   child: Center(
                     child: nameController.text.isNotEmpty
                         ? TextWidget(
-                            text: nameController.text.split(' ').length == 1
-                                ? nameController.text
-                                    .split('')
-                                    .first
-                                    .toUpperCase()
-                                : nameController.text.split(' ').isNotEmpty
+                            text:
+                                nameController.text.trim().split(' ').length ==
+                                        1
                                     ? nameController.text
-                                        .split(' ')
-                                        .map((e) => e[0])
-                                        .join()
+                                        .split('')
+                                        .first
                                         .toUpperCase()
-                                    : nameController.text[0],
+                                    : nameController.text
+                                            .trim()
+                                            .split(' ')
+                                            .isNotEmpty
+                                        ? nameController.text
+                                            .trim()
+                                            .split(' ')
+                                            .take(3)
+                                            .map((e) => e[0])
+                                            .join()
+                                            .toUpperCase()
+                                        : nameController.text[0],
                             color: Colors.white,
                             fontSize: 14,
                           )

@@ -102,17 +102,52 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTop(),
-            // _buildReminder(
-            //     'Please select the winner for the second round in August.'),
-            const SizedBox(height: 15),
-            _buildTitle(),
-            const SizedBox(height: 10),
-            _buildTabs(),
-          ],
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                expandedHeight: 380.0,
+                pinned: true,
+                backgroundColor: ColorName.white,
+                surfaceTintColor: ColorName.white,
+                leading: const SizedBox.shrink(),
+                flexibleSpace: FlexibleSpaceBar(
+                  expandedTitleScale: 1,
+                  collapseMode: CollapseMode.parallax,
+                  titlePadding: EdgeInsets.zero,
+                  title: Container(
+                    color: Colors.white,
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: ColorName.primaryColor,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: ColorName.primaryColor,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      tabs: [
+                        const Tab(text: 'Members'),
+                        _buildTabWithNotification("Winners"),
+                        _buildTabWithNotification("Payment"),
+                        _buildTabWithNotification("Requests", count: 10),
+                      ],
+                    ),
+                  ),
+                  background: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTop(),
+                      // _buildReminder(
+                      //     'Please select the winner for the second round in August.'),
+                      const SizedBox(height: 15),
+                      _buildTitle(),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+              ),
+            ];
+          },
+          body: _buildTabs(),
         ),
       ),
     );
@@ -390,10 +425,10 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextWidget(
@@ -444,41 +479,21 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   Widget _buildTabs() {
-    return Expanded(
-      child: Column(
-        children: [
-          // TabBar to display the tabs
-          TabBar(
+    return Column(
+      children: [
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            labelColor: ColorName.primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: ColorName.primaryColor,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-
-            // labelPadding: const EdgeInsets.only(right: 15),
-            tabs: [
-              const Tab(text: 'Members'),
-              _buildTabWithNotification("Winners"),
-              _buildTabWithNotification("Payment"),
-              _buildTabWithNotification("Requests", count: 10),
+            children: [
+              _buildMembersContent(), // Tab 1 content
+              _buildWinnersContent(), // Tab 2 content
+              _buildPaymentContent(), // Tab 3 content
+              _buildRequestsContent(), // Tab 4 content
             ],
           ),
-          // TabBarView to handle tab content switching
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildMembersContent(), // Tab 1 content
-                _buildWinnersContent(), // Tab 2 content
-                _buildPaymentContent(), // Tab 3 content
-                _buildRequestsContent(), // Tab 4 content
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 
@@ -923,11 +938,11 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                 id: state.selectedEqub!.members[i].userId ?? 0,
                                 phoneNumber: snapshot.data?.phoneNumber ??
                                     state.selectedEqub!.members[i].username ??
-                                    '',
+                                    'PENDING USER',
                                 status: state.selectedEqub!.members[i].status,
                                 name: snapshot.data?.displayName ??
                                     state.selectedEqub!.members[i].username ??
-                                    '',
+                                    'PENDING USER',
                               ),
                             );
                           }),

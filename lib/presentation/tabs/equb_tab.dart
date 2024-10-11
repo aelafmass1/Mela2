@@ -51,7 +51,11 @@ class _EqubTabState extends State<EqubTab> {
               description: state.reason,
             );
           } else if (state is EqubSuccess) {
-            //
+            setState(() {
+              yourEqubs = state.equbList.where((e) => e.isAdmin).toList();
+              invitedEqubs =
+                  state.equbList.where((e) => e.isAdmin == false).toList();
+            });
           }
         },
         builder: (context, state) {
@@ -213,17 +217,46 @@ class _EqubTabState extends State<EqubTab> {
                               type: TextType.small,
                             )),
                         const SizedBox(height: 15),
-                        if (state.equbList.length == 1)
-                          EqubCard(equb: state.equbList.first)
-                        else
-                          Column(
-                            children: [
-                              for (var equb in state.equbList)
-                                EqubCard(
-                                  equb: equb,
-                                ),
-                            ],
-                          ),
+                        Column(
+                          children: [
+                            for (var equb in yourEqubs)
+                              EqubCard(
+                                equb: equb,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Visibility(
+                          visible: invitedEqubs.isNotEmpty,
+                          child: Container(
+                              padding: const EdgeInsets.only(left: 15),
+                              alignment: Alignment.centerLeft,
+                              child: const TextWidget(
+                                text: 'Invitation Equb',
+                                color: ColorName.grey,
+                                type: TextType.small,
+                              )),
+                        ),
+                        Visibility(
+                          visible: invitedEqubs.isNotEmpty,
+                          child: const SizedBox(height: 15),
+                        ),
+                        Column(
+                          children: [
+                            for (var equb in invitedEqubs)
+                              EqubCard(
+                                showJoinRequestButton: true,
+                                blurTexts: true,
+                                equb: equb,
+                                onTab: () {
+                                  context.goNamed(
+                                    RouteName.equbMemberDetail,
+                                    extra: equb,
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
                         Container(
                           padding: const EdgeInsets.only(left: 15, top: 15),
                           alignment: Alignment.centerLeft,
@@ -235,8 +268,10 @@ class _EqubTabState extends State<EqubTab> {
                         ),
                         EqubCard(
                           showJoinRequestButton: true,
+                          blurTexts: true,
                           onTab: () {
                             final detail = EqubDetailModel(
+                              isAdmin: false,
                               currency: 'USD',
                               id: -1,
                               name: 'Member Test Another',
@@ -259,6 +294,7 @@ class _EqubTabState extends State<EqubTab> {
                                 extra: detail);
                           },
                           equb: EqubDetailModel(
+                            isAdmin: false,
                             currency: 'USD',
                             id: -1,
                             name: 'Member Test Another',

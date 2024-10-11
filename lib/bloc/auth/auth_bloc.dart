@@ -355,7 +355,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (res.containsKey('error')) {
           return emit(RegisterUserFail(reason: res['error']));
         }
-        final token = res['response']['jwtToken'];
+        final token = res['successResponse']['jwtToken'];
         storeToken(token);
         storeDisplayName(
           '${event.userModel.firstName} ${event.userModel.lastName}',

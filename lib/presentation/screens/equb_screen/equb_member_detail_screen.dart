@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ class EqubMemberDetailScreen extends StatefulWidget {
 
 class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
   bool isPending = false;
+  bool blurTexts = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -241,7 +243,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       text:
                           'Members : ${widget.equbDetailModel.invitees.length}',
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -264,7 +266,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       text:
                           '${widget.equbDetailModel.startDate.day.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.month.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.year}',
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -286,7 +288,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     TextWidget(
                       text: widget.equbDetailModel.frequency,
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -307,11 +309,22 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       color: Color(0xfF6D6D6D),
                     ),
                     const Expanded(child: SizedBox()),
-                    TextWidget(
-                      text: '\$${widget.equbDetailModel.contributionAmount}',
-                      fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
-                    ),
+                    blurTexts
+                        ? Blur(
+                            blur: 10,
+                            child: TextWidget(
+                              text:
+                                  '\$${widget.equbDetailModel.contributionAmount}',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          )
+                        : TextWidget(
+                            text:
+                                '\$${widget.equbDetailModel.contributionAmount}',
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -329,12 +342,22 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       color: Color(0xfF6D6D6D),
                     ),
                     const Expanded(child: SizedBox()),
-                    TextWidget(
-                      text:
-                          '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
-                      fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
-                    ),
+                    blurTexts
+                        ? Blur(
+                            blur: 10,
+                            child: TextWidget(
+                              text:
+                                  '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          )
+                        : TextWidget(
+                            text:
+                                '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                   ],
                 ),
               ],

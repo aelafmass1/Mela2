@@ -18,6 +18,7 @@ class EqubDetailModel {
   final List<EqubMemberModel> members;
   final List<EqubInviteeModel> invitees;
   final List<EqubCycleModel> cycles;
+  final bool isAdmin;
   EqubDetailModel({
     required this.id,
     required this.name,
@@ -29,6 +30,7 @@ class EqubDetailModel {
     required this.members,
     required this.invitees,
     required this.cycles,
+    required this.isAdmin,
   });
 
   EqubDetailModel copyWith({
@@ -54,6 +56,7 @@ class EqubDetailModel {
       members: members ?? this.members,
       invitees: invitees ?? this.invitees,
       cycles: cycles ?? this.cycles,
+      isAdmin: isAdmin,
     );
   }
 
@@ -69,6 +72,7 @@ class EqubDetailModel {
       'members': members.map((x) => x.toMap()).toList(),
       'invitees': invitees.map((x) => x.toMap()).toList(),
       'cycles': cycles.map((x) => x.toMap()).toList(),
+      'admin': isAdmin,
     };
   }
 
@@ -80,12 +84,15 @@ class EqubDetailModel {
       contributionAmount: map['contributionAmount'] as double,
       frequency: map['frequency'] as String,
       startDate: DateTime.parse(map['startDate']),
-      currency: map['currency'] as String,
-      members: List<EqubMemberModel>.from(
-        (map['members'] as List).map<EqubMemberModel>(
-          (x) => EqubMemberModel.fromMap(x),
-        ),
-      ),
+      currency: map['currency'] == null ? '' : map['currency'] as String,
+      isAdmin: map['admin'],
+      members: map['members'] == null
+          ? []
+          : List<EqubMemberModel>.from(
+              (map['members'] as List).map<EqubMemberModel>(
+                (x) => EqubMemberModel.fromMap(x),
+              ),
+            ),
       invitees: [],
       cycles: map['cycles'] == null
           ? []

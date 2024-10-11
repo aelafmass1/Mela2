@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -13,6 +16,7 @@ class EqubCard extends StatelessWidget {
   final EqubDetailModel equb;
   final Function()? onTab;
   final bool showJoinRequestButton;
+  final bool blurTexts;
   final bool onCarousel;
   const EqubCard({
     super.key,
@@ -20,6 +24,7 @@ class EqubCard extends StatelessWidget {
     this.onTab,
     this.showJoinRequestButton = false,
     this.onCarousel = false,
+    this.blurTexts = false,
   });
 
   int? getFrequencyDay(String frequency) {
@@ -54,9 +59,14 @@ class EqubCard extends StatelessWidget {
     return endDay - currentDay;
   }
 
+  String getEndDate(int day) {
+    final newDate = equb.startDate.add(Duration(days: day));
+    return '${newDate.day.toString().padLeft(2, '0')}-${newDate.month.toString().padLeft(2, '0')}-${newDate.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final remainingDay = getRemainingDate();
+    final remainingDay = getRemainingDate() ?? 0;
     return GestureDetector(
       onTap: onTab ??
           () {
@@ -151,12 +161,22 @@ class EqubCard extends StatelessWidget {
                           const SizedBox(height: 3),
                           SizedBox(
                             width: 20.sw,
-                            child: TextWidget(
-                              text: 'ETB ${equb.contributionAmount}',
-                              fontSize: 12,
-                              color: ColorName.primaryColor,
-                              weight: FontWeight.bold,
-                            ),
+                            child: blurTexts
+                                ? Blur(
+                                    blur: 10,
+                                    child: TextWidget(
+                                      text: 'ETB ${equb.contributionAmount}',
+                                      fontSize: 12,
+                                      color: ColorName.primaryColor,
+                                      weight: FontWeight.bold,
+                                    ),
+                                  )
+                                : TextWidget(
+                                    text: 'ETB ${equb.contributionAmount}',
+                                    fontSize: 12,
+                                    color: ColorName.primaryColor,
+                                    weight: FontWeight.bold,
+                                  ),
                           )
                         ],
                       ),
@@ -182,13 +202,24 @@ class EqubCard extends StatelessWidget {
                           const SizedBox(height: 3),
                           SizedBox(
                             width: 20.sw,
-                            child: TextWidget(
-                              text:
-                                  'ETB ${equb.contributionAmount * equb.numberOfMembers}',
-                              fontSize: 12,
-                              color: ColorName.primaryColor,
-                              weight: FontWeight.bold,
-                            ),
+                            child: blurTexts
+                                ? Blur(
+                                    blur: 10,
+                                    child: TextWidget(
+                                      text:
+                                          'ETB ${equb.contributionAmount * equb.numberOfMembers}',
+                                      fontSize: 12,
+                                      color: ColorName.primaryColor,
+                                      weight: FontWeight.bold,
+                                    ),
+                                  )
+                                : TextWidget(
+                                    text:
+                                        'ETB ${equb.contributionAmount * equb.numberOfMembers}',
+                                    fontSize: 12,
+                                    color: ColorName.primaryColor,
+                                    weight: FontWeight.bold,
+                                  ),
                           )
                         ],
                       ),
@@ -205,8 +236,8 @@ class EqubCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 3),
                           TextWidget(
-                            text:
-                                '${(equb.startDate.day + (getFrequencyDay(equb.frequency) ?? 0)).toString().padLeft(2, '0')}-${equb.startDate.month.toString().padLeft(2, '0')}-${equb.startDate.year}',
+                            text: getEndDate(
+                                getFrequencyDay(equb.frequency) ?? 0),
                             fontSize: 14,
                             color: ColorName.primaryColor,
                             weight: FontWeight.bold,
@@ -258,7 +289,7 @@ class EqubCard extends StatelessWidget {
                               ),
                               onPressed: () {}),
                         )
-                      else if (remainingDay == 0)
+                      else if (remainingDay! <= 0)
                         SizedBox(
                           width: 75,
                           height: 30,
@@ -289,7 +320,7 @@ class EqubCard extends StatelessWidget {
                             mergeMode: true,
                             onGetText: (value) {
                               return Text(
-                                '${value.toInt()}\nDays',
+                                '${value.toInt()}\n${(remainingDay == 1 || remainingDay == 0) ? 'Day' : 'Days'}',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
