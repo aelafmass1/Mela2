@@ -4,7 +4,7 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page_dynamic.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/create_equb_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_admin_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_member_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_edit_screen.dart';
@@ -94,7 +94,7 @@ final goRouting = GoRouter(
         GoRoute(
           path: 'equb_creation',
           name: RouteName.equbCreation,
-          builder: (context, state) => const EqubCreationScreen(),
+          builder: (context, state) => const CreateEqubScreen(),
         ),
         GoRoute(
           path: 'send_invitation',

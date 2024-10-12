@@ -305,6 +305,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 )
               : CircleAvatar(
+                  backgroundColor: ColorName.primaryColor.shade300,
                   radius: 13,
                   backgroundImage: AssetImage(iconPath),
                 )

@@ -29,6 +29,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SendOTPForPincodeReset>(_onSendOTPForPincodeReset);
     on<ResetPassword>(_onResetPassword);
     on<ResetPincode>(_onResetPincode);
+    on<CheckEmailExists>(_onCheckEmailExists);
+  }
+
+  /// Handles the logic for checking if an email already exists.
+  ///
+  /// This method is called when the `CheckEmailExists` event is dispatched.
+  /// It first checks if the current state is not `CheckEmailExistsLoading`, and if so, it emits
+  /// the `CheckEmailExistsLoading` state. It then calls the `checkEmailExists` method
+  /// of the `AuthRepository` to check if the email exists. If the response contains an 'error' key,
+  /// it emits the `CheckEmailExistsFail` state with the error reason. Otherwise, it emits the
+  /// `CheckEmailExistsSuccess` state.
+  ///
+  /// If an error occurs during the process, it logs the error and emits the `CheckEmailExistsFail`
+  /// state with the error message.
+  _onCheckEmailExists(CheckEmailExists event, Emitter emit) async {
+    try {
+      if (state is! CheckEmailExistsLoading) {
+        emit(CheckEmailExistsLoading());
+        final res = await repository.checkEmailExists(event.email.trim());
+        if (res.containsKey('error')) {
+          return emit(CheckEmailExistsFail(reason: res['error']));
+        }
+        emit(CheckEmailExistsSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(CheckEmailExistsFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(CheckEmailExistsFail(reason: error.toString()));
+    }
   }
 
   /// Handles the logic for sending an OTP (One-Time Password) for password reset.

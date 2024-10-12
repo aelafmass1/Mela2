@@ -1,4 +1,5 @@
 import 'package:currency_picker/currency_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,14 +26,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../data/models/contact_model.dart';
 
-class EqubCreationScreen extends StatefulWidget {
-  const EqubCreationScreen({super.key});
+class CreateEqubScreen extends StatefulWidget {
+  const CreateEqubScreen({super.key});
 
   @override
-  State<EqubCreationScreen> createState() => _EqubCreationScreenState();
+  State<CreateEqubScreen> createState() => _CreateEqubScreenState();
 }
 
-class _EqubCreationScreenState extends State<EqubCreationScreen> {
+class _CreateEqubScreenState extends State<CreateEqubScreen> {
   double sliderWidth = 30.sw;
   final nameController = TextEditingController();
   final amountController = TextEditingController();
@@ -58,14 +59,18 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
 
   bool isSearching = false;
   bool agreeToTermAndCondition = false;
-  bool isPermissionDenied = false;
+  bool isPermissionDenied = true;
   bool isWebviewLoading = false;
 
   late WebViewController _controller;
 
   Future<void> _fetchContacts() async {
-    if (await Permission.contacts.isDenied) {
-      await Future.delayed(const Duration(seconds: 10));
+    var status = await Permission.contacts.status;
+    if (status.isDenied) {
+      setState(() {
+        isPermissionDenied = true;
+      });
+      await Future.delayed(const Duration(seconds: 1));
     }
     if (await FlutterContacts.requestPermission(readonly: true)) {
       List<Contact> contacts =
@@ -77,12 +82,6 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
       // ignore: use_build_context_synchronously
       context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
     } else {
-      // context.pushNamed(RouteName.contactPermission, extra: () {
-      //   setState(() {
-      //     index = 0;
-      //     sliderWidth = 30.sw;
-      //   });
-      // });
       setState(() {
         isPermissionDenied = true;
       });
@@ -462,9 +461,9 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             TextField(
               controller: searchingController,
               onTap: () {
-                if (isPermissionDenied) {
-                  _fetchContacts();
-                }
+                // if (isPermissionDenied) {
+                //   _fetchContacts();
+                // }
               },
               onChanged: (value) {
                 if (value.isEmpty) {
@@ -521,61 +520,65 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             ),
             const SizedBox(height: 10),
             if (isPermissionDenied)
-              Column(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Assets.images.contactPageImage.image(
-                      width: 200,
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Assets.images.contactPageImage.image(width: 250),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 10),
-                    child: TextWidget(
-                      text: 'Enable Contact Permission',
-                      weight: FontWeight.w700,
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: TextWidget(
+                        text: 'Enable Contact Permission',
+                        type: TextType.small,
+                        weight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: 80.sw,
-                    child: const TextWidget(
-                      text:
-                          'This is going to be the settings path on the users device to enable the contact permission for our App.',
-                      type: TextType.small,
-                      textAlign: TextAlign.center,
-                      fontSize: 12,
-                      weight: FontWeight.w400,
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 80.sw,
+                      child: const TextWidget(
+                        text:
+                            'This is going to be the settings path on the users device to enable the contact permission for our App.',
+                        type: TextType.small,
+                        textAlign: TextAlign.center,
+                        fontSize: 11,
+                        weight: FontWeight.w400,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 80.sw,
-                    child: const TextWidget(
-                      text:
-                          'Go to Settings > Apps > Mela Fi > Contact > Select Full Access',
-                      type: TextType.small,
-                      textAlign: TextAlign.center,
-                      fontSize: 12,
-                      weight: FontWeight.w600,
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      width: 80.sw,
+                      child: const TextWidget(
+                        text:
+                            'Go to Settings > Apps > Mela Fi > Contact > Select Full Access',
+                        type: TextType.small,
+                        textAlign: TextAlign.center,
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 10,
-                    ),
-                    child: ButtonWidget(
-                        child: const TextWidget(
-                          text: 'Enable Permission',
-                          type: TextType.small,
-                          color: Colors.white,
-                        ),
-                        onPressed: () async {
-                          await openAppSettings();
-                        }),
-                  )
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10, top: 30),
+                      child: ButtonWidget(
+                          child: const TextWidget(
+                            text: 'Enable Permission',
+                            type: TextType.small,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            if (kIsWeb == false) {
+                              await openAppSettings();
+                              setState(() {
+                                sliderWidth = 30.sw;
+                                index = 0;
+                              });
+                              // _fetchContacts();
+                            }
+                          }),
+                    )
+                  ],
+                ),
               )
             else
               Expanded(

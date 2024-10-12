@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -13,6 +11,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../../bloc/auth/auth_bloc.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_field_widget.dart';
@@ -408,30 +407,48 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 20, top: 10),
-                child: ButtonWidget(
-                  color: termAndConditionAgreed
-                      ? ColorName.primaryColor
-                      : Colors.grey.withOpacity(0.5),
-                  child: const TextWidget(
-                    text: 'Next',
-                    type: TextType.small,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    if (termAndConditionAgreed) {
-                      if (_formKey.currentState!.validate()) {
-                        UserModel user = widget.userModel.copyWith(
-                          firstName: firstNameController.text,
-                          lastName: lastNameController.text,
-                          email: emailController.text,
-                          password: password1Controller.text,
-                        );
-                        context.pushNamed(
-                          RouteName.setPinCode,
-                          extra: user,
-                        );
-                      }
+                child: BlocConsumer<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is CheckEmailExistsFail) {
+                      setState(() {
+                        emailError = state.reason;
+                      });
+                      showSnackbar(context, description: state.reason);
+                    } else if (state is CheckEmailExistsSuccess) {
+                      UserModel user = widget.userModel.copyWith(
+                        firstName: firstNameController.text,
+                        lastName: lastNameController.text,
+                        email: emailController.text,
+                        password: password1Controller.text,
+                      );
+                      context.pushNamed(
+                        RouteName.setPinCode,
+                        extra: user,
+                      );
                     }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                      color: termAndConditionAgreed
+                          ? ColorName.primaryColor
+                          : Colors.grey.withOpacity(0.5),
+                      child: state is CheckEmailExistsLoading
+                          ? const LoadingWidget()
+                          : const TextWidget(
+                              text: 'Next',
+                              type: TextType.small,
+                              color: Colors.white,
+                            ),
+                      onPressed: () {
+                        if (termAndConditionAgreed) {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(CheckEmailExists(
+                                  email: emailController.text,
+                                ));
+                          }
+                        }
+                      },
+                    );
                   },
                 ),
               )

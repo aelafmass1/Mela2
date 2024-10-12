@@ -106,7 +106,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
-                expandedHeight: 380.0,
+                expandedHeight: 46.sh,
                 pinned: true,
                 backgroundColor: ColorName.white,
                 surfaceTintColor: ColorName.white,
@@ -504,38 +504,38 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
         Row(
           children: [
             Tab(text: text),
-            if (count != 0)
-              Container(
-                margin: const EdgeInsets.only(left: 3),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
-                decoration: BoxDecoration(
-                  color: ColorName.yellow,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  count.toString(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: ColorName.white,
-                  ),
-                ),
-              ),
+            // if (count != 0)
+            //   Container(
+            //     margin: const EdgeInsets.only(left: 3),
+            //     padding:
+            //         const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
+            //     decoration: BoxDecoration(
+            //       color: ColorName.yellow,
+            //       borderRadius: BorderRadius.circular(10),
+            //     ),
+            //     child: Text(
+            //       count.toString(),
+            //       style: const TextStyle(
+            //         fontSize: 10,
+            //         color: ColorName.white,
+            //       ),
+            //     ),
+            //   ),
           ],
         ),
-        if (count == 0)
-          Positioned(
-            top: 15,
-            right: -10, // You can adjust this based on your design
-            child: Container(
-              width: 5,
-              height: 5,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+        // if (count == 0)
+        //   Positioned(
+        //     top: 15,
+        //     right: -10, // You can adjust this based on your design
+        //     child: Container(
+        //       width: 5,
+        //       height: 5,
+        //       decoration: const BoxDecoration(
+        //         color: Colors.red,
+        //         shape: BoxShape.circle,
+        //       ),
+        //     ),
+        //   ),
       ],
     );
   }
