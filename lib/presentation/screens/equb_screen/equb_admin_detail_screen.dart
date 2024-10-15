@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -100,56 +102,64 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverAppBar(
-                expandedHeight: 46.sh,
-                pinned: true,
-                backgroundColor: ColorName.white,
-                surfaceTintColor: ColorName.white,
-                leading: const SizedBox.shrink(),
-                flexibleSpace: FlexibleSpaceBar(
-                  expandedTitleScale: 1,
-                  collapseMode: CollapseMode.parallax,
-                  titlePadding: EdgeInsets.zero,
-                  title: Container(
-                    color: Colors.white,
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: ColorName.primaryColor,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: ColorName.primaryColor,
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      tabs: [
-                        const Tab(text: 'Members'),
-                        _buildTabWithNotification("Winners"),
-                        _buildTabWithNotification("Payment"),
-                        _buildTabWithNotification("Requests", count: 10),
+      body: ResponsiveBuilder(builder: (context, sizingInfo) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: NestedScrollView(
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  expandedHeight: ResponsiveUtil.forScreen(
+                    sizingInfo: sizingInfo,
+                    small: 57.sh,
+                    mobile: 370,
+                    tablet: 370,
+                  ),
+                  pinned: true,
+                  backgroundColor: ColorName.white,
+                  surfaceTintColor: ColorName.white,
+                  leading: const SizedBox.shrink(),
+                  flexibleSpace: FlexibleSpaceBar(
+                    expandedTitleScale: 1,
+                    collapseMode: CollapseMode.parallax,
+                    titlePadding: EdgeInsets.zero,
+                    title: Container(
+                      color: Colors.white,
+                      child: TabBar(
+                        controller: _tabController,
+                        labelColor: ColorName.primaryColor,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: ColorName.primaryColor,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        tabs: [
+                          const Tab(text: 'Members'),
+                          _buildTabWithNotification("Winners"),
+                          _buildTabWithNotification("Payment"),
+                          _buildTabWithNotification("Requests", count: 10),
+                        ],
+                      ),
+                    ),
+                    background: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTop(),
+                        // _buildReminder(
+                        //     'Please select the winner for the second round in August.'),
+                        const SizedBox(height: 10),
+                        _buildTitle(),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
-                  background: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTop(),
-                      // _buildReminder(
-                      //     'Please select the winner for the second round in August.'),
-                      const SizedBox(height: 15),
-                      _buildTitle(),
-                      const SizedBox(height: 10),
-                    ],
-                  ),
                 ),
-              ),
-            ];
-          },
-          body: _buildTabs(),
-        ),
-      ),
+              ];
+            },
+            body: _buildTabs(),
+          ),
+        );
+      }),
     );
   }
 
@@ -182,7 +192,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   _buildTop() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.only(top: 15, bottom: 5),
       child: CardWidget(
         width: 100.sw,
         child: Container(
@@ -251,7 +261,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         ),
                         TextWidget(
                           text:
-                              'Created at ${DateTime.now().day.toString().padLeft(2, '0')}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().year}',
+                              'Created at ${DateFormat('dd-MM-yyyy').format(widget.equbDetailModel.startDate)}',
                           color: Colors.white,
                           fontSize: 10,
                           weight: FontWeight.w400,
@@ -385,7 +395,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         const Expanded(child: SizedBox()),
                         TextWidget(
                           text:
-                              '\$${widget.equbDetailModel.contributionAmount}',
+                              '${widget.equbDetailModel.contributionAmount} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),
@@ -408,7 +418,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         const Expanded(child: SizedBox()),
                         TextWidget(
                           text:
-                              '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                              '${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),

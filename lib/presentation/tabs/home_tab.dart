@@ -118,7 +118,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                         TextWidget(
                           text: displayName ?? '',
-                          fontSize: 20,
+                          fontSize: 16,
                           weight: FontWeight.w800,
                           color: ColorName.primaryColor,
                         ),
@@ -175,8 +175,9 @@ class _HomeTabState extends State<HomeTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const TextWidget(
-                text: 'Send Money',
+                text: 'Initiate Payment',
                 fontSize: 14,
+                weight: FontWeight.w600,
               ),
               const SizedBox(height: 15),
               TextFormField(
@@ -424,9 +425,10 @@ class _HomeTabState extends State<HomeTab> {
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 10),
                               child: TextWidget(
-                                text: 'Current Trade rate',
+                                text: 'Current Trade Rate',
                                 color: Colors.white,
                                 fontSize: 15,
+                                weight: FontWeight.w700,
                               ),
                             ),
                             Container(
@@ -466,6 +468,7 @@ class _HomeTabState extends State<HomeTab> {
                                             text: '1 USD',
                                             fontSize: 14,
                                             color: ColorName.primaryColor,
+                                            weight: FontWeight.w600,
                                           )
                                         ],
                                       )
@@ -527,6 +530,7 @@ class _HomeTabState extends State<HomeTab> {
                                                       '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
                                                   fontSize: 14,
                                                   color: ColorName.primaryColor,
+                                                  weight: FontWeight.w600,
                                                 );
                                               }
                                               return const SizedBox.shrink();
@@ -594,6 +598,7 @@ class _HomeTabState extends State<HomeTab> {
                                     text: 'Today’s best rate',
                                     color: ColorName.primaryColor,
                                     fontSize: 12,
+                                    weight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -659,6 +664,7 @@ class _HomeTabState extends State<HomeTab> {
                                             text: '1 USD',
                                             fontSize: 14,
                                             color: ColorName.primaryColor,
+                                            weight: FontWeight.w600,
                                           )
                                         ],
                                       )
@@ -720,6 +726,7 @@ class _HomeTabState extends State<HomeTab> {
                                                       '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
                                                   fontSize: 14,
                                                   color: ColorName.primaryColor,
+                                                  weight: FontWeight.w600,
                                                 );
                                               }
                                               return const SizedBox.shrink();

@@ -386,6 +386,7 @@ class _CreateEqubScreenState extends State<CreateEqubScreen> {
     bool showOnlyNumber = false,
     String? Function(String? text)? validator,
     bool readOnly = false,
+    int? maxLength,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 20),
@@ -398,8 +399,11 @@ class _CreateEqubScreenState extends State<CreateEqubScreen> {
         inputFormatters: showOnlyNumber
             ? [
                 FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(maxLength ?? 25),
               ]
-            : null,
+            : [
+                LengthLimitingTextInputFormatter(maxLength ?? 25),
+              ],
         decoration: InputDecoration(
           hintStyle: const TextStyle(
             fontSize: 12,
@@ -1035,6 +1039,7 @@ class _CreateEqubScreenState extends State<CreateEqubScreen> {
           ],
         ),
         _buildTextFeild(
+            maxLength: 10,
             validator: (text) {
               if (text!.isEmpty) {
                 return 'amount is empty';
@@ -1146,6 +1151,7 @@ class _CreateEqubScreenState extends State<CreateEqubScreen> {
           ],
         ),
         _buildTextFeild(
+          maxLength: 3,
           validator: (text) {
             if (text!.isEmpty) {
               return 'number of members is empty';

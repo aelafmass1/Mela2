@@ -89,7 +89,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Form(
           key: _formKey,
           child: Column(
@@ -100,6 +100,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     'Forget my ${widget.routeName == RouteName.newPincode ? 'PIN' : 'Password'}',
                 fontSize: 20,
                 color: ColorName.primaryColor,
+                weight: FontWeight.w700,
               ),
               const SizedBox(height: 7),
               const TextWidget(

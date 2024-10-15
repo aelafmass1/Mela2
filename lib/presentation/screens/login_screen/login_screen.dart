@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     children: [
                       const TextWidget(
-                        text: 'Hello There',
+                        text: 'Hello, ',
                         fontSize: 24,
                         weight: FontWeight.w700,
                       ),

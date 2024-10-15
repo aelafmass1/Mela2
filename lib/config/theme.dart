@@ -12,7 +12,6 @@ themeData() {
     ),
 
     appBarTheme: const AppBarTheme(
-      toolbarHeight: 0,
       backgroundColor: Colors.white,
       surfaceTintColor: ColorName.white,
     ),

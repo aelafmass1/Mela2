@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -24,6 +25,7 @@ import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.d
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
@@ -218,6 +220,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         builder: (_) => MaterialApp.router(
           debugShowCheckedModeBanner: false,
           routerConfig: goRouting,
+          theme: themeData(),
         ),
       ),
     );

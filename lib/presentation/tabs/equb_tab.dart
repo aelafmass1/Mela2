@@ -90,7 +90,10 @@ class _EqubTabState extends State<EqubTab> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const TextWidget(text: 'Equb'),
+                      const TextWidget(
+                        text: 'Equb',
+                        weight: FontWeight.w700,
+                      ),
                       SizedBox(
                         width: 110,
                         height: 45,
@@ -129,7 +132,10 @@ class _EqubTabState extends State<EqubTab> {
                   children: [
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: TextWidget(text: 'Equb'),
+                      child: TextWidget(
+                        text: 'Equb',
+                        weight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Assets.images.equbImage.image(
@@ -234,7 +240,10 @@ class _EqubTabState extends State<EqubTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const TextWidget(text: 'Equb'),
+                    const TextWidget(
+                      text: 'Equb',
+                      weight: FontWeight.w700,
+                    ),
                     SizedBox(
                       width: 110,
                       height: 45,
