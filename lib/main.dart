@@ -1,4 +1,3 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -6,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:jumio_mobile_sdk_flutter/jumio_mobile_sdk_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
@@ -52,6 +52,10 @@ void main() async {
 
   // Set the Stripe publishable key, which is necessary to identify your Stripe account.
   Stripe.publishableKey = dotenv.env['PUBLISHABLE_KEY']!;
+
+  Jumio.init("AUTHORIZATION_TOKEN", "DATACENTER");
+
+  Jumio.start();
 
   // Set the Stripe merchant identifier, which is required for Apple Pay integration.
   Stripe.merchantIdentifier = 'Mela Fi';
