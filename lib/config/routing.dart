@@ -12,6 +12,7 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/comp
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/new_password_screen/new_password_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/confirm_pincode_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/new_pincode_screen.dart';
@@ -61,6 +62,7 @@ class RouteName {
   static const forgetPassword = 'forget_screen';
   static const newPassword = 'new_password_screen';
   static const newPincode = 'new_pincode_screen';
+  static const notification = 'notification_screen';
 }
 
 final goRouting = GoRouter(
@@ -159,6 +161,11 @@ final goRouting = GoRouter(
           builder: (context, state) => CompletePage(
             equbName: state.extra as String,
           ),
+        ),
+        GoRoute(
+          path: 'notification',
+          name: RouteName.notification,
+          builder: (context, state) => const NotificationScreen(),
         ),
       ],
     ),

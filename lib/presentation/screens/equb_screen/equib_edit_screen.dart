@@ -16,6 +16,7 @@ import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dar
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../bloc/equb_member/equb_member_bloc.dart';
 import '../../../core/utils/get_member_contact_info.dart';
 import '../../../core/utils/show_add_member.dart';
 import '../../../core/utils/show_cupertino_date_picker.dart';
@@ -43,7 +44,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
   List<Contact> _contacts = [];
 
   DateTime? startingDate;
-
+  final _formKey = GlobalKey<FormState>();
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
       List<Contact> contacts =
@@ -102,134 +103,137 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 15),
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitle(),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _buildEqubTextFeilds(isReviewPage: true),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const TextWidget(
-                          text: 'Members',
-                          fontSize: 16,
-                        ),
-                        TextButton(
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.add,
-                                  color: ColorName.primaryColor,
-                                ),
-                                SizedBox(width: 3),
-                                TextWidget(
-                                  text: 'Add Member',
-                                  fontSize: 13,
-                                  color: ColorName.primaryColor,
-                                ),
-                              ],
-                            ),
-                            onPressed: () async {
-                              await _fetchContacts();
-
-                              showAddMember(
-                                // ignore: use_build_context_synchronously
-                                context,
-                                int.tryParse(numberOfMembersController.text) ??
-                                    3,
-                                _contacts,
-                                widget.equb.id,
-                              );
-                            }),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    for (var member in widget.equb.members)
-                      FutureBuilder(
-                          future: getMemberContactInfo(
-                            equbUser: member.user!,
-                            contacts: _contacts,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 15),
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle(),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _buildEqubTextFeilds(isReviewPage: true),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const TextWidget(
+                            text: 'Members',
+                            fontSize: 16,
                           ),
-                          builder: (context, snapshot) {
-                            return EqubMemberTile(
-                              equbInviteeModel: EqubInviteeModel(
-                                  id: member.userId ?? 0,
-                                  phoneNumber: snapshot.data?.phoneNumber ??
-                                      member.username ??
-                                      '',
-                                  status: member.status,
-                                  name: snapshot.data?.displayName ??
-                                      member.username ??
-                                      ''),
-                            );
-                          })
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              BlocConsumer<EqubBloc, EqubState>(
-                listener: (context, state) {
-                  if (state is EqubFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  } else if (state is EqubSuccess) {
-                    context.pushNamed(
-                      RouteName.completePage,
-                      extra: "Name",
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  return ButtonWidget(
-                      child: state is EqubLoading
-                          ? const LoadingWidget()
-                          : const TextWidget(
-                              text: 'Confirm',
-                              color: Colors.white,
-                              type: TextType.small,
+                          TextButton(
+                              child: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.add,
+                                    color: ColorName.primaryColor,
+                                  ),
+                                  SizedBox(width: 3),
+                                  TextWidget(
+                                    text: 'Add Member',
+                                    fontSize: 13,
+                                    color: ColorName.primaryColor,
+                                  ),
+                                ],
+                              ),
+                              onPressed: () async {
+                                await _fetchContacts();
+
+                                showAddMember(
+                                  // ignore: use_build_context_synchronously
+                                  context,
+                                  int.tryParse(
+                                          numberOfMembersController.text) ??
+                                      3,
+                                  _contacts,
+                                  widget.equb.id,
+                                );
+                              }),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      for (var member in widget.equb.members)
+                        FutureBuilder(
+                            future: getMemberContactInfo(
+                              equbUser: member.user!,
+                              contacts: _contacts,
                             ),
-                      onPressed: () {
-                        // if (_formKey.currentState!.validate()) {
-                        //   context.read<EqubBloc>().add(
-                        //         AddEqub(
-                        //           equbModel: EqubModel(
-                        //             name: nameController.text,
-                        //             contributionAmount: double.parse(amountController.text),
-                        //             frequency: selectedFrequency!,
-                        //             numberOfMembers: int.parse(numberOfMembersController.text),
-                        //             startDate: startingDate!,
-                        //             members: selectedContacts
-                        //                 .map((c) => ContactModel(
-                        //                       name: c.displayName,
-                        //                       phoneNumber: c.phones.first.number,
-                        //                     ))
-                        //                 .toList(),
-                        //           ),
-                        //         ),
-                        //       );
-                        // }
-                      });
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              )
-            ],
+                            builder: (context, snapshot) {
+                              return EqubMemberTile(
+                                equbInviteeModel: EqubInviteeModel(
+                                    id: member.userId ?? 0,
+                                    phoneNumber: snapshot.data?.phoneNumber ??
+                                        member.username ??
+                                        '',
+                                    status: member.status,
+                                    name: snapshot.data?.displayName ??
+                                        member.username ??
+                                        ''),
+                              );
+                            })
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                BlocConsumer<EqubMemberBloc, EqubMemberState>(
+                  listener: (context, state) {
+                    if (state is EqubEditFail) {
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    } else if (state is EqubEditSuccess) {
+                      context.read<EqubBloc>().add(FetchAllEqubs());
+
+                      context.pop();
+                      context.pop();
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        child: state is EqubEditLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Confirm',
+                                color: Colors.white,
+                                type: TextType.small,
+                              ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<EqubMemberBloc>().add(EditEqub(
+                                    equb: widget.equb.copyWith(
+                                  name: equbNameController.text.trim(),
+                                  contributionAmount: double.tryParse(
+                                          amountController.text.trim()) ??
+                                      0,
+                                  frequency: selectedFrequency ??
+                                      widget.equb.frequency,
+                                  currency: selectedCurrencyCode ??
+                                      widget.equb.currency,
+                                  numberOfMembers: int.tryParse(
+                                          numberOfMembersController.text) ??
+                                      0,
+                                  startDate:
+                                      startingDate ?? widget.equb.startDate,
+                                )));
+                          }
+                        });
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                )
+              ],
+            ),
           ),
         ),
       ),

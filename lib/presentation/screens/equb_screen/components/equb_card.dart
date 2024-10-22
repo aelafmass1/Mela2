@@ -77,7 +77,7 @@ class EqubCard extends StatelessWidget {
             );
           },
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.all(15),
         width: onCarousel ? 93.sw : 100.sw,
         decoration: BoxDecoration(
@@ -163,27 +163,24 @@ class EqubCard extends StatelessWidget {
                             weight: FontWeight.w400,
                           ),
                           const SizedBox(height: 3),
-                          SizedBox(
-                            width: 20.sw,
-                            child: blurTexts
-                                ? Blur(
-                                    blur: 10,
-                                    child: TextWidget(
-                                      text:
-                                          '${equb.contributionAmount} ${equb.currency}',
-                                      fontSize: 12,
-                                      color: ColorName.primaryColor,
-                                      weight: FontWeight.bold,
-                                    ),
-                                  )
-                                : TextWidget(
+                          blurTexts
+                              ? Blur(
+                                  blur: 10,
+                                  child: TextWidget(
                                     text:
                                         '${equb.contributionAmount} ${equb.currency}',
                                     fontSize: 12,
                                     color: ColorName.primaryColor,
                                     weight: FontWeight.bold,
                                   ),
-                          )
+                                )
+                              : TextWidget(
+                                  text:
+                                      '${equb.contributionAmount} ${equb.currency}',
+                                  fontSize: 12,
+                                  color: ColorName.primaryColor,
+                                  weight: FontWeight.bold,
+                                )
                         ],
                       ),
                     ),
@@ -206,27 +203,24 @@ class EqubCard extends StatelessWidget {
                             weight: FontWeight.w400,
                           ),
                           const SizedBox(height: 3),
-                          SizedBox(
-                            width: 20.sw,
-                            child: blurTexts
-                                ? Blur(
-                                    blur: 10,
-                                    child: TextWidget(
-                                      text:
-                                          '${equb.contributionAmount * equb.numberOfMembers} ${equb.currency}',
-                                      fontSize: 12,
-                                      color: ColorName.primaryColor,
-                                      weight: FontWeight.bold,
-                                    ),
-                                  )
-                                : TextWidget(
+                          blurTexts
+                              ? Blur(
+                                  blur: 10,
+                                  child: TextWidget(
                                     text:
                                         '${equb.contributionAmount * equb.numberOfMembers} ${equb.currency}',
                                     fontSize: 12,
                                     color: ColorName.primaryColor,
                                     weight: FontWeight.bold,
                                   ),
-                          )
+                                )
+                              : TextWidget(
+                                  text:
+                                      '${equb.contributionAmount * equb.numberOfMembers} ${equb.currency}',
+                                  fontSize: 12,
+                                  color: ColorName.primaryColor,
+                                  weight: FontWeight.bold,
+                                )
                         ],
                       ),
                     ),
@@ -255,34 +249,36 @@ class EqubCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 SizedBox(
-                  width: 71.sw,
+                  width: 70.sw,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
-                        width: 50.sw,
-                        height: 40,
-                        child: Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            for (int i = 0;
-                                i <
-                                    equb.members
-                                        .where((e) =>
-                                            (e.user?.firstName != null) &&
-                                            e.user?.lastName != null)
-                                        .length;
-                                i++)
-                              if (i < 5)
-                                _buildEqubMember(
-                                    '${equb.members[i].user?.firstName?.trim() ?? ''} ${equb.members[i].user?.lastName?.trim() ?? ''}',
-                                    i),
-                          ],
+                        child: SizedBox(
+                          width: 40.sw,
+                          height: 40,
+                          child: Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              for (int i = 0;
+                                  i <
+                                      equb.members
+                                          .where((e) =>
+                                              (e.user?.firstName != null) &&
+                                              e.user?.lastName != null)
+                                          .length;
+                                  i++)
+                                if (i < 5)
+                                  _buildEqubMember(
+                                      '${equb.members[i].user?.firstName?.trim() ?? ''} ${equb.members[i].user?.lastName?.trim() ?? ''}',
+                                      i),
+                            ],
+                          ),
                         ),
                       ),
                       if (showJoinRequestButton)
                         SizedBox(
-                          width: 78,
+                          width: 83,
                           height: 30,
                           child: ButtonWidget(
                               horizontalPadding: 5,
@@ -297,7 +293,7 @@ class EqubCard extends StatelessWidget {
                         )
                       else if (remainingDay <= 0)
                         SizedBox(
-                          width: 78,
+                          width: 83,
                           height: 30,
                           child: ButtonWidget(
                               color: ColorName.yellow,

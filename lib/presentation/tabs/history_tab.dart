@@ -37,6 +37,8 @@ class _HistoryTabState extends State<HistoryTab> {
         toolbarHeight: 50,
         title: const TextWidget(
           text: 'Transaction History',
+          fontSize: 20,
+          weight: FontWeight.w700,
         ),
         actions: [
           // IconButton(

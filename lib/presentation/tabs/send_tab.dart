@@ -360,7 +360,7 @@ class _SentTabState extends State<SentTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        leadingWidth: index == 0 ? 200 : null,
+        leadingWidth: index == 0 ? 400 : null,
         centerTitle: true,
         toolbarHeight: 60,
         titleSpacing: 0,

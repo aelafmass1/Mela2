@@ -243,7 +243,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   expandedHeight: ResponsiveUtil.forScreen(
                     sizingInfo: sizingInfo,
                     small: 57.sh,
-                    mobile: 370,
+                    mobile: 375,
                     tablet: 370,
                   ),
                   pinned: true,

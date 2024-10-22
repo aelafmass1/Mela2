@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
@@ -19,6 +20,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../config/routing.dart';
 import '../screens/home_screen/components/exchange_rate_card.dart';
 
 class HomeTab extends StatefulWidget {
@@ -128,7 +130,7 @@ class _HomeTabState extends State<HomeTab> {
                 ),
                 IconButton(
                     onPressed: () {
-                      //
+                      context.pushNamed(RouteName.notification);
                     },
                     icon: const Icon(
                       Bootstrap.bell,

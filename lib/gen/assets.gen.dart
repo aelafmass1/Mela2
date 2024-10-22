@@ -130,6 +130,10 @@ class $AssetsImagesGen {
   AssetGenImage get nibBankLogo =>
       const AssetGenImage('assets/images/nib_bank_logo.png');
 
+  /// File path: assets/images/no_notification.png
+  AssetGenImage get noNotification =>
+      const AssetGenImage('assets/images/no_notification.png');
+
   /// File path: assets/images/no_transaction.png
   AssetGenImage get noTransaction =>
       const AssetGenImage('assets/images/no_transaction.png');
@@ -222,6 +226,7 @@ class $AssetsImagesGen {
         newsBackground,
         nextArrow,
         nibBankLogo,
+        noNotification,
         noTransaction,
         oromiaBankLogo,
         profileImage,

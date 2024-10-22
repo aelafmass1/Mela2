@@ -54,7 +54,6 @@ dependencies:
   connectivity_plus: ^6.0.5
   http_interceptor: ^2.0.0
   blur: ^4.0.0
-  jumio_mobile_sdk_flutter: ^4.11.0
 
 dev_dependencies:
   flutter_test:

@@ -61,7 +61,7 @@ class _EqubTabState extends State<EqubTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        toolbarHeight: 30,
+        toolbarHeight: 20,
       ),
       body: BlocConsumer<EqubBloc, EqubState>(
         listener: (context, state) async {
