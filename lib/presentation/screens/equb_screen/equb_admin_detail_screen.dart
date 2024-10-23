@@ -7,14 +7,17 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_cycle_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_cycle_widget.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -24,6 +27,7 @@ import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dar
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../core/utils/get_member_bottom_sheet.dart';
 import '../../../core/utils/get_member_contact_info.dart';
 import '../../../core/utils/show_add_member.dart';
 import '../../../data/models/equb_detail_model.dart';
@@ -48,6 +52,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   final numberOfMembersController = TextEditingController();
   final searchingController = TextEditingController();
 
+  Map<int, int> winnerMembers = {};
+
   List<Contact> _contacts = [];
   List<Contact> selectedContacts = [];
   List<Contact> filteredContacts = [];
@@ -55,136 +61,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   bool isPermissionDenied = false;
   bool isSearching = false;
   bool isJoin = false;
-
-  showDetailBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (_) => Wrap(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            width: 35,
-                            height: 35,
-                            color: ColorName.green,
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.person_add,
-                              color: ColorName.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        title: const TextWidget(
-                          text: "Make Co-Admin",
-                          type: TextType.small,
-                        ),
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const TextWidget(
-                                text:
-                                    "Are you sure you want to promote to co-admin?"),
-                            actions: [
-                              MaterialButton(
-                                child: const Text("Cancel"),
-                                onPressed: () => context.pop(),
-                              ),
-                              MaterialButton(
-                                child: const Text("Promote"),
-                                onPressed: () => context.pop(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            width: 35,
-                            height: 35,
-                            color: ColorName.green,
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.person_remove,
-                              color: ColorName.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        title: const TextWidget(
-                          text: "Remove Co-Admin",
-                          type: TextType.small,
-                        ),
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const TextWidget(
-                                text:
-                                    "Are you sure you want to remove this co-admin?"),
-                            actions: [
-                              MaterialButton(
-                                child: const Text("Cancel"),
-                                onPressed: () => context.pop(),
-                              ),
-                              MaterialButton(
-                                child: const Text("Remove"),
-                                onPressed: () => context.pop(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            width: 35,
-                            height: 35,
-                            color: ColorName.red,
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.close,
-                              color: ColorName.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        title: const TextWidget(
-                          text: "Remove from equb",
-                          type: TextType.small,
-                        ),
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const TextWidget(
-                                text:
-                                    "Are you sure you want to remove this member?"),
-                            actions: [
-                              MaterialButton(
-                                child: const Text("Cancel"),
-                                onPressed: () => context.pop(),
-                              ),
-                              MaterialButton(
-                                child: const Text("Remove"),
-                                onPressed: () => context.pop(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ));
-  }
+  int round = -1;
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -200,6 +77,29 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
         isPermissionDenied = true;
       });
     }
+  }
+
+  int? getFrequencyDay(String frequency) {
+    switch (frequency) {
+      case 'WEEKLY':
+        return 7;
+      case 'BIWEEKLY':
+        return 15;
+      case 'MONTHLY':
+        return 30;
+      default:
+        return null;
+    }
+  }
+
+  int? getRemainingDate() {
+    final startDate = widget.equbDetailModel.startDate;
+    final freqencyInDay = getFrequencyDay(widget.equbDetailModel.frequency);
+    if (freqencyInDay == null) return null;
+    final endDay = startDate.day + freqencyInDay;
+    final currentDay = DateTime.now().day;
+
+    return endDay - currentDay;
   }
 
   @override
@@ -242,9 +142,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                 SliverAppBar(
                   expandedHeight: ResponsiveUtil.forScreen(
                     sizingInfo: sizingInfo,
-                    small: 57.sh,
-                    mobile: 375,
-                    tablet: 370,
+                    small: 66.sh,
+                    mobile: 447,
+                    tablet: 447,
                   ),
                   pinned: true,
                   backgroundColor: ColorName.white,
@@ -398,35 +298,36 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         ),
                       ],
                     ),
-                    const Expanded(child: SizedBox()),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                    const Spacer(),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 3,
+                          color: Colors.white,
                         ),
-                        onPressed: () {
-                          // setState(() {
-                          //   index = 0;
-                          // });
-                          context.pushNamed(
-                            RouteName.equbEdit,
-                            extra: widget.equbDetailModel,
-                          );
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const TextWidget(
-                              text: 'Edit',
-                              fontSize: 12,
-                              color: ColorName.primaryColor,
-                            ),
-                            const SizedBox(width: 3),
-                            SvgPicture.asset(
-                              Assets.images.svgs.editIcon,
-                            ),
-                          ],
-                        ))
+                        shape: BoxShape.circle,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextWidget(
+                            text: round == -1
+                                ? '--'
+                                : round.toString().padLeft(2, '0'),
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                          const TextWidget(
+                            text: 'Rounds',
+                            color: Colors.white,
+                            fontSize: 6,
+                            weight: FontWeight.w200,
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -441,12 +342,16 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                       children: [
                         SvgPicture.asset(Assets.images.svgs.adminIcon),
                         const SizedBox(width: 10),
-                        const TextWidget(
-                          text: "Admin",
-                          fontSize: 14,
-                          color: Color(0xfF6D6D6D),
+                        SizedBox(
+                          width: 45.sw,
+                          child: TextWidget(
+                            text:
+                                "Admin: ${widget.equbDetailModel.createdBy.firstName} ${widget.equbDetailModel.createdBy.lastName}",
+                            fontSize: 14,
+                            color: const Color(0xfF6D6D6D),
+                          ),
                         ),
-                        const Expanded(child: SizedBox()),
+                        const Spacer(),
                         const Icon(
                           Icons.groups_outlined,
                           color: Color(0xfF6D6D6D),
@@ -480,7 +385,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           text:
                               '${widget.equbDetailModel.startDate.day.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.month.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.year}',
                           fontSize: 14,
-                          color: const Color(0xfF6D6D6D),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -502,7 +407,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         TextWidget(
                           text: widget.equbDetailModel.frequency,
                           fontSize: 14,
-                          color: const Color(0xfF6D6D6D),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -527,7 +432,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           text:
                               '${widget.equbDetailModel.contributionAmount} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
-                          color: const Color(0xfF6D6D6D),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -550,10 +455,97 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           text:
                               '${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
-                          color: const Color(0xfF6D6D6D),
+                          color: Colors.black,
                         ),
                       ],
                     ),
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if ((getRemainingDate() ?? 0) <= 0)
+                          SizedBox(
+                            width: 83,
+                            height: 30,
+                            child: ButtonWidget(
+                                color: ColorName.yellow,
+                                horizontalPadding: 5,
+                                verticalPadding: 0,
+                                child: const TextWidget(
+                                  text: 'Make Payment',
+                                  type: TextType.small,
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {}),
+                          )
+                        else
+                          SizedBox(
+                            width: 35,
+                            height: 35,
+                            child: SimpleCircularProgressBar(
+                              valueNotifier: ValueNotifier(
+                                  (getRemainingDate() ?? 0).toDouble()),
+                              progressStrokeWidth: 5,
+                              backStrokeWidth: 5,
+                              maxValue: (getFrequencyDay(
+                                          widget.equbDetailModel.frequency) ??
+                                      0)
+                                  .toDouble(),
+                              animationDuration: 3,
+                              mergeMode: true,
+                              onGetText: (value) {
+                                return Text(
+                                  '${value.toInt()}\n${((getRemainingDate() ?? 0) == 1 || (getRemainingDate() ?? 0) == 0) ? 'Day' : 'Days'}',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall!
+                                      .copyWith(
+                                        fontSize: 9,
+                                      ),
+                                );
+                              },
+                              progressColors: [
+                                ((getRemainingDate() ?? 0) <= 3)
+                                    ? ColorName.red
+                                    : ColorName.primaryColor,
+                              ],
+                              backColor: Colors.black.withOpacity(0.2),
+                            ),
+                          ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              elevation: 0,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                            ),
+                            onPressed: () {
+                              // setState(() {
+                              //   index = 0;
+                              // });
+                              context.pushNamed(
+                                RouteName.equbEdit,
+                                extra: widget.equbDetailModel,
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const TextWidget(
+                                  text: 'Edit',
+                                  fontSize: 12,
+                                  color: ColorName.primaryColor,
+                                ),
+                                const SizedBox(width: 3),
+                                SvgPicture.asset(
+                                  Assets.images.svgs.editIcon,
+                                ),
+                              ],
+                            )),
+                      ],
+                    )
                   ],
                 ),
               )
@@ -565,10 +557,13 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
+    return SizedBox(
+      height: 80,
+      width: 100.sw,
+      child: const Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextWidget(
@@ -587,34 +582,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             )
           ],
         ),
-        // Container(
-        //   width: 40,
-        //   height: 40,
-        //   decoration: BoxDecoration(
-        //     border: Border.all(
-        //       width: 3,
-        //       color: ColorName.primaryColor,
-        //     ),
-        //     shape: BoxShape.circle,
-        //   ),
-        //   child: const Column(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       TextWidget(
-        //         text: '01',
-        //         color: ColorName.primaryColor,
-        //         fontSize: 13,
-        //       ),
-        //       TextWidget(
-        //         text: 'Rounds',
-        //         color: ColorName.primaryColor,
-        //         fontSize: 6,
-        //         weight: FontWeight.w400,
-        //       )
-        //     ],
-        //   ),
-        // ),
-      ],
+      ),
     );
   }
 
@@ -682,7 +650,41 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   Widget _buildMembersContent() {
     return SingleChildScrollView(
-      child: BlocBuilder<EqubBloc, EqubState>(
+      child: BlocConsumer<EqubBloc, EqubState>(
+        listener: (context, state) {
+          if (state is EqubSuccess) {
+            if (state.selectedEqub != null) {
+              final cycle = state.selectedEqub!.cycles
+                  .where((c) => c.status == 'CURRENT');
+              if (cycle.isNotEmpty) {
+                setState(() {
+                  round = cycle.first.cycleNumber;
+                });
+              } else {
+                setState(() {
+                  round = 1;
+                });
+              }
+              if (state.selectedEqub?.cycles.isNotEmpty == true) {
+                // state.selectedEqub!.cycles.sort((a, b) => a.cycleNumber.compareTo(b.cycleNumber));
+
+                final winnerCycles = state.selectedEqub!.cycles
+                    .where((c) => c.winner != null)
+                    .toList();
+
+                for (var cycle in winnerCycles) {
+                  if (cycle.winner != null) {
+                    winnerMembers[cycle.winner?.user?.phoneNumber ?? 0] =
+                        cycle.cycleNumber;
+                  }
+                }
+                setState(() {
+                  winnerMembers = winnerMembers;
+                });
+              }
+            }
+          }
+        },
         builder: (context, state) {
           if (state is EqubLoading) {
             return Column(
@@ -769,28 +771,38 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     ),
                   ],
                 ),
-                for (var member in state.selectedEqub!.members)
-                  FutureBuilder(
-                      future: getMemberContactInfo(
-                        equbUser: member.user!,
-                        contacts: _contacts,
-                      ),
-                      builder: (context, snapshot) {
-                        return EqubMemberTile(
-                          onOptionPressed: () {
-                            showDetailBottomSheet();
-                          },
-                          equbInviteeModel: EqubInviteeModel(
-                              id: member.userId ?? 0,
-                              phoneNumber: snapshot.data?.phoneNumber ??
-                                  member.username ??
-                                  '',
-                              status: member.status,
-                              name: snapshot.data?.displayName ??
-                                  member.username ??
-                                  ''),
-                        );
-                      })
+                if (state.selectedEqub?.members.isEmpty == true)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: TextWidget(
+                      text: 'No Member Found',
+                      type: TextType.small,
+                      weight: FontWeight.w300,
+                    ),
+                  )
+                else
+                  for (var member in state.selectedEqub!.members)
+                    FutureBuilder(
+                        future: getMemberContactInfo(
+                          equbUser: member.user!,
+                          contacts: _contacts,
+                        ),
+                        builder: (context, snapshot) {
+                          return EqubMemberTile(
+                            onOptionPressed: () {
+                              showDetailBottomSheet(context);
+                            },
+                            equbInviteeModel: EqubInviteeModel(
+                                id: member.userId ?? 0,
+                                phoneNumber: snapshot.data?.phoneNumber ??
+                                    member.username ??
+                                    '',
+                                status: member.status,
+                                name: snapshot.data?.displayName ??
+                                    member.username ??
+                                    ''),
+                          );
+                        })
               ],
             );
           }
@@ -855,12 +867,14 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           builder: (context, equbMemberState) {
                             return TextButton(
                               onPressed: () {
-                                context.read<EqubMemberBloc>().add(
-                                      EqubAutoPickWinner(
-                                        cycleId: state
-                                            .selectedEqub!.cycles.first.cycleId,
-                                      ),
-                                    );
+                                if (state.selectedEqub!.members.isNotEmpty) {
+                                  context.read<EqubMemberBloc>().add(
+                                        EqubAutoPickWinner(
+                                          cycleId: state.selectedEqub!.cycles
+                                              .first.cycleId,
+                                        ),
+                                      );
+                                }
                               },
                               child: equbMemberState is EqubAutoWinnerLoading
                                   ? const LoadingWidget(
@@ -883,62 +897,97 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         ),
                       ],
                     ),
-                    for (int i = 0;
-                        i < (state.selectedEqub?.members ?? []).length;
-                        i++)
-                      FutureBuilder(
-                          future: getMemberContactInfo(
-                            equbUser: state.selectedEqub!.members[i].user!,
-                            contacts: _contacts,
-                          ),
-                          builder: (context, snapshot) {
-                            return EqubMemberTile(
-                              trailingWidget: SizedBox(
-                                width: 70,
-                                height: 35,
-                                child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                      backgroundColor: activeIndex == i
-                                          ? ColorName.primaryColor
-                                          : ColorName.white,
-                                      shape: RoundedRectangleBorder(
+                    if (state.selectedEqub?.members.isEmpty == true)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: TextWidget(
+                          text: 'No Member Found',
+                          type: TextType.small,
+                          weight: FontWeight.w300,
+                        ),
+                      )
+                    else
+                      for (int i = 0;
+                          i < (state.selectedEqub?.members ?? []).length;
+                          i++)
+                        FutureBuilder(
+                            future: getMemberContactInfo(
+                              equbUser: state.selectedEqub!.members[i].user!,
+                              contacts: _contacts,
+                            ),
+                            builder: (context, snapshot) {
+                              return EqubMemberTile(
+                                trailingWidget: winnerMembers.containsKey(state
+                                        .selectedEqub
+                                        ?.members[i]
+                                        .user
+                                        ?.phoneNumber)
+                                    ? Container(
+                                        height: 30,
+                                        width: 100,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: ColorName.grey,
+                                          ),
                                           borderRadius:
                                               BorderRadius.circular(30),
-                                          side: activeIndex == i
-                                              ? BorderSide.none
-                                              : const BorderSide(
-                                                  color: ColorName.primaryColor,
-                                                  width: 1,
-                                                )),
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        activeIndex = i;
-                                      });
-                                    },
-                                    child: TextWidget(
-                                      text: activeIndex == i
-                                          ? 'Selected'
-                                          : 'Select',
-                                      color: activeIndex == i
-                                          ? ColorName.white
-                                          : ColorName.primaryColor,
-                                      fontSize: 12,
-                                    )),
-                              ),
-                              equbInviteeModel: EqubInviteeModel(
-                                id: state.selectedEqub!.members[i].userId ?? 0,
-                                phoneNumber: snapshot.data?.phoneNumber ??
-                                    state.selectedEqub!.members[i].username ??
-                                    'PENDING USER',
-                                status: state.selectedEqub!.members[i].status,
-                                name: snapshot.data?.displayName ??
-                                    state.selectedEqub!.members[i].username ??
-                                    'PENDING USER',
-                              ),
-                            );
-                          }),
+                                        ),
+                                        child: TextWidget(
+                                          text:
+                                              ' Round ${winnerMembers[state.selectedEqub!.members[i].user?.phoneNumber]} winner',
+                                          fontSize: 11,
+                                          color: ColorName.grey,
+                                        ),
+                                      )
+                                    : SizedBox(
+                                        width: 70,
+                                        height: 35,
+                                        child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              padding: EdgeInsets.zero,
+                                              backgroundColor: activeIndex == i
+                                                  ? ColorName.primaryColor
+                                                  : ColorName.white,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                  side: activeIndex == i
+                                                      ? BorderSide.none
+                                                      : const BorderSide(
+                                                          color: ColorName
+                                                              .primaryColor,
+                                                          width: 1,
+                                                        )),
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                activeIndex = i;
+                                              });
+                                            },
+                                            child: TextWidget(
+                                              text: activeIndex == i
+                                                  ? 'Selected'
+                                                  : 'Select',
+                                              color: activeIndex == i
+                                                  ? ColorName.white
+                                                  : ColorName.primaryColor,
+                                              fontSize: 12,
+                                            )),
+                                      ),
+                                equbInviteeModel: EqubInviteeModel(
+                                  id: state.selectedEqub!.members[i].userId ??
+                                      0,
+                                  phoneNumber: snapshot.data?.phoneNumber ??
+                                      state.selectedEqub!.members[i].username ??
+                                      'PENDING USER',
+                                  status: state.selectedEqub!.members[i].status,
+                                  name: snapshot.data?.displayName ??
+                                      state.selectedEqub!.members[i].username ??
+                                      'PENDING USER',
+                                ),
+                              );
+                            }),
 
                     // ListView.builder(
                     //   shrinkWrap: true,
@@ -1021,8 +1070,17 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                   log(state.selectedEqub!.members[activeIndex]
                                           .username ??
                                       '');
-                                  final cycleId =
-                                      state.selectedEqub!.cycles.first.cycleId;
+                                  final cycle = state.selectedEqub!.cycles
+                                      .where((c) => c.status == 'CURRENT');
+                                  int cycleId = 0;
+                                  if (cycle.isNotEmpty) {
+                                    cycleId = cycle.first.cycleId;
+                                  } else {
+                                    cycleId = state.selectedEqub!.cycles
+                                        .where((c) => c.cycleNumber == 1)
+                                        .first
+                                        .cycleId;
+                                  }
                                   final memberId = state
                                       .selectedEqub!.members[activeIndex].id;
 
@@ -1057,77 +1115,114 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   Widget _buildPaymentContent() {
     return Stack(
       children: [
-        SingleChildScrollView(
-          child: BlocBuilder<EqubBloc, EqubState>(
-            builder: (context, state) {
-              if (state is EqubSuccess && state.selectedEqub != null) {
-                return Column(
+        BlocBuilder<EqubBloc, EqubState>(
+          builder: (context, state) {
+            if (state is EqubSuccess && state.selectedEqub != null) {
+              return SingleChildScrollView(
+                child: Column(
                   children: [
                     const SizedBox(height: 10),
-                    const Row(
+                    if (state.selectedEqub?.cycles.isNotEmpty == true)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 42,
+                            width: 100.sw,
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.zero,
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  for (var cycle in state.selectedEqub!.cycles)
+                                    EqubCycleWidget(
+                                      equbCycleModel: cycle,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            color: ColorName.grey[50],
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 10),
+                    Row(
                       children: [
                         TextWidget(
-                          text: 'All Members (10)',
+                          text:
+                              'All Members (${state.selectedEqub?.members.length})',
                           fontSize: 16,
                         ),
-                        Spacer(),
-                        TextWidget(
+                        const Spacer(),
+                        const TextWidget(
                           text: 'Paid',
                           fontSize: 13,
                           color: ColorName.green,
                         ),
-                        SizedBox(width: 22),
-                        TextWidget(
+                        const SizedBox(width: 13),
+                        const TextWidget(
                           text: 'Unpaid',
                           fontSize: 13,
                           color: ColorName.red,
                         ),
-                        SizedBox(width: 5),
+                        const SizedBox(width: 4),
                       ],
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: (state.selectedEqub?.members.length ??
-                          0), // Example list item count
-                      itemBuilder: (context, index) {
-                        return FutureBuilder(
-                            future: getMemberContactInfo(
-                              equbUser:
-                                  state.selectedEqub!.members[index].user!,
-                              contacts: _contacts,
-                            ),
-                            builder: (context, snapshot) {
-                              return EqubPaymentCard(
-                                equbInviteeModel: EqubInviteeModel(
-                                  id: state.selectedEqub!.members[index]
-                                          .userId ??
-                                      0,
-                                  phoneNumber: snapshot.data?.phoneNumber ??
-                                      state.selectedEqub!.members[index]
-                                          .username ??
-                                      '',
-                                  status:
-                                      state.selectedEqub!.members[index].status,
-                                  name: snapshot.data?.displayName ??
-                                      state.selectedEqub!.members[index]
-                                          .username ??
-                                      '',
-                                ),
-                                index: index,
-                              );
-                            });
-                      },
-                    ),
+                    if (state.selectedEqub?.members.isEmpty == true)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: TextWidget(
+                          text: 'No Member Found',
+                          type: TextType.small,
+                          weight: FontWeight.w300,
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: (state.selectedEqub?.members.length ??
+                            0), // Example list item count
+                        itemBuilder: (context, index) {
+                          return FutureBuilder(
+                              future: getMemberContactInfo(
+                                equbUser:
+                                    state.selectedEqub!.members[index].user!,
+                                contacts: _contacts,
+                              ),
+                              builder: (context, snapshot) {
+                                return EqubPaymentCard(
+                                  equbInviteeModel: EqubInviteeModel(
+                                    id: state.selectedEqub!.members[index]
+                                            .userId ??
+                                        0,
+                                    phoneNumber: snapshot.data?.phoneNumber ??
+                                        state.selectedEqub!.members[index]
+                                            .username ??
+                                        '',
+                                    status: state
+                                        .selectedEqub!.members[index].status,
+                                    name: snapshot.data?.displayName ??
+                                        state.selectedEqub!.members[index]
+                                            .username ??
+                                        '',
+                                  ),
+                                  index: index,
+                                );
+                              });
+                        },
+                      ),
                     const SizedBox(
                       height: 75,
                     ),
                   ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
         Positioned(
           bottom: 0,

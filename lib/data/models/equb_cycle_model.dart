@@ -1,15 +1,19 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
+
 class EqubCycleModel {
   final int cycleId;
   final int cycleNumber;
   final String? cycleDate;
-  final Map? winner;
+  final String status;
+  final EqubMemberModel? winner;
   EqubCycleModel({
     required this.cycleId,
     required this.cycleNumber,
     this.cycleDate,
+    required this.status,
     this.winner,
   });
 
@@ -17,12 +21,14 @@ class EqubCycleModel {
     int? cycleId,
     int? cycleNumber,
     String? cycleDate,
-    Map? winner,
+    String? status,
+    EqubMemberModel? winner,
   }) {
     return EqubCycleModel(
       cycleId: cycleId ?? this.cycleId,
       cycleNumber: cycleNumber ?? this.cycleNumber,
       cycleDate: cycleDate ?? this.cycleDate,
+      status: status ?? this.status,
       winner: winner ?? this.winner,
     );
   }
@@ -32,16 +38,20 @@ class EqubCycleModel {
       'cycleId': cycleId,
       'cycleNumber': cycleNumber,
       'cycleDate': cycleDate,
-      'winner': winner,
+      'status': status,
+      'winner': winner?.toMap(),
     };
   }
 
-  factory EqubCycleModel.fromMap(Map map) {
+  factory EqubCycleModel.fromMap(Map<String, dynamic> map) {
     return EqubCycleModel(
       cycleId: map['cycleId'] as int,
       cycleNumber: map['cycleNumber'] as int,
       cycleDate: map['cycleDate'] != null ? map['cycleDate'] as String : null,
-      winner: map['winner'] != null ? Map.from(map['winner']) : null,
+      status: map['status'] as String,
+      winner: map['winner'] != null
+          ? EqubMemberModel.fromMap(map['winner'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -52,7 +62,7 @@ class EqubCycleModel {
 
   @override
   String toString() {
-    return 'EqubCycleModel(cycleId: $cycleId, cycleNumber: $cycleNumber, cycleDate: $cycleDate, winner: $winner)';
+    return 'EqubCycleModel(cycleId: $cycleId, cycleNumber: $cycleNumber, cycleDate: $cycleDate, status: $status, winner: $winner)';
   }
 
   @override
@@ -62,6 +72,7 @@ class EqubCycleModel {
     return other.cycleId == cycleId &&
         other.cycleNumber == cycleNumber &&
         other.cycleDate == cycleDate &&
+        other.status == status &&
         other.winner == winner;
   }
 
@@ -70,6 +81,7 @@ class EqubCycleModel {
     return cycleId.hashCode ^
         cycleNumber.hashCode ^
         cycleDate.hashCode ^
+        status.hashCode ^
         winner.hashCode;
   }
 }

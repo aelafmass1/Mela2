@@ -267,7 +267,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     const SizedBox(width: 10),
                     TextWidget(
                       text:
-                          'Members : ${widget.equbDetailModel.invitees.length}',
+                          'Members : ${widget.equbDetailModel.members.length}',
                       fontSize: 14,
                       color: Colors.black,
                     ),
@@ -338,6 +338,10 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     blurTexts
                         ? Blur(
                             blur: 10,
+                            overlay: Container(
+                              color: ColorName.grey[50],
+                              height: 50,
+                            ),
                             child: TextWidget(
                               text:
                                   '\$${widget.equbDetailModel.contributionAmount}',
@@ -371,6 +375,10 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     blurTexts
                         ? Blur(
                             blur: 10,
+                            overlay: Container(
+                              color: ColorName.grey[50],
+                              height: 50,
+                            ),
                             child: TextWidget(
                               text:
                                   '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
