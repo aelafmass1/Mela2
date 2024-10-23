@@ -111,7 +111,7 @@ class _WinScreenState extends State<WinScreen> {
             ),
           ),
           Positioned(
-            bottom: 5,
+            bottom: 20,
             left: 15,
             right: 15,
             child: ButtonWidget(

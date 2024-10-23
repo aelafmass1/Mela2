@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
@@ -27,10 +28,30 @@ class _EqubTabState extends State<EqubTab> {
   List<EqubDetailModel> yourEqubs = [];
   List<EqubDetailModel> invitedEqubs = [];
   List<EqubDetailModel> otherEqubs = [];
+  bool? isDescoveryEqubFound;
+  List<Contact> _contacts = [];
+
+  Future<void> _fetchContacts() async {
+    if (await Permission.contacts.isDenied) {
+      await Future.delayed(const Duration(seconds: 10));
+    }
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        _contacts = contacts;
+      });
+    }
+    setState(() {
+      isDescoveryEqubFound = false;
+    });
+  }
+
   @override
   void initState() {
-    context.read<EqubBloc>().add(FetchAllEqubs());
+    // TODO: implement initState
     super.initState();
+    context.read<EqubBloc>().add(FetchAllEqubs());
   }
 
   @override
@@ -40,7 +61,7 @@ class _EqubTabState extends State<EqubTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        toolbarHeight: 30,
+        toolbarHeight: 20,
       ),
       body: BlocConsumer<EqubBloc, EqubState>(
         listener: (context, state) async {
@@ -51,7 +72,11 @@ class _EqubTabState extends State<EqubTab> {
               description: state.reason,
             );
           } else if (state is EqubSuccess) {
-            //
+            setState(() {
+              yourEqubs = state.equbList.where((e) => e.isAdmin).toList();
+              invitedEqubs =
+                  state.equbList.where((e) => e.isAdmin == false).toList();
+            });
           }
         },
         builder: (context, state) {
@@ -65,7 +90,10 @@ class _EqubTabState extends State<EqubTab> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const TextWidget(text: 'Equb'),
+                      const TextWidget(
+                        text: 'Equb',
+                        weight: FontWeight.w700,
+                      ),
                       SizedBox(
                         width: 110,
                         height: 45,
@@ -93,80 +121,116 @@ class _EqubTabState extends State<EqubTab> {
               ],
             );
           }
+
           if (state.equbList.isEmpty) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
               ),
-              child: Column(
-                children: [
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextWidget(text: 'Equb'),
-                  ),
-                  const SizedBox(height: 10),
-                  Assets.images.equbImage.image(
-                    width: 250,
-                  ),
-                  const SizedBox(height: 10),
-                  const TextWidget(
-                    text: 'oops, You don’t have any Equb.',
-                    type: TextType.small,
-                    weight: FontWeight.w500,
-                  ),
-                  const SizedBox(height: 10),
-                  const TextWidget(
-                    text:
-                        'Please create new Equb or you’ll see your active Equb when someone added you as a member',
-                    fontSize: 12,
-                    weight: FontWeight.w300,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 35),
-                  ButtonWidget(
-                      child: const TextWidget(
-                        text: 'Create Equb',
-                        color: Colors.white,
-                        type: TextType.small,
-                        weight: FontWeight.w500,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextWidget(
+                        text: 'Equb',
+                        weight: FontWeight.w700,
                       ),
-                      onPressed: () {
-                        context.pushNamed(RouteName.equbCreation);
-                      }),
-                  SvgPicture.asset(
-                    Assets.images.svgs.discovery,
-                    width: 150,
-                  ),
-                  const SizedBox(height: 20),
-                  const TextWidget(
-                    text: 'Discover Equb',
-                    type: TextType.small,
-                    weight: FontWeight.w500,
-                  ),
-                  const SizedBox(height: 10),
-                  const TextWidget(
-                    text:
-                        'Start exploring Equbs! Find Equbs that your contacts are participating in right here',
-                    fontSize: 12,
-                    weight: FontWeight.w300,
-                    textAlign: TextAlign.center,
-                  ),
-                  const Expanded(child: SizedBox()),
-                  ButtonWidget(
-                      child: const TextWidget(
-                        text: 'Start Discovering',
-                        color: Colors.white,
-                        type: TextType.small,
-                        weight: FontWeight.w500,
-                      ),
-                      onPressed: () {
-                        //
-                      }),
-                  const SizedBox(height: 10),
-                ],
+                    ),
+                    const SizedBox(height: 10),
+                    Assets.images.equbImage.image(
+                      width: 250,
+                    ),
+                    const SizedBox(height: 10),
+                    const TextWidget(
+                      text: 'oops, You don’t have any Equb.',
+                      type: TextType.small,
+                      weight: FontWeight.w500,
+                    ),
+                    const SizedBox(height: 10),
+                    const TextWidget(
+                      text:
+                          'Please create new Equb or you’ll see your active Equb when someone added you as a member',
+                      fontSize: 12,
+                      weight: FontWeight.w300,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    ButtonWidget(
+                        child: const TextWidget(
+                          text: 'Create Equb',
+                          color: Colors.white,
+                          type: TextType.small,
+                          weight: FontWeight.w500,
+                        ),
+                        onPressed: () {
+                          context.pushNamed(RouteName.equbCreation);
+                        }),
+                    const SizedBox(height: 10),
+                    if (isDescoveryEqubFound == false)
+                      Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          SvgPicture.asset(Assets.images.svgs.noEqub),
+                          const SizedBox(height: 20),
+                          const TextWidget(
+                            text: 'Opps, Couldn’t find any Equb',
+                            type: TextType.small,
+                            weight: FontWeight.w600,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          const TextWidget(
+                            text:
+                                "We couldn't find any Equb groups that your contacts are currently participating in.",
+                            fontSize: 12,
+                            color: ColorName.grey,
+                            weight: FontWeight.w400,
+                            textAlign: TextAlign.center,
+                          )
+                        ],
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            Assets.images.svgs.discovery,
+                            width: 150,
+                          ),
+                          const SizedBox(height: 20),
+                          const TextWidget(
+                            text: 'Discover Equb',
+                            type: TextType.small,
+                            weight: FontWeight.w500,
+                          ),
+                          const TextWidget(
+                            text:
+                                'Start exploring Equbs! Find Equbs that your contacts are participating in right here',
+                            fontSize: 12,
+                            weight: FontWeight.w300,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+                          ButtonWidget(
+                              child: const TextWidget(
+                                text: 'Start Discovering',
+                                color: Colors.white,
+                                type: TextType.small,
+                                weight: FontWeight.w500,
+                              ),
+                              onPressed: () {
+                                _fetchContacts();
+                              }),
+                          const SizedBox(height: 10),
+                        ],
+                      )
+                  ],
+                ),
               ),
             );
           }
+
           return Column(
             children: [
               Padding(
@@ -176,7 +240,10 @@ class _EqubTabState extends State<EqubTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const TextWidget(text: 'Equb'),
+                    const TextWidget(
+                      text: 'Equb',
+                      weight: FontWeight.w700,
+                    ),
                     SizedBox(
                       width: 110,
                       height: 45,
@@ -213,17 +280,46 @@ class _EqubTabState extends State<EqubTab> {
                               type: TextType.small,
                             )),
                         const SizedBox(height: 15),
-                        if (state.equbList.length == 1)
-                          EqubCard(equb: state.equbList.first)
-                        else
-                          Column(
-                            children: [
-                              for (var equb in state.equbList)
-                                EqubCard(
-                                  equb: equb,
-                                ),
-                            ],
-                          ),
+                        Column(
+                          children: [
+                            for (var equb in yourEqubs)
+                              EqubCard(
+                                equb: equb,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Visibility(
+                          visible: invitedEqubs.isNotEmpty,
+                          child: Container(
+                              padding: const EdgeInsets.only(left: 15),
+                              alignment: Alignment.centerLeft,
+                              child: const TextWidget(
+                                text: 'Invitation Equb',
+                                color: ColorName.grey,
+                                type: TextType.small,
+                              )),
+                        ),
+                        Visibility(
+                          visible: invitedEqubs.isNotEmpty,
+                          child: const SizedBox(height: 15),
+                        ),
+                        Column(
+                          children: [
+                            for (var equb in invitedEqubs)
+                              EqubCard(
+                                showJoinRequestButton: true,
+                                blurTexts: true,
+                                equb: equb,
+                                onTab: () {
+                                  context.goNamed(
+                                    RouteName.equbMemberDetail,
+                                    extra: equb,
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
                         Container(
                           padding: const EdgeInsets.only(left: 15, top: 15),
                           alignment: Alignment.centerLeft,
@@ -235,8 +331,10 @@ class _EqubTabState extends State<EqubTab> {
                         ),
                         EqubCard(
                           showJoinRequestButton: true,
+                          blurTexts: true,
                           onTab: () {
                             final detail = EqubDetailModel(
+                              isAdmin: false,
                               currency: 'USD',
                               id: -1,
                               name: 'Member Test Another',
@@ -259,6 +357,7 @@ class _EqubTabState extends State<EqubTab> {
                                 extra: detail);
                           },
                           equb: EqubDetailModel(
+                            isAdmin: false,
                             currency: 'USD',
                             id: -1,
                             name: 'Member Test Another',

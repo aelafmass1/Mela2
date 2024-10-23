@@ -102,6 +102,7 @@ class _AccountTabState extends State<AccountTab> {
                       children: [
                         ResponsiveBuilder(builder: (context, sizingInfo) {
                           return CircleAvatar(
+                            backgroundColor: ColorName.primaryColor.shade300,
                             radius: ResponsiveUtil.forScreen(
                               sizingInfo: sizingInfo,
                               mobile: 30,

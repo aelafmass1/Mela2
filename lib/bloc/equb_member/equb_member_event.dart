@@ -21,3 +21,9 @@ final class EqubAutoPickWinner extends EqubMemberEvent {
 
   EqubAutoPickWinner({required this.cycleId});
 }
+
+final class EditEqub extends EqubMemberEvent {
+  final EqubDetailModel equb;
+
+  EditEqub({required this.equb});
+}

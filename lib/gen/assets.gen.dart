@@ -130,6 +130,14 @@ class $AssetsImagesGen {
   AssetGenImage get nibBankLogo =>
       const AssetGenImage('assets/images/nib_bank_logo.png');
 
+  /// File path: assets/images/no_notification.png
+  AssetGenImage get noNotification =>
+      const AssetGenImage('assets/images/no_notification.png');
+
+  /// File path: assets/images/no_transaction.png
+  AssetGenImage get noTransaction =>
+      const AssetGenImage('assets/images/no_transaction.png');
+
   /// File path: assets/images/oromia_bank_logo.png
   AssetGenImage get oromiaBankLogo =>
       const AssetGenImage('assets/images/oromia_bank_logo.png');
@@ -218,6 +226,8 @@ class $AssetsImagesGen {
         newsBackground,
         nextArrow,
         nibBankLogo,
+        noNotification,
+        noTransaction,
         oromiaBankLogo,
         profileImage,
         receipt,
@@ -302,6 +312,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/no_equb.svg
+  String get noEqub => 'assets/images/svgs/no_equb.svg';
+
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
@@ -334,6 +347,7 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
+        noEqub,
         sendIcon,
         spinWheel,
         transactionIcon

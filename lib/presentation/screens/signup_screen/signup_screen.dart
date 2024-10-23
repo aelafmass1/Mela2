@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -110,7 +109,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Row(
                     children: [
                       const TextWidget(
-                        text: 'Hello There',
+                        text: 'Hello, ',
                         fontSize: 24,
                         weight: FontWeight.w700,
                       ),
@@ -202,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           }
                           return null;
                         },
-                        obscurePassword: showPassword,
+                        obscurePassword: showPassword == false,
                         controller: passwordController,
                         hintText: 'Password',
                         suffix: Padding(

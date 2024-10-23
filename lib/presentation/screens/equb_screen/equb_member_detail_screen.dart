@@ -1,13 +1,16 @@
-import 'dart:developer';
-
+import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 
+import '../../../config/routing.dart';
 import '../../../core/utils/show_consent.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -23,6 +26,29 @@ class EqubMemberDetailScreen extends StatefulWidget {
 
 class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
   bool isPending = false;
+  bool blurTexts = true;
+  List<Contact> _contacts = [];
+
+  Future<void> _fetchContacts() async {
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        _contacts = contacts;
+      });
+    } else {
+      // ignore: use_build_context_synchronously
+      context.pushNamed(RouteName.contactPermission, extra: () {});
+    }
+  }
+
+  @override
+  void initState() {
+    _fetchContacts();
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,11 +70,13 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Column(
-                children: [
-                  _buildTop(),
-                  _buildMembers(),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildTop(),
+                    _buildMembers(),
+                  ],
+                ),
               ),
             ),
             Padding(
@@ -241,7 +269,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       text:
                           'Members : ${widget.equbDetailModel.invitees.length}',
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -264,7 +292,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       text:
                           '${widget.equbDetailModel.startDate.day.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.month.toString().padLeft(2, '0')}-${widget.equbDetailModel.startDate.year}',
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -286,7 +314,7 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     TextWidget(
                       text: widget.equbDetailModel.frequency,
                       fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -307,11 +335,22 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       color: Color(0xfF6D6D6D),
                     ),
                     const Expanded(child: SizedBox()),
-                    TextWidget(
-                      text: '\$${widget.equbDetailModel.contributionAmount}',
-                      fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
-                    ),
+                    blurTexts
+                        ? Blur(
+                            blur: 10,
+                            child: TextWidget(
+                              text:
+                                  '\$${widget.equbDetailModel.contributionAmount}',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          )
+                        : TextWidget(
+                            text:
+                                '\$${widget.equbDetailModel.contributionAmount}',
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -329,12 +368,22 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                       color: Color(0xfF6D6D6D),
                     ),
                     const Expanded(child: SizedBox()),
-                    TextWidget(
-                      text:
-                          '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
-                      fontSize: 14,
-                      color: const Color(0xfF6D6D6D),
-                    ),
+                    blurTexts
+                        ? Blur(
+                            blur: 10,
+                            child: TextWidget(
+                              text:
+                                  '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          )
+                        : TextWidget(
+                            text:
+                                '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                   ],
                 ),
               ],
@@ -352,14 +401,27 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
           padding: const EdgeInsets.only(top: 25, bottom: 20),
           alignment: Alignment.centerLeft,
           child: TextWidget(
-            text: 'All Members (${widget.equbDetailModel.invitees.length})',
+            text: 'All Members (${widget.equbDetailModel.members.length})',
           ),
         ),
-        for (var member in widget.equbDetailModel.invitees)
-          EqubMemberTile(
-            equbInviteeModel: member,
-            trailingWidget: const SizedBox.shrink(),
-          ),
+        for (var member in widget.equbDetailModel.members)
+          FutureBuilder(
+              future: getMemberContactInfo(
+                equbUser: member.user!,
+                contacts: _contacts,
+              ),
+              builder: (context, snapshot) {
+                return EqubMemberTile(
+                  trailingWidget: const SizedBox.shrink(),
+                  equbInviteeModel: EqubInviteeModel(
+                      id: member.userId ?? 0,
+                      phoneNumber:
+                          snapshot.data?.phoneNumber ?? member.username ?? '',
+                      status: member.status,
+                      name:
+                          snapshot.data?.displayName ?? member.username ?? ''),
+                );
+              })
       ],
     );
   }

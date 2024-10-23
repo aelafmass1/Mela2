@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -53,6 +55,136 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   bool isPermissionDenied = false;
   bool isSearching = false;
   bool isJoin = false;
+
+  showDetailBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (_) => Wrap(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            width: 35,
+                            height: 35,
+                            color: ColorName.green,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.person_add,
+                              color: ColorName.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        title: const TextWidget(
+                          text: "Make Co-Admin",
+                          type: TextType.small,
+                        ),
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const TextWidget(
+                                text:
+                                    "Are you sure you want to promote to co-admin?"),
+                            actions: [
+                              MaterialButton(
+                                child: const Text("Cancel"),
+                                onPressed: () => context.pop(),
+                              ),
+                              MaterialButton(
+                                child: const Text("Promote"),
+                                onPressed: () => context.pop(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            width: 35,
+                            height: 35,
+                            color: ColorName.green,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.person_remove,
+                              color: ColorName.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        title: const TextWidget(
+                          text: "Remove Co-Admin",
+                          type: TextType.small,
+                        ),
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const TextWidget(
+                                text:
+                                    "Are you sure you want to remove this co-admin?"),
+                            actions: [
+                              MaterialButton(
+                                child: const Text("Cancel"),
+                                onPressed: () => context.pop(),
+                              ),
+                              MaterialButton(
+                                child: const Text("Remove"),
+                                onPressed: () => context.pop(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            width: 35,
+                            height: 35,
+                            color: ColorName.red,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.close,
+                              color: ColorName.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        title: const TextWidget(
+                          text: "Remove from equb",
+                          type: TextType.small,
+                        ),
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const TextWidget(
+                                text:
+                                    "Are you sure you want to remove this member?"),
+                            actions: [
+                              MaterialButton(
+                                child: const Text("Cancel"),
+                                onPressed: () => context.pop(),
+                              ),
+                              MaterialButton(
+                                child: const Text("Remove"),
+                                onPressed: () => context.pop(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ));
+  }
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -100,21 +232,64 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTop(),
-            // _buildReminder(
-            //     'Please select the winner for the second round in August.'),
-            const SizedBox(height: 15),
-            _buildTitle(),
-            const SizedBox(height: 10),
-            _buildTabs(),
-          ],
-        ),
-      ),
+      body: ResponsiveBuilder(builder: (context, sizingInfo) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: NestedScrollView(
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  expandedHeight: ResponsiveUtil.forScreen(
+                    sizingInfo: sizingInfo,
+                    small: 57.sh,
+                    mobile: 375,
+                    tablet: 370,
+                  ),
+                  pinned: true,
+                  backgroundColor: ColorName.white,
+                  surfaceTintColor: ColorName.white,
+                  leading: const SizedBox.shrink(),
+                  flexibleSpace: FlexibleSpaceBar(
+                    expandedTitleScale: 1,
+                    collapseMode: CollapseMode.parallax,
+                    titlePadding: EdgeInsets.zero,
+                    title: Container(
+                      color: Colors.white,
+                      child: TabBar(
+                        controller: _tabController,
+                        labelColor: ColorName.primaryColor,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: ColorName.primaryColor,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        tabs: [
+                          const Tab(text: 'Members'),
+                          _buildTabWithNotification("Winners"),
+                          _buildTabWithNotification("Payment"),
+                          _buildTabWithNotification("Requests", count: 10),
+                        ],
+                      ),
+                    ),
+                    background: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTop(),
+                        // _buildReminder(
+                        //     'Please select the winner for the second round in August.'),
+                        const SizedBox(height: 10),
+                        _buildTitle(),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
+              ];
+            },
+            body: _buildTabs(),
+          ),
+        );
+      }),
     );
   }
 
@@ -147,7 +322,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   _buildTop() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.only(top: 15, bottom: 5),
       child: CardWidget(
         width: 100.sw,
         child: Container(
@@ -216,7 +391,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         ),
                         TextWidget(
                           text:
-                              'Created at ${DateTime.now().day.toString().padLeft(2, '0')}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().year}',
+                              'Created at ${DateFormat('dd-MM-yyyy').format(widget.equbDetailModel.startDate)}',
                           color: Colors.white,
                           fontSize: 10,
                           weight: FontWeight.w400,
@@ -350,7 +525,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         const Expanded(child: SizedBox()),
                         TextWidget(
                           text:
-                              '\$${widget.equbDetailModel.contributionAmount}',
+                              '${widget.equbDetailModel.contributionAmount} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),
@@ -373,7 +548,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         const Expanded(child: SizedBox()),
                         TextWidget(
                           text:
-                              '\$${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)}',
+                              '${(widget.equbDetailModel.numberOfMembers * widget.equbDetailModel.contributionAmount).toStringAsFixed(2)} ${widget.equbDetailModel.currency}',
                           fontSize: 14,
                           color: const Color(0xfF6D6D6D),
                         ),
@@ -390,10 +565,10 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextWidget(
@@ -444,41 +619,21 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   Widget _buildTabs() {
-    return Expanded(
-      child: Column(
-        children: [
-          // TabBar to display the tabs
-          TabBar(
+    return Column(
+      children: [
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            labelColor: ColorName.primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: ColorName.primaryColor,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-
-            // labelPadding: const EdgeInsets.only(right: 15),
-            tabs: [
-              const Tab(text: 'Members'),
-              _buildTabWithNotification("Winners"),
-              _buildTabWithNotification("Payment"),
-              _buildTabWithNotification("Requests", count: 10),
+            children: [
+              _buildMembersContent(), // Tab 1 content
+              _buildWinnersContent(), // Tab 2 content
+              _buildPaymentContent(), // Tab 3 content
+              _buildRequestsContent(), // Tab 4 content
             ],
           ),
-          // TabBarView to handle tab content switching
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildMembersContent(), // Tab 1 content
-                _buildWinnersContent(), // Tab 2 content
-                _buildPaymentContent(), // Tab 3 content
-                _buildRequestsContent(), // Tab 4 content
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 
@@ -489,38 +644,38 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
         Row(
           children: [
             Tab(text: text),
-            if (count != 0)
-              Container(
-                margin: const EdgeInsets.only(left: 3),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
-                decoration: BoxDecoration(
-                  color: ColorName.yellow,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  count.toString(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: ColorName.white,
-                  ),
-                ),
-              ),
+            // if (count != 0)
+            //   Container(
+            //     margin: const EdgeInsets.only(left: 3),
+            //     padding:
+            //         const EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
+            //     decoration: BoxDecoration(
+            //       color: ColorName.yellow,
+            //       borderRadius: BorderRadius.circular(10),
+            //     ),
+            //     child: Text(
+            //       count.toString(),
+            //       style: const TextStyle(
+            //         fontSize: 10,
+            //         color: ColorName.white,
+            //       ),
+            //     ),
+            //   ),
           ],
         ),
-        if (count == 0)
-          Positioned(
-            top: 15,
-            right: -10, // You can adjust this based on your design
-            child: Container(
-              width: 5,
-              height: 5,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+        // if (count == 0)
+        //   Positioned(
+        //     top: 15,
+        //     right: -10, // You can adjust this based on your design
+        //     child: Container(
+        //       width: 5,
+        //       height: 5,
+        //       decoration: const BoxDecoration(
+        //         color: Colors.red,
+        //         shape: BoxShape.circle,
+        //       ),
+        //     ),
+        //   ),
       ],
     );
   }
@@ -623,154 +778,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                       builder: (context, snapshot) {
                         return EqubMemberTile(
                           onOptionPressed: () {
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (_) => Wrap(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: Column(
-                                            children: [
-                                              ListTile(
-                                                leading: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 35,
-                                                    height: 35,
-                                                    color: ColorName.green,
-                                                    alignment: Alignment.center,
-                                                    child: const Icon(
-                                                      Icons.person_add,
-                                                      color: ColorName.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                                title: const TextWidget(
-                                                  text: "Make Co-Admin",
-                                                  type: TextType.small,
-                                                ),
-                                                onTap: () => showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
-                                                    title: const TextWidget(
-                                                        text:
-                                                            "Are you sure you want to promote to co-admin?"),
-                                                    actions: [
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Cancel"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Promote"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              ListTile(
-                                                leading: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 35,
-                                                    height: 35,
-                                                    color: ColorName.green,
-                                                    alignment: Alignment.center,
-                                                    child: const Icon(
-                                                      Icons.person_remove,
-                                                      color: ColorName.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                                title: const TextWidget(
-                                                  text: "Remove Co-Admin",
-                                                  type: TextType.small,
-                                                ),
-                                                onTap: () => showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
-                                                    title: const TextWidget(
-                                                        text:
-                                                            "Are you sure you want to remove this co-admin?"),
-                                                    actions: [
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Cancel"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Remove"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              ListTile(
-                                                leading: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 35,
-                                                    height: 35,
-                                                    color: ColorName.red,
-                                                    alignment: Alignment.center,
-                                                    child: const Icon(
-                                                      Icons.close,
-                                                      color: ColorName.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                                title: const TextWidget(
-                                                  text: "Remove from equb",
-                                                  type: TextType.small,
-                                                ),
-                                                onTap: () => showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
-                                                    title: const TextWidget(
-                                                        text:
-                                                            "Are you sure you want to remove this member?"),
-                                                    actions: [
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Cancel"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                      MaterialButton(
-                                                        child: const Text(
-                                                            "Remove"),
-                                                        onPressed: () =>
-                                                            context.pop(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ));
+                            showDetailBottomSheet();
                           },
                           equbInviteeModel: EqubInviteeModel(
                               id: member.userId ?? 0,
@@ -923,11 +931,11 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                 id: state.selectedEqub!.members[i].userId ?? 0,
                                 phoneNumber: snapshot.data?.phoneNumber ??
                                     state.selectedEqub!.members[i].username ??
-                                    '',
+                                    'PENDING USER',
                                 status: state.selectedEqub!.members[i].status,
                                 name: snapshot.data?.displayName ??
                                     state.selectedEqub!.members[i].username ??
-                                    '',
+                                    'PENDING USER',
                               ),
                             );
                           }),

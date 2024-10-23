@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ResponsiveUtil {
@@ -15,7 +17,6 @@ class ResponsiveUtil {
       return large ?? tablet;
     } else if (sizingInfo.deviceScreenType == DeviceScreenType.desktop) {
       // > 950px
-
       return desktop ?? tablet;
     } else if (sizingInfo.deviceScreenType == DeviceScreenType.tablet) {
       // < 950px

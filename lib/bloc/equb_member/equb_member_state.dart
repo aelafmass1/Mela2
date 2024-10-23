@@ -59,3 +59,13 @@ final class EqubAutoWinnerSuccess extends EqubMemberState {
       this.role,
       required this.phoneNumber});
 }
+
+final class EqubEditLoading extends EqubMemberState {}
+
+final class EqubEditFail extends EqubMemberState {
+  final String reason;
+
+  EqubEditFail({required this.reason});
+}
+
+final class EqubEditSuccess extends EqubMemberState {}

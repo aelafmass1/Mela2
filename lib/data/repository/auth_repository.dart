@@ -432,6 +432,13 @@ class AuthRepository {
     return processErrorResponse(data);
   }
 
+  /// Deletes the current user's account.
+  ///
+  /// This method sends a DELETE request to the `/user/me/delete` endpoint with the provided access token in the `Authorization` header.
+  ///
+  /// If the request is successful (status code 200), the method returns the response data. If the request fails, the method returns an error object with the error message.
+  ///
+  /// The method uses the `http` package to make the DELETE request and the `jsonDecode` function to parse the response body.
   Future<Map> deleteUser({required String accessToken}) async {
     final res = await client.delete(
       Uri.parse('$baseUrl/user/me/delete'),
@@ -443,6 +450,25 @@ class AuthRepository {
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  checkEmailExists(String email) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/auth/email/exists?email=$email'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      if (data['message'] == 'Email already exists.') {
+        return processErrorResponse(data);
+      }
       return data;
     }
     return processErrorResponse(data);

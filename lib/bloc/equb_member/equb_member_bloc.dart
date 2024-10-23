@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 import '../../data/models/contact_model.dart';
+import '../../data/models/equb_detail_model.dart';
 import '../../data/repository/equb_repository.dart';
 
 part 'equb_member_event.dart';
@@ -18,6 +18,36 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
     on<InviteEqubMemeber>(_onInviteEqubMember);
     on<EqubAssignWinner>(_onEqubManualAssignWinner);
     on<EqubAutoPickWinner>(_onEqubAutoPickWinner);
+    on<EditEqub>(_onEqubEdit);
+  }
+
+  /// Handles the logic for editing an Equb.
+  ///
+  /// This method is called when the `EditEqub` event is emitted. It first checks if the current state is not `EqubEditLoading`,
+  /// and if so, it emits the `EqubEditLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to edit the specified Equb. If the edit is successful, it emits the `EqubEditSuccess` state. If there is an error,
+  /// it emits the `EqubEditFail` state with the error reason.
+  _onEqubEdit(EditEqub event, Emitter emit) async {
+    try {
+      if (state is! EqubEditLoading) {
+        emit(EqubEditLoading());
+        final accessToken = await getToken();
+        final res = await repository.editEqub(
+            accessToken: accessToken ?? '', equb: event.equb);
+        if (res.containsKey('error')) {
+          return emit(EqubEditFail(reason: res['error']));
+        }
+        emit(EqubEditSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubEditFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(EqubEditFail(reason: e.toString()));
+    }
   }
 
   /// Handles the logic for manually assigning a winner to an Equb cycle.

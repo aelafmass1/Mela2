@@ -37,6 +37,8 @@ class _HistoryTabState extends State<HistoryTab> {
         toolbarHeight: 50,
         title: const TextWidget(
           text: 'Transaction History',
+          fontSize: 20,
+          weight: FontWeight.w700,
         ),
         actions: [
           // IconButton(
@@ -218,12 +220,19 @@ class _HistoryTabState extends State<HistoryTab> {
                         ),
                       );
                     }
-                    return const Center(
-                      child: TextWidget(
-                        text: 'Transaction history is empty',
-                        type: TextType.small,
-                        weight: FontWeight.w300,
-                      ),
+                    return Column(
+                      children: [
+                        const SizedBox(height: 30),
+                        Assets.images.noTransaction.image(
+                          width: 350,
+                          height: 350,
+                        ),
+                        const TextWidget(
+                          text: 'oops, You don’t have any History.',
+                          weight: FontWeight.w600,
+                          fontSize: 16,
+                        )
+                      ],
                     );
                   }
                   return const SizedBox.shrink();

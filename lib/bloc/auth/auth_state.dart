@@ -109,3 +109,13 @@ final class DeleteUserFail extends AuthState {
 }
 
 final class DeleteUserSucess extends AuthState {}
+
+final class CheckEmailExistsLoading extends AuthState {}
+
+final class CheckEmailExistsFail extends AuthState {
+  final String reason;
+
+  CheckEmailExistsFail({required this.reason});
+}
+
+final class CheckEmailExistsSuccess extends AuthState {}

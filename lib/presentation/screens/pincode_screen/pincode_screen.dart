@@ -104,7 +104,6 @@ class _PincodeScreenState extends State<PincodeScreen> {
                 const TextWidget(
                   text: 'Enter Your Pin',
                   color: ColorName.primaryColor,
-                  fontSize: 20,
                   weight: FontWeight.w700,
                 ),
                 const SizedBox(height: 5),

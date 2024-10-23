@@ -119,3 +119,9 @@ final class ResetPincode extends AuthEvent {
     required this.newPincode,
   });
 }
+
+final class CheckEmailExists extends AuthEvent {
+  final String email;
+
+  CheckEmailExists({required this.email});
+}

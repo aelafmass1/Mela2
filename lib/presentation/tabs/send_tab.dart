@@ -360,7 +360,7 @@ class _SentTabState extends State<SentTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        leadingWidth: index == 0 ? 200 : null,
+        leadingWidth: index == 0 ? 400 : null,
         centerTitle: true,
         toolbarHeight: 60,
         titleSpacing: 0,
@@ -375,8 +375,9 @@ class _SentTabState extends State<SentTab> {
             ? const Padding(
                 padding: EdgeInsets.only(left: 15, top: 15),
                 child: TextWidget(
-                  text: 'Send Money',
+                  text: 'Facilitate Payment',
                   fontSize: 20,
+                  weight: FontWeight.w700,
                 ),
               )
             : index == 1 || index == 2
@@ -463,9 +464,10 @@ class _SentTabState extends State<SentTab> {
                                             padding: EdgeInsets.symmetric(
                                                 vertical: 10),
                                             child: TextWidget(
-                                              text: 'Current Trade rate',
+                                              text: 'Current Trade Rate',
                                               color: Colors.white,
                                               fontSize: 15,
+                                              weight: FontWeight.w700,
                                             ),
                                           ),
                                           Container(
@@ -642,8 +644,9 @@ class _SentTabState extends State<SentTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const TextWidget(
-                                text: 'Send Money',
+                                text: 'Initiate Payment',
                                 fontSize: 14,
+                                weight: FontWeight.w600,
                               ),
                               const SizedBox(height: 10),
                               _buildExchangeInputs(),
@@ -832,7 +835,7 @@ class _SentTabState extends State<SentTab> {
                                                                         14,
                                                                     weight:
                                                                         FontWeight
-                                                                            .w500,
+                                                                            .w600,
                                                                   ),
                                                                 ),
                                                                 IconButton(
@@ -864,7 +867,7 @@ class _SentTabState extends State<SentTab> {
                                                                   fontSize: 14,
                                                                   weight:
                                                                       FontWeight
-                                                                          .w500,
+                                                                          .w600,
                                                                 ),
                                                                 IconButton(
                                                                   style: IconButton
@@ -911,7 +914,7 @@ class _SentTabState extends State<SentTab> {
                                           const TextWidget(
                                             text: 'Total Fee',
                                             fontSize: 16,
-                                            weight: FontWeight.w400,
+                                            weight: FontWeight.w700,
                                           ),
                                           BlocBuilder<FeeBloc, FeeState>(
                                             builder: (context, state) {
@@ -922,7 +925,7 @@ class _SentTabState extends State<SentTab> {
                                                       text:
                                                           '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
                                                       fontSize: 16,
-                                                      weight: FontWeight.w500,
+                                                      weight: FontWeight.w600,
                                                     )
                                                   else
                                                     const TextWidget(
@@ -2140,7 +2143,16 @@ class _SentTabState extends State<SentTab> {
     return Stack(
       children: [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
+              child: TextWidget(
+                text: 'You Fund',
+                fontSize: 10,
+                color: ColorName.grey,
+              ),
+            ),
             TextFormField(
               controller: usdController,
               validator: (value) {
@@ -2251,7 +2263,15 @@ class _SentTabState extends State<SentTab> {
                     borderRadius: BorderRadius.circular(40)),
               ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 5),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
+              child: TextWidget(
+                text: 'Recipient Settles',
+                fontSize: 10,
+                color: ColorName.grey,
+              ),
+            ),
             TextFormField(
               controller: etbController,
               // validator: (value) {
@@ -2362,12 +2382,12 @@ class _SentTabState extends State<SentTab> {
         Positioned(
           left: 0,
           right: 0,
-          top: 0,
+          top: 15,
           bottom: 0,
           child: Align(
             child: SizedBox(
-              width: 40,
-              height: 40,
+              width: 50,
+              height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.zero,

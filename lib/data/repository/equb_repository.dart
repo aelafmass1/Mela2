@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:http_interceptor/http/intercepted_client.dart';
+import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
 import '../models/contact_model.dart';
@@ -176,6 +178,34 @@ class EqubRepository {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> editEqub({
+    required String accessToken,
+    required EqubDetailModel equb,
+  }) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/ekub/edit/${equb.id}'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(
+        {
+          "name": equb.name,
+          "numberOfMembers": equb.numberOfMembers,
+          "contributionAmount": equb.contributionAmount,
+          "frequency": equb.frequency,
+          "startDate": DateFormat('yyyy-MM-dd').format(equb.startDate),
+          "currency": equb.currency,
+        },
+      ),
     );
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
