@@ -18,7 +18,7 @@ import printing
 import sentry_flutter
 import share_plus
 import shared_preferences_foundation
-import sqflite_darwin
+import sqflite
 import url_launcher_macos
 import webview_flutter_wkwebview
 
