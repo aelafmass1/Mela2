@@ -1305,8 +1305,6 @@ PODS:
     - Flutter
   - geocoding_ios (1.0.5):
     - Flutter
-  - geolocator_apple (1.2.0):
-    - Flutter
   - GoogleAppMeasurement (11.2.0):
     - GoogleAppMeasurement/AdIdSupport (= 11.2.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
@@ -1553,7 +1551,6 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_upgrade_version (from `.symlinks/plugins/flutter_upgrade_version/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
-  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
@@ -1640,8 +1637,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_upgrade_version/ios"
   geocoding_ios:
     :path: ".symlinks/plugins/geocoding_ios/ios"
-  geolocator_apple:
-    :path: ".symlinks/plugins/geolocator_apple/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   in_app_review:
@@ -1708,7 +1703,6 @@ SPEC CHECKSUMS:
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   flutter_upgrade_version: 056fb7aec8e30182a1db6d436b4fdc615582d996
   geocoding_ios: d7460f56e80e118d57678efe5c2cdc888739ff18
-  geolocator_apple: 6cbaf322953988e009e5ecb481f07efece75c450
   GoogleAppMeasurement: 76d4f8b36b03bd8381fa9a7fe2cc7f99c0a2e93a
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
