@@ -141,6 +141,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/receipt.png
   AssetGenImage get receipt => const AssetGenImage('assets/images/receipt.png');
 
+  /// File path: assets/images/reward.png
+  AssetGenImage get reward => const AssetGenImage('assets/images/reward.png');
+
   /// File path: assets/images/send_icon.png
   AssetGenImage get sendIcon =>
       const AssetGenImage('assets/images/send_icon.png');
@@ -218,6 +221,7 @@ class $AssetsImagesGen {
         oromiaBankLogo,
         profileImage,
         receipt,
+        reward,
         sendIcon,
         sinqeBankLogo,
         splashLogo,
@@ -234,14 +238,35 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/admin_icon.svg
+  String get adminIcon => 'assets/images/svgs/admin_icon.svg';
+
+  /// File path: assets/images/svgs/amount_icon.svg
+  String get amountIcon => 'assets/images/svgs/amount_icon.svg';
+
+  /// File path: assets/images/svgs/back_space.svg
+  String get backSpace => 'assets/images/svgs/back_space.svg';
+
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
   /// File path: assets/images/svgs/card_pattern.svg
   String get cardPattern => 'assets/images/svgs/card_pattern.svg';
 
+  /// File path: assets/images/svgs/checkmark_icon.svg
+  String get checkmarkIcon => 'assets/images/svgs/checkmark_icon.svg';
+
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
+
+  /// File path: assets/images/svgs/discovery.svg
+  String get discovery => 'assets/images/svgs/discovery.svg';
+
+  /// File path: assets/images/svgs/edit_icon.svg
+  String get editIcon => 'assets/images/svgs/edit_icon.svg';
+
+  /// File path: assets/images/svgs/end_time_icon.svg
+  String get endTimeIcon => 'assets/images/svgs/end_time_icon.svg';
 
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
@@ -254,6 +279,9 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/filter_icon.svg
   String get filterIcon => 'assets/images/svgs/filter_icon.svg';
+
+  /// File path: assets/images/svgs/frequency_icon.svg
+  String get frequencyIcon => 'assets/images/svgs/frequency_icon.svg';
 
   /// File path: assets/images/svgs/hi_emoji.svg
   String get hiEmoji => 'assets/images/svgs/hi_emoji.svg';
@@ -277,18 +305,29 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
+  /// File path: assets/images/svgs/spin_wheel.svg
+  String get spinWheel => 'assets/images/svgs/spin_wheel.svg';
+
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
   /// List of all assets
   List<String> get values => [
+        adminIcon,
+        amountIcon,
+        backSpace,
         cameraIcon,
         cardPattern,
+        checkmarkIcon,
         completeLogo,
+        discovery,
+        editIcon,
+        endTimeIcon,
         equbIcon,
         exchangeIcon,
         faceId,
         filterIcon,
+        frequencyIcon,
         hiEmoji,
         historyIcon,
         homeIcon,
@@ -296,6 +335,7 @@ class $AssetsImagesSvgsGen {
         increaseArrow,
         melaLogo,
         sendIcon,
+        spinWheel,
         transactionIcon
       ];
 }

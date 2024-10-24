@@ -2,15 +2,36 @@
 part of 'equb_bloc.dart';
 
 class EqubState {
-  final List<EqubModel> equbList;
+  final List<EqubDetailModel> equbList;
 
   EqubState({required this.equbList});
 
   EqubState copyWith({
-    List<EqubModel>? equbList,
+    List<EqubDetailModel>? equbList,
   }) {
     return EqubState(
       equbList: equbList ?? this.equbList,
     );
   }
+}
+
+final class EqubLoading extends EqubState {
+  EqubLoading({required super.equbList});
+}
+
+final class EqubSuccess extends EqubState {
+  final List<EqubInviteeModel>? invitees;
+  final EqubDetailModel? selectedEqub;
+  final int? addedEqubId;
+  EqubSuccess({
+    required super.equbList,
+    this.invitees,
+    this.selectedEqub,
+    this.addedEqubId,
+  });
+}
+
+final class EqubFail extends EqubState {
+  final String reason;
+  EqubFail({required super.equbList, required this.reason});
 }

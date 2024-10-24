@@ -1,12 +1,16 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 class CurrencyRepository {
-  static Future<Map<String, dynamic>> fetchPromotionalCurrency(
+  final InterceptedClient client;
+
+  CurrencyRepository({required this.client});
+  Future<Map<String, dynamic>> fetchPromotionalCurrency(
       String accessToken) async {
-    final res = await http.get(
+    final res = await client.get(
       Uri.parse(
         '$baseUrl/api/exchange-rates',
       ),
@@ -16,17 +20,18 @@ class CurrencyRepository {
         'currencyCode': 'USD',
       },
     );
+
+    final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
       return data.first;
     }
-    return {'error': res.body};
+    return processErrorResponse(data);
   }
 
-  static Future<List> fetchCurrencies(
+  Future<List> fetchCurrencies(
     String accessToken,
   ) async {
-    final res = await http.get(
+    final res = await client.get(
       Uri.parse(
         '$baseUrl/api/exchange-rates',
       ),
@@ -36,12 +41,11 @@ class CurrencyRepository {
         'currencyCode': '',
       },
     );
+
+    final data = jsonDecode(res.body) as List;
     if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
       return data;
     }
-    return [
-      {'error': res.body}
-    ];
+    return [processErrorResponse(data)];
   }
 }

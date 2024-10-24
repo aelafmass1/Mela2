@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -134,6 +135,7 @@ class _SentTabState extends State<SentTab> {
   /// If permission has been asked before and denied, it sets [isPermissionDenied] to true.
   /// If permission has been granted, it fetches contacts and updates the [contacts] list.
   Future<void> _fetchContacts() async {
+    if (kIsWeb) return;
     if (await isPermissionAsked() == false) {
       // Permission has not been asked before
       if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -237,8 +239,11 @@ class _SentTabState extends State<SentTab> {
                 .reduce((value, element) => value + element)) +
             (feeState.fees
                 .where((f) => f.type == 'PERCENTAGE')
-                .map((f) => (((double.tryParse(usdController.text) ?? 0) *
-                    (f.amount / 100))))
+                .map((f) =>
+                    (f.label == 'Service Fee' && whoPayFee == 'RECEIVER')
+                        ? 0
+                        : (((double.tryParse(usdController.text) ?? 0) *
+                            (f.amount / 100))))
                 .reduce((value, element) => value + element)) +
             (selectedPaymentMethodIndex == 1
                 ? ((double.tryParse(usdController.text) ?? 0) *
@@ -303,6 +308,9 @@ class _SentTabState extends State<SentTab> {
 
   @override
   void initState() {
+    if (kIsWeb) {
+      isPermissionDenied = true;
+    }
     _streamEvent = PlaidLink.onEvent.listen(_onEvent);
     _streamExit = PlaidLink.onExit.listen(_onExit);
     _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
@@ -353,11 +361,13 @@ class _SentTabState extends State<SentTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         leadingWidth: index == 0 ? 200 : null,
         centerTitle: true,
-        toolbarHeight: 50,
+        toolbarHeight: 60,
         titleSpacing: 0,
         title: index == 1 || index == 2
             ? TextWidget(
@@ -368,7 +378,7 @@ class _SentTabState extends State<SentTab> {
             : null,
         leading: index == 0
             ? const Padding(
-                padding: EdgeInsets.only(left: 15, top: 10),
+                padding: EdgeInsets.only(left: 15, top: 15),
                 child: TextWidget(
                   text: 'Send Money',
                   fontSize: 20,
@@ -391,15 +401,12 @@ class _SentTabState extends State<SentTab> {
                   )
                 : null,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Stack(
-          children: [
-            _buildExchangeRate(),
-            _buildRecipientSelection(),
-            _builPaymentMethodSelection(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          _buildExchangeRate(),
+          _buildRecipientSelection(),
+          _builPaymentMethodSelection(),
+        ],
       ),
     );
   }
@@ -425,508 +432,533 @@ class _SentTabState extends State<SentTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        width: 100.sw,
-                        height: 120,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    width: 100.sw,
-                                    height: 120,
-                                    decoration: BoxDecoration(
-                                      color: ColorName.primaryColor,
-                                      borderRadius: BorderRadius.circular(18),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 15,
+                        ),
+                        child: SizedBox(
+                          width: 100.sw,
+                          height: 120,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      width: 100.sw,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: ColorName.primaryColor,
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      child: SvgPicture.asset(
+                                        Assets.images.svgs.cardPattern,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child: SvgPicture.asset(
-                                      Assets.images.svgs.cardPattern,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 10,
-                                    right: 10,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 10),
-                                          child: TextWidget(
-                                            text: 'Current Trade rate',
-                                            color: Colors.white,
-                                            fontSize: 15,
+                                    Positioned(
+                                      left: 10,
+                                      right: 10,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10),
+                                            child: TextWidget(
+                                              text: 'Current Trade rate',
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                            ),
                                           ),
-                                        ),
-                                        Container(
-                                          width: 100.sw,
-                                          height: 52,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(14),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  CircleAvatar(
-                                                    radius: 12,
-                                                    backgroundImage: Assets
-                                                        .images.usaFlag
-                                                        .provider(),
-                                                  ),
-                                                  const SizedBox(width: 7),
-                                                  const Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      TextWidget(
-                                                        text: 'US Dollar',
-                                                        fontSize: 9,
-                                                        weight: FontWeight.w500,
-                                                        color: ColorName
-                                                            .primaryColor,
-                                                      ),
-                                                      TextWidget(
-                                                        text: '1 USD',
-                                                        fontSize: 14,
-                                                        color: ColorName
-                                                            .primaryColor,
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                              Container(
-                                                width: 28,
-                                                height: 28,
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                decoration: const BoxDecoration(
-                                                  color: ColorName.primaryColor,
-                                                  shape: BoxShape.circle,
+                                          Container(
+                                            width: 100.sw,
+                                            height: 52,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(14),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    CircleAvatar(
+                                                      radius: 12,
+                                                      backgroundImage: Assets
+                                                          .images.usaFlag
+                                                          .provider(),
+                                                    ),
+                                                    const SizedBox(width: 7),
+                                                    const Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        TextWidget(
+                                                          text: 'US Dollar',
+                                                          fontSize: 9,
+                                                          weight:
+                                                              FontWeight.w500,
+                                                          color: ColorName
+                                                              .primaryColor,
+                                                        ),
+                                                        TextWidget(
+                                                          text: '1 USD',
+                                                          fontSize: 14,
+                                                          color: ColorName
+                                                              .primaryColor,
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
                                                 ),
-                                                child: SvgPicture.asset(
-                                                  Assets
-                                                      .images.svgs.exchangeIcon,
-                                                  // ignore: deprecated_member_use
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  CircleAvatar(
-                                                    radius: 12,
-                                                    backgroundImage: Assets
-                                                        .images.ethiopianFlag
-                                                        .provider(),
+                                                Container(
+                                                  width: 28,
+                                                  height: 28,
+                                                  padding:
+                                                      const EdgeInsets.all(5),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color:
+                                                        ColorName.primaryColor,
+                                                    shape: BoxShape.circle,
                                                   ),
-                                                  const SizedBox(width: 7),
-                                                  Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      const TextWidget(
-                                                        text: 'ET Birr',
-                                                        fontSize: 9,
-                                                        weight: FontWeight.w500,
-                                                        color: ColorName
-                                                            .primaryColor,
-                                                      ),
-                                                      BlocConsumer<CurrencyBloc,
-                                                          CurrencyState>(
-                                                        listener:
-                                                            (context, state) {
-                                                          if (state
-                                                              is CurrencySuccess) {
-                                                            setState(() {
-                                                              exchangeRate = state
-                                                                  .currencies
-                                                                  .where((c) =>
-                                                                      c.currencyCode ==
-                                                                      'USD')
-                                                                  .first
-                                                                  .rate;
-                                                            });
-                                                          }
-                                                        },
-                                                        builder:
-                                                            (context, state) {
-                                                          if (state
-                                                              is CurrencyLoading) {
-                                                            return const Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(top: 3),
-                                                              child:
-                                                                  CustomShimmer(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .zero,
-                                                                width: 60,
-                                                                height: 16,
-                                                              ),
-                                                            );
-                                                          }
-                                                          if (state
-                                                              is CurrencySuccess) {
-                                                            return TextWidget(
-                                                              text:
-                                                                  '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                  child: SvgPicture.asset(
+                                                    Assets.images.svgs
+                                                        .exchangeIcon,
+                                                    // ignore: deprecated_member_use
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    CircleAvatar(
+                                                      radius: 12,
+                                                      backgroundImage: Assets
+                                                          .images.ethiopianFlag
+                                                          .provider(),
+                                                    ),
+                                                    const SizedBox(width: 7),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        const TextWidget(
+                                                          text: 'ET Birr',
+                                                          fontSize: 9,
+                                                          weight:
+                                                              FontWeight.w500,
+                                                          color: ColorName
+                                                              .primaryColor,
+                                                        ),
+                                                        BlocConsumer<
+                                                            CurrencyBloc,
+                                                            CurrencyState>(
+                                                          listener:
+                                                              (context, state) {
+                                                            if (state
+                                                                is CurrencySuccess) {
+                                                              setState(() {
+                                                                exchangeRate = state
+                                                                    .currencies
+                                                                    .where((c) =>
+                                                                        c.currencyCode ==
+                                                                        'USD')
+                                                                    .first
+                                                                    .rate;
+                                                              });
+                                                            }
+                                                          },
+                                                          builder:
+                                                              (context, state) {
+                                                            if (state
+                                                                is CurrencyLoading) {
+                                                              return const Padding(
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        top: 3),
+                                                                child:
+                                                                    CustomShimmer(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .zero,
+                                                                  width: 60,
+                                                                  height: 16,
+                                                                ),
+                                                              );
+                                                            }
+                                                            if (state
+                                                                is CurrencySuccess) {
+                                                              return TextWidget(
+                                                                text:
+                                                                    '${state.currencies.where((c) => c.currencyCode == 'USD').first.rate.toStringAsFixed(2)} ETB',
+                                                                fontSize: 14,
+                                                                color: ColorName
+                                                                    .primaryColor,
+                                                              );
+                                                            }
+                                                            return const TextWidget(
+                                                              text: '--',
                                                               fontSize: 14,
                                                               color: ColorName
                                                                   .primaryColor,
                                                             );
-                                                          }
-                                                          return const TextWidget(
-                                                            text: '--',
-                                                            fontSize: 14,
-                                                            color: ColorName
-                                                                .primaryColor,
-                                                          );
-                                                        },
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      CardWidget(
-                        width: 100.sw,
-                        padding: const EdgeInsets.all(15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const TextWidget(
-                              text: 'Send Money',
-                              fontSize: 14,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildExchangeInputs(),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 15),
-                              child: Divider(
-                                color: Colors.black12,
-                              ),
-                            ),
-                            Container(
-                              width: 100.sw,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 15, horizontal: 15),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: ColorName.borderColor,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const TextWidget(
-                                    text:
-                                        'Who’s going to pay the service charge?',
-                                    fontSize: 14,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Radio(
-                                              activeColor:
-                                                  ColorName.primaryColor,
-                                              value: 'SENDER',
-                                              groupValue: whoPayFee,
-                                              onChanged: (value) {
-                                                if (value != null) {
-                                                  setState(() {
-                                                    whoPayFee = value;
-                                                  });
-                                                }
-                                              }),
-                                          const TextWidget(
-                                            text: 'Me',
-                                            fontSize: 13,
-                                            weight: FontWeight.w300,
+                                                          },
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           )
                                         ],
                                       ),
-                                      const SizedBox(width: 20),
-                                      Row(
-                                        children: [
-                                          Radio(
-                                              activeColor:
-                                                  ColorName.primaryColor,
-                                              value: 'RECEIVER',
-                                              groupValue: whoPayFee,
-                                              onChanged: (value) {
-                                                if (value != null) {
-                                                  setState(() {
-                                                    whoPayFee = value;
-                                                  });
-                                                }
-                                              }),
-                                          const TextWidget(
-                                            text: 'Recipient',
-                                            fontSize: 13,
-                                            weight: FontWeight.w300,
-                                          )
-                                        ],
-                                      )
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 15),
+                        child: CardWidget(
+                          width: 100.sw,
+                          padding: const EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const TextWidget(
+                                text: 'Send Money',
+                                fontSize: 14,
+                              ),
+                              const SizedBox(height: 10),
+                              _buildExchangeInputs(),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 15),
+                                child: Divider(
+                                  color: Colors.black12,
+                                ),
+                              ),
+                              Container(
+                                width: 100.sw,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 15, horizontal: 15),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: ColorName.borderColor,
                                   ),
-                                  BlocBuilder<FeeBloc, FeeState>(
-                                    builder: (context, state) {
-                                      if (state is FeeLoading) {
-                                        return Column(
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const TextWidget(
+                                      text:
+                                          'Who’s going to pay the service charge?',
+                                      fontSize: 14,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Row(
                                           children: [
-                                            const Divider(
-                                              color: ColorName.borderColor,
-                                            ),
-                                            CustomShimmer(
-                                              width: 100.sw,
-                                              height: 34,
-                                            ),
-                                            const Divider(
-                                              color: ColorName.borderColor,
-                                            ),
-                                            CustomShimmer(
-                                              width: 100.sw,
-                                              height: 34,
-                                            ),
-                                            const Divider(
-                                              color: ColorName.borderColor,
-                                            ),
-                                            CustomShimmer(
-                                              width: 100.sw,
-                                              height: 34,
-                                            ),
+                                            Radio(
+                                                activeColor:
+                                                    ColorName.primaryColor,
+                                                value: 'SENDER',
+                                                groupValue: whoPayFee,
+                                                onChanged: (value) {
+                                                  if (value != null) {
+                                                    setState(() {
+                                                      whoPayFee = value;
+                                                    });
+                                                  }
+                                                }),
+                                            const TextWidget(
+                                              text: 'Me',
+                                              fontSize: 13,
+                                              weight: FontWeight.w300,
+                                            )
                                           ],
-                                        );
-                                      }
-                                      if (state is FeeSuccess) {
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Row(
                                           children: [
-                                            for (var fee in state.fees)
-                                              Column(
-                                                key: ValueKey(fee.id),
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Divider(
-                                                    color:
-                                                        ColorName.borderColor,
-                                                  ),
-                                                  SizedBox(
-                                                    height: 34,
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        SizedBox(
-                                                          width: 34.sw,
-                                                          child: Row(
-                                                            children: [
-                                                              TextWidget(
-                                                                text: fee.label,
-                                                                color: const Color(
-                                                                    0xFF7B7B7B),
-                                                                fontSize: 14,
-                                                                weight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                              ),
-                                                              const SizedBox(
-                                                                  width: 5),
-                                                              Visibility(
-                                                                visible: fee
-                                                                        .type ==
-                                                                    'PERCENTAGE',
-                                                                child:
-                                                                    TextWidget(
+                                            Radio(
+                                                activeColor:
+                                                    ColorName.primaryColor,
+                                                value: 'RECEIVER',
+                                                groupValue: whoPayFee,
+                                                onChanged: (value) {
+                                                  if (value != null) {
+                                                    setState(() {
+                                                      whoPayFee = value;
+                                                    });
+                                                  }
+                                                }),
+                                            const TextWidget(
+                                              text: 'Recipient',
+                                              fontSize: 13,
+                                              weight: FontWeight.w300,
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    BlocBuilder<FeeBloc, FeeState>(
+                                      builder: (context, state) {
+                                        if (state is FeeLoading) {
+                                          return Column(
+                                            children: [
+                                              const Divider(
+                                                color: ColorName.borderColor,
+                                              ),
+                                              CustomShimmer(
+                                                width: 100.sw,
+                                                height: 34,
+                                              ),
+                                              const Divider(
+                                                color: ColorName.borderColor,
+                                              ),
+                                              CustomShimmer(
+                                                width: 100.sw,
+                                                height: 34,
+                                              ),
+                                              const Divider(
+                                                color: ColorName.borderColor,
+                                              ),
+                                              CustomShimmer(
+                                                width: 100.sw,
+                                                height: 34,
+                                              ),
+                                            ],
+                                          );
+                                        }
+                                        if (state is FeeSuccess) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              for (var fee in state.fees)
+                                                Column(
+                                                  key: ValueKey(fee.id),
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Divider(
+                                                      color:
+                                                          ColorName.borderColor,
+                                                    ),
+                                                    SizedBox(
+                                                      height: 34,
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 34.sw,
+                                                            child: Row(
+                                                              children: [
+                                                                TextWidget(
                                                                   text:
-                                                                      '${fee.amount == fee.amount.toInt() ? fee.amount.toInt() : fee.amount}%',
-                                                                  color: Colors
-                                                                      .black87,
+                                                                      fee.label,
+                                                                  color: const Color(
+                                                                      0xFF7B7B7B),
                                                                   fontSize: 14,
                                                                   weight:
                                                                       FontWeight
-                                                                          .w600,
+                                                                          .w400,
                                                                 ),
-                                                              ),
-                                                            ],
+                                                                const SizedBox(
+                                                                    width: 5),
+                                                                Visibility(
+                                                                  visible: fee
+                                                                          .type ==
+                                                                      'PERCENTAGE',
+                                                                  child:
+                                                                      TextWidget(
+                                                                    text:
+                                                                        '${fee.amount == fee.amount.toInt() ? fee.amount.toInt() : fee.amount}%',
+                                                                    color: Colors
+                                                                        .black87,
+                                                                    fontSize:
+                                                                        14,
+                                                                    weight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
                                                           ),
-                                                        ),
-                                                        Visibility(
-                                                          visible: fee.type ==
-                                                              'FIXED',
-                                                          replacement: Row(
-                                                            children: [
-                                                              Container(
-                                                                alignment: Alignment
-                                                                    .centerRight,
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .zero,
-                                                                width: 25.sw,
-                                                                child:
-                                                                    TextWidget(
-                                                                  text: usdController
-                                                                          .text
-                                                                          .isEmpty
-                                                                      ? '--'
-                                                                      : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)}',
+                                                          Visibility(
+                                                            visible: fee.type ==
+                                                                'FIXED',
+                                                            replacement: Row(
+                                                              children: [
+                                                                Container(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .centerRight,
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                  width: 25.sw,
+                                                                  child:
+                                                                      TextWidget(
+                                                                    text: usdController
+                                                                            .text
+                                                                            .isEmpty
+                                                                        ? '--'
+                                                                        : (fee.label == 'Service Fee' &&
+                                                                                whoPayFee == 'RECEIVER')
+                                                                            ? '\$0'
+                                                                            : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)}',
+                                                                    fontSize:
+                                                                        14,
+                                                                    weight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+                                                                IconButton(
+                                                                  style: IconButton
+                                                                      .styleFrom(
+                                                                    padding:
+                                                                        EdgeInsets
+                                                                            .zero,
+                                                                  ),
+                                                                  onPressed:
+                                                                      () {
+                                                                    //
+                                                                  },
+                                                                  icon:
+                                                                      const Icon(
+                                                                    Icons
+                                                                        .info_outline,
+                                                                    color: Color(
+                                                                        0xFFD0D0D0),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                TextWidget(
+                                                                  text:
+                                                                      '\$${fee.amount}',
                                                                   fontSize: 14,
                                                                   weight:
                                                                       FontWeight
                                                                           .w500,
                                                                 ),
-                                                              ),
-                                                              IconButton(
-                                                                style: IconButton
-                                                                    .styleFrom(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .zero,
-                                                                ),
-                                                                onPressed: () {
-                                                                  //
-                                                                },
-                                                                icon:
-                                                                    const Icon(
-                                                                  Icons
-                                                                      .info_outline,
-                                                                  color: Color(
-                                                                      0xFFD0D0D0),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                          child: Row(
-                                                            children: [
-                                                              TextWidget(
-                                                                text:
-                                                                    '\$${fee.amount}',
-                                                                fontSize: 14,
-                                                                weight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                              IconButton(
-                                                                style: IconButton
-                                                                    .styleFrom(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .zero,
-                                                                ),
-                                                                onPressed: () {
-                                                                  //
-                                                                },
-                                                                icon:
-                                                                    const Icon(
-                                                                  Icons
-                                                                      .info_outline,
-                                                                  color: Color(
-                                                                      0xFFD0D0D0),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        )
-                                                      ],
+                                                                IconButton(
+                                                                  style: IconButton
+                                                                      .styleFrom(
+                                                                    padding:
+                                                                        EdgeInsets
+                                                                            .zero,
+                                                                  ),
+                                                                  onPressed:
+                                                                      () {
+                                                                    //
+                                                                  },
+                                                                  icon:
+                                                                      const Icon(
+                                                                    Icons
+                                                                        .info_outline,
+                                                                    color: Color(
+                                                                        0xFFD0D0D0),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
-                                              )
-                                          ],
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    },
-                                  ),
-                                  const Divider(
-                                    color: ColorName.borderColor,
-                                  ),
-                                  SizedBox(
-                                    height: 34,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const TextWidget(
-                                          text: 'Total Fee',
-                                          fontSize: 16,
-                                          weight: FontWeight.w400,
-                                        ),
-                                        BlocBuilder<FeeBloc, FeeState>(
-                                          builder: (context, state) {
-                                            return Row(
-                                              children: [
-                                                if (state is FeeSuccess)
-                                                  TextWidget(
-                                                    text:
-                                                        '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
-                                                    fontSize: 16,
-                                                    weight: FontWeight.w500,
-                                                  )
-                                                else
-                                                  const TextWidget(
-                                                    text: '\$--',
-                                                    fontSize: 16,
-                                                    weight: FontWeight.w500,
-                                                  ),
-                                                IconButton(
-                                                  style: IconButton.styleFrom(
-                                                    padding: EdgeInsets.zero,
-                                                  ),
-                                                  onPressed: () {
-                                                    //
-                                                  },
-                                                  icon: const Icon(
-                                                    Icons.info_outline,
-                                                    color: Color(0xFFD0D0D0),
-                                                  ),
+                                                  ],
                                                 )
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                      ],
+                                            ],
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      },
                                     ),
-                                  ),
-                                ],
+                                    const Divider(
+                                      color: ColorName.borderColor,
+                                    ),
+                                    SizedBox(
+                                      height: 34,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const TextWidget(
+                                            text: 'Total Fee',
+                                            fontSize: 16,
+                                            weight: FontWeight.w400,
+                                          ),
+                                          BlocBuilder<FeeBloc, FeeState>(
+                                            builder: (context, state) {
+                                              return Row(
+                                                children: [
+                                                  if (state is FeeSuccess)
+                                                    TextWidget(
+                                                      text:
+                                                          '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
+                                                      fontSize: 16,
+                                                      weight: FontWeight.w500,
+                                                    )
+                                                  else
+                                                    const TextWidget(
+                                                      text: '\$--',
+                                                      fontSize: 16,
+                                                      weight: FontWeight.w500,
+                                                    ),
+                                                  IconButton(
+                                                    style: IconButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                    ),
+                                                    onPressed: () {
+                                                      //
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.info_outline,
+                                                      color: Color(0xFFD0D0D0),
+                                                    ),
+                                                  )
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -935,21 +967,24 @@ class _SentTabState extends State<SentTab> {
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          ButtonWidget(
-              child: const TextWidget(
-                text: 'Next',
-                type: TextType.small,
-                color: Colors.white,
-              ),
-              onPressed: () async {
-                if (_exchangeRateFormKey.currentState!.validate()) {
-                  _fetchContacts();
-                  setState(() {
-                    index = 1;
-                  });
-                }
-              }),
+          // const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ButtonWidget(
+                child: const TextWidget(
+                  text: 'Next',
+                  type: TextType.small,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  if (_exchangeRateFormKey.currentState!.validate()) {
+                    _fetchContacts();
+                    setState(() {
+                      index = 1;
+                    });
+                  }
+                }),
+          ),
           const SizedBox(height: 10),
         ],
       ),
@@ -960,7 +995,7 @@ class _SentTabState extends State<SentTab> {
     return Visibility(
       visible: index == 1,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
         child: CardWidget(
           width: 100.sw,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
@@ -1242,6 +1277,8 @@ class _SentTabState extends State<SentTab> {
                                   children: [
                                     if (bank.bankLogo != null)
                                       CachedNetworkImage(
+                                        width: 24,
+                                        height: 24,
                                         imageUrl: bank.bankLogo ?? '',
                                         errorWidget: (context, x, y) =>
                                             const SizedBox(
@@ -1368,7 +1405,7 @@ class _SentTabState extends State<SentTab> {
     return Visibility(
       visible: index == 2,
       child: Padding(
-        padding: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
         child: Column(
           children: [
             Expanded(
@@ -1797,7 +1834,7 @@ class _SentTabState extends State<SentTab> {
                                                 if (feeState is FeeSuccess)
                                                   TextWidget(
                                                     text:
-                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? creditCardAmount : 0)).toStringAsFixed(2)}',
+                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? creditCardAmount : 0)).toStringAsFixed(2)}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w500,
                                                   )
@@ -1938,8 +1975,11 @@ class _SentTabState extends State<SentTab> {
                                       (value, element) => value + element)) +
                               (feeState.fees
                                   .where((f) => f.type == 'PERCENTAGE')
-                                  .map((f) =>
-                                      (((double.tryParse(usdController.text) ??
+                                  .map((f) => (f.label == 'Service Fee' &&
+                                          whoPayFee == 'RECEIVER')
+                                      ? 0
+                                      : (((double.tryParse(
+                                                  usdController.text) ??
                                               0) *
                                           (f.amount / 100))))
                                   .reduce(
@@ -2019,10 +2059,13 @@ class _SentTabState extends State<SentTab> {
                                           value + element)) +
                                   (feeState.fees
                                       .where((f) => f.type == 'PERCENTAGE')
-                                      .map((f) => (((double.tryParse(
-                                                  usdController.text) ??
-                                              0) *
-                                          (f.amount / 100))))
+                                      .map((f) => (f.label == 'Service Fee' &&
+                                              whoPayFee == 'RECEIVER')
+                                          ? 0
+                                          : (((double.tryParse(
+                                                      usdController.text) ??
+                                                  0) *
+                                              (f.amount / 100))))
                                       .reduce((value, element) =>
                                           value + element)) +
                                   (selectedPaymentMethodIndex == 1
@@ -2129,7 +2172,9 @@ class _SentTabState extends State<SentTab> {
               keyboardType: TextInputType.phone,
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(
-                    RegExp(r'^[0-9]*[.,]?[0-9]*$')),
+                  RegExp(r'^[0-9]*[.,]?[0-9]*$'),
+                ),
+                LengthLimitingTextInputFormatter(10),
               ],
               decoration: InputDecoration(
                 contentPadding:
@@ -2176,26 +2221,26 @@ class _SentTabState extends State<SentTab> {
                               ],
                             ),
                           ),
-                          DropdownMenuItem(
-                            value: 'etb',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.ethiopianFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'ETB',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
+                          // DropdownMenuItem(
+                          //   value: 'etb',
+                          //   child: Row(
+                          //     children: [
+                          //       ClipRRect(
+                          //         borderRadius: BorderRadius.circular(100),
+                          //         child: Assets.images.ethiopianFlag.image(
+                          //           width: 20,
+                          //           height: 20,
+                          //           fit: BoxFit.cover,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 5),
+                          //       const TextWidget(
+                          //         text: 'ETB',
+                          //         fontSize: 12,
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                         onChanged: (value) {
                           //
@@ -2265,26 +2310,26 @@ class _SentTabState extends State<SentTab> {
                         underline: const SizedBox.shrink(),
                         icon: const Icon(Icons.keyboard_arrow_down),
                         items: [
-                          DropdownMenuItem(
-                            value: 'usd',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.usaFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'USD',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
+                          // DropdownMenuItem(
+                          //   value: 'usd',
+                          //   child: Row(
+                          //     children: [
+                          //       ClipRRect(
+                          //         borderRadius: BorderRadius.circular(100),
+                          //         child: Assets.images.usaFlag.image(
+                          //           width: 20,
+                          //           height: 20,
+                          //           fit: BoxFit.cover,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 5),
+                          //       const TextWidget(
+                          //         text: 'USD',
+                          //         fontSize: 12,
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
                           DropdownMenuItem(
                             value: 'etb',
                             child: Row(

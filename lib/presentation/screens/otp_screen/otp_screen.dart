@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -15,6 +18,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../core/utils/settings.dart';
 import '../../../gen/colors.gen.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -25,7 +29,7 @@ class OTPScreen extends StatefulWidget {
   State<OTPScreen> createState() => _OTPScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
@@ -34,7 +38,7 @@ class _OTPScreenState extends State<OTPScreen> {
   final pin5Controller = TextEditingController();
   final pin6Controller = TextEditingController();
   bool isValid = false;
-  int minute = 1;
+  int minute = 0;
   int second = 60;
   Timer? timer;
 
@@ -66,6 +70,15 @@ class _OTPScreenState extends State<OTPScreen> {
     }
 
     return [];
+  }
+
+  clearPins() {
+    pin1Controller.clear();
+    pin2Controller.clear();
+    pin3Controller.clear();
+    pin4Controller.clear();
+    pin5Controller.clear();
+    pin6Controller.clear();
   }
 
   void startTimer() {
@@ -105,17 +118,42 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   @override
+
+  /// Updates the OTP pin fields with the provided code.
+  ///
+  /// This method is used to automatically populate the OTP pin fields when the
+  /// user receives the OTP code. It splits the code string into individual
+  /// characters and sets the text of each pin field controller accordingly.
+  ///
+  /// If the [code] parameter is null, this method does nothing.
+  void codeUpdated() {
+    if (code != null) {
+      final pins = code!.trim().split('');
+      if (code!.trim().length == 6) {
+        pin1Controller.text = pins[0];
+        pin2Controller.text = pins[1];
+        pin3Controller.text = pins[2];
+        pin4Controller.text = pins[3];
+        pin5Controller.text = pins[4];
+        pin6Controller.text = pins[5];
+      }
+    }
+  }
+
+  @override
   void initState() {
     startTimer();
     super.initState();
+    SmsAutoFill().listenForCode();
   }
 
   @override
   void dispose() {
+    super.dispose();
     if (timer?.isActive ?? false) {
       timer?.cancel();
     }
-    super.dispose();
+    SmsAutoFill().unregisterListener();
   }
 
   @override
@@ -175,20 +213,56 @@ class _OTPScreenState extends State<OTPScreen> {
                         weight: FontWeight.w400,
                       ),
                       TextButton(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(
-                                SendOTP(
-                                  phoneNumber: int.tryParse(
-                                          widget.userModel.phoneNumber!) ??
-                                      0,
-                                  countryCode: widget.userModel.countryCode!,
-                                ),
-                              );
+                        onPressed: () async {
+                          clearPins();
+                          final signature = await SmsAutoFill().getAppSignature;
+                          if (widget.userModel.toScreen == null) {
+                            context.read<AuthBloc>().add(
+                                  SendOTP(
+                                    phoneNumber: int.tryParse(
+                                            widget.userModel.phoneNumber!) ??
+                                        0,
+                                    countryCode: widget.userModel.countryCode!,
+                                    signature: signature,
+                                  ),
+                                );
+                          } else {
+                            if (widget.userModel.toScreen ==
+                                RouteName.newPassword) {
+                              context.read<AuthBloc>().add(
+                                    SendOTPForPasswordReset(
+                                      phoneNumber: int.tryParse(
+                                              widget.userModel.phoneNumber!) ??
+                                          0,
+                                      countryCode:
+                                          widget.userModel.countryCode!,
+                                      signature: signature,
+                                    ),
+                                  );
+                            } else if (widget.userModel.toScreen ==
+                                RouteName.newPincode) {
+                              final token = await getToken();
+                              if (token != null) {
+                                context.read<AuthBloc>().add(
+                                      SendOTPForPincodeReset(
+                                        accessToken: token,
+                                        phoneNumber: int.tryParse(widget
+                                                .userModel.phoneNumber!) ??
+                                            0,
+                                        countryCode:
+                                            widget.userModel.countryCode!,
+                                        signature: signature,
+                                      ),
+                                    );
+                              }
+                            }
+                          }
                         },
                         child: const TextWidget(
                           text: 'Resend',
                           fontSize: 16,
                           weight: FontWeight.w500,
+                          color: ColorName.yellow,
                         ),
                       )
                     ],
@@ -207,10 +281,21 @@ class _OTPScreenState extends State<OTPScreen> {
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is OTPVerificationSuccess) {
-                  context.pushNamed(
-                    RouteName.setPinCode,
-                    extra: widget.userModel,
-                  );
+                  if (widget.userModel.toScreen == null) {
+                    context.pushNamed(
+                      RouteName.createAccount,
+                      extra: widget.userModel.copyWith(
+                        verificationUUID: state.userId,
+                      ),
+                    );
+                  } else {
+                    context.pushNamed(
+                      widget.userModel.toScreen!,
+                      extra: widget.userModel.copyWith(
+                        otp: getAllPins().join(),
+                      ),
+                    );
+                  }
                 } else if (state is OTPVerificationFail) {
                   showSnackbar(
                     context,
@@ -233,7 +318,7 @@ class _OTPScreenState extends State<OTPScreen> {
                         ? ColorName.primaryColor
                         : ColorName.grey.shade200,
                     child: state is OTPVerificationLoading
-                        ? LoadingWidget()
+                        ? const LoadingWidget()
                         : const TextWidget(
                             text: 'Verify',
                             type: TextType.small,
@@ -279,6 +364,7 @@ class _OTPScreenState extends State<OTPScreen> {
             ),
         textAlign: TextAlign.center,
         inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           LengthLimitingTextInputFormatter(1),
         ],
         keyboardType: TextInputType.phone,

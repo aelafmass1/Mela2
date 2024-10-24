@@ -1,10 +1,9 @@
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
@@ -12,6 +11,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../../bloc/auth/auth_bloc.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_field_widget.dart';
@@ -30,7 +30,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final emailController = TextEditingController();
   final password1Controller = TextEditingController();
   final password2Controller = TextEditingController();
-  final phoneNumberController = TextEditingController();
+  // final phoneNumberController = TextEditingController();
+
+  final firstNameKey = GlobalKey<FormFieldState>();
+  final lastNameKey = GlobalKey<FormFieldState>();
+  final emailKey = GlobalKey<FormFieldState>();
+  final password1Key = GlobalKey<FormFieldState>();
+  final password2Key = GlobalKey<FormFieldState>();
+  // final phoneNumberKey = GlobalKey<FormFieldState>();
 
   bool termAndConditionAgreed = false;
   bool enableFaceId = true;
@@ -46,42 +53,34 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   String emailError = '';
   String phoneNumberError = '';
 
-  String? strongPasswordValidator(password) {
-    if (password!.isEmpty) {
-      return 'password is empty';
-    } else if (password.length < 8) {
-      return 'Password must be at least 8 characters long.';
-    }
-    if (password1Controller.text != password2Controller.text) {
-      return 'Password are not indentical';
-    }
-    return null;
+  Timer? _debounceTimer;
+
+  debounceValidation(GlobalKey<FormFieldState> formKey) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      // Trigger validation after 500ms of inactivity (debounce period)
+
+      formKey.currentState?.validate();
+    });
   }
 
   @override
-  void initState() {
-    log(widget.userModel.toString());
-    super.initState();
+  void dispose() {
+    //controller dispose
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    password1Controller.dispose();
+    password2Controller.dispose();
+    // phoneNumberController.dispose();
+
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leadingWidth: 200,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 20, left: 15),
-          child: InkWell(
-              onTap: () {
-                context.goNamed(RouteName.login);
-              },
-              child: const TextWidget(
-                text: 'Login',
-                color: ColorName.primaryColor,
-                fontSize: 15,
-                weight: FontWeight.w300,
-              )),
-        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 15),
@@ -118,9 +117,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        onChanged: (p0) {
+                          debounceValidation(firstNameKey);
+                        },
+                        globalKey: firstNameKey,
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'First Name is Empty';
+                          }
+                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(text)) {
+                            return 'First Name should only contain letters';
                           }
                           return null;
                         },
@@ -135,9 +141,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        onChanged: (p0) {
+                          debounceValidation(lastNameKey);
+                        },
+                        globalKey: lastNameKey,
                         validator: (text) {
                           if (text!.isEmpty) {
                             return 'Last Name is Empty';
+                          }
+                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(text)) {
+                            return 'Last Name should only contain letters';
                           }
                           return null;
                         },
@@ -145,102 +158,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         hintText: 'Enter your last name',
                       ),
                       const SizedBox(height: 15),
-                      // const TextWidget(
-                      //   text: 'Gender *',
-                      //   fontSize: 12,
-                      //   weight: FontWeight.w400,
-                      // ),
-                      // const SizedBox(height: 5),
-                      // DropdownButtonFormField(
-                      //   validator: (value) {
-                      //     if (selectedGender.isEmpty) {
-                      //       return 'Gender not selected';
-                      //     }
-                      //     return null;
-                      //   },
-                      //   hint: const TextWidget(
-                      //     text: 'Select Gender',
-                      //     fontSize: 14,
-                      //     color: Color(0xFF8E8E8E),
-                      //     weight: FontWeight.w500,
-                      //   ),
-                      //   icon: const Icon(Icons.keyboard_arrow_down),
-                      //   decoration: InputDecoration(
-                      //     contentPadding: const EdgeInsets.symmetric(
-                      //         horizontal: 20, vertical: 18),
-                      //     border: OutlineInputBorder(
-                      //       borderRadius: BorderRadius.circular(40),
-                      //     ),
-                      //     focusedBorder: OutlineInputBorder(
-                      //       borderRadius: BorderRadius.circular(40),
-                      //       borderSide: const BorderSide(
-                      //         color: ColorName.primaryColor,
-                      //         width: 2,
-                      //       ),
-                      //     ),
-                      //   ),
-                      //   items: const [
-                      //     DropdownMenuItem(
-                      //       value: 'male',
-                      //       child: TextWidget(
-                      //         text: 'Male',
-                      //         type: TextType.small,
-                      //       ),
-                      //     ),
-                      //     DropdownMenuItem(
-                      //       value: 'female',
-                      //       child: TextWidget(
-                      //         text: 'Female',
-                      //         type: TextType.small,
-                      //       ),
-                      //     )
-                      //   ],
-                      //   onChanged: (value) {
-                      //     if (value != null) {
-                      //       setState(() {
-                      //         selectedGender = value;
-                      //       });
-                      //     }
-                      //   },
-                      // ),
-                      // const SizedBox(height: 15),
-                      // const TextWidget(
-                      //   text: 'Birthdate *',
-                      //   fontSize: 12,
-                      //   weight: FontWeight.w400,
-                      // ),
-                      // const SizedBox(height: 5),
-                      // TextFieldWidget(
-                      //   validator: (text) {
-                      //     if (text!.isEmpty) {
-                      //       return 'birthdate is empty';
-                      //     }
-                      //   },
-                      //   readOnly: true,
-                      //   onTab: () async {
-                      //     birthdayDate = await showDatePicker(
-                      //       context: context,
-                      //       firstDate: DateTime(1900),
-                      //       lastDate: DateTime.now(),
-                      //     );
-                      //     if (birthdayDate != null) {
-                      //       birthDateController.text =
-                      //           DateFormat('MMMM dd, yyyy')
-                      //               .format(birthdayDate!);
-                      //     }
-                      //   },
-                      //   suffix: const Padding(
-                      //     padding: EdgeInsets.only(right: 20),
-                      //     child: Icon(
-                      //       Icons.calendar_month_outlined,
-                      //       size: 25,
-                      //       color: ColorName.grey,
-                      //     ),
-                      //   ),
-                      //   controller: birthDateController,
-                      //   hintText: 'Select your birthdate',
-                      // ),
-                      // const SizedBox(height: 15),
+
                       const TextWidget(
                         text: 'Email *',
                         fontSize: 12,
@@ -248,6 +166,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
+                        onChanged: (p0) {
+                          debounceValidation(emailKey);
+                        },
+                        globalKey: emailKey,
                         errorText: emailError.isEmpty ? null : emailError,
                         keyboardType: TextInputType.emailAddress,
                         validator: (text) {
@@ -264,73 +186,96 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: emailController,
                         hintText: 'Enter your email address',
                       ),
-                      const SizedBox(height: 25),
-                      const TextWidget(
-                        text: 'Phone Number',
-                        fontSize: 12,
-                        weight: FontWeight.w400,
-                      ),
-                      const SizedBox(height: 5),
-                      TextFieldWidget(
-                        errorText:
-                            phoneNumberError.isEmpty ? null : phoneNumberError,
-                        prefixText:
-                            selectedCoutry == 'ethiopia' ? '+251' : '+1',
-                        enableFocusColor: false,
-                        prefix: Container(
-                          width: 80,
-                          height: 60,
-                          margin: const EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(40),
-                              border: Border.all(color: Colors.black54)),
-                          child: Center(
-                            child: DropdownButton(
-                                value: selectedCoutry,
-                                padding: EdgeInsets.zero,
-                                underline: const SizedBox.shrink(),
-                                icon: const Padding(
-                                  padding: EdgeInsets.only(left: 5.0),
-                                  child: Icon(Icons.keyboard_arrow_down),
-                                ),
-                                items: [
-                                  DropdownMenuItem(
-                                      alignment: Alignment.center,
-                                      value: 'ethiopia',
-                                      child: CircleAvatar(
-                                        radius: 13,
-                                        backgroundImage: Assets
-                                            .images.ethiopianFlag
-                                            .provider(),
-                                      )),
-                                  DropdownMenuItem(
-                                      alignment: Alignment.center,
-                                      value: 'usa',
-                                      child: CircleAvatar(
-                                        radius: 13,
-                                        backgroundImage:
-                                            Assets.images.usaFlag.provider(),
-                                      )),
-                                ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      selectedCoutry = value;
-                                    });
-                                  }
-                                }),
-                          ),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return 'Phone Number is empty';
-                          }
-                          return null;
-                        },
-                        controller: phoneNumberController,
-                        hintText: 'Phone Number',
-                      ),
+                      // const SizedBox(height: 25),
+                      // const TextWidget(
+                      //   text: 'Phone Number',
+                      //   fontSize: 12,
+                      //   weight: FontWeight.w400,
+                      // ),
+                      // const SizedBox(height: 5),
+                      // TextFieldWidget(
+                      //   onChanged: (p0) {
+                      //     debounceValidation(phoneNumberKey);
+                      //   },
+                      //   globalKey: phoneNumberKey,
+                      //   errorText:
+                      //       phoneNumberError.isEmpty ? null : phoneNumberError,
+                      //   prefixText:
+                      //       selectedCoutry == 'ethiopia' ? '+251' : '+1',
+                      //   enableFocusColor: false,
+                      //   prefix: Container(
+                      //     width: 80,
+                      //     height: 55,
+                      //     margin: const EdgeInsets.only(right: 10),
+                      //     decoration: BoxDecoration(
+                      //         borderRadius: BorderRadius.circular(40),
+                      //         border: Border.all(color: Colors.black54)),
+                      //     child: Center(
+                      //       child: DropdownButton(
+                      //           value: selectedCoutry,
+                      //           padding: EdgeInsets.zero,
+                      //           underline: const SizedBox.shrink(),
+                      //           icon: const Padding(
+                      //             padding: EdgeInsets.only(left: 5.0),
+                      //             child: Icon(Icons.keyboard_arrow_down),
+                      //           ),
+                      //           items: [
+                      //             DropdownMenuItem(
+                      //                 alignment: Alignment.center,
+                      //                 value: 'ethiopia',
+                      //                 child: CircleAvatar(
+                      //                   radius: 13,
+                      //                   backgroundImage: Assets
+                      //                       .images.ethiopianFlag
+                      //                       .provider(),
+                      //                 )),
+                      //             DropdownMenuItem(
+                      //                 alignment: Alignment.center,
+                      //                 value: 'usa',
+                      //                 child: CircleAvatar(
+                      //                   radius: 13,
+                      //                   backgroundImage:
+                      //                       Assets.images.usaFlag.provider(),
+                      //                 )),
+                      //           ],
+                      //           onChanged: (value) {
+                      //             debounceValidation(phoneNumberKey);
+                      //             if (value != null) {
+                      //               setState(() {
+                      //                 selectedCoutry = value;
+                      //               });
+                      //             }
+                      //           }),
+                      //     ),
+                      //   ),
+                      //   keyboardType: TextInputType.phone,
+                      //   validator: (text) {
+                      //     if (text!.isEmpty) {
+                      //       return 'Phone Number is empty';
+                      //     }
+                      //     if (selectedCoutry == 'ethiopia') {
+                      //       // RegEx for Ethiopian (+251) phone numbers (9 digits after country code)
+                      //       final ethiopianPhoneRegex = RegExp(r'^\+251\d{9}$');
+                      //       if (ethiopianPhoneRegex.hasMatch(
+                      //               '+251${phoneNumberController.text}') ==
+                      //           false) {
+                      //         return 'Invalid Ethiopian Number';
+                      //       }
+                      //     } else {
+                      //       // RegEx for US (+1) phone numbers (10 digits after country code)
+                      //       final usPhoneRegex = RegExp(r'^\+1\d{10}$');
+                      //       if (usPhoneRegex.hasMatch(
+                      //               '+1${phoneNumberController.text}') ==
+                      //           false) {
+                      //         return 'Invalid US Number';
+                      //       }
+                      //     }
+
+                      //     return null;
+                      //   },
+                      //   controller: phoneNumberController,
+                      //   hintText: 'Phone Number',
+                      // ),
                       const SizedBox(height: 20),
                       const TextWidget(
                         text: 'Password',
@@ -339,7 +284,19 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
-                        validator: strongPasswordValidator,
+                        onChanged: (p0) {
+                          debounceValidation(password1Key);
+                        },
+                        globalKey: password1Key,
+                        validator: (password) {
+                          if (password!.isEmpty) {
+                            return 'password is empty';
+                          } else if (password.length < 6) {
+                            return 'Password must be at least 6 characters long.';
+                          }
+
+                          return null;
+                        },
                         controller: password1Controller,
                         hintText: 'Enter your password',
                       ),
@@ -351,7 +308,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
-                        validator: strongPasswordValidator,
+                        onChanged: (p0) {
+                          debounceValidation(password2Key);
+                        },
+                        globalKey: password2Key,
+                        validator: (password) {
+                          if (password!.isEmpty) {
+                            return 'password is empty';
+                          } else if (password.length < 8) {
+                            return 'Password must be at least 8 characters long.';
+                          }
+                          if (password1Controller.text !=
+                              password2Controller.text) {
+                            return 'Password are not indentical';
+                          }
+                          return null;
+                        },
                         controller: password2Controller,
                         hintText: 'Confirm your password',
                       ),
@@ -397,23 +369,35 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   });
                                 }
                               }),
-                          RichText(
-                              text: TextSpan(
-                                  text: 'I have read & agree to the ',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .copyWith(
-                                        fontSize: 12,
-                                      ),
-                                  children: const [
-                                TextSpan(
-                                    text: 'Term & Conditions',
-                                    style: TextStyle(
-                                      color: ColorName.primaryColor,
-                                    ))
-                              ])),
-                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              RichText(
+                                  text: TextSpan(
+                                text: 'I have read & agree to the',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(
+                                      fontSize: 12,
+                                    ),
+                              )),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 5),
+                                ),
+                                onPressed: () {
+                                  //
+                                },
+                                child: const TextWidget(
+                                  text: 'Term & Condition',
+                                  fontSize: 12,
+                                  color: ColorName.primaryColor,
+                                  weight: FontWeight.w800,
+                                ),
+                              )
+                            ],
+                          ),
                         ],
                       )
                       //
@@ -422,100 +406,49 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.only(bottom: 20, top: 10),
                 child: BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    if (state is RegisterUserFail) {
-                      if (state.field == 'email') {
-                        setState(() {
-                          emailError = state.reason;
-                        });
-                      } else {
-                        setState(() {
-                          emailError = '';
-                        });
-                      }
-                      if (state.field == 'phoneNumber') {
-                        setState(() {
-                          phoneNumberError = state.reason;
-                        });
-                      } else {
-                        setState(() {
-                          phoneNumberError = '';
-                        });
-                      }
-                      setState(() {});
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is RegisterUserSuccess) {
-                      context.read<AuthBloc>().add(
-                            SendOTP(
-                              phoneNumber:
-                                  int.tryParse(phoneNumberController.text) ?? 0,
-                              countryCode:
-                                  selectedCoutry == 'ethiopia' ? 251 : 1,
-                            ),
-                          );
-                      //
-                    } else if (state is SendOTPFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is SendOTPSuccess) {
-                      String phoneCode =
-                          selectedCoutry == 'ethiopia' ? '+251' : '+1';
-                      String phoneNumber =
-                          phoneCode + phoneNumberController.text;
+                    if (state is CheckEmailExistsFail) {
+                      setState(() {
+                        emailError = state.reason;
+                      });
+                      showSnackbar(context, description: state.reason);
+                    } else if (state is CheckEmailExistsSuccess) {
                       UserModel user = widget.userModel.copyWith(
                         firstName: firstNameController.text,
                         lastName: lastNameController.text,
                         email: emailController.text,
                         password: password1Controller.text,
-                        phoneNumber: phoneNumberController.text,
-                        countryCode: selectedCoutry == 'ethiopia' ? 251 : 1,
                       );
                       context.pushNamed(
-                        RouteName.otp,
+                        RouteName.setPinCode,
                         extra: user,
                       );
                     }
                   },
                   builder: (context, state) {
                     return ButtonWidget(
-                        color: termAndConditionAgreed
-                            ? ColorName.primaryColor
-                            : Colors.grey.withOpacity(0.5),
-                        child: state is RegisterUserLoaing ||
-                                state is SendOTPLoading
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Next',
-                                type: TextType.small,
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (termAndConditionAgreed) {
-                            if (_formKey.currentState!.validate()) {
-                              UserModel user = widget.userModel.copyWith(
-                                firstName: firstNameController.text,
-                                lastName: lastNameController.text,
-                                email: emailController.text,
-                                password: password1Controller.text,
-                                phoneNumber: phoneNumberController.text,
-                                countryCode:
-                                    selectedCoutry == 'ethiopia' ? 251 : 1,
-                              );
-                              context
-                                  .read<AuthBloc>()
-                                  .add(CreateAccount(userModel: user));
-                            }
+                      color: termAndConditionAgreed
+                          ? ColorName.primaryColor
+                          : Colors.grey.withOpacity(0.5),
+                      child: state is CheckEmailExistsLoading
+                          ? const LoadingWidget()
+                          : const TextWidget(
+                              text: 'Next',
+                              type: TextType.small,
+                              color: Colors.white,
+                            ),
+                      onPressed: () {
+                        if (termAndConditionAgreed) {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(CheckEmailExists(
+                                  email: emailController.text,
+                                ));
                           }
-                        });
+                        }
+                      },
+                    );
                   },
                 ),
               )

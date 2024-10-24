@@ -1,16 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'payment_card_event.dart';
 part 'payment_card_state.dart';
 
 class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
-  PaymentCardBloc()
+  final PaymentCardRepository repository;
+  PaymentCardBloc({required this.repository})
       : super(PaymentCardInitial(
           paymentCards: [],
         )) {
@@ -24,7 +27,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
 
-        final res = await PaymentCardRepository.fetchPaymentCards(
+        final res = await repository.fetchPaymentCards(
           accessToken: token!,
         );
         if (res.isNotEmpty) {
@@ -47,6 +50,15 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
           ));
         }
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PaymentCardFail(
+        reason: error.message,
+        paymentCards: state.paymentCards,
+      ));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(
@@ -66,7 +78,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
 
-        final res = await PaymentCardRepository.addPaymentCard(
+        final res = await repository.addPaymentCard(
           accessToken: token!,
           token: event.token,
         );
@@ -83,6 +95,13 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
           paymentCards: cards,
         ));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PaymentCardFail(
+          reason: error.message, paymentCards: state.paymentCards));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(

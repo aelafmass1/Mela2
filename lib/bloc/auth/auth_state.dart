@@ -32,14 +32,19 @@ final class OTPVerificationFail extends AuthState {
   OTPVerificationFail({required this.reason});
 }
 
-final class OTPVerificationSuccess extends AuthState {}
+final class OTPVerificationSuccess extends AuthState {
+  final String? userId;
+
+  OTPVerificationSuccess({this.userId});
+}
 
 final class SendOTPLoading extends AuthState {}
 
 final class SendOTPFail extends AuthState {
+  final String? userId;
   final String reason;
 
-  SendOTPFail({required this.reason});
+  SendOTPFail({required this.reason, this.userId});
 }
 
 final class SendOTPSuccess extends AuthState {}
@@ -84,3 +89,33 @@ final class LoginWithPincodeFail extends AuthState {
 }
 
 final class LoginWithPincodeSuccess extends AuthState {}
+
+final class ResetLoading extends AuthState {}
+
+final class ResetFail extends AuthState {
+  final String reason;
+
+  ResetFail({required this.reason});
+}
+
+final class ResetSuccess extends AuthState {}
+
+final class DeleteUserLoading extends AuthState {}
+
+final class DeleteUserFail extends AuthState {
+  final String reason;
+
+  DeleteUserFail({required this.reason});
+}
+
+final class DeleteUserSucess extends AuthState {}
+
+final class CheckEmailExistsLoading extends AuthState {}
+
+final class CheckEmailExistsFail extends AuthState {
+  final String reason;
+
+  CheckEmailExistsFail({required this.reason});
+}
+
+final class CheckEmailExistsSuccess extends AuthState {}

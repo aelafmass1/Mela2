@@ -10,12 +10,13 @@ themeData() {
       seedColor: ColorName.primaryColor,
       primary: ColorName.primaryColor,
     ),
+
     appBarTheme: const AppBarTheme(
-      toolbarHeight: 0,
+      // toolbarHeight: 0,
       backgroundColor: Colors.white,
       surfaceTintColor: ColorName.white,
     ),
-    colorSchemeSeed: ColorName.primaryColor,
+    // colorSchemeSeed: ColorName.primaryColor,
     textTheme: const TextTheme(
         displaySmall: TextStyle(
           fontWeight: FontWeight.w600,

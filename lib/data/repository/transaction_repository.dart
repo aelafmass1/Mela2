@@ -1,12 +1,15 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 class TransactionRepository {
-  static Future<Map<String, dynamic>> fetchTransaction(
-      String accessToken) async {
-    final res = await http.get(
+  final InterceptedClient client;
+
+  TransactionRepository({required this.client});
+  Future<Map<String, dynamic>> fetchTransaction(String accessToken) async {
+    final res = await client.get(
       Uri.parse(
         '$baseUrl/api/v1/money-transfer/transactions',
       ),
@@ -15,6 +18,7 @@ class TransactionRepository {
         'Content-Type': 'application/json',
       },
     );
+
     if (res.statusCode == 200 || res.statusCode == 204) {
       List data = [];
       if (res.body.isNotEmpty) {
@@ -24,6 +28,6 @@ class TransactionRepository {
       }
       return {'success': data};
     }
-    return {"error": res.body.isEmpty ? 'please try again' : res.body};
+    return processErrorResponse(jsonDecode(res.body));
   }
 }

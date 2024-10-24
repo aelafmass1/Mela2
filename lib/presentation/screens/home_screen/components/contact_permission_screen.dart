@@ -69,11 +69,23 @@ class ContactPermissionScreen extends StatelessWidget {
               width: 80.sw,
               child: const TextWidget(
                 text:
-                    'It is not mandatory to enable contact permission but if you want to send easily we recommend you to enable it manually',
+                    'This is going to be the settings path on the users device to enable the contact permission for our App.',
                 type: TextType.small,
                 textAlign: TextAlign.center,
                 fontSize: 12,
                 weight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: 80.sw,
+              child: const TextWidget(
+                text:
+                    'Go to Settings > Apps > Mela Fi > Contact > Select Full Access',
+                type: TextType.small,
+                textAlign: TextAlign.center,
+                fontSize: 12,
+                weight: FontWeight.w600,
               ),
             ),
             const Expanded(child: SizedBox()),

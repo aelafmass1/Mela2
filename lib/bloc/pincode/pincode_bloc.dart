@@ -1,14 +1,18 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
+
+import '../../core/exceptions/server_exception.dart';
 
 part 'pincode_event.dart';
 part 'pincode_state.dart';
 
 class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
-  PincodeBloc() : super(PinInitial()) {
+  final AuthRepository repository;
+  PincodeBloc({required this.repository}) : super(PinInitial()) {
     on<SetPinCode>(_onSetPincode);
     on<VerifyPincode>(_onVerifyPincode);
   }
@@ -18,7 +22,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         emit(PinLoading());
         final token = await getToken();
 
-        final res = await AuthRepository.verfiyPincode(
+        final res = await repository.verfiyPincode(
           token ?? '',
           event.pincode,
         );
@@ -27,6 +31,12 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         }
         emit(PinSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PinFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());
@@ -38,12 +48,18 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
       if (state is! PinLoading) {
         emit(PinLoading());
         final token = await getToken();
-        final res = await AuthRepository.setPincode(token ?? '', event.pincode);
+        final res = await repository.setPincode(token ?? '', event.pincode);
         if (res.containsKey('error')) {
           return emit(PinFail(reason: res['error']));
         }
         emit(PinSuccess());
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PinFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       emit(PinFail(reason: error.toString()));
       log(error.toString());

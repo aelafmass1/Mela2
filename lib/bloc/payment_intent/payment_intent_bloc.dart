@@ -1,15 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 
+import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'payment_intent_event.dart';
 part 'payment_intent_state.dart';
 
 class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
-  PaymentIntentBloc() : super(PaymentIntentInitial()) {
+  final PaymentIntentRepository repository;
+  PaymentIntentBloc({required this.repository})
+      : super(PaymentIntentInitial()) {
     on<FetchClientSecret>(_onFetchClientSecret);
   }
 
@@ -23,7 +27,7 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
         final token = await getToken();
 
         if (token != null) {
-          final res = await PaymentIntentRepository.createPaymentIntent(
+          final res = await repository.createPaymentIntent(
             currency: event.currency,
             amount: event.amount,
             accessToken: token,
@@ -40,6 +44,12 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
           emit(PaymentIntentFail(reason: 'Please login first'));
         }
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(PaymentIntentFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(PaymentIntentFail(reason: error.toString()));

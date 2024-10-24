@@ -5,8 +5,13 @@ sealed class AuthEvent {}
 final class SendOTP extends AuthEvent {
   final int phoneNumber;
   final int countryCode;
+  final String signature;
 
-  SendOTP({required this.phoneNumber, required this.countryCode});
+  SendOTP({
+    required this.phoneNumber,
+    required this.countryCode,
+    required this.signature,
+  });
 }
 
 final class CreateAccount extends AuthEvent {
@@ -59,4 +64,64 @@ final class LoginWithPincode extends AuthEvent {
   final String pincode;
 
   LoginWithPincode({required this.pincode});
+}
+
+final class SendOTPForPasswordReset extends AuthEvent {
+  final int phoneNumber;
+  final int countryCode;
+  final String signature;
+
+  SendOTPForPasswordReset({
+    required this.phoneNumber,
+    required this.countryCode,
+    required this.signature,
+  });
+}
+
+final class SendOTPForPincodeReset extends AuthEvent {
+  final int phoneNumber;
+  final int countryCode;
+  final String signature;
+  final String accessToken;
+
+  SendOTPForPincodeReset({
+    required this.phoneNumber,
+    required this.countryCode,
+    required this.signature,
+    required this.accessToken,
+  });
+}
+
+final class ResetPassword extends AuthEvent {
+  final int phoneNumber;
+  final String otp;
+  final int countryCode;
+  final String newPassword;
+
+  ResetPassword({
+    required this.phoneNumber,
+    required this.otp,
+    required this.countryCode,
+    required this.newPassword,
+  });
+}
+
+final class ResetPincode extends AuthEvent {
+  final int phoneNumber;
+  final String otp;
+  final int countryCode;
+  final String newPincode;
+
+  ResetPincode({
+    required this.phoneNumber,
+    required this.otp,
+    required this.countryCode,
+    required this.newPincode,
+  });
+}
+
+final class CheckEmailExists extends AuthEvent {
+  final String email;
+
+  CheckEmailExists({required this.email});
 }

@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/data/models/bank_rate.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
 
@@ -11,7 +13,9 @@ part 'bank_currency_rate_state.dart';
 
 class BankCurrencyRateBloc
     extends Bloc<BankCurrencyRateEvent, BankCurrencyRateState> {
-  BankCurrencyRateBloc() : super(BankCurrencyRateInitial()) {
+  final CurrencyRateRepository repository;
+  BankCurrencyRateBloc({required this.repository})
+      : super(BankCurrencyRateInitial()) {
     on<FetchCurrencyRate>(_onFetchCurrencyRate);
   }
   _onFetchCurrencyRate(
@@ -21,11 +25,22 @@ class BankCurrencyRateBloc
         emit(BankCurrencyRateLoading());
 
         final token = await getToken();
-        final res = await CurrencyRateRepository.fetchCurrencyRate(token!);
+        final res = await repository.fetchCurrencyRate(token!);
         final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
         emit(BankCurrencyRateSuccess(rates: rates));
       }
-    } catch (error) {
+    } on ServerException catch (error, stackTrace) {
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+      log(error.toString());
+      emit(BankCurrencyRateFail(reason: error.message));
+    } catch (error, stackTrace) {
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
       log(error.toString());
       emit(BankCurrencyRateFail(reason: error.toString()));
     }

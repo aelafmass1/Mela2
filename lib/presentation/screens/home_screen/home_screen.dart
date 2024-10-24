@@ -1,8 +1,13 @@
+import 'dart:io' show Platform;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
+import 'package:go_router/go_router.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -11,7 +16,9 @@ import 'package:transaction_mobile_app/presentation/tabs/equb_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/send_tab.dart';
+import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../bloc/navigation/navigation_bloc.dart';
 
@@ -26,13 +33,159 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   int selectedIndex = 0;
   String? imageUrl;
+  PackageInfo _packageInfo = PackageInfo();
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> getPackageData() async {
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    // We also handle the message potentially returning null.
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+    _packageInfo = await PackageManager.getPackageInfo();
+    setState(() {});
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      if (Platform.isAndroid) {
+        InAppUpdateManager manager = InAppUpdateManager();
+        AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
+        if (appUpdateInfo == null) return;
+
+        if (appUpdateInfo.updateAvailability ==
+            UpdateAvailability.developerTriggeredUpdateInProgress) {
+          ///If an in-app update is already running, resume the update.
+          String? message =
+              await manager.startAnUpdate(type: AppUpdateType.immediate);
+
+          ///message return null when run update success
+        } else if (appUpdateInfo.updateAvailability ==
+            UpdateAvailability.updateAvailable) {
+          ///Update available
+          if (appUpdateInfo.immediateAllowed) {
+            debugPrint('Start an immediate update');
+            String? message =
+                await manager.startAnUpdate(type: AppUpdateType.immediate);
+
+            ///message return null when run update success
+          } else if (appUpdateInfo.flexibleAllowed) {
+            debugPrint('Start an flexible update');
+            String? message =
+                await manager.startAnUpdate(type: AppUpdateType.flexible);
+
+            ///message return null when run update success
+          } else {
+            debugPrint(
+                'Update available. Immediate & Flexible Update Flow not allow');
+          }
+        }
+      } else if (Platform.isIOS) {
+        VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(
+          packageInfo: _packageInfo,
+        );
+        if (versionInfo.canUpdate) {
+          _showUpdateBottomSheet(versionInfo.appStoreLink);
+        }
+      }
+    } catch (e) {
+      print('Failed to check for update: $e');
+    }
+  }
+
+  // Method to show the BottomSheet
+  void _showUpdateBottomSheet(String storeLink) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "New Update Available",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: SvgPicture.asset(
+                        Assets.images.svgs.melaLogo,
+                        width: 40,
+                        height: 40,
+                        color: ColorName.primaryColor,
+                      )),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "A newer version of the Mela Fi is available. Please update for the best experience.",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 40,
+                width: 100,
+                child: ButtonWidget(
+                  onPressed: () async {
+                    context.pop(); // Close the BottomSheet
+                    await launchUrl(Uri.parse(storeLink));
+                  },
+                  child: const TextWidget(
+                    text: "Update Now",
+                    type: TextType.small,
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close the BottomSheet
+                },
+                child: const TextWidget(
+                  text: "Later",
+                  color: ColorName.primaryColor,
+                  type: TextType.small,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  reviewTheApp() async {
+    final InAppReview inAppReview = InAppReview.instance;
+
+    if (await inAppReview.isAvailable()) {
+      inAppReview.requestReview();
+    }
+  }
 
   @override
   void initState() {
+    super.initState();
     getImageUrl().then((value) {
       imageUrl = value;
     });
-    super.initState();
+    reviewTheApp();
+    context.read<NavigationBloc>().add(NavigateTo(index: 0));
+    // getPackageData().then((value) {
+    //   _checkForUpdate();
+    // });
   }
 
   @override

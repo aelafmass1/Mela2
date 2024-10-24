@@ -5,7 +5,7 @@ import '../../gen/colors.gen.dart';
 
 void showSnackbar(
   BuildContext context, {
-  required String title,
+  String? title,
   required String description,
 }) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -27,12 +27,12 @@ void showSnackbar(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+                  // Text(
+                  //   title,
+                  //   style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  // ),
                   SizedBox(
                     width: 65.sw,
                     child: Text(
