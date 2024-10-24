@@ -7,6 +7,8 @@ import 'package:transaction_mobile_app/data/models/equb_cycle_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 
+import 'equb_created_by_model.dart';
+
 class EqubDetailModel {
   final int id;
   final String name;
@@ -19,6 +21,7 @@ class EqubDetailModel {
   final List<EqubInviteeModel> invitees;
   final List<EqubCycleModel> cycles;
   final bool isAdmin;
+  final EqubCreatedByModel createdBy;
   EqubDetailModel({
     required this.id,
     required this.name,
@@ -31,6 +34,7 @@ class EqubDetailModel {
     required this.invitees,
     required this.cycles,
     required this.isAdmin,
+    required this.createdBy,
   });
 
   EqubDetailModel copyWith({
@@ -44,6 +48,7 @@ class EqubDetailModel {
     List<EqubMemberModel>? members,
     List<EqubInviteeModel>? invitees,
     List<EqubCycleModel>? cycles,
+    EqubCreatedByModel? createdBy,
   }) {
     return EqubDetailModel(
       id: id ?? this.id,
@@ -57,6 +62,7 @@ class EqubDetailModel {
       invitees: invitees ?? this.invitees,
       cycles: cycles ?? this.cycles,
       isAdmin: isAdmin,
+      createdBy: createdBy ?? this.createdBy,
     );
   }
 
@@ -73,6 +79,7 @@ class EqubDetailModel {
       'invitees': invitees.map((x) => x.toMap()).toList(),
       'cycles': cycles.map((x) => x.toMap()).toList(),
       'admin': isAdmin,
+      'createdBy': createdBy.toMap(),
     };
   }
 
@@ -101,6 +108,7 @@ class EqubDetailModel {
                 (x) => EqubCycleModel.fromMap(x),
               ),
             ),
+      createdBy: EqubCreatedByModel.fromMap(map['createdBy']),
     );
   }
 

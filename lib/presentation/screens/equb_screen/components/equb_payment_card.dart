@@ -81,7 +81,7 @@ class _EqubPaymentCardState extends State<EqubPaymentCard> {
                 ),
               ),
               child: Container(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                 decoration: BoxDecoration(
                   color: ColorName.white,
                   border: Border.all(

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_created_by_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -334,6 +335,11 @@ class _EqubTabState extends State<EqubTab> {
                           blurTexts: true,
                           onTab: () {
                             final detail = EqubDetailModel(
+                              createdBy: EqubCreatedByModel(
+                                id: 0,
+                                firstName: 'Abebe',
+                                lastName: 'Kebede',
+                              ),
                               isAdmin: false,
                               currency: 'USD',
                               id: -1,
@@ -357,6 +363,11 @@ class _EqubTabState extends State<EqubTab> {
                                 extra: detail);
                           },
                           equb: EqubDetailModel(
+                            createdBy: EqubCreatedByModel(
+                              id: 0,
+                              firstName: 'Abebe',
+                              lastName: 'Kebede',
+                            ),
                             isAdmin: false,
                             currency: 'USD',
                             id: -1,
