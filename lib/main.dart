@@ -26,6 +26,7 @@ import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.d
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
@@ -222,6 +223,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         builder: (_) => MaterialApp.router(
           debugShowCheckedModeBanner: false,
           routerConfig: goRouting,
+          theme: themeData(),
         ),
       ),
     );

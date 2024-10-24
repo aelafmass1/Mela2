@@ -3,15 +3,15 @@ import 'dart:convert';
 
 class BankRate {
   final String bankName;
-  final num buyingRate;
-  final num sellingRate;
+  final num? buyingRate;
+  final num? sellingRate;
   final String incrementPercentage;
   final String buyingRateChange;
   final String sellingRateChange;
   BankRate({
     required this.bankName,
-    required this.buyingRate,
-    required this.sellingRate,
+    this.buyingRate,
+    this.sellingRate,
     required this.incrementPercentage,
     required this.buyingRateChange,
     required this.sellingRateChange,
@@ -19,9 +19,8 @@ class BankRate {
 
   BankRate copyWith({
     String? bankName,
-    double? buyingRate,
-    double? sellingRate,
-    DateTime? timestamp,
+    num? buyingRate,
+    num? sellingRate,
     String? incrementPercentage,
     String? buyingRateChange,
     String? sellingRateChange,
@@ -50,8 +49,9 @@ class BankRate {
   factory BankRate.fromMap(Map<String, dynamic> map) {
     return BankRate(
       bankName: map['bank_name'] as String,
-      buyingRate: map['buying_rate'] as num,
-      sellingRate: map['selling_rate'] as num,
+      buyingRate: map['buying_rate'] != null ? map['buying_rate'] as num : null,
+      sellingRate:
+          map['selling_rate'] != null ? map['selling_rate'] as num : null,
       incrementPercentage: map['incrementPercentage'] as String,
       buyingRateChange: map['buyingRateChange'] as String,
       sellingRateChange: map['sellingRateChange'] as String,
