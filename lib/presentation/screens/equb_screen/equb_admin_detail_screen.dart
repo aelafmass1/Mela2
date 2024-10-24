@@ -13,7 +13,6 @@ import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/equb_cycle_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -47,7 +46,11 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   // Create a TabController to manage the TabBar and TabBarView
   late TabController _tabController;
+  late TabController _requestTabController;
+
   int activeIndex = -1;
+  int requestIndex = 0;
+  int round = -1;
 
   final numberOfMembersController = TextEditingController();
   final searchingController = TextEditingController();
@@ -59,9 +62,6 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   List<Contact> filteredContacts = [];
 
   bool isPermissionDenied = false;
-  bool isSearching = false;
-  bool isJoin = false;
-  int round = -1;
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -105,6 +105,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   @override
   void initState() {
     _tabController = TabController(length: 4, vsync: this);
+    _requestTabController = TabController(length: 2, vsync: this);
+
     final equbId = widget.equbDetailModel.id;
     context.read<EqubBloc>().add(
           FetchEqub(
@@ -1257,95 +1259,41 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     return SingleChildScrollView(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => setState(() {
-                    isJoin = false;
-                  }),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: isJoin ? ColorName.white : ColorName.primaryColor,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Text(
-                      "Leave Request",
-                      style: TextStyle(
-                        color:
-                            isJoin ? ColorName.primaryColor : ColorName.white,
-                      ),
-                    ),
+          ColoredBox(
+            color: const Color(0xFFF6F6F6),
+            child: TabBar(
+              padding: EdgeInsets.zero,
+              tabAlignment: TabAlignment.start,
+              isScrollable: true,
+              tabs: [
+                Tab(
+                  child: TextWidget(
+                    text: 'Join Requests',
+                    fontSize: 14,
+                    color: requestIndex == 0 ? ColorName.primaryColor : null,
                   ),
                 ),
-                const SizedBox(
-                  width: 15,
-                ),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    isJoin = true;
-                  }),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: isJoin ? ColorName.primaryColor : ColorName.white,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Text(
-                      "Join Request",
-                      style: TextStyle(
-                        color:
-                            isJoin ? ColorName.white : ColorName.primaryColor,
-                      ),
-                    ),
+                Tab(
+                  child: TextWidget(
+                    text: 'Leave Requests',
+                    fontSize: 14,
+                    color: requestIndex == 1 ? ColorName.primaryColor : null,
                   ),
                 ),
               ],
+              controller: _requestTabController,
+              onTap: (value) {
+                setState(() {
+                  requestIndex = value;
+                });
+              },
             ),
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          if (isJoin)
+          if (requestIndex == 0)
             const Column(
               children: [
                 SizedBox(height: 10),
                 Row(
-                  children: [
-                    TextWidget(
-                      text: 'All Requests (0)',
-                      fontSize: 16,
-                    ),
-                    Spacer(),
-                    TextWidget(
-                      text: 'Accept',
-                      fontSize: 13,
-                      color: ColorName.green,
-                    ),
-                    SizedBox(width: 16),
-                    TextWidget(
-                      text: 'Reject',
-                      fontSize: 13,
-                      color: ColorName.red,
-                    ),
-                    SizedBox(width: 5),
-                  ],
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-              ],
-            )
-          else
-            const Column(
-              children: [
-                const SizedBox(height: 10),
-                const Row(
                   children: [
                     TextWidget(
                       text: 'All Members (0)',
@@ -1366,7 +1314,37 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     SizedBox(width: 5),
                   ],
                 ),
-                const SizedBox(
+                SizedBox(
+                  height: 15,
+                ),
+              ],
+            )
+          else
+            const Column(
+              children: [
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    TextWidget(
+                      text: 'All Members (0)',
+                      fontSize: 16,
+                    ),
+                    Spacer(),
+                    TextWidget(
+                      text: 'Accept',
+                      fontSize: 13,
+                      color: ColorName.green,
+                    ),
+                    SizedBox(width: 16),
+                    TextWidget(
+                      text: 'Reject',
+                      fontSize: 13,
+                      color: ColorName.red,
+                    ),
+                    SizedBox(width: 5),
+                  ],
+                ),
+                SizedBox(
                   height: 15,
                 ),
               ],
