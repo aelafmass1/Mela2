@@ -17,6 +17,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<NavigateTo>(_onNavigateTo);
   }
   _onNavigateTo(NavigateTo event, Emitter emit) {
+    FocusManager.instance.primaryFocus?.unfocus();
     tabController.animateTo(event.index);
     emit(state.copyWith(
       index: event.index,

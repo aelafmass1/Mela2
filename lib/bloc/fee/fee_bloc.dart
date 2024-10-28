@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/data/models/fee_models.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'fee_event.dart';
@@ -40,7 +41,7 @@ class FeeBloc extends Bloc<FeeEvent, FeeState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(FeeFailed(reason: error.toString()));
+      emit(FeeFailed(reason: processException(error)));
     }
   }
 }

@@ -355,54 +355,59 @@ class _SentTabState extends State<SentTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        leadingWidth: index == 0 ? 400 : null,
-        centerTitle: true,
-        toolbarHeight: 60,
-        titleSpacing: 0,
-        title: index == 1 || index == 2
-            ? TextWidget(
-                text: index == 1 ? 'Select Recipient' : 'Payment Method',
-                fontSize: 20,
-                weight: FontWeight.w700,
-              )
-            : null,
-        leading: index == 0
-            ? const Padding(
-                padding: EdgeInsets.only(left: 15, top: 15),
-                child: TextWidget(
-                  text: 'Facilitate Payment',
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          leadingWidth: index == 0 ? 400 : null,
+          centerTitle: true,
+          toolbarHeight: 60,
+          titleSpacing: 0,
+          title: index == 1 || index == 2
+              ? TextWidget(
+                  text: index == 1 ? 'Select Recipient' : 'Payment Method',
                   fontSize: 20,
                   weight: FontWeight.w700,
-                ),
-              )
-            : index == 1 || index == 2
-                ? IconButton(
-                    onPressed: () {
-                      if (index == 1) {
-                        setState(() {
-                          index = 0;
-                        });
-                      } else {
-                        setState(() {
-                          index = 1;
-                        });
-                      }
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                  )
-                : null,
-      ),
-      body: Stack(
-        children: [
-          _buildExchangeRate(),
-          _buildRecipientSelection(),
-          _builPaymentMethodSelection(),
-        ],
+                )
+              : null,
+          leading: index == 0
+              ? const Padding(
+                  padding: EdgeInsets.only(left: 15, top: 15),
+                  child: TextWidget(
+                    text: 'Facilitate Payment',
+                    fontSize: 20,
+                    weight: FontWeight.w700,
+                  ),
+                )
+              : index == 1 || index == 2
+                  ? IconButton(
+                      onPressed: () {
+                        if (index == 1) {
+                          setState(() {
+                            index = 0;
+                          });
+                        } else {
+                          setState(() {
+                            index = 1;
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                    )
+                  : null,
+        ),
+        body: Stack(
+          children: [
+            _buildExchangeRate(),
+            _buildRecipientSelection(),
+            _builPaymentMethodSelection(),
+          ],
+        ),
       ),
     );
   }

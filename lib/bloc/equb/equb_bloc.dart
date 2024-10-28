@@ -8,6 +8,7 @@ import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../data/models/equb_detail_model.dart';
 
 part 'equb_event.dart';
@@ -62,7 +63,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+      emit(EqubFail(equbList: state.equbList, reason: processException(error)));
     }
   }
 
@@ -104,7 +105,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+      emit(EqubFail(equbList: state.equbList, reason: processException(error)));
     }
   }
 
@@ -148,7 +149,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+      emit(EqubFail(equbList: state.equbList, reason: processException(error)));
     }
   }
 
@@ -213,7 +214,7 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(EqubFail(equbList: state.equbList, reason: error.toString()));
+      emit(EqubFail(equbList: state.equbList, reason: processException(error)));
     }
   }
 }

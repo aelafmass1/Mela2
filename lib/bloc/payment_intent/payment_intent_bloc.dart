@@ -5,6 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'payment_intent_event.dart';
@@ -52,7 +53,7 @@ class PaymentIntentBloc extends Bloc<PaymentIntentEvent, PaymentIntentState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(PaymentIntentFail(reason: error.toString()));
+      emit(PaymentIntentFail(reason: processException(error)));
     }
   }
 }

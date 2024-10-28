@@ -39,18 +39,21 @@ class _EqubTabState extends State<EqubTab> {
     if (await FlutterContacts.requestPermission(readonly: true)) {
       List<Contact> contacts =
           await FlutterContacts.getContacts(withProperties: true);
+      if (mounted) {
+        setState(() {
+          _contacts = contacts;
+        });
+      }
+    }
+    if (mounted) {
       setState(() {
-        _contacts = contacts;
+        isDescoveryEqubFound = false;
       });
     }
-    setState(() {
-      isDescoveryEqubFound = false;
-    });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<EqubBloc>().add(FetchAllEqubs());
   }
@@ -309,8 +312,8 @@ class _EqubTabState extends State<EqubTab> {
                           children: [
                             for (var equb in invitedEqubs)
                               EqubCard(
-                                showJoinRequestButton: true,
-                                blurTexts: true,
+                                buttonText: 'Accept',
+                                blurTexts: false,
                                 equb: equb,
                                 onTab: () {
                                   context.goNamed(
@@ -331,7 +334,7 @@ class _EqubTabState extends State<EqubTab> {
                           ),
                         ),
                         EqubCard(
-                          showJoinRequestButton: true,
+                          buttonText: 'Join Request',
                           blurTexts: true,
                           onTab: () {
                             final detail = EqubDetailModel(

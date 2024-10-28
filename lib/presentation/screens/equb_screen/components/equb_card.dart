@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,14 +14,14 @@ import '../../../widgets/text_widget.dart';
 class EqubCard extends StatelessWidget {
   final EqubDetailModel equb;
   final Function()? onTab;
-  final bool showJoinRequestButton;
   final bool blurTexts;
   final bool onCarousel;
+  final String? buttonText;
   const EqubCard({
     super.key,
     required this.equb,
     this.onTab,
-    this.showJoinRequestButton = false,
+    this.buttonText,
     this.onCarousel = false,
     this.blurTexts = false,
   });
@@ -276,15 +274,15 @@ class EqubCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (showJoinRequestButton)
+                      if (buttonText != null)
                         SizedBox(
                           width: 83,
                           height: 30,
                           child: ButtonWidget(
                               horizontalPadding: 5,
                               verticalPadding: 0,
-                              child: const TextWidget(
-                                text: 'Request Join',
+                              child: TextWidget(
+                                text: buttonText ?? '',
                                 type: TextType.small,
                                 fontSize: 10,
                                 color: Colors.white,

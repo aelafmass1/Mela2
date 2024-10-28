@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/utils/process_exception.dart';
 import 'package:transaction_mobile_app/data/models/bank_model.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 
@@ -44,7 +45,7 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
         stackTrace: stackTrace,
       );
       log(error.toString());
-      emit(BanksFail(reason: error.toString()));
+      emit(BanksFail(reason: processException(error)));
     }
   }
 }

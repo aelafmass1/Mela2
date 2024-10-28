@@ -4,6 +4,7 @@ import 'package:transaction_mobile_app/data/models/curruncy_model.dart';
 import 'package:transaction_mobile_app/data/repository/currency_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'currency_event.dart';
@@ -40,7 +41,7 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(CurrencyFail(reason: error.toString()));
+      emit(CurrencyFail(reason: processException(error)));
     }
   }
 
@@ -72,7 +73,7 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(CurrencyFail(reason: error.toString()));
+      emit(CurrencyFail(reason: processException(error)));
     }
   }
 }

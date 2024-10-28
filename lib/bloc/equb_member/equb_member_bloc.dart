@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 import '../../data/models/contact_model.dart';
 import '../../data/models/equb_detail_model.dart';
@@ -46,7 +47,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
         stackTrace: stackTrace,
       );
     } catch (e) {
-      emit(EqubEditFail(reason: e.toString()));
+      emit(EqubEditFail(reason: processException(e)));
     }
   }
 
@@ -79,7 +80,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       }
     } catch (error) {
       log(error.toString());
-      emit(EqubManualWinnerFail(reason: error.toString()));
+      emit(EqubManualWinnerFail(reason: processException(error)));
     }
   }
 
@@ -111,7 +112,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       }
     } catch (error) {
       log(error.toString());
-      emit(EqubAutoWinnerFail(reason: error.toString()));
+      emit(EqubAutoWinnerFail(reason: processException(error)));
     }
   }
 
@@ -148,7 +149,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(EqubMemberInviteFail(reason: error.toString()));
+      emit(EqubMemberInviteFail(reason: processException(error)));
     }
   }
 }

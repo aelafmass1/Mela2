@@ -7,6 +7,7 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'transaction_event.dart';
@@ -68,7 +69,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
     } catch (error) {
       log(error.toString());
-      return emit(TransactionFail(reason: error.toString()));
+      return emit(TransactionFail(reason: processException(error)));
     }
   }
 }

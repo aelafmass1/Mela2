@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 
 part 'pincode_event.dart';
 part 'pincode_state.dart';
@@ -38,7 +39,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(PinFail(reason: error.toString()));
+      emit(PinFail(reason: processException(error)));
       log(error.toString());
     }
   }
@@ -61,7 +62,7 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(PinFail(reason: error.toString()));
+      emit(PinFail(reason: processException(error)));
       log(error.toString());
     }
   }

@@ -795,14 +795,15 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                               showDetailBottomSheet(context);
                             },
                             equbInviteeModel: EqubInviteeModel(
-                                id: member.userId ?? 0,
-                                phoneNumber: snapshot.data?.phoneNumber ??
-                                    member.username ??
-                                    '',
-                                status: member.status,
-                                name: snapshot.data?.displayName ??
-                                    member.username ??
-                                    ''),
+                              id: member.userId ?? 0,
+                              phoneNumber: snapshot.data?.phoneNumber ??
+                                  member.username ??
+                                  'PENDING USER',
+                              status: member.status,
+                              name: snapshot.data?.displayName ??
+                                  member.username ??
+                                  'PENDING USER',
+                            ),
                           );
                         })
               ],
@@ -1203,13 +1204,13 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                     phoneNumber: snapshot.data?.phoneNumber ??
                                         state.selectedEqub!.members[index]
                                             .username ??
-                                        '',
+                                        'PENDING USER',
                                     status: state
                                         .selectedEqub!.members[index].status,
                                     name: snapshot.data?.displayName ??
                                         state.selectedEqub!.members[index]
                                             .username ??
-                                        '',
+                                        'PENDING USER',
                                   ),
                                   index: index,
                                 );

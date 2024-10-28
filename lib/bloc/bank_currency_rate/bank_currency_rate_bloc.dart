@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/data/models/bank_rate.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
 
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'bank_currency_rate_event.dart';
@@ -36,13 +37,9 @@ class BankCurrencyRateBloc
       );
       log(error.toString());
       emit(BankCurrencyRateFail(reason: error.message));
-    } catch (error, stackTrace) {
-      await Sentry.captureException(
-        error,
-        stackTrace: stackTrace,
-      );
+    } catch (error) {
       log(error.toString());
-      emit(BankCurrencyRateFail(reason: error.toString()));
+      emit(BankCurrencyRateFail(reason: processException(error)));
     }
   }
 }

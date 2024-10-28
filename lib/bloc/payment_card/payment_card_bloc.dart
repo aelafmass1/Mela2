@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'payment_card_event.dart';
@@ -63,7 +64,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       log(error.toString());
       emit(
         PaymentCardFail(
-          reason: error.toString(),
+          reason: processException(error),
           paymentCards: state.paymentCards,
         ),
       );
@@ -106,7 +107,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       log(error.toString());
       emit(
         PaymentCardFail(
-          reason: error.toString(),
+          reason: processException(error),
           paymentCards: state.paymentCards,
         ),
       );

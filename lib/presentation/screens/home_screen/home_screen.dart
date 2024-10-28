@@ -233,6 +233,8 @@ class _HomeScreenState extends State<HomeScreen>
                 labelColor: Colors.white,
                 unselectedLabelColor: const Color(0xFFF0F0F3).withOpacity(0.5),
                 onTap: (value) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  // FocusScope.of(context).unfocus();
                   setState(() {
                     selectedIndex = value;
                   });

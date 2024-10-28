@@ -1,9 +1,11 @@
 import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
@@ -26,8 +28,10 @@ class EqubMemberDetailScreen extends StatefulWidget {
 
 class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
   bool isPending = false;
-  bool blurTexts = true;
+  bool blurTexts = false;
   List<Contact> _contacts = [];
+
+  int round = -1;
 
   Future<void> _fetchContacts() async {
     if (await FlutterContacts.requestPermission(readonly: true)) {
@@ -44,6 +48,11 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
 
   @override
   void initState() {
+    context.read<EqubBloc>().add(
+          FetchEqub(
+            equbId: widget.equbDetailModel.id,
+          ),
+        );
     _fetchContacts();
 
     super.initState();
@@ -51,89 +60,108 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorName.white,
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 70,
+    return BlocListener<EqubBloc, EqubState>(
+      listener: (context, state) {
+        if (state is EqubSuccess) {
+          if (state.selectedEqub != null) {
+            final cycle =
+                state.selectedEqub!.cycles.where((c) => c.status == 'CURRENT');
+            if (cycle.isNotEmpty) {
+              setState(() {
+                round = cycle.first.cycleNumber;
+              });
+            } else {
+              setState(() {
+                round = 1;
+              });
+            }
+          }
+        }
+      },
+      child: Scaffold(
         backgroundColor: ColorName.white,
-        surfaceTintColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            context.pop();
-          },
-          icon: const Icon(Icons.arrow_back),
+        appBar: AppBar(
+          elevation: 0,
+          toolbarHeight: 70,
+          backgroundColor: ColorName.white,
+          surfaceTintColor: Colors.white,
+          leading: IconButton(
+            onPressed: () {
+              context.pop();
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildTop(),
-                    _buildMembers(),
-                  ],
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildTop(),
+                      _buildMembers(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10, top: 10),
-              child: ButtonWidget(
-                  onPressed: isPending
-                      ? null
-                      : () async {
-                          final agreed = await showConsent(context);
-                          if (agreed) {
-                            setState(() {
-                              isPending = true;
-                            });
-                            showDialog(
-                                // ignore: use_build_context_synchronously
-                                context: context,
-                                builder: ((_) => Dialog(
-                                      child: Container(
-                                        width: 100.sw,
-                                        height: 55.sh,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10, top: 10),
+                child: ButtonWidget(
+                    onPressed: isPending
+                        ? null
+                        : () async {
+                            final agreed = await showConsent(context);
+                            if (agreed) {
+                              setState(() {
+                                isPending = true;
+                              });
+                              showDialog(
+                                  // ignore: use_build_context_synchronously
+                                  context: context,
+                                  builder: ((_) => Dialog(
+                                        child: Container(
+                                          width: 100.sw,
+                                          height: 55.sh,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(height: 40),
+                                              SvgPicture.asset(Assets
+                                                  .images.svgs.completeLogo),
+                                              const SizedBox(height: 20),
+                                              const TextWidget(
+                                                text: 'Request Sent',
+                                                color: ColorName.primaryColor,
+                                                fontSize: 24,
+                                              ),
+                                              const SizedBox(height: 20),
+                                              TextWidget(
+                                                text:
+                                                    'You have successfully sent a request to join “${widget.equbDetailModel.name}”',
+                                                color: ColorName.grey,
+                                                textAlign: TextAlign.center,
+                                                fontSize: 14,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        child: Column(
-                                          children: [
-                                            const SizedBox(height: 40),
-                                            SvgPicture.asset(Assets
-                                                .images.svgs.completeLogo),
-                                            const SizedBox(height: 20),
-                                            const TextWidget(
-                                              text: 'Request Sent',
-                                              color: ColorName.primaryColor,
-                                              fontSize: 24,
-                                            ),
-                                            const SizedBox(height: 20),
-                                            TextWidget(
-                                              text:
-                                                  'You have successfully sent a request to join “${widget.equbDetailModel.name}”',
-                                              color: ColorName.grey,
-                                              textAlign: TextAlign.center,
-                                              fontSize: 14,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )));
-                          }
-                        },
-                  child: TextWidget(
-                    text: isPending ? 'Pending' : 'Request to Join',
-                    type: TextType.small,
-                    color: Colors.white,
-                  )),
-            )
-          ],
+                                      )));
+                            }
+                          },
+                    child: TextWidget(
+                      text: isPending ? 'Pending' : 'Accept',
+                      type: TextType.small,
+                      color: Colors.white,
+                    )),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -223,15 +251,17 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                     ),
                     shape: BoxShape.circle,
                   ),
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextWidget(
-                        text: '01',
+                        text: round == -1
+                            ? '--'
+                            : round.toString().padLeft(2, '0'),
                         color: Colors.white,
                         fontSize: 13,
                       ),
-                      TextWidget(
+                      const TextWidget(
                         text: 'Rounds',
                         color: Colors.white,
                         fontSize: 6,
@@ -423,11 +453,13 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                   trailingWidget: const SizedBox.shrink(),
                   equbInviteeModel: EqubInviteeModel(
                       id: member.userId ?? 0,
-                      phoneNumber:
-                          snapshot.data?.phoneNumber ?? member.username ?? '',
+                      phoneNumber: snapshot.data?.phoneNumber ??
+                          member.username ??
+                          'PENDING USER',
                       status: member.status,
-                      name:
-                          snapshot.data?.displayName ?? member.username ?? ''),
+                      name: snapshot.data?.displayName ??
+                          member.username ??
+                          'PENDING USER'),
                 );
               })
       ],

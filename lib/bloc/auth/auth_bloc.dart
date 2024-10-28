@@ -9,6 +9,7 @@ import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 
+import '../../core/utils/process_exception.dart';
 import '../../data/repository/auth_repository.dart';
 
 part 'auth_event.dart';
@@ -61,7 +62,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(CheckEmailExistsFail(reason: error.toString()));
+      emit(CheckEmailExistsFail(reason: processException(error)));
     }
   }
 
@@ -101,7 +102,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(SendOTPFail(reason: error.toString()));
+      emit(SendOTPFail(reason: processException(error)));
     }
   }
 
@@ -142,7 +143,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(SendOTPFail(reason: error.toString()));
+      emit(SendOTPFail(reason: processException(error)));
     }
   }
 
@@ -183,7 +184,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(ResetFail(reason: error.toString()));
+      emit(ResetFail(reason: processException(error)));
     }
   }
 
@@ -224,7 +225,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(ResetFail(reason: error.toString()));
+      emit(ResetFail(reason: processException(error)));
     }
   }
 
@@ -263,7 +264,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(LoginWithPincodeFail(reason: error.toString()));
+      emit(LoginWithPincodeFail(reason: processException(error)));
     }
   }
 
@@ -304,7 +305,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(OTPVerificationFail(reason: error.toString()));
+      emit(OTPVerificationFail(reason: processException(error)));
     }
   }
 
@@ -329,7 +330,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(DeleteUserSucess());
       }
     } catch (error) {
-      emit(AuthFail(reason: error.toString()));
+      emit(AuthFail(reason: processException(error)));
     }
   }
 
@@ -368,7 +369,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(LoginUserFail(reason: error.toString()));
+      emit(LoginUserFail(reason: processException(error)));
     }
   }
 
@@ -405,7 +406,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
-      emit(RegisterUserFail(reason: error.toString()));
+      emit(RegisterUserFail(reason: processException(error)));
     }
   }
 
@@ -439,7 +440,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(SendOTPFail(reason: error.toString()));
+      emit(SendOTPFail(reason: processException(error)));
     }
   }
 }

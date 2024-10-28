@@ -5,6 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'plaid_event.dart';
@@ -37,7 +38,7 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(PlaidPublicTokenFail(reason: error.toString()));
+      emit(PlaidPublicTokenFail(reason: processException(error)));
     }
   }
 
@@ -61,7 +62,7 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(PlaidLinkTokenFail(reason: error.toString()));
+      emit(PlaidLinkTokenFail(reason: processException(error)));
     }
   }
 }

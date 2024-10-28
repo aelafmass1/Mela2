@@ -27,8 +27,10 @@ Future<ContactEqubMember> getMemberContactInfo({
     return ContactEqubMember(displayName: 'PENDING USER', phoneNumber: '---');
   }
 
-  final user =
-      contacts.where((c) => c.phones.first.number.endsWith(phoneN)).toList();
+  final user = contacts
+      .where((c) =>
+          c.phones.first.number.replaceAll(RegExp(r'\s+'), '').endsWith(phoneN))
+      .toList();
   if (user.isNotEmpty) {
     final phoneNumber = user.first.phones.first.number;
     final userName = user.first.displayName;

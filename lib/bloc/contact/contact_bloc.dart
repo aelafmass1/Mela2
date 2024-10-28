@@ -9,6 +9,7 @@ import 'package:transaction_mobile_app/data/models/contact_status_model.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 
 part 'contact_event.dart';
 part 'contact_state.dart';
@@ -56,7 +57,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(ContactFail(message: error.toString()));
+      emit(ContactFail(message: processException(error)));
     }
   }
 }

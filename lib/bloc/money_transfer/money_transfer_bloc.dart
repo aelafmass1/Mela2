@@ -6,6 +6,7 @@ import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/repository/money_transfer_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
+import '../../core/utils/process_exception.dart';
 import '../../core/utils/settings.dart';
 
 part 'money_transfer_event.dart';
@@ -44,7 +45,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(MoneyTransferFail(reason: error.toString()));
+      emit(MoneyTransferFail(reason: processException(error)));
     }
   }
 }
