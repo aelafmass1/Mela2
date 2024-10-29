@@ -28,6 +28,11 @@ class _AccountTabState extends State<AccountTab> {
   String? phoneNumber;
   @override
   void initState() {
+    setUpScreenData();
+    super.initState();
+  }
+
+  setUpScreenData() async {
     getDisplayName().then((value) {
       setState(() {
         displayName = value;
@@ -45,7 +50,6 @@ class _AccountTabState extends State<AccountTab> {
         });
       });
     });
-    super.initState();
   }
 
   @override
@@ -156,8 +160,12 @@ class _AccountTabState extends State<AccountTab> {
                         Column(
                           children: [
                             InkWell(
-                              onTap: () {
-                                context.pushNamed(RouteName.profileEdit);
+                              onTap: () async {
+                                final res = await context
+                                    .pushNamed(RouteName.profileEdit);
+                                if (res == true) {
+                                  setUpScreenData();
+                                }
                               },
                               child: Container(
                                 width: 36,
@@ -226,8 +234,12 @@ class _AccountTabState extends State<AccountTab> {
                       _buildTab(
                         icon: Icons.person_outline,
                         title: 'Personal Info',
-                        onTab: () {
-                          context.pushNamed(RouteName.profileEdit);
+                        onTab: () async {
+                          final res =
+                              await context.pushNamed(RouteName.profileEdit);
+                          if (res == true) {
+                            setUpScreenData();
+                          }
                         },
                       ),
                       _buildTab(

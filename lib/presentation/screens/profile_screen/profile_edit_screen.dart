@@ -43,6 +43,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         lastNameController.text = names.last;
       }
     });
+    getUserData().then((user) {
+      emailNameController.text = user.email ?? '';
+    });
 
     super.initState();
   }
@@ -156,29 +159,40 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           size: 17,
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 20, bottom: 5),
-                        child: TextWidget(
-                          text: 'Email',
-                          fontSize: 12,
-                        ),
-                      ),
-                      TextFieldWidget(
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return 'email is empty';
-                          } else if (RegExp(
-                                      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                                  .hasMatch(text) ==
-                              false) {
-                            return 'invalid email';
-                          }
-                          return null;
-                        },
-                        controller: emailNameController,
-                        suffix: const Icon(
-                          Icons.edit_outlined,
-                          size: 17,
+
+                      AbsorbPointer(
+                        child: Opacity(
+                          opacity: 0.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 20, bottom: 5),
+                                child: TextWidget(
+                                  text: 'Email',
+                                  fontSize: 12,
+                                ),
+                              ),
+                              TextFieldWidget(
+                                validator: (text) {
+                                  if (text!.isEmpty) {
+                                    return 'email is empty';
+                                  } else if (RegExp(
+                                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                                          .hasMatch(text) ==
+                                      false) {
+                                    return 'invalid email';
+                                  }
+                                  return null;
+                                },
+                                controller: emailNameController,
+                                suffix: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 17,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 25),
@@ -212,7 +226,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     showSnackbar(context,
                         title: 'Error', description: state.reason);
                   } else if (state is UpdateSuccess) {
-                    context.pop();
+                    context.pop(true);
                   }
                 }
               },
@@ -229,9 +243,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     if (_formKey.currentState!.validate()) {
                       context.read<AuthBloc>().add(
                             UpdateUser(
-                                fullName:
-                                    '${firstNameController.text} ${lastNameController.text}',
-                                email: emailNameController.text),
+                              firstName: firstNameController.text,
+                              lastName: lastNameController.text,
+                              email: emailNameController.text,
+                            ),
                           );
                     }
                   },
