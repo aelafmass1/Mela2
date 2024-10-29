@@ -34,10 +34,15 @@ final class LoginUser extends AuthEvent {
 final class DeleteUser extends AuthEvent {}
 
 final class UpdateUser extends AuthEvent {
-  final String fullName;
+  final String firstName;
+  final String lastName;
   final String email;
 
-  UpdateUser({required this.fullName, required this.email});
+  UpdateUser({
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+  });
 }
 
 final class VerfiyOTP extends AuthEvent {

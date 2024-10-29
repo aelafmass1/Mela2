@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../data/models/user_model.dart';
 
 const _isFirstTimeKey = 'isFirstTime';
 const _isContactPermissonAllowed = '_isContactPermissonAllowed';
@@ -9,6 +13,7 @@ const _imageUrl = 'image_url';
 const _phoneNumber = 'phone_number';
 const _loggedIn = 'is_logged_in';
 const _countryCode = 'country_code';
+const _userData = 'user_data';
 
 const storage = FlutterSecureStorage();
 
@@ -110,4 +115,20 @@ Future<int?> getCountryCode() async {
 Future<void> deleteCountryCode() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   await preferences.remove(_countryCode);
+}
+
+Future<void> storeUserData(UserModel user) async {
+  final userData = jsonEncode(user.toMap());
+  // store display name
+  storeDisplayName("${user.firstName ?? "-"} ${user.lastName ?? "-"}");
+
+  await storage.write(key: _userData, value: userData);
+}
+
+Future<UserModel> getUserData() async {
+  final userData = await storage.read(key: _userData);
+  if (userData != null) {
+    return UserModel.fromMap(jsonDecode(userData));
+  }
+  return UserModel();
 }

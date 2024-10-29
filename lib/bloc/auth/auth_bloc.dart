@@ -309,12 +309,51 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  _onUpdateUser(UpdateUser event, Emitter emit) async {
+  /// Updates a user's profile information with the provided first name, last name, and email.
+  ///
+  /// This method handles updating a user's profile details. It first checks if the `UpdateLoading`
+  /// state is not already set, and if not, emits the `UpdateLoading` state. It then constructs an
+  /// update data map containing the user's new first name, last name and email address.
+  ///
+  /// The method calls `repository.updateProfile()` with the update data. If the response contains
+  /// an 'error' key, it emits the `UpdateFail` state with the error reason. Otherwise, it emits
+  /// the `UpdateSuccess` state to indicate the profile was updated successfully.
+  ///
+  /// If a [ServerException] occurs, it emits `UpdateFail` with the error message and logs the
+  /// error to Sentry. For any other exceptions, it logs the error and emits `UpdateFail` with
+  /// the processed exception message.
+  Future<void> _onUpdateUser(UpdateUser event, Emitter emit) async {
     try {
-      //
+      if (state is! UpdateLoading) {
+        emit(UpdateLoading());
+
+        final updateData = {
+          'firstName': event.firstName,
+          'lastName': event.lastName,
+          'email': event.email,
+        };
+
+        final res = await repository.updateProfile(
+          updateData: updateData,
+        );
+
+        if (res.containsKey('error')) {
+          return emit(UpdateFail(reason: res['error']));
+        }
+
+        // Update stored display name if needed
+
+        emit(UpdateSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(UpdateFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
-      emit(UpdateFail(reason: error.toString()));
+      emit(UpdateFail(reason: processException(error)));
     }
   }
 

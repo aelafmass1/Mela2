@@ -1,9 +1,12 @@
 import 'dart:convert';
-
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:http_interceptor/http_interceptor.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 
 class AuthRepository {
   InterceptedClient client;
@@ -125,6 +128,17 @@ class AuthRepository {
 
     final data = jsonDecode(res.body) as Map;
     if (res.statusCode == 200 || res.statusCode == 201) {
+      try {
+        final result = await fetchUserData();
+        await _storeUserData(result);
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error fetching user data: $e');
+          await Sentry.captureException(e);
+        }
+        return processErrorResponse(data);
+      }
+
       return data;
     }
     return processErrorResponse(data);
@@ -163,6 +177,17 @@ class AuthRepository {
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
+      try {
+        final result = await fetchUserData();
+        await _storeUserData(result);
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error fetching user data: $e');
+          await Sentry.captureException(e);
+        }
+        return processErrorResponse(data);
+      }
+
       return data;
     }
     return processErrorResponse(data);
@@ -472,5 +497,87 @@ class AuthRepository {
       return data;
     }
     return processErrorResponse(data);
+  }
+
+  Future<Map> updateProfile({
+    required Map<String, dynamic> updateData,
+  }) async {
+    final userId = await getUserData();
+    final id = userId.id;
+    final accessToken = await getToken();
+    final res = await client.put(
+      Uri.parse('$baseUrl/user/me/$id'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(updateData),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      try {
+        final result = await fetchUserData();
+        await _storeUserData(result);
+      } on Exception catch (e) {
+        if (kDebugMode) {
+          print('Error fetching user data: $e');
+          await Sentry.captureException(e);
+        }
+        return processErrorResponse(data);
+      }
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  /// Retrieves the current user's profile information.
+  ///
+  /// This method sends a GET request to the '/user/me' endpoint to fetch the authenticated
+  /// user's profile data. The request must include an authorization token which is
+  /// automatically retrieved from secure storage.
+  ///
+  /// If the request is successful (status code 200 or 201), returns a [UserModel]
+  /// constructed from the response data.
+  /// If the request fails, throws an error message processed by [processErrorResponse].
+  ///
+  /// Returns:
+  /// A [Future<UserModel>] containing the user's profile data.
+  ///
+  /// Throws:
+  /// An error message if the request fails or returns an invalid response.
+  Future<UserModel> fetchUserData() async {
+    final accessToken = await getToken();
+    final res = await client.get(
+      Uri.parse('$baseUrl/user/me'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return UserModel.fromMap(data);
+    }
+    throw processErrorResponse(data);
+  }
+
+  /// Stores the user data in secure storage.
+  ///
+  /// This private helper method takes a [UserModel] and stores it using the [storeUserData]
+  /// utility function. If an error occurs during storage, the exception is re-thrown to be
+  /// handled by the calling method.
+  ///
+  /// Parameters:
+  /// - [user]: The [UserModel] containing the user data to be stored
+  ///
+  /// Throws:
+  /// Any exception that occurs during the storage operation
+  Future<void> _storeUserData(UserModel user) async {
+    try {
+      await storeUserData(user);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
