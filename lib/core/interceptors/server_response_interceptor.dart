@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
@@ -21,6 +22,7 @@ class ServerResponseInterceptor implements InterceptorContract {
   ];
   @override
   FutureOr<BaseRequest> interceptRequest({required BaseRequest request}) {
+    log(request.headers.toString());
     return request;
   }
 
@@ -28,6 +30,7 @@ class ServerResponseInterceptor implements InterceptorContract {
   FutureOr<BaseResponse> interceptResponse(
       {required BaseResponse response}) async {
     if (_serverErrorStatusCodes.contains(response.statusCode)) {
+      log(response.request.toString());
       throw ServerException('Oops! Something went wrong.', response.statusCode);
     }
     return response;

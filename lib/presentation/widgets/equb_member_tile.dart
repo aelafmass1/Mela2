@@ -74,18 +74,20 @@ class EqubMemberTile extends StatelessWidget {
                 equbInviteeModel.status.isEmpty ||
                         equbInviteeModel.status == 'NOT_INVITED'
                     ? _buildInviteButton(context)
-                    : TextWidget(
-                        text: equbInviteeModel.status == 'INVITED'
-                            ? 'Pending'
-                            : equbInviteeModel.status,
-                        type: TextType.small,
-                        fontSize: 14,
-                        color: equbInviteeModel.status == 'Pending' ||
-                                equbInviteeModel.status == 'INVITED'
-                            ? Colors.orange
-                            : null,
-                        weight: FontWeight.w500,
-                      ),
+                    : equbInviteeModel.status == 'ACTIVE'
+                        ? _buildActiveWidget()
+                        : TextWidget(
+                            text: equbInviteeModel.status == 'INVITED'
+                                ? 'Pending'
+                                : equbInviteeModel.status,
+                            type: TextType.small,
+                            fontSize: 14,
+                            color: equbInviteeModel.status == 'Pending' ||
+                                    equbInviteeModel.status == 'INVITED'
+                                ? Colors.orange
+                                : null,
+                            weight: FontWeight.w500,
+                          ),
                 Visibility(
                   visible: onOptionPressed != null,
                   child: IconButton(
@@ -177,6 +179,27 @@ class EqubMemberTile extends StatelessWidget {
           fontSize: 12,
         ),
       ),
+    );
+  }
+
+  _buildActiveWidget() {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: const BoxDecoration(
+            color: ColorName.primaryColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 10),
+        const TextWidget(
+          text: 'Joined',
+          fontSize: 12,
+          color: ColorName.primaryColor,
+        )
+      ],
     );
   }
 }

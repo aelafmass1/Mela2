@@ -89,11 +89,19 @@ class _SentTabState extends State<SentTab> {
   StreamSubscription<LinkSuccess>? _streamSuccess;
   String? publicToken;
 
+  final _searchFormKey = GlobalKey<FormFieldState>();
+
   @override
   void dispose() {
     _streamEvent?.cancel();
     _streamExit?.cancel();
     _streamSuccess?.cancel();
+    searchContactController.dispose();
+    receiverName.dispose();
+    usdController.dispose();
+    etbController.dispose();
+    bankAcocuntController.dispose();
+    phoneNumberController.dispose();
     super.dispose();
   }
 
@@ -134,16 +142,14 @@ class _SentTabState extends State<SentTab> {
   /// If permission has been asked before and denied, it sets [isPermissionDenied] to true.
   /// If permission has been granted, it fetches contacts and updates the [contacts] list.
   Future<void> _fetchContacts() async {
-    if (await isPermissionAsked() == false) {
-      // Permission has not been asked before
-      if (await FlutterContacts.requestPermission(readonly: true)) {
-        List<Contact> c =
-            await FlutterContacts.getContacts(withProperties: true);
-        setState(() {
-          contacts = c;
-        });
-      }
-      checkContactPermission();
+    // if (await isPermissionAsked() == false) {
+    // Permission has not been asked before
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> c = await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        contacts = c;
+        isPermissionDenied = false;
+      });
     } else {
       // Permission has been asked before
       if (contacts.isEmpty) {
@@ -152,12 +158,12 @@ class _SentTabState extends State<SentTab> {
           isPermissionDenied = true;
         });
       }
+      checkContactPermission();
     }
   }
 
   /// Checks the status of the contact permission and handles different scenarios.
   ///
-  /// If permission is granted, logs a message.
   /// If permission is denied and it's the first time asking, navigates to a permission request screen.
   /// If permission is denied and it's not the first time asking, sets [isPermissionDenied] to true.
   /// If permission is permanently denied, sets [isPermissionDenied] to true and logs a message.
@@ -165,9 +171,7 @@ class _SentTabState extends State<SentTab> {
     // Check if the contact permission is already granted
     PermissionStatus status = await Permission.contacts.status;
 
-    if (status.isGranted) {
-      log("Contact permission granted.");
-    } else if (status.isDenied) {
+    if (status.isDenied) {
       if (await isPermissionAsked() == false) {
         // Permission denied for the first time, navigate to permission request screen
         changePermissionAskedState(true);
@@ -1026,6 +1030,7 @@ class _SentTabState extends State<SentTab> {
                       },
                       keyboardType: TextInputType.phone,
                       inputFormatters: <TextInputFormatter>[
+                        LengthLimitingTextInputFormatter(20),
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^[0-9]*[+]?[0-9]*$')),
                       ],
@@ -1039,6 +1044,7 @@ class _SentTabState extends State<SentTab> {
                           setState(() {
                             showBorder = false;
                           });
+                          _searchFormKey.currentState?.validate();
                         }
                       },
                       height: contactListHeight,
@@ -1052,9 +1058,10 @@ class _SentTabState extends State<SentTab> {
                       child: Column(
                         children: [
                           TextFormField(
+                            key: _searchFormKey,
                             validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'receiver is selected';
+                              if (value?.isEmpty == true || showBorder) {
+                                return 'receiver is not selected';
                               }
                               return null;
                             },
@@ -1328,10 +1335,13 @@ class _SentTabState extends State<SentTab> {
                       }
                       return null;
                     },
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 17),
-                      hintText: 'Select recipient Bank account',
+                      hintText: 'Enter recipient Full Name',
                       hintStyle: const TextStyle(
                         fontSize: 13,
                       ),
@@ -1359,8 +1369,7 @@ class _SentTabState extends State<SentTab> {
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^[0-9]*[]?[0-9]*$')),
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                     ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(

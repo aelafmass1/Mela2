@@ -1,6 +1,7 @@
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
-import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
+
+import '../../data/models/equb_user_model.dart';
 
 /// Retrieves a [ContactEqubMember] based on the provided phone number and list of contacts.
 ///

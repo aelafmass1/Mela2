@@ -69,3 +69,77 @@ final class EqubEditFail extends EqubMemberState {
 }
 
 final class EqubEditSuccess extends EqubMemberState {}
+
+final class EqubReminderLoading extends EqubMemberState {}
+
+final class EqubReminderFail extends EqubMemberState {
+  final String reason;
+
+  EqubReminderFail({required this.reason});
+}
+
+final class EqubReminderSuccess extends EqubMemberState {}
+
+final class EqubReminderToAllLoading extends EqubMemberState {}
+
+final class EqubReminderToAllFail extends EqubMemberState {
+  final String reason;
+
+  EqubReminderToAllFail({required this.reason});
+}
+
+final class EqubReminderToAllSuccess extends EqubMemberState {}
+
+final class FetchJoinRequestLoading extends EqubMemberState {}
+
+final class FetchJoinRequestFail extends EqubMemberState {
+  final String reason;
+
+  FetchJoinRequestFail({required this.reason});
+}
+
+final class FetchJoinRequestSuccess extends EqubMemberState {
+  final List<EqubRequestModel> joinRequests;
+
+  FetchJoinRequestSuccess({required this.joinRequests});
+}
+
+final class SendEqubRequestLoading extends EqubMemberState {}
+
+final class SendEqubRequestFail extends EqubMemberState {
+  final String reason;
+
+  SendEqubRequestFail({required this.reason});
+}
+
+final class SendEqubRequestSuccess extends EqubMemberState {}
+
+final class ApproveJoinRequestLoading extends EqubMemberState {}
+
+final class ApproveJoinRequestFail extends EqubMemberState {
+  final String reason;
+
+  ApproveJoinRequestFail({required this.reason});
+}
+
+final class ApproveJoinRequestSuccess extends EqubMemberState {}
+
+final class SetMemberAsPaidLoading extends EqubMemberState {}
+
+final class SetMemberAsPaidFail extends EqubMemberState {
+  final String reason;
+
+  SetMemberAsPaidFail({required this.reason});
+}
+
+final class SetMemberAsPaidSuccess extends EqubMemberState {}
+
+final class AssignAdminLoading extends EqubMemberState {}
+
+final class AssignAdminFail extends EqubMemberState {
+  final String reason;
+
+  AssignAdminFail({required this.reason});
+}
+
+final class AssignAdminSuccess extends EqubMemberState {}

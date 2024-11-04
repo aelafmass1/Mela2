@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/data/models/equb_request_model.dart';
 
 import '../../core/exceptions/server_exception.dart';
 import '../../core/utils/process_exception.dart';
@@ -20,6 +21,225 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
     on<EqubAssignWinner>(_onEqubManualAssignWinner);
     on<EqubAutoPickWinner>(_onEqubAutoPickWinner);
     on<EditEqub>(_onEqubEdit);
+    on<SendReminder>(_onSendReminder);
+    on<SendReminderToAll>(_onSendReminderToAll);
+    on<FetchEqubJoinRequests>(_onFetchEqubJoinRequests);
+    on<AcceptJoinRequest>(_onAcceptJoinRequest);
+    on<ApproveJoinRequest>(_onApproveJoinRequest);
+    on<SetMemberAsPaid>(_onSetMemberAsPaid);
+    on<AssignAdmin>(_onAssignAdmin);
+  }
+
+  _onAssignAdmin(AssignAdmin event, Emitter emit) async {
+    try {
+      if (state is! AssignAdminLoading) {
+        emit(AssignAdminLoading());
+        final accessToken = await getToken();
+        final res = await repository.assignAdmin(
+          accessToken: accessToken ?? '',
+          equbId: event.equbId,
+          memberId: event.memberId,
+        );
+        if (res.containsKey('error')) {
+          return emit(AssignAdminFail(reason: res['error']));
+        }
+        emit(AssignAdminSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(AssignAdminFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(AssignAdminFail(reason: processException(e)));
+    }
+  }
+
+  _onSetMemberAsPaid(SetMemberAsPaid event, Emitter emit) async {
+    try {
+      if (state is! SetMemberAsPaidLoading) {
+        emit(SetMemberAsPaidLoading());
+        final accessToken = await getToken();
+        final res = await repository.setMemberAsPaid(
+          accessToken: accessToken ?? '',
+          cycleId: event.cycleId,
+          memberId: event.memberId,
+        );
+        if (res.containsKey('error')) {
+          return emit(SetMemberAsPaidFail(reason: res['error']));
+        }
+        emit(SetMemberAsPaidSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(SetMemberAsPaidFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(SetMemberAsPaidFail(reason: processException(e)));
+    }
+  }
+
+  /// Handles the logic for approving a join request to an Equb.
+  ///
+  /// This method is called when the `ApproveJoinRequest` event is emitted. It first checks if the current state is not `ApproveJoinRequestLoading`,
+  /// and if so, it emits the `ApproveJoinRequestLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to approve the join request for the specified request ID. If the request is approved successfully, it emits the `ApproveJoinRequestSuccess` state.
+  /// If there is an error, it emits the `ApproveJoinRequestFail` state with the error reason.
+  _onApproveJoinRequest(ApproveJoinRequest event, Emitter emit) async {
+    try {
+      if (state is! ApproveJoinRequestLoading) {
+        emit(ApproveJoinRequestLoading());
+        final accessToken = await getToken();
+        final res = await repository.approveJoinRequest(
+          accessToken: accessToken ?? '',
+          requestId: event.requestId,
+        );
+        if (res.containsKey('error')) {
+          return emit(ApproveJoinRequestFail(reason: res['error']));
+        }
+        emit(ApproveJoinRequestSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(ApproveJoinRequestFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(ApproveJoinRequestFail(reason: processException(e)));
+    }
+  }
+
+  /// Handles the logic for accepting a join request to an Equb.
+  ///
+  /// This method is called when the `AcceptJoinRequest` event is emitted. It first checks if the current state is not `SendEqubRequestLoading`,
+  /// and if so, it emits the `SendEqubRequestLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to accept the join request for the specified Equb. If the request is accepted successfully, it emits the `SendEqubRequestSuccess` state.
+  /// If there is an error, it emits the `SendEqubRequestFail` state with the error reason.
+  _onAcceptJoinRequest(AcceptJoinRequest event, Emitter emit) async {
+    try {
+      if (state is! SendEqubRequestLoading) {
+        emit(SendEqubRequestLoading());
+        final accessToken = await getToken();
+        final res = await repository.acceptJoinRequest(
+          accessToken: accessToken ?? '',
+          equbId: event.equbId,
+        );
+        if (res.containsKey('error')) {
+          return emit(SendEqubRequestFail(reason: res['error']));
+        }
+        emit(SendEqubRequestSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(SendEqubRequestFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(SendEqubRequestFail(reason: processException(e)));
+    }
+  }
+
+  /// Handles the logic for fetching Equb join requests.
+  ///
+  /// This method is called when the `FetchEqubJoinRequests` event is emitted. It first checks if the current state is not `FetchJoinRequestLoading`,
+  /// and if so, it emits the `FetchJoinRequestLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to fetch the join requests for the specified Equb. If the requests are fetched successfully, it emits the `FetchJoinRequestSuccess` state
+  /// with the list of join requests. If there is an error, it emits the `FetchJoinRequestFail` state with the error reason.
+  _onFetchEqubJoinRequests(FetchEqubJoinRequests event, Emitter emit) async {
+    try {
+      if (state is! FetchJoinRequestLoading) {
+        emit(FetchJoinRequestLoading());
+        final accessToken = await getToken();
+        final res = await repository.fetchJoinRequests(
+          accessToken: accessToken ?? '',
+          equbId: event.equbId,
+        );
+        final data = res['successResponse'] as List;
+        if (res.containsKey('error')) {
+          return emit(FetchJoinRequestFail(reason: res['error']));
+        }
+        emit(
+          FetchJoinRequestSuccess(
+            joinRequests: data.map((r) => EqubRequestModel.fromMap(r)).toList(),
+          ),
+        );
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(FetchJoinRequestFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(FetchJoinRequestFail(reason: processException(e)));
+    }
+  }
+
+  /// Handles the logic for sending a reminder to all Equb members.
+  ///
+  /// This method is called when the `SendReminderToAll` event is emitted. It first checks if the current state is not `EqubReminderToAllLoading`,
+  /// and if so, it emits the `EqubReminderToAllLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to send a reminder to all Equb members. If the reminder is sent successfully, it emits the `EqubReminderToAllSuccess` state.
+  /// If there is an error, it emits the `EqubReminderToAllFail` state with the error reason.
+  _onSendReminderToAll(SendReminderToAll event, Emitter emit) async {
+    try {
+      if (state is! EqubReminderToAllLoading) {
+        emit(EqubReminderToAllLoading());
+        final accessToken = await getToken();
+        final res = await repository.sendReminderToAll(
+          accessToken: accessToken ?? '',
+          cycleId: event.cycleId,
+        );
+        if (res.containsKey('error')) {
+          return emit(EqubReminderToAllFail(reason: res['error']));
+        }
+        emit(EqubReminderToAllSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubReminderToAllFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(EqubReminderToAllFail(reason: processException(e)));
+    }
+  }
+
+  /// Handles the logic for sending a reminder to a specific Equb member.
+  ///
+  /// This method is called when the `SendReminder` event is emitted. It first checks if the current state is not `EqubReminderLoading`,
+  /// and if so, it emits the `EqubReminderLoading` state. It then retrieves the access token, and uses the `EqubRepository`
+  /// to send a reminder to the specified Equb member. If the reminder is sent successfully, it emits the `EqubReminderSuccess` state.
+  /// If there is an error, it emits the `EqubReminderFail` state with the error reason.
+  _onSendReminder(SendReminder event, Emitter emit) async {
+    try {
+      if (state is! EqubReminderLoading) {
+        emit(EqubReminderLoading());
+        final accessToken = await getToken();
+        final res = await repository.sendReminder(
+          accessToken: accessToken ?? '',
+          memberId: event.memberId,
+        );
+        if (res.containsKey('error')) {
+          return emit(EqubReminderFail(reason: res['error']));
+        }
+        emit(EqubReminderSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubReminderFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (e) {
+      emit(EqubReminderFail(reason: processException(e)));
+    }
   }
 
   /// Handles the logic for editing an Equb.
@@ -110,6 +330,12 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
           phoneNumber: res.containsKey('phoneNumber') ? res['phoneNumber'] : '',
         ));
       }
+    } on ServerException catch (error, stackTrace) {
+      emit(EqubAutoWinnerFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
     } catch (error) {
       log(error.toString());
       emit(EqubAutoWinnerFail(reason: processException(error)));

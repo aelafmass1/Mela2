@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_request_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class EqubRequestsCard extends StatefulWidget {
-  final int index;
-  final Function onAccept;
+  final EqubRequestModel equbRequestModel;
+  final Function() onSuccess;
 
   const EqubRequestsCard({
-    required this.index,
-    required this.onAccept,
+    required this.equbRequestModel,
+    required this.onSuccess,
     super.key,
   });
 
@@ -30,8 +35,12 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
               height: 50,
               color: ColorName.primaryColor,
               alignment: Alignment.center,
-              child: const TextWidget(
-                text: "",
+              child: TextWidget(
+                text: widget.equbRequestModel.user.firstName != null &&
+                        widget.equbRequestModel.user.firstName?.isNotEmpty ==
+                            true
+                    ? widget.equbRequestModel.user.firstName![0] ?? ''
+                    : '',
                 color: Colors.white,
               ),
             ),
@@ -44,15 +53,18 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextWidget(
-                  text: "Member Name ${widget.index}",
+                  text:
+                      "${widget.equbRequestModel.user.firstName} ${widget.equbRequestModel.user.lastName}",
                   fontSize: 16,
                   weight: FontWeight.w400,
                 ),
                 const SizedBox(
                   height: 5,
                 ),
-                const TextWidget(
-                  text: "+251912345678",
+                TextWidget(
+                  text: widget.equbRequestModel.user.countryCode == null
+                      ? widget.equbRequestModel.status
+                      : '+${widget.equbRequestModel.user.countryCode}${widget.equbRequestModel.user.phoneNumber}',
                   type: TextType.small,
                   fontSize: 14,
                   weight: FontWeight.w300,
@@ -63,66 +75,61 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
           const SizedBox(
             width: 15,
           ),
-          // Checkbox(
-          //   value: true,
-          //   checkColor: ColorName.green,
-          //   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-          //     return ColorName.green.shade100;
-          //   }),
-          //   side: BorderSide.none,
-          //   onChanged: (value) {
-          //     // setState(() {
-          //     //   isActive = true;
-          //     //   isInactive = false;
-          //     // });
-          //     // Call the onAccept function when this checkbox is clicked
-          //     widget.onAccept(widget.index);
-          //   },
-          // ),
-          // Custom Accept "X" checkbox
-          GestureDetector(
-            onTap: () {
-              widget.onAccept(widget.index); // Call the onAccept function
+          BlocConsumer<EqubMemberBloc, EqubMemberState>(
+            listener: (context, state) {
+              if (state is ApproveJoinRequestFail) {
+                showSnackbar(
+                  context,
+                  description: state.reason,
+                );
+              } else if (state is ApproveJoinRequestSuccess) {
+                showSnackbar(
+                  context,
+                  description:
+                      'Join request approved and user added as member.',
+                );
+                widget.onSuccess();
+              }
             },
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
+            builder: (context, state) {
+              if (state is ApproveJoinRequestLoading) {
+                return const LoadingWidget(
+                  size: 20,
                   color: ColorName.green,
-                  width: 2.0,
+                );
+              }
+              return InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  context.read<EqubMemberBloc>().add(
+                        ApproveJoinRequest(
+                          requestId: widget.equbRequestModel.id,
+                        ),
+                      );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: ColorName.green,
+                      width: 2.0,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(
+                    Icons.check, // Empty circle when unchecked
+                    color: ColorName.green,
+                    size: 15,
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.all(1.0),
-              child: const Icon(
-                Icons.check, // Empty circle when unchecked
-                color: ColorName.green,
-                size: 15,
-              ),
-            ),
+              );
+            },
           ),
-
-          const SizedBox(width: 25),
-          // Checkbox(
-          //   value: true,
-          //   checkColor: ColorName.red,
-          //   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-          //     return ColorName.red.shade100;
-          //   }),
-          //   side: BorderSide.none,
-          //   onChanged: (value) {
-          //     // setState(() {
-          //     //   isInactive = true;
-          //     //   isActive = false;
-          //     // });
-          //     // Call the onAccept function when this checkbox is clicked
-          //     widget.onAccept(widget.index);
-          //   },
-          // ),
-          // Custom Reject "X" checkbox
-          GestureDetector(
+          const SizedBox(width: 35),
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
             onTap: () {
-              // Call the onAccept function when this checkbox is clicked
-              widget.onAccept(widget.index);
+              //
             },
             child: Container(
               decoration: BoxDecoration(
@@ -132,7 +139,7 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
                   width: 2.0,
                 ),
               ),
-              padding: const EdgeInsets.all(1.0),
+              padding: const EdgeInsets.all(4),
               child: const Icon(
                 Icons.close, // "X" icon for reject
                 color: ColorName.red,
@@ -140,6 +147,7 @@ class _EqubRequestsCardState extends State<EqubRequestsCard> {
               ),
             ),
           ),
+          const SizedBox(width: 10),
         ],
       ),
     );

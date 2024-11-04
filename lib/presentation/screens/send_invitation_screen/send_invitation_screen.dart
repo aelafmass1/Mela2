@@ -1,7 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
+import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -16,6 +22,25 @@ class SendInvitationScreen extends StatefulWidget {
 
 class _SendInvitationScreenState extends State<SendInvitationScreen> {
   List invitedMembers = [];
+  List<Contact> _contacts = [];
+
+  Future<void> _fetchContacts() async {
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      setState(() {
+        _contacts = contacts;
+      });
+      // ignore: use_build_context_synchronously
+    }
+  }
+
+  @override
+  void initState() {
+    _fetchContacts();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -67,22 +92,36 @@ class _SendInvitationScreenState extends State<SendInvitationScreen> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          if (state is EqubSuccess && state.invitees != null)
-                            for (var invitee in state.invitees!)
-                              EqubMemberTile(
-                                equbInviteeModel: invitee.copyWith(
-                                  status: invitedMembers
-                                          .contains(invitee.phoneNumber)
-                                      ? 'Pending'
-                                      : null,
-                                ),
-                                onSuccessInvite: () {
-                                  invitedMembers.add(invitee.phoneNumber);
-                                  setState(() {
-                                    invitedMembers = invitedMembers;
-                                  });
-                                },
-                              ),
+                          if (state is EqubSuccess && state.equbMembers != null)
+                            for (var equbMember in state.equbMembers!)
+                              if (equbMember.user?.enabled == false)
+                                FutureBuilder(
+                                    future: getMemberContactInfo(
+                                      equbUser: equbMember.user!,
+                                      contacts: _contacts,
+                                    ),
+                                    builder: (context, snapshot) {
+                                      return EqubMemberTile(
+                                        equbInviteeModel: EqubInviteeModel(
+                                          id: equbMember.userId ?? 0,
+                                          phoneNumber:
+                                              snapshot.data?.phoneNumber ??
+                                                  equbMember.username ??
+                                                  'PENDING USER',
+                                          status: equbMember.status,
+                                          name: snapshot.data?.displayName ??
+                                              equbMember.username ??
+                                              'PENDING USER',
+                                        ),
+                                        onSuccessInvite: () {
+                                          invitedMembers.add(
+                                              '+${equbMember.user?.countryCode}${equbMember.user?.phoneNumber}');
+                                          setState(() {
+                                            invitedMembers = invitedMembers;
+                                          });
+                                        },
+                                      );
+                                    }),
                         ],
                       ),
                     ),

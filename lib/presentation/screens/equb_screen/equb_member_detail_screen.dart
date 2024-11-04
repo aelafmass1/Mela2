@@ -7,11 +7,14 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/equb/equb_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dart';
+import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 
+import '../../../bloc/equb_member/equb_member_bloc.dart';
 import '../../../config/routing.dart';
 import '../../../core/utils/show_consent.dart';
 import '../../../gen/assets.gen.dart';
@@ -44,6 +47,43 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
       // ignore: use_build_context_synchronously
       context.pushNamed(RouteName.contactPermission, extra: () {});
     }
+  }
+
+  showSucessDialog() {
+    showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: ((_) => Dialog(
+              child: Container(
+                width: 100.sw,
+                height: 55.sh,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    SvgPicture.asset(Assets.images.svgs.completeLogo),
+                    const SizedBox(height: 20),
+                    const TextWidget(
+                      text: 'Request Sent',
+                      color: ColorName.primaryColor,
+                      fontSize: 24,
+                    ),
+                    const SizedBox(height: 20),
+                    TextWidget(
+                      text:
+                          'You have successfully sent a request to join “${widget.equbDetailModel.name}”',
+                      color: ColorName.grey,
+                      textAlign: TextAlign.center,
+                      fontSize: 14,
+                    ),
+                  ],
+                ),
+              ),
+            )));
   }
 
   @override
@@ -108,57 +148,45 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10, top: 10),
-                child: ButtonWidget(
-                    onPressed: isPending
-                        ? null
-                        : () async {
-                            final agreed = await showConsent(context);
-                            if (agreed) {
-                              setState(() {
-                                isPending = true;
-                              });
-                              showDialog(
-                                  // ignore: use_build_context_synchronously
-                                  context: context,
-                                  builder: ((_) => Dialog(
-                                        child: Container(
-                                          width: 100.sw,
-                                          height: 55.sh,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 40),
-                                              SvgPicture.asset(Assets
-                                                  .images.svgs.completeLogo),
-                                              const SizedBox(height: 20),
-                                              const TextWidget(
-                                                text: 'Request Sent',
-                                                color: ColorName.primaryColor,
-                                                fontSize: 24,
-                                              ),
-                                              const SizedBox(height: 20),
-                                              TextWidget(
-                                                text:
-                                                    'You have successfully sent a request to join “${widget.equbDetailModel.name}”',
-                                                color: ColorName.grey,
-                                                textAlign: TextAlign.center,
-                                                fontSize: 14,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )));
-                            }
-                          },
-                    child: TextWidget(
-                      text: isPending ? 'Pending' : 'Accept',
-                      type: TextType.small,
-                      color: Colors.white,
-                    )),
+                child: BlocConsumer<EqubMemberBloc, EqubMemberState>(
+                  listener: (context, state) async {
+                    if (state is SendEqubRequestSuccess) {
+                      context.read<EqubBloc>().add(FetchAllEqubs());
+                      setState(() {
+                        isPending = true;
+                      });
+                      showSucessDialog();
+                    } else if (state is SendEqubRequestFail) {
+                      showSnackbar(
+                        context,
+                        description: state.reason,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    return ButtonWidget(
+                      onPressed: isPending
+                          ? null
+                          : () async {
+                              final agreed = await showConsent(context);
+                              if (agreed) {
+                                context.read<EqubMemberBloc>().add(
+                                      AcceptJoinRequest(
+                                        equbId: widget.equbDetailModel.id,
+                                      ),
+                                    );
+                              }
+                            },
+                      child: state is SendEqubRequestLoading
+                          ? const LoadingWidget()
+                          : TextWidget(
+                              text: isPending ? 'Pending' : 'Accept',
+                              type: TextType.small,
+                              color: Colors.white,
+                            ),
+                    );
+                  },
+                ),
               )
             ],
           ),

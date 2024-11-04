@@ -22,6 +22,7 @@ class EqubDetailModel {
   final List<EqubCycleModel> cycles;
   final bool isAdmin;
   final EqubCreatedByModel createdBy;
+  final bool? joinded;
   EqubDetailModel({
     required this.id,
     required this.name,
@@ -35,6 +36,7 @@ class EqubDetailModel {
     required this.cycles,
     required this.isAdmin,
     required this.createdBy,
+    this.joinded,
   });
 
   EqubDetailModel copyWith({
@@ -49,6 +51,7 @@ class EqubDetailModel {
     List<EqubInviteeModel>? invitees,
     List<EqubCycleModel>? cycles,
     EqubCreatedByModel? createdBy,
+    bool? joinded,
   }) {
     return EqubDetailModel(
       id: id ?? this.id,
@@ -63,6 +66,7 @@ class EqubDetailModel {
       cycles: cycles ?? this.cycles,
       isAdmin: isAdmin,
       createdBy: createdBy ?? this.createdBy,
+      joinded: joinded,
     );
   }
 
@@ -93,6 +97,7 @@ class EqubDetailModel {
       startDate: DateTime.parse(map['startDate']),
       currency: map['currency'] == null ? '' : map['currency'] as String,
       isAdmin: map['admin'],
+      joinded: map['joined'],
       members: map['members'] == null
           ? []
           : List<EqubMemberModel>.from(

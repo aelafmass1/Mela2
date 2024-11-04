@@ -358,7 +358,7 @@ class _CreateEqubScreenState extends State<CreateEqubScreen> {
               ),
             ),
             DropdownMenuItem(
-              value: 'BIWEEKLY',
+              value: 'BI_WEEKLY',
               child: TextWidget(
                 text: 'Bi Weekly',
                 type: TextType.small,

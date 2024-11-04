@@ -218,7 +218,9 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
                                   frequency: selectedFrequency ??
                                       widget.equb.frequency,
                                   currency: selectedCurrencyCode ??
-                                      widget.equb.currency,
+                                      (widget.equb.currency.isEmpty
+                                          ? 'USD'
+                                          : widget.equb.currency),
                                   numberOfMembers: int.tryParse(
                                           numberOfMembersController.text) ??
                                       0,
@@ -562,13 +564,6 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
             });
           },
           items: const [
-            // DropdownMenuItem(
-            //   value: 'DAILY',
-            //   child: TextWidget(
-            //     text: 'Daily',
-            //     type: TextType.small,
-            //   ),
-            // ),
             DropdownMenuItem(
               value: 'WEEKLY',
               child: TextWidget(
@@ -577,7 +572,7 @@ class _EqubEditScreenState extends State<EqubEditScreen> {
               ),
             ),
             DropdownMenuItem(
-              value: 'BIWEEKLY',
+              value: 'BI_WEEKLY',
               child: TextWidget(
                 text: 'Bi Weekly',
                 type: TextType.small,

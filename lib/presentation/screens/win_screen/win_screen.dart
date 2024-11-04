@@ -86,7 +86,7 @@ class _WinScreenState extends State<WinScreen> {
                         ),
                       ),
                       EqubMemberTile(
-                        equbInviteeModel: widget.equbInviteeModel,
+                        equbInviteeModel: widget.equbInviteeModel.copyWith(),
                         trailingWidget:
                             SvgPicture.asset(Assets.images.svgs.checkmarkIcon),
                       ),

@@ -1,12 +1,14 @@
+import 'package:flutter/material.dart';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
@@ -148,8 +150,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
           create: (context) => AuthBloc(repository: authRepo),
         ),
         BlocProvider(
-          create: (context) =>
-              TransactionBloc(repository: transactionRepository),
+          create: (context) => TransactionBloc(
+            repository: transactionRepository,
+          ),
         ),
         BlocProvider(
           create: (context) =>

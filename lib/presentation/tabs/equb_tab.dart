@@ -77,7 +77,9 @@ class _EqubTabState extends State<EqubTab> {
             );
           } else if (state is EqubSuccess) {
             setState(() {
-              yourEqubs = state.equbList.where((e) => e.isAdmin).toList();
+              yourEqubs = state.equbList
+                  .where((e) => e.isAdmin || e.joinded == true)
+                  .toList();
               invitedEqubs =
                   state.equbList.where((e) => e.isAdmin == false).toList();
             });
@@ -338,6 +340,7 @@ class _EqubTabState extends State<EqubTab> {
                           blurTexts: true,
                           onTab: () {
                             final detail = EqubDetailModel(
+                              joinded: false,
                               createdBy: EqubCreatedByModel(
                                 id: 0,
                                 firstName: 'Abebe',
@@ -366,6 +369,7 @@ class _EqubTabState extends State<EqubTab> {
                                 extra: detail);
                           },
                           equb: EqubDetailModel(
+                            joinded: false,
                             createdBy: EqubCreatedByModel(
                               id: 0,
                               firstName: 'Abebe',

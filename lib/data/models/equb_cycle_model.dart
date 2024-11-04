@@ -3,18 +3,22 @@ import 'dart:convert';
 
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 
+import 'equb_contribution_model.dart';
+
 class EqubCycleModel {
   final int cycleId;
   final int cycleNumber;
   final String? cycleDate;
   final String status;
   final EqubMemberModel? winner;
+  final List<EqubContribution>? contributions;
   EqubCycleModel({
     required this.cycleId,
     required this.cycleNumber,
     this.cycleDate,
     required this.status,
     this.winner,
+    this.contributions,
   });
 
   EqubCycleModel copyWith({
@@ -23,6 +27,7 @@ class EqubCycleModel {
     String? cycleDate,
     String? status,
     EqubMemberModel? winner,
+    List<EqubContribution>? contributions,
   }) {
     return EqubCycleModel(
       cycleId: cycleId ?? this.cycleId,
@@ -30,6 +35,7 @@ class EqubCycleModel {
       cycleDate: cycleDate ?? this.cycleDate,
       status: status ?? this.status,
       winner: winner ?? this.winner,
+      contributions: contributions ?? this.contributions,
     );
   }
 
@@ -40,6 +46,7 @@ class EqubCycleModel {
       'cycleDate': cycleDate,
       'status': status,
       'winner': winner?.toMap(),
+      'contributions': contributions?.map((e) => e.toMap()),
     };
   }
 
@@ -52,6 +59,11 @@ class EqubCycleModel {
       winner: map['winner'] != null
           ? EqubMemberModel.fromMap(map['winner'] as Map<String, dynamic>)
           : null,
+      contributions: map['contributions'] != null
+          ? (map['contributions'] as List)
+              .map((c) => EqubContribution.fromMap(c))
+              .toList()
+          : null,
     );
   }
 
@@ -62,7 +74,7 @@ class EqubCycleModel {
 
   @override
   String toString() {
-    return 'EqubCycleModel(cycleId: $cycleId, cycleNumber: $cycleNumber, cycleDate: $cycleDate, status: $status, winner: $winner)';
+    return 'EqubCycleModel(cycleId: $cycleId, cycleNumber: $cycleNumber, cycleDate: $cycleDate, status: $status, winner: $winner, contributions: $contributions)';
   }
 
   @override

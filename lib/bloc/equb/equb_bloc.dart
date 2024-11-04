@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
@@ -185,24 +186,22 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         );
 
         if (inviteRes.first.containsKey('error')) {
-          return emit(EqubFail(
-              equbList: state.equbList, reason: inviteRes.first['error']));
+          return emit(
+            EqubFail(
+              equbList: state.equbList,
+              reason: inviteRes.first['error'],
+            ),
+          );
         }
 
-        final invitees = inviteRes.map((m) {
-          final invitee = m['invite'];
-          final member = m['member'];
-          return EqubInviteeModel(
-            id: -1,
-            phoneNumber: invitee != null ? invitee['phoneNumber'] : '',
-            status: member != null ? member['status'] : '',
-            name: invitee != null ? invitee['name'] : '',
-          );
+        final equbMembers = inviteRes.map((m) {
+          final member = m['ekubMember'];
+          return EqubMemberModel.fromMap(member);
         }).toList();
 
         emit(EqubSuccess(
           equbList: equbs,
-          invitees: invitees,
+          equbMembers: equbMembers,
           addedEqubId: equbId,
         ));
       }

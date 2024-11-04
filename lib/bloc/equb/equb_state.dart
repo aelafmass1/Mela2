@@ -20,12 +20,12 @@ final class EqubLoading extends EqubState {
 }
 
 final class EqubSuccess extends EqubState {
-  final List<EqubInviteeModel>? invitees;
+  final List<EqubMemberModel>? equbMembers;
   final EqubDetailModel? selectedEqub;
   final int? addedEqubId;
   EqubSuccess({
     required super.equbList,
-    this.invitees,
+    this.equbMembers,
     this.selectedEqub,
     this.addedEqubId,
   });

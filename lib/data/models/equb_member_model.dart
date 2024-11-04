@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'equb_user_model.dart';
+
 class EqubMemberModel {
   final int id;
   final int? userId;
@@ -89,78 +91,5 @@ class EqubMemberModel {
         role.hashCode ^
         status.hashCode ^
         user.hashCode;
-  }
-}
-
-class EqubUser {
-  final String? firstName;
-  final String? lastName;
-  final int phoneNumber;
-  final int countryCode;
-  EqubUser({
-    this.firstName,
-    this.lastName,
-    required this.phoneNumber,
-    required this.countryCode,
-  });
-
-  EqubUser copyWith({
-    String? firstName,
-    String? lastName,
-    int? phoneNumber,
-    int? countryCode,
-  }) {
-    return EqubUser(
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      countryCode: countryCode ?? this.countryCode,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'firstName': firstName,
-      'lastName': lastName,
-      'phoneNumber': phoneNumber,
-      'countryCode': countryCode,
-    };
-  }
-
-  factory EqubUser.fromMap(Map<String, dynamic> map) {
-    return EqubUser(
-      firstName: map['firstName'] != null ? map['firstName'] as String : null,
-      lastName: map['lastName'] != null ? map['lastName'] as String : null,
-      phoneNumber: map['phoneNumber'] as int,
-      countryCode: map['countryCode'] as int,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory EqubUser.fromJson(String source) =>
-      EqubUser.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() {
-    return 'EqubUser(firstName: $firstName, lastName: $lastName, phoneNumber: $phoneNumber, countryCode: $countryCode)';
-  }
-
-  @override
-  bool operator ==(covariant EqubUser other) {
-    if (identical(this, other)) return true;
-
-    return other.firstName == firstName &&
-        other.lastName == lastName &&
-        other.phoneNumber == phoneNumber &&
-        other.countryCode == countryCode;
-  }
-
-  @override
-  int get hashCode {
-    return firstName.hashCode ^
-        lastName.hashCode ^
-        phoneNumber.hashCode ^
-        countryCode.hashCode;
   }
 }

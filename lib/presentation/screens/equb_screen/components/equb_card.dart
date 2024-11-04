@@ -311,7 +311,7 @@ class EqubCard extends StatelessWidget {
                           height: 40,
                           child: SimpleCircularProgressBar(
                             valueNotifier:
-                                ValueNotifier(remainingDay?.toDouble() ?? 0),
+                                ValueNotifier(remainingDay.toDouble()),
                             progressStrokeWidth: 5,
                             backStrokeWidth: 5,
                             maxValue: (getFrequencyDay(equb.frequency) ?? 0)

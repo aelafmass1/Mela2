@@ -158,86 +158,87 @@ class _HistoryTabState extends State<HistoryTab> {
                 color: ColorName.borderColor,
               ),
             ),
-            Expanded(
-              child: BlocConsumer<TransactionBloc, TransactionState>(
-                listener: (context, state) {
-                  if (state is TransactionFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is TransactionLoading) {
-                    return const Center(
+            BlocConsumer<TransactionBloc, TransactionState>(
+              listener: (context, state) {
+                if (state is TransactionFail) {
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is TransactionLoading) {
+                  return const Expanded(
+                    child: Align(
+                      alignment: Alignment.center,
                       child: LoadingWidget(
                         color: ColorName.primaryColor,
                       ),
-                    );
-                  } else if (state is TransactionSuccess) {
-                    if (state.data.isNotEmpty) {
-                      return Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            context
-                                .read<TransactionBloc>()
-                                .add(FetchTrasaction());
-                          },
-                          child: ListView.separated(
-                            separatorBuilder: (context, index) => const Divider(
-                              color: ColorName.borderColor,
-                            ),
-                            itemCount: state.data.length,
-                            itemBuilder: (context, index) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextWidget(
-                                  text: DateFormat('yyyy-MM-dd')
-                                              .format(DateTime.now()) ==
-                                          state.data.keys.elementAt(index)
-                                      ? 'Today'
-                                      : (DateTime.parse(state.data.keys
-                                                          .elementAt(index))
-                                                      .day -
-                                                  1) ==
-                                              DateTime.now().day
-                                          ? 'Yesterday'
-                                          : DateFormat('d-MMMM yyyy').format(
-                                              DateTime.parse(state.data.keys
-                                                  .elementAt(index))),
-                                  color: ColorName.primaryColor,
-                                  fontSize: 14,
-                                  weight: FontWeight.w600,
-                                ),
-                                for (var transaction
-                                    in state.data.values.elementAt(index))
-                                  _buildTrasactionTile(transaction),
-                              ],
-                            ),
+                    ),
+                  );
+                } else if (state is TransactionSuccess) {
+                  if (state.data.isNotEmpty) {
+                    return Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          context
+                              .read<TransactionBloc>()
+                              .add(FetchTrasaction());
+                        },
+                        child: ListView.separated(
+                          separatorBuilder: (context, index) => const Divider(
+                            color: ColorName.borderColor,
+                          ),
+                          itemCount: state.data.length,
+                          itemBuilder: (context, index) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextWidget(
+                                text: DateFormat('yyyy-MM-dd')
+                                            .format(DateTime.now()) ==
+                                        state.data.keys.elementAt(index)
+                                    ? 'Today'
+                                    : (DateTime.parse(state.data.keys
+                                                        .elementAt(index))
+                                                    .day -
+                                                1) ==
+                                            DateTime.now().day
+                                        ? 'Yesterday'
+                                        : DateFormat('d-MMMM yyyy').format(
+                                            DateTime.parse(state.data.keys
+                                                .elementAt(index))),
+                                color: ColorName.primaryColor,
+                                fontSize: 14,
+                                weight: FontWeight.w600,
+                              ),
+                              for (var transaction
+                                  in state.data.values.elementAt(index))
+                                _buildTrasactionTile(transaction),
+                            ],
                           ),
                         ),
-                      );
-                    }
-                    return Column(
-                      children: [
-                        const SizedBox(height: 30),
-                        Assets.images.noTransaction.image(
-                          width: 350,
-                          height: 350,
-                        ),
-                        const TextWidget(
-                          text: 'oops, You don’t have any History.',
-                          weight: FontWeight.w600,
-                          fontSize: 16,
-                        )
-                      ],
+                      ),
                     );
                   }
-                  return const SizedBox.shrink();
-                },
-              ),
+                  return Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      Assets.images.noTransaction.image(
+                        width: 350,
+                        height: 350,
+                      ),
+                      const TextWidget(
+                        text: 'oops, You don’t have any History.',
+                        weight: FontWeight.w600,
+                        fontSize: 16,
+                      )
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             )
           ],
         ),

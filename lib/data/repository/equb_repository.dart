@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:intl/intl.dart';
@@ -46,6 +47,7 @@ class EqubRepository {
       required String accessToken,
       required List<ContactModel> members}) async {
     final body = members.map((m) => m.toMap()).toList();
+    log(body.toString());
     final res = await client.post(
       Uri.parse('$baseUrl/ekub/$equbId/invite'),
       headers: {
@@ -206,6 +208,142 @@ class EqubRepository {
           "currency": equb.currency,
         },
       ),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> sendReminder({
+    required String accessToken,
+    required int memberId,
+  }) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/ekub/members/$memberId/notify'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> sendReminderToAll({
+    required String accessToken,
+    required int cycleId,
+  }) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/ekub/cycles/$cycleId/notify-missing-contributions'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> fetchJoinRequests({
+    required String accessToken,
+    required int equbId,
+  }) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/ekub/$equbId/join-requests/pending'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> acceptJoinRequest({
+    required String accessToken,
+    required int equbId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/ekub/$equbId/accept-membership',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> approveJoinRequest({
+    required String accessToken,
+    required int requestId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/ekub/join-requests/$requestId/approve',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> setMemberAsPaid({
+    required String accessToken,
+    required int cycleId,
+    required int memberId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/ekub/cycle/$cycleId/member/$memberId/set-contribution',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> assignAdmin({
+    required String accessToken,
+    required int equbId,
+    required int memberId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/ekub/$equbId/members/$memberId/assign-admin',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
     );
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {

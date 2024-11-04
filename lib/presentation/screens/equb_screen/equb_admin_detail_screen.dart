@@ -13,12 +13,13 @@ import 'package:transaction_mobile_app/bloc/equb_member/equb_member_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/models/equb_contribution_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_cycle_widget.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_card.dart';
-import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_payment_tile.dart';
+import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/equb_requests_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/equb_member_shimmer.dart';
@@ -26,10 +27,11 @@ import 'package:transaction_mobile_app/presentation/widgets/equb_member_tile.dar
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../core/utils/get_member_bottom_sheet.dart';
+import '../../../core/utils/show_member_bottom_sheet.dart';
 import '../../../core/utils/get_member_contact_info.dart';
 import '../../../core/utils/show_add_member.dart';
 import '../../../data/models/equb_detail_model.dart';
+import '../../../data/models/equb_request_model.dart';
 
 class EqubAdminDetailScreen extends StatefulWidget {
   final EqubDetailModel equbDetailModel;
@@ -60,6 +62,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   List<Contact> _contacts = [];
   List<Contact> selectedContacts = [];
   List<Contact> filteredContacts = [];
+  List<int> contributedMemberIds = [];
+
+  List<EqubRequestModel> joinRequests = [];
 
   bool isPermissionDenied = false;
 
@@ -107,10 +112,9 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
     _tabController = TabController(length: 4, vsync: this);
     _requestTabController = TabController(length: 2, vsync: this);
 
-    final equbId = widget.equbDetailModel.id;
     context.read<EqubBloc>().add(
           FetchEqub(
-            equbId: equbId,
+            equbId: widget.equbDetailModel.id,
           ),
         );
     _fetchContacts();
@@ -165,6 +169,15 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                         indicatorColor: ColorName.primaryColor,
                         isScrollable: true,
                         tabAlignment: TabAlignment.start,
+                        onTap: (value) {
+                          if (value == 3) {
+                            context.read<EqubMemberBloc>().add(
+                                  FetchEqubJoinRequests(
+                                    equbId: widget.equbDetailModel.id,
+                                  ),
+                                );
+                          }
+                        },
                         tabs: [
                           const Tab(text: 'Members'),
                           _buildTabWithNotification("Winners"),
@@ -483,8 +496,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                           )
                         else
                           SizedBox(
-                            width: 35,
-                            height: 35,
+                            width: 40,
+                            height: 40,
                             child: SimpleCircularProgressBar(
                               valueNotifier: ValueNotifier(
                                   (getRemainingDate() ?? 0).toDouble()),
@@ -658,6 +671,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             if (state.selectedEqub != null) {
               final cycle = state.selectedEqub!.cycles
                   .where((c) => c.status == 'CURRENT');
+
               if (cycle.isNotEmpty) {
                 setState(() {
                   round = cycle.first.cycleNumber;
@@ -667,6 +681,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   round = 1;
                 });
               }
+
               if (state.selectedEqub?.cycles.isNotEmpty == true) {
                 // state.selectedEqub!.cycles.sort((a, b) => a.cycleNumber.compareTo(b.cycleNumber));
 
@@ -684,6 +699,14 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                   winnerMembers = winnerMembers;
                 });
               }
+              for (EqubContribution contribution
+                  in cycle.first.contributions ?? []) {
+                contributedMemberIds.add(contribution.memberId);
+              }
+              setState(() {
+                contributedMemberIds = contributedMemberIds;
+              });
+              log('Contributed Member id:$cycle');
             }
           }
         },
@@ -729,84 +752,117 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             );
           }
           if (state is EqubSuccess && state.selectedEqub != null) {
-            return Column(
-              children: [
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextWidget(
-                      text:
-                          'All Members (${state.selectedEqub!.members.length})',
-                      fontSize: 16,
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 0)),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.add,
-                            color: ColorName.primaryColor,
-                          ),
-                          SizedBox(width: 3),
-                          TextWidget(
-                            text: 'Add Member',
-                            fontSize: 13,
-                            color: ColorName.primaryColor,
-                          ),
-                        ],
+            return BlocListener<EqubMemberBloc, EqubMemberState>(
+              listener: (context, equbMemberState) {
+                if (equbMemberState is AssignAdminLoading) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const Center(
+                      child: LoadingWidget(
+                        color: ColorName.primaryColor,
                       ),
-                      onPressed: () async {
-                        await _fetchContacts();
+                    ),
+                  );
+                } else if (equbMemberState is AssignAdminFail) {
+                  context.pop();
+                  showSnackbar(
+                    context,
+                    description: equbMemberState.reason,
+                  );
+                } else if (equbMemberState is AssignAdminSuccess) {
+                  context.pop();
 
-                        if (isPermissionDenied == false) {
-                          showAddMember(
-                            // ignore: use_build_context_synchronously
-                            context,
-                            int.tryParse(numberOfMembersController.text) ?? 3,
-                            _contacts,
-                            widget.equbDetailModel.id,
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                if (state.selectedEqub?.members.isEmpty == true)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: TextWidget(
-                      text: 'No Member Found',
-                      type: TextType.small,
-                      weight: FontWeight.w300,
-                    ),
-                  )
-                else
-                  for (var member in state.selectedEqub!.members)
-                    FutureBuilder(
-                        future: getMemberContactInfo(
-                          equbUser: member.user!,
-                          contacts: _contacts,
+                  showSnackbar(
+                    context,
+                    description: 'Member Promoted to Admin Successfully',
+                  );
+                  context.read<EqubBloc>().add(
+                        FetchEqub(
+                          equbId: widget.equbDetailModel.id,
                         ),
-                        builder: (context, snapshot) {
-                          return EqubMemberTile(
-                            onOptionPressed: () {
-                              showDetailBottomSheet(context);
-                            },
-                            equbInviteeModel: EqubInviteeModel(
-                              id: member.userId ?? 0,
-                              phoneNumber: snapshot.data?.phoneNumber ??
-                                  member.username ??
-                                  'PENDING USER',
-                              status: member.status,
-                              name: snapshot.data?.displayName ??
-                                  member.username ??
-                                  'PENDING USER',
+                      );
+                }
+              },
+              child: Column(
+                children: [
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextWidget(
+                        text:
+                            'All Members (${state.selectedEqub!.members.length})',
+                        fontSize: 16,
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 0)),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.add,
+                              color: ColorName.primaryColor,
                             ),
-                          );
-                        })
-              ],
+                            SizedBox(width: 3),
+                            TextWidget(
+                              text: 'Add Member',
+                              fontSize: 13,
+                              color: ColorName.primaryColor,
+                            ),
+                          ],
+                        ),
+                        onPressed: () async {
+                          await _fetchContacts();
+
+                          if (isPermissionDenied == false) {
+                            showAddMember(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              widget.equbDetailModel.numberOfMembers,
+                              _contacts,
+                              widget.equbDetailModel.id,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  if (state.selectedEqub?.members.isEmpty == true)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: TextWidget(
+                        text: 'No Member Found',
+                        type: TextType.small,
+                        weight: FontWeight.w300,
+                      ),
+                    )
+                  else
+                    for (var member in state.selectedEqub!.members)
+                      FutureBuilder(
+                          future: getMemberContactInfo(
+                            equbUser: member.user!,
+                            contacts: _contacts,
+                          ),
+                          builder: (context, snapshot) {
+                            return EqubMemberTile(
+                              onOptionPressed: () {
+                                showMemberBottomSheet(
+                                    context, member, widget.equbDetailModel.id);
+                              },
+                              equbInviteeModel: EqubInviteeModel(
+                                id: member.userId ?? 0,
+                                phoneNumber: snapshot.data?.phoneNumber ??
+                                    member.username ??
+                                    'PENDING USER',
+                                status: member.status,
+                                name: snapshot.data?.displayName ??
+                                    member.username ??
+                                    'PENDING USER',
+                              ),
+                            );
+                          })
+                ],
+              ),
             );
           }
 
@@ -1044,11 +1100,22 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                             name:
                                 '${equbMemberState.firstName} ${equbMemberState.lastName}',
                           ),
+                          // EqubMemberModel(
+                          //   id: -1,
+                          //   role: equbMemberState.role ?? '',
+                          //   status: '',
+                          //   user: EqubUser(phoneNumber: int.tryParse(equbMemberState.phoneNumber) ?? 0, countryCode: equbMemberState.)
+                          // )
                         ]);
                       } else if (equbMemberState is EqubAutoWinnerFail) {
                         showSnackbar(context,
                             description: equbMemberState.reason);
                       } else if (equbMemberState is EqubAutoWinnerSuccess) {
+                        context.read<EqubBloc>().add(
+                              FetchEqub(
+                                equbId: widget.equbDetailModel.id,
+                              ),
+                            );
                         context.pushNamed(RouteName.win, extra: [
                           '${equbMemberState.cycleNumber}',
                           EqubInviteeModel(
@@ -1196,23 +1263,25 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                                 contacts: _contacts,
                               ),
                               builder: (context, snapshot) {
-                                return EqubPaymentCard(
-                                  equbInviteeModel: EqubInviteeModel(
-                                    id: state.selectedEqub!.members[index]
-                                            .userId ??
-                                        0,
-                                    phoneNumber: snapshot.data?.phoneNumber ??
+                                final cycle = state.selectedEqub!.cycles
+                                    .where((c) => c.status == 'CURRENT');
+                                return EqubPaymentTile(
+                                  isActive: contributedMemberIds.contains(
+                                      state.selectedEqub?.members[index].id),
+                                  cycleId: cycle.isNotEmpty
+                                      ? cycle.first.cycleId
+                                      : 1,
+                                  equbMemberModel: state
+                                      .selectedEqub!.members[index]
+                                      .copyWith(
+                                          user: state
+                                              .selectedEqub!.members[index].user
+                                              ?.copyWith(
+                                    firstName: snapshot.data?.displayName ??
                                         state.selectedEqub!.members[index]
                                             .username ??
                                         'PENDING USER',
-                                    status: state
-                                        .selectedEqub!.members[index].status,
-                                    name: snapshot.data?.displayName ??
-                                        state.selectedEqub!.members[index]
-                                            .username ??
-                                        'PENDING USER',
-                                  ),
-                                  index: index,
+                                  )),
                                 );
                               });
                         },
@@ -1233,21 +1302,49 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
             color: ColorName.white,
             child: SizedBox(
               width: 100.sw - 30,
-              child: ButtonWidget(
-                onPressed: () => context.pushNamed(
-                  RouteName.equbActionCompleted,
-                  extra: CompletePageDto(
-                    title: "Reminder sent!",
-                    description:
-                        "You have successfully sent a reminder to all members!",
-                    onComplete: () => context.pop(),
-                  ),
-                ),
-                child: const TextWidget(
-                  text: 'Send Reminder To All',
-                  type: TextType.small,
-                  color: Colors.white,
-                ),
+              child: BlocBuilder<EqubBloc, EqubState>(
+                builder: (context, state) {
+                  return ButtonWidget(
+                    onPressed: () {
+                      if (state is EqubSuccess) {
+                        final cycle = state.selectedEqub!.cycles
+                            .where((c) => c.status == 'CURRENT');
+                        if (cycle.isNotEmpty) {
+                          context.read<EqubMemberBloc>().add(
+                                SendReminderToAll(
+                                  cycleId: cycle.first.cycleId,
+                                ),
+                              );
+                        }
+                      }
+                    },
+                    child: BlocConsumer<EqubMemberBloc, EqubMemberState>(
+                      listener: (context, equbMemberState) {
+                        if (equbMemberState is EqubReminderToAllFail) {
+                          showSnackbar(
+                            context,
+                            description: equbMemberState.reason,
+                          );
+                        } else if (equbMemberState is EqubAutoWinnerSuccess) {
+                          showSnackbar(
+                            context,
+                            description: 'Reminder Sent to all',
+                          );
+                        }
+                      },
+                      builder: (context, equbMemberState) {
+                        if (equbMemberState is EqubReminderToAllLoading) {
+                          return const LoadingWidget();
+                        }
+                        return const TextWidget(
+                          text: 'Send Reminder To All',
+                          type: TextType.small,
+                          color: Colors.white,
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -1258,99 +1355,138 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
 
   Widget _buildRequestsContent() {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          ColoredBox(
-            color: const Color(0xFFF6F6F6),
-            child: TabBar(
-              padding: EdgeInsets.zero,
-              tabAlignment: TabAlignment.start,
-              isScrollable: true,
-              tabs: [
-                Tab(
-                  child: TextWidget(
-                    text: 'Join Requests',
-                    fontSize: 14,
-                    color: requestIndex == 0 ? ColorName.primaryColor : null,
-                  ),
+      child: BlocConsumer<EqubMemberBloc, EqubMemberState>(
+        listener: (context, state) {
+          if (state is FetchJoinRequestSuccess) {
+            setState(() {
+              joinRequests = state.joinRequests;
+            });
+          }
+        },
+        builder: (context, state) {
+          return Column(
+            children: [
+              ColoredBox(
+                color: const Color(0xFFF6F6F6),
+                child: TabBar(
+                  padding: EdgeInsets.zero,
+                  tabAlignment: TabAlignment.start,
+                  isScrollable: true,
+                  tabs: [
+                    Tab(
+                      child: TextWidget(
+                        text: 'Join Requests',
+                        fontSize: 14,
+                        color:
+                            requestIndex == 0 ? ColorName.primaryColor : null,
+                      ),
+                    ),
+                    Tab(
+                      child: TextWidget(
+                        text: 'Leave Requests',
+                        fontSize: 14,
+                        color:
+                            requestIndex == 1 ? ColorName.primaryColor : null,
+                      ),
+                    ),
+                  ],
+                  controller: _requestTabController,
+                  onTap: (value) {
+                    setState(() {
+                      requestIndex = value;
+                    });
+                  },
                 ),
-                Tab(
-                  child: TextWidget(
-                    text: 'Leave Requests',
-                    fontSize: 14,
-                    color: requestIndex == 1 ? ColorName.primaryColor : null,
-                  ),
-                ),
-              ],
-              controller: _requestTabController,
-              onTap: (value) {
-                setState(() {
-                  requestIndex = value;
-                });
-              },
-            ),
-          ),
-          if (requestIndex == 0)
-            const Column(
-              children: [
-                SizedBox(height: 10),
-                Row(
+              ),
+              if (requestIndex == 0)
+                Column(
                   children: [
-                    TextWidget(
-                      text: 'All Members (0)',
-                      fontSize: 16,
+                    const SizedBox(height: 10),
+                    const Row(
+                      children: [
+                        TextWidget(
+                          text: 'All Members (0)',
+                          fontSize: 16,
+                        ),
+                        Spacer(),
+                        TextWidget(
+                          text: 'Accept',
+                          fontSize: 13,
+                          color: ColorName.green,
+                        ),
+                        SizedBox(width: 25),
+                        TextWidget(
+                          text: 'Reject',
+                          fontSize: 13,
+                          color: ColorName.red,
+                        ),
+                        SizedBox(width: 5),
+                      ],
                     ),
-                    Spacer(),
-                    TextWidget(
-                      text: 'Accept',
-                      fontSize: 13,
-                      color: ColorName.green,
+                    const SizedBox(
+                      height: 15,
                     ),
-                    SizedBox(width: 16),
-                    TextWidget(
-                      text: 'Reject',
-                      fontSize: 13,
-                      color: ColorName.red,
+                    if (state is FetchJoinRequestLoading)
+                      const LoadingWidget(
+                        color: ColorName.primaryColor,
+                      )
+                    else if (joinRequests.isEmpty)
+                      Column(
+                        children: [
+                          Assets.images.equbImage.image(
+                            width: 150,
+                          ),
+                          const TextWidget(
+                            text: 'No Request Found',
+                            type: TextType.small,
+                            weight: FontWeight.w300,
+                          ),
+                        ],
+                      )
+                    else
+                      for (var req in joinRequests)
+                        EqubRequestsCard(
+                          equbRequestModel: req,
+                          onSuccess: () {
+                            log('success');
+                            joinRequests.removeWhere((r) => r.id == req.id);
+                          },
+                        )
+                  ],
+                )
+              else
+                const Column(
+                  children: [
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        TextWidget(
+                          text: 'All Members (0)',
+                          fontSize: 16,
+                        ),
+                        Spacer(),
+                        TextWidget(
+                          text: 'Accept',
+                          fontSize: 13,
+                          color: ColorName.green,
+                        ),
+                        SizedBox(width: 25),
+                        TextWidget(
+                          text: 'Reject',
+                          fontSize: 13,
+                          color: ColorName.red,
+                        ),
+                        SizedBox(width: 5),
+                      ],
                     ),
-                    SizedBox(width: 5),
+                    SizedBox(
+                      height: 15,
+                    ),
                   ],
                 ),
-                SizedBox(
-                  height: 15,
-                ),
-              ],
-            )
-          else
-            const Column(
-              children: [
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    TextWidget(
-                      text: 'All Members (0)',
-                      fontSize: 16,
-                    ),
-                    Spacer(),
-                    TextWidget(
-                      text: 'Accept',
-                      fontSize: 13,
-                      color: ColorName.green,
-                    ),
-                    SizedBox(width: 16),
-                    TextWidget(
-                      text: 'Reject',
-                      fontSize: 13,
-                      color: ColorName.red,
-                    ),
-                    SizedBox(width: 5),
-                  ],
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-              ],
-            ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
