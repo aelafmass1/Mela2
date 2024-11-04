@@ -152,10 +152,12 @@ class _EqubMemberDetailScreenState extends State<EqubMemberDetailScreen> {
                   listener: (context, state) async {
                     if (state is SendEqubRequestSuccess) {
                       context.read<EqubBloc>().add(FetchAllEqubs());
+
                       setState(() {
                         isPending = true;
                       });
-                      showSucessDialog();
+                      context.pop();
+                      // showSucessDialog();
                     } else if (state is SendEqubRequestFail) {
                       showSnackbar(
                         context,
