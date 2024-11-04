@@ -36,7 +36,7 @@ dependencies:
   mockito: ^5.4.4
   mocktail: ^1.0.4
   permission_handler: ^11.3.1
-  plaid_flutter: ^3.1.8
+  plaid_flutter: ^4.1.1
   printing: ^5.13.1
   responsive_builder: ^0.7.1
   share_plus: ^10.0.2
@@ -64,6 +64,9 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   build_runner: ^2.4.12
 
+dependency_overrides: 
+  js: ^0.7.1
+  
 flutter:
   uses-material-design: true
 
