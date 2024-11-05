@@ -84,7 +84,7 @@ class _SentTabState extends State<SentTab> {
 
   ReceiverInfo? receiverInfo;
 
-  LinkConfiguration? _configuration;
+  LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
@@ -1939,7 +1939,8 @@ class _SentTabState extends State<SentTab> {
                         );
                       } else if (state is PlaidLinkTokenSuccess) {
                         _createLinkTokenConfiguration(state.linkToken);
-                        await PlaidLink.open(configuration: _configuration!);
+                        await PlaidLink.create(configuration: _configuration!);
+                        await PlaidLink.open();
                       } else if (state is PlaidPublicTokenFail) {
                         showSnackbar(
                           context,

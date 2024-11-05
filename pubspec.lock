@@ -318,14 +318,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  currency_icons:
-    dependency: "direct main"
-    description:
-      name: currency_icons
-      sha256: "5ef9e24ec628b672ae28a9fc90a7f24503b18da2d8636d3c763ad9abb83053e2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0"
   currency_picker:
     dependency: "direct main"
     description:
@@ -692,10 +684,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: de82e6bf958cec7190fbc1c5298282c851228e35ae2b14e2b103e7f777818c64
+      sha256: "1b7723a814d84fb65869ea7115cdb3ee7c3be5a27a755c1ec60e049f6b9fcbb2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.13"
+    version: "2.0.11"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -774,10 +766,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: ce89c5a993ca5eea74535f798478502c30a625ecb10a1de4d7fef5cd1bcac2a4
+      sha256: "5a7419238fe5ed0b6bcf62f2eec8153caf12929dcebe05a891d530bf4b4ef52e"
       url: "https://pub.dev"
     source: hosted
-    version: "14.4.1"
+    version: "14.4.0"
   graphs:
     dependency: transitive
     description:
@@ -940,13 +932,13 @@ packages:
     source: hosted
     version: "1.0.4"
   js:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
+      sha256: c1b2e9b5ea78c45e1a0788d29606ba27dc5f71f019f32ca5140f61ef071838cf
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.7"
+    version: "0.7.1"
   json_annotation:
     dependency: transitive
     description:
@@ -1288,10 +1280,10 @@ packages:
     dependency: "direct main"
     description:
       name: plaid_flutter
-      sha256: b9d760f1c19ae3dc036561022ab1b5dd051f81c640d27f96feb27ad5f8e90ced
+      sha256: "276c38b8cc92105fbff0c8ce35b795b8d1e27747a2a22df86f57c3d64c991c6f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.8"
+    version: "4.1.1"
   platform:
     dependency: transitive
     description:
@@ -1789,10 +1781,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics
-      sha256: "773c9522d66d523e1c7b25dfb95cc91c26a1e17b107039cfe147285e92de7878"
+      sha256: "0b9149c6ddb013818075b072b9ddc1b89a5122fff1275d4648d297086b46c4f0"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.14"
+    version: "1.1.12"
   vector_graphics_codec:
     dependency: transitive
     description:
@@ -1805,10 +1797,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "26d520739b7c6b5d2a2b3274427874a8390831fd4cd5bb8cfbd7d913477d3a2e"
+      sha256: f3b9b6e4591c11394d4be4806c63e72d3a41778547b2c1e2a8a04fadcfd7d173
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.14"
+    version: "1.1.12"
   vector_math:
     dependency: transitive
     description:
@@ -1821,10 +1813,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "5c5f338a667b4c644744b661f309fb8080bb94b18a7e91ef1dbd343bed00ed6d"
+      sha256: f652077d0bdf60abe4c1f6377448e8655008eef28f128bc023f7b5e8dfeb48fc
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.5"
+    version: "14.2.4"
   watcher:
     dependency: transitive
     description:
@@ -1877,10 +1869,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_android
-      sha256: dec83a8da0a2dcd8a25418534cc59348dbc2855fa1dd0cc929c62b6029fde392
+      sha256: "74693a212d990b32e0b7055d27db973a18abf31c53942063948cdfaaef9787ba"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.0"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
@@ -1893,10 +1885,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_wkwebview
-      sha256: f14ee08021772fed913da8daebcfdeb46be457081e521e93e9918fe6cd1ce9e8
+      sha256: d4034901d96357beb1b6717ebf7d583c88e40cfc6eb85fe76dd1bf0979a9f251
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.1"
+    version: "3.16.0"
   win32:
     dependency: transitive
     description:
