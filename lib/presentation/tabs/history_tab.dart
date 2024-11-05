@@ -11,6 +11,7 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+import 'package:transaction_mobile_app/presentation/widgets/transaction_tile.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
@@ -211,7 +212,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                 ),
                                 for (var transaction
                                     in state.data.values.elementAt(index))
-                                  _buildTrasactionTile(transaction),
+                                  TransactionTile(receiverInfo: transaction),
                               ],
                             ),
                           ),
@@ -232,58 +233,6 @@ class _HistoryTabState extends State<HistoryTab> {
             )
           ],
         ),
-      ),
-    );
-  }
-
-  _buildTrasactionTile(ReceiverInfo receiverInfo) {
-    return ListTile(
-      onTap: () {
-        context.pushNamed(
-          RouteName.receipt,
-          extra: receiverInfo,
-        );
-      },
-      leading: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: const Color(0xFFA000C8).withOpacity(0.1),
-        ),
-        child: Center(
-          child: SvgPicture.asset(
-            Assets.images.svgs.transactionIcon,
-            width: 24,
-            height: 24,
-          ),
-        ),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          TextWidget(
-            text: '\$${receiverInfo.amount}',
-            fontSize: 14,
-            weight: FontWeight.w600,
-          ),
-          TextWidget(
-            text: DateFormat('hh:mm a').format(receiverInfo.transactionDate!),
-            fontSize: 10,
-            weight: FontWeight.w400,
-          )
-        ],
-      ),
-      title: TextWidget(
-        text: receiverInfo.receiverName,
-        fontSize: 14,
-        weight: FontWeight.w400,
-      ),
-      subtitle: TextWidget(
-        text: receiverInfo.receiverPhoneNumber,
-        fontSize: 10,
-        weight: FontWeight.w400,
       ),
     );
   }

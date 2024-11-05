@@ -26,6 +26,7 @@ import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.d
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
@@ -38,6 +39,7 @@ import 'package:transaction_mobile_app/data/repository/payment_card_repository.d
 import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
+import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
@@ -114,6 +116,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   late PaymentIntentRepository paymentIntentRepository;
   late PlaidRepository plaidRepository;
   late TransactionRepository transactionRepository;
+  late WalletRepository walletRepository;
 
   @override
   void initState() {
@@ -129,6 +132,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     paymentIntentRepository = PaymentIntentRepository(client: client);
     plaidRepository = PlaidRepository(client: client);
     transactionRepository = TransactionRepository(client: client);
+    walletRepository = WalletRepository(client: client);
     super.initState();
   }
 
@@ -217,6 +221,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => LocationBloc(),
+        ),
+        BlocProvider(
+          create: (context) => WalletBloc(
+            repository: walletRepository,
+          ),
         ),
       ],
       child: ResponsiveApp(

@@ -57,6 +57,7 @@ dependencies:
   connectivity_plus: ^6.0.5
   http_interceptor: ^2.0.0
   card_stack_widget: ^0.1.6
+  currency_icons: ^0.3.0
 
 dev_dependencies:
   flutter_test:
