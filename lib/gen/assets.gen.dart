@@ -302,6 +302,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/qrcode_logo.svg
+  String get qrcodeLogo => 'assets/images/svgs/qrcode_logo.svg';
+
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
@@ -334,6 +337,7 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
+        qrcodeLogo,
         sendIcon,
         spinWheel,
         transactionIcon

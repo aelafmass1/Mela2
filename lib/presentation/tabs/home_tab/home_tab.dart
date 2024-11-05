@@ -19,7 +19,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../screens/home_screen/components/exchange_rate_card.dart';
+import '../../screens/home_screen/components/exchange_rate_card.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -125,6 +125,14 @@ class _HomeTabState extends State<HomeTab> {
                       ],
                     ),
                   ],
+                ),
+                IconButton(
+                  onPressed: () {
+                    //
+                  },
+                  icon: SvgPicture.asset(
+                    Assets.images.svgs.qrcodeLogo,
+                  ),
                 ),
                 IconButton(
                     onPressed: () {
