@@ -57,7 +57,7 @@ class WalletOptions extends StatelessWidget {
   }) {
     return SizedBox(
       width: 85,
-      height: 60,
+      height: 68,
       child: ButtonWidget(
         borderRadius: BorderRadius.circular(10),
         elevation: 0,
@@ -67,7 +67,7 @@ class WalletOptions extends StatelessWidget {
           children: [
             // ignore: deprecated_member_use
             SvgPicture.asset(iconPath, width: 18, height: 18, color: iconColor),
-            const SizedBox(height: 3),
+            const SizedBox(height: 5),
             TextWidget(
               text: title,
               fontSize: 10,
