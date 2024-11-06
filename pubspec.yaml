@@ -1,7 +1,7 @@
 name: transaction_mobile_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 3.0.1+301
+version: 3.0.2+302
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
@@ -56,6 +56,8 @@ dependencies:
   currency_picker: ^2.0.21
   connectivity_plus: ^6.0.5
   http_interceptor: ^2.0.0
+  card_stack_widget: ^0.1.6
+  currency_icons: ^0.3.0
 
 dev_dependencies:
   flutter_test:

@@ -254,6 +254,9 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/add_money.svg
+  String get addMoney => 'assets/images/svgs/add_money.svg';
+
   /// File path: assets/images/svgs/admin_icon.svg
   String get adminIcon => 'assets/images/svgs/admin_icon.svg';
 
@@ -324,8 +327,11 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
-  /// File path: assets/images/svgs/search.svg
-  String get search => 'assets/images/svgs/search.svg';
+  /// File path: assets/images/svgs/qrcode_logo.svg
+  String get qrcodeLogo => 'assets/images/svgs/qrcode_logo.svg';
+
+  /// File path: assets/images/svgs/request_logo.svg
+  String get requestLogo => 'assets/images/svgs/request_logo.svg';
 
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
@@ -336,8 +342,15 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
+  /// File path: assets/images/svgs/wallet_pattern.svg
+  String get walletPattern => 'assets/images/svgs/wallet_pattern.svg';
+
+  /// File path: assets/images/svgs/withdraw_logo.svg
+  String get withdrawLogo => 'assets/images/svgs/withdraw_logo.svg';
+
   /// List of all assets
   List<String> get values => [
+        addMoney,
         adminIcon,
         amountIcon,
         backArrow,
@@ -361,10 +374,13 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
-        search,
+        qrcodeLogo,
+        requestLogo,
         sendIcon,
         spinWheel,
-        transactionIcon
+        transactionIcon,
+        walletPattern,
+        withdrawLogo
       ];
 }
 
