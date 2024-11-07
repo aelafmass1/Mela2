@@ -29,6 +29,9 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
       child: BlocConsumer<WalletBloc, WalletState>(
         listener: (context, state) {
           if (state is FetchWalletSuccess) {
+            setState(() {
+              stackHeight = 240;
+            });
             if (state.wallets.length > 2) {
               setState(() {
                 stackHeight = stackHeight + ((state.wallets.length - 2) * 50);

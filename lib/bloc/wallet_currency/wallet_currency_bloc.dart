@@ -28,7 +28,7 @@ class WalletCurrencyBloc
             FetchWalletCurrencyFail(reason: res['error']),
           );
         }
-        final currencies = res['successResponse'] as List;
+        final currencies = (res['data'] as List).map((c) => c['code']).toList();
 
         emit(
           FetchWalletCurrencySuccess(

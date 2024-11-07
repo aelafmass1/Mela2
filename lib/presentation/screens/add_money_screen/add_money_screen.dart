@@ -44,7 +44,7 @@ class AddMoneyScreen extends StatefulWidget {
 class _AddMoneyScreenState extends State<AddMoneyScreen> {
   final amountController = TextEditingController();
   ScrollController scrollController = ScrollController();
-  String selectedCurrency = 'aed';
+  String selectedCurrency = 'usd';
   int selectedPaymentMethodIndex = -1;
   bool showFee = false;
   bool isAnimationFinished = false;

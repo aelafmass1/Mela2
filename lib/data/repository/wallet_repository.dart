@@ -48,7 +48,7 @@ class WalletRepository {
   Future<Map> fetchWalletCurrencies({required String accessToken}) async {
     final res = await client.get(
       Uri.parse(
-        '$baseUrl/api/wallet/available-currencies',
+        '$baseUrl/api/wallet/currency/all',
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -57,7 +57,7 @@ class WalletRepository {
     );
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
-      return data;
+      return {'data': data};
     }
     return processErrorResponse(data);
   }
