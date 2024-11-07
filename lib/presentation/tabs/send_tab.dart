@@ -1880,8 +1880,7 @@ class _SentTabState extends State<SentTab> {
             BlocConsumer<PaymentIntentBloc, PaymentIntentState>(
               listener: (context, paymentState) async {
                 if (paymentState is PaymentIntentFail) {
-                  showSnackbar(context,
-                      title: 'Error', description: paymentState.reason);
+                  showSnackbar(context, description: paymentState.reason);
                 } else if (paymentState is PaymentIntentSuccess) {
                   /// Initializes and presents a Stripe payment sheet for processing a payment.
                   ///

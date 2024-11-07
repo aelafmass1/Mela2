@@ -11,6 +11,7 @@ class WalletCard extends StatelessWidget {
   final String logo;
   final String walletName;
   final bool showPattern;
+  final double? height;
   const WalletCard({
     super.key,
     required this.color,
@@ -18,6 +19,7 @@ class WalletCard extends StatelessWidget {
     required this.logo,
     required this.walletName,
     required this.showPattern,
+    this.height,
   });
 
   @override
@@ -29,7 +31,7 @@ class WalletCard extends StatelessWidget {
         children: [
           Container(
             width: 93.sw,
-            height: 160,
+            height: height ?? 160,
             padding: const EdgeInsets.all(17),
             decoration: BoxDecoration(
               color: color,
@@ -70,8 +72,9 @@ class WalletCard extends StatelessWidget {
                         width: 80.sw,
                         child: TextWidget(
                           text: '\$${NumberFormat('#,###.##').format(amount)}',
-                          type: TextType.large,
+                          fontSize: 36,
                           color: Colors.white,
+                          weight: FontWeight.w700,
                         ),
                       ),
                     ],

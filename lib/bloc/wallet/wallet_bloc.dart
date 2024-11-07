@@ -25,6 +25,48 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         )) {
     on<FetchWallets>(_onFetchWallets);
     on<CreateWallet>(_onCreateWallet);
+    on<AddFundToWallet>(_onAddFundToWallet);
+  }
+
+  _onAddFundToWallet(AddFundToWallet event, Emitter emit) async {
+    try {
+      if (state is! AddFundToWalletLoading) {
+        emit(
+          AddFundToWalletLoading(
+            wallets: state.wallets,
+          ),
+        );
+        final accessToken = await getToken();
+        final res = await repository.addFundToWallet(
+          accessToken: accessToken ?? '',
+          amount: event.amount,
+          paymentIntentId: event.paymentIntentId,
+          paymentType: event.paymentType,
+          publicToken: event.publicToken,
+          savedPaymentId: event.savedPaymentId,
+          walletId: event.walletId,
+        );
+        if (res.containsKey('error')) {
+          return emit(
+            AddFundToWalletFail(wallets: state.wallets, reason: res['error']),
+          );
+        }
+        final wallets = res['successResponse'] as List;
+
+        emit(
+          AddFundToWalletSuccess(
+            wallets: wallets.map((w) => WalletModel.fromMap(w)).toList(),
+          ),
+        );
+      }
+    } catch (error) {
+      emit(
+        AddFundToWalletFail(
+          wallets: state.wallets,
+          reason: error.toString(),
+        ),
+      );
+    }
   }
 
   _onCreateWallet(CreateWallet event, Emitter emit) async {

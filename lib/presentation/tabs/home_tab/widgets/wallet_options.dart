@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -19,7 +21,7 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.addMoney,
             title: 'Add Money',
             onTab: () {
-              // TODO
+              context.pushNamed(RouteName.addMoney);
             },
           ),
           _buildOptionButton(
