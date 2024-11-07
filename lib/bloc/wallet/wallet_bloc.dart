@@ -51,11 +51,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
             AddFundToWalletFail(wallets: state.wallets, reason: res['error']),
           );
         }
-        final wallets = res['successResponse'] as List;
 
         emit(
           AddFundToWalletSuccess(
-            wallets: wallets.map((w) => WalletModel.fromMap(w)).toList(),
+            wallets: state.wallets,
           ),
         );
       }

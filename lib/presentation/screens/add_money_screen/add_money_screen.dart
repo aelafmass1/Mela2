@@ -490,9 +490,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 displayPaymentSheet(clientSecret);
               } else {
                 _addFundToWallet(
-                  intentId: '',
-                  publicToken: '',
-                );
+                    intentId: '',
+                    publicToken: '',
+                    paymentType: 'SAVED_PAYMENT');
               }
             } catch (error) {
               log(error.toString());
