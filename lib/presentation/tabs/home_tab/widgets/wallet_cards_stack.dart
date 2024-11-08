@@ -23,7 +23,7 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       height: stackHeight,
       width: 93.sw,
       child: BlocConsumer<WalletBloc, WalletState>(

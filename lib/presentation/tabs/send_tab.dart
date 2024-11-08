@@ -1890,10 +1890,10 @@ class _SentTabState extends State<SentTab> {
                   /// Logs any errors encountered during the process.
                   try {
                     final clientSecret = paymentState.clientSecret;
-
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
                           paymentIntentClientSecret: clientSecret,
+                          customFlow: true,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
                           appearance: const PaymentSheetAppearance(
