@@ -26,6 +26,7 @@ import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/withdraw_screen/withdraw_screen.dart';
 
 import '../presentation/screens/forget_password_screen/forget_password_screen.dart';
 import '../presentation/screens/home_screen/home_screen.dart';
@@ -63,6 +64,7 @@ class RouteName {
   static const newPassword = 'new_password_screen';
   static const newPincode = 'new_pincode_screen';
   static const addMoney = 'add_money_screen';
+  static const withdraw = 'withdraw_screen';
 }
 
 final goRouting = GoRouter(
@@ -166,6 +168,11 @@ final goRouting = GoRouter(
           path: 'add_money_screen',
           name: RouteName.addMoney,
           builder: (context, state) => const AddMoneyScreen(),
+        ),
+        GoRoute(
+          path: 'withdraw_screen',
+          name: RouteName.withdraw,
+          builder: (context, state) => const WithdrawScreen(),
         ),
       ],
     ),

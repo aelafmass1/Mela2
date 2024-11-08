@@ -23,6 +23,8 @@ class TextFieldWidget extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? fontSize;
   final EdgeInsetsGeometry? contentPadding;
+  final bool? enabled;
+  final int? maxLines;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -43,11 +45,15 @@ class TextFieldWidget extends StatelessWidget {
       this.borderRadius,
       this.fontSize,
       this.contentPadding,
+      this.enabled,
+      this.maxLines,
       this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: maxLines,
+      enabled: enabled,
       key: globalKey,
       focusNode: focusNode,
       onTap: onTab,

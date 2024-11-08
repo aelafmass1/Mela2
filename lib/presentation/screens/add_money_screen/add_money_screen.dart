@@ -53,8 +53,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   final _formKey = GlobalKey<FormState>();
   final amonutFocus = FocusNode();
 
-  ReceiverInfo? receiverInfo;
-
   LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
@@ -65,6 +63,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   _addFundToWallet(
       {required String intentId,
       required String publicToken,
+      required String paymentMethodId,
       String? paymentType}) {
     final feeState = context.read<FeeBloc>().state;
     final bankState = context.read<BankFeeBloc>().state;
@@ -103,7 +102,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       ? 'STRIPE_DEBIT'
                       : 'STRIPE_CREDIT'),
               publicToken: publicToken,
-              savedPaymentId: selectedPaymentCardId,
+              savedPaymentId: selectedPaymentCardId.isEmpty
+                  ? paymentMethodId
+                  : selectedPaymentCardId,
               paymentIntentId: selectedPaymentCardId.isEmpty ? intentId : '',
               walletId: selectedWalletModel != null
                   ? selectedWalletModel!.walletId
@@ -154,7 +155,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
       final paymentIntent =
           await Stripe.instance.retrievePaymentIntent(clientSecret);
 
-      _addFundToWallet(intentId: paymentIntent.id, publicToken: '');
+      _addFundToWallet(
+        intentId: paymentIntent.id,
+        publicToken: '',
+        paymentMethodId: paymentIntent.paymentMethodId ?? '',
+      );
     } catch (error) {
       if (error is StripeException) {
         // Handle StripeException specifically
@@ -480,7 +485,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       paymentIntentClientSecret: clientSecret,
                       customerId: paymentState.customerId,
                       merchantDisplayName: 'Mela Fi',
-                      customFlow: true,
+                      customFlow: false,
                       appearance: const PaymentSheetAppearance(
                         colors: PaymentSheetAppearanceColors(
                           primary: ColorName.primaryColor,
@@ -491,9 +496,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 displayPaymentSheet(clientSecret);
               } else {
                 _addFundToWallet(
-                    intentId: '',
-                    publicToken: '',
-                    paymentType: 'SAVED_PAYMENT');
+                  intentId: '',
+                  publicToken: '',
+                  paymentType: 'SAVED_PAYMENT',
+                  paymentMethodId: '',
+                );
               }
             } catch (error) {
               log(error.toString());
@@ -519,10 +526,10 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             );
           } else if (state is PlaidPublicTokenSuccess) {
             _addFundToWallet(
-              intentId: '',
-              publicToken: publicToken ?? '',
-              paymentType: 'PLAID_ACH',
-            );
+                intentId: '',
+                publicToken: publicToken ?? '',
+                paymentType: 'PLAID_ACH',
+                paymentMethodId: '');
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
@@ -1009,7 +1016,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               return const SizedBox(
                 height: 120,
                 child: Center(
-                  child: TextWidget(text: "No Wallet Found"),
+                  child: TextWidget(
+                    text: "No Wallet Found",
+                    type: TextType.small,
+                    weight: FontWeight.w400,
+                  ),
                 ),
               );
             },

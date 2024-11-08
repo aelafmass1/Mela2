@@ -269,7 +269,7 @@ class _SentTabState extends State<SentTab> {
             SendMoney(
                 receiverInfo: receiverInfo!,
                 paymentId: paymentIntent.id,
-                savedPaymentId: ''),
+                savedPaymentId: paymentIntent.paymentMethodId ?? ''),
           );
       log(paymentIntent.id);
       log(receiverInfo.toString());
@@ -1893,7 +1893,7 @@ class _SentTabState extends State<SentTab> {
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
                           paymentIntentClientSecret: clientSecret,
-                          customFlow: true,
+                          customFlow: false,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
                           appearance: const PaymentSheetAppearance(

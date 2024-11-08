@@ -43,7 +43,7 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.withdrawLogo,
             title: 'Withdraw',
             onTab: () {
-              // TODO
+              context.pushNamed(RouteName.withdraw);
             },
           ),
         ],
