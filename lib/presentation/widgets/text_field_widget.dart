@@ -20,6 +20,9 @@ class TextFieldWidget extends StatelessWidget {
   final FocusNode? focusNode;
   final Key? globalKey;
   final Function(String)? onChanged;
+  final BorderRadius? borderRadius;
+  final double? fontSize;
+  final EdgeInsetsGeometry? contentPadding;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -37,6 +40,9 @@ class TextFieldWidget extends StatelessWidget {
       this.inputFormatters,
       this.focusNode,
       this.onChanged,
+      this.borderRadius,
+      this.fontSize,
+      this.contentPadding,
       this.errorText});
 
   @override
@@ -52,33 +58,33 @@ class TextFieldWidget extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       cursorColor: ColorName.primaryColor,
-      style: const TextStyle(
-        fontSize: 15,
+      style: TextStyle(
+        fontSize: fontSize ?? 15,
         fontWeight: FontWeight.w500,
       ),
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
         errorText: errorText,
-        contentPadding:
+        contentPadding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         hintText: hintText,
-        hintStyle: const TextStyle(
-          fontSize: 15,
-          color: Color(0xFF8E8E8E),
+        hintStyle: TextStyle(
+          fontSize: fontSize ?? 15,
+          color: const Color(0xFF8E8E8E),
           fontWeight: FontWeight.w500,
         ),
         prefixText: prefixText != null ? '$prefixText ' : null,
         prefixIcon: prefix,
         suffixIcon: suffix,
-        prefixStyle: const TextStyle(
-          fontSize: 15,
+        prefixStyle: TextStyle(
+          fontSize: fontSize ?? 15,
           fontWeight: FontWeight.w500,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: borderRadius ?? BorderRadius.circular(40),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: borderRadius ?? BorderRadius.circular(40),
           borderSide: enableFocusColor
               ? const BorderSide(
                   color: ColorName.primaryColor,

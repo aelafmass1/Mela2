@@ -1880,8 +1880,7 @@ class _SentTabState extends State<SentTab> {
             BlocConsumer<PaymentIntentBloc, PaymentIntentState>(
               listener: (context, paymentState) async {
                 if (paymentState is PaymentIntentFail) {
-                  showSnackbar(context,
-                      title: 'Error', description: paymentState.reason);
+                  showSnackbar(context, description: paymentState.reason);
                 } else if (paymentState is PaymentIntentSuccess) {
                   /// Initializes and presents a Stripe payment sheet for processing a payment.
                   ///
@@ -1891,10 +1890,10 @@ class _SentTabState extends State<SentTab> {
                   /// Logs any errors encountered during the process.
                   try {
                     final clientSecret = paymentState.clientSecret;
-
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
                           paymentIntentClientSecret: clientSecret,
+                          customFlow: true,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
                           appearance: const PaymentSheetAppearance(
