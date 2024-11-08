@@ -333,6 +333,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/request_logo.svg
   String get requestLogo => 'assets/images/svgs/request_logo.svg';
 
+  /// File path: assets/images/svgs/search.svg
+  String get search => 'assets/images/svgs/search.svg';
+
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
@@ -341,6 +344,12 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
+
+  /// File path: assets/images/svgs/user_group.svg
+  String get userGroup => 'assets/images/svgs/user_group.svg';
+
+  /// File path: assets/images/svgs/wallet_02.svg
+  String get wallet02 => 'assets/images/svgs/wallet_02.svg';
 
   /// File path: assets/images/svgs/wallet_pattern.svg
   String get walletPattern => 'assets/images/svgs/wallet_pattern.svg';
@@ -376,9 +385,12 @@ class $AssetsImagesSvgsGen {
         melaLogo,
         qrcodeLogo,
         requestLogo,
+        search,
         sendIcon,
         spinWheel,
         transactionIcon,
+        userGroup,
+        wallet02,
         walletPattern,
         withdrawLogo
       ];

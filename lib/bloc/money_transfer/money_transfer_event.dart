@@ -13,3 +13,17 @@ final class SendMoney extends MoneyTransferEvent {
     required this.savedPaymentId,
   });
 }
+
+final class TransferToOwnWallet extends MoneyTransferEvent {
+  final int fromWalletId;
+  final int toWalletId;
+  final double amount;
+  final String note;
+
+  TransferToOwnWallet({
+    required this.fromWalletId,
+    required this.toWalletId,
+    required this.amount,
+    required this.note,
+  });
+}

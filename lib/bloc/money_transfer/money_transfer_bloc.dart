@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +17,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
   MoneyTransferBloc({required this.repository})
       : super(MoneyTransferInitial()) {
     on<SendMoney>(_onSendMoney);
+    on<TransferToOwnWallet>(_onTransferToOwnWallet);
   }
   _onSendMoney(SendMoney event, Emitter emit) async {
     try {
@@ -34,6 +36,38 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
             return emit(MoneyTransferFail(reason: res['error']));
           }
           emit(MoneyTransferSuccess());
+        }
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(MoneyTransferFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(MoneyTransferFail(reason: error.toString()));
+    }
+  }
+
+  FutureOr<void> _onTransferToOwnWallet(
+      TransferToOwnWallet event, Emitter<MoneyTransferState> emit) async {
+    try {
+      if (state is! MoneyTransferLoading) {
+        emit(MoneyTransferLoading());
+        final token = await getToken();
+        if (token != null) {
+          final res = await repository.transferToOwnWallet(
+            accessToken: token,
+            fromWalletId: event.fromWalletId,
+            toWalletId: event.toWalletId,
+            amount: event.amount,
+            note: event.note,
+          );
+          if (res.containsKey('error')) {
+            return emit(MoneyTransferFail(reason: res['error']));
+          }
+          emit(MoneyTransferOwnWalletSuccess());
         }
       }
     } on ServerException catch (error, stackTrace) {

@@ -23,6 +23,9 @@ import 'package:transaction_mobile_app/presentation/screens/send_invitation_scre
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-wallet/transfer_to_wallet_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-other-screen/transfer_to_other_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/transfer/components/transfer_to_section.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
 
@@ -30,6 +33,7 @@ import '../presentation/screens/forget_password_screen/forget_password_screen.da
 import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
+import '../presentation/screens/transfer/transfer-user-search/user_search.dart';
 
 class RouteName {
   static const splash = 'splash_screen';
@@ -61,10 +65,15 @@ class RouteName {
   static const forgetPassword = 'forget_screen';
   static const newPassword = 'new_password_screen';
   static const newPincode = 'new_pincode_screen';
+  static const transferToWallet = 'transfer_to_wallet_screen_screen';
+  static const transferToOther = 'transfer_to_other_screen';
+  static const userSearch = 'user_search_screen';
 }
 
 final goRouting = GoRouter(
   initialLocation: '/splash',
+  // initialLocation: '/transfer_to_wallet_screen',
+
   routes: [
     GoRoute(
       path: '/welcome',
@@ -161,6 +170,21 @@ final goRouting = GoRouter(
           ),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/transfer_to_wallet_screen',
+      name: RouteName.transferToWallet,
+      builder: (context, state) => const SendMoneyScreen(),
+    ),
+    GoRoute(
+      path: '/transfer_to_other_screen',
+      name: RouteName.transferToOther,
+      builder: (context, state) => const TransferToOtherScreen(),
+    ),
+    GoRoute(
+      path: '/user_search_screen',
+      name: RouteName.userSearch,
+      builder: (context, state) => const UserSearchScreen(),
     ),
     GoRoute(
       path: '/login',

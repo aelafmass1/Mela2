@@ -13,3 +13,5 @@ final class MoneyTransferFail extends MoneyTransferState {
 }
 
 final class MoneyTransferSuccess extends MoneyTransferState {}
+
+final class MoneyTransferOwnWalletSuccess extends MoneyTransferState {}

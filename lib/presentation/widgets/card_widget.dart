@@ -6,6 +6,7 @@ class CardWidget extends StatelessWidget {
   final double? height;
   final EdgeInsets? padding;
   final BorderRadius? borderRadius;
+  final BoxBorder? border;
   const CardWidget({
     super.key,
     required this.child,
@@ -13,15 +14,17 @@ class CardWidget extends StatelessWidget {
     this.height,
     this.padding,
     this.borderRadius,
+    this.border,
   });
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       height: height,
       width: width,
       padding: padding,
       decoration: BoxDecoration(
+        border: border,
         color: Colors.white,
         borderRadius: borderRadius ?? BorderRadius.circular(24),
         boxShadow: [
