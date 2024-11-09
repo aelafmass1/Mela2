@@ -1893,7 +1893,7 @@ class _SentTabState extends State<SentTab> {
                     await Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: SetupPaymentSheetParameters(
                           paymentIntentClientSecret: clientSecret,
-                          customFlow: true,
+                          customFlow: false,
                           customerId: paymentState.customerId,
                           merchantDisplayName: 'Mela Fi',
                           appearance: const PaymentSheetAppearance(
