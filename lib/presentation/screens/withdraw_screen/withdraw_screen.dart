@@ -29,7 +29,11 @@ class WithdrawScreen extends StatefulWidget {
 class _WithdrawScreenState extends State<WithdrawScreen> {
   final amountController = TextEditingController();
   final noteController = TextEditingController();
+
   String selectedCurrency = 'usd';
+
+  bool showCheckDetail = false;
+  bool isAnimationFinished = false;
 
   WalletModel? selectedWalletModel;
   int selectBankAccountIndex = -1;
@@ -180,7 +184,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        //
+                        if (showCheckDetail == false) {
+                          setState(() {
+                            showCheckDetail = true;
+                          });
+                        }
                       }),
                 )
               ],
@@ -314,61 +322,105 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           ),
           const SizedBox(height: 10),
           for (int i = 0; i < 2; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: CardWidget(
-                boxBorder: Border.all(
-                  color: selectBankAccountIndex == i
-                      ? ColorName.primaryColor
-                      : Colors.transparent,
-                ),
-                alignment: Alignment.center,
-                borderRadius: BorderRadius.circular(24),
-                width: 100.sw,
-                height: 65,
-                child: ListTile(
-                  shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(50)),
-                  onTap: () {
-                    setState(() {
-                      selectBankAccountIndex = i;
-                    });
-                  },
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                  leading: Container(
-                    width: 44,
-                    height: 44,
-                    clipBehavior: Clip.antiAlias,
-                    padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ColorName.primaryColor,
+            AnimatedOpacity(
+              opacity: (showCheckDetail == true && selectBankAccountIndex != i)
+                  ? 0
+                  : 1,
+              duration: const Duration(milliseconds: 400),
+              onEnd: () {
+                if (showCheckDetail == true) {
+                  setState(() {
+                    isAnimationFinished = true;
+                  });
+                }
+              },
+              child: Visibility(
+                visible: (isAnimationFinished && selectBankAccountIndex != i) ==
+                    false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: CardWidget(
+                    boxBorder: Border.all(
+                      color: selectBankAccountIndex == i
+                          ? ColorName.primaryColor
+                          : Colors.transparent,
                     ),
-                    child: SvgPicture.asset(Assets.images.svgs.bankLogo),
-                  ),
-                  title: const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextWidget(
-                        text: 'Bank Account',
-                        fontSize: 14,
+                    alignment: Alignment.center,
+                    borderRadius: BorderRadius.circular(24),
+                    width: 100.sw,
+                    height: 65,
+                    child: ListTile(
+                      shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(50)),
+                      onTap: () {
+                        setState(() {
+                          selectBankAccountIndex = i;
+                        });
+                      },
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 10),
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        clipBehavior: Clip.antiAlias,
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ColorName.primaryColor,
+                        ),
+                        child: SvgPicture.asset(Assets.images.svgs.bankLogo),
                       ),
-                      TextWidget(
-                        text: '10001800110011001',
-                        fontSize: 10,
-                        color: ColorName.grey,
-                      )
-                    ],
-                  ),
-                  trailing: Checkbox(
-                    shape: const CircleBorder(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectBankAccountIndex = i;
-                      });
-                    },
-                    value: selectBankAccountIndex == i,
+                      title: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextWidget(
+                            text: 'Bank Account',
+                            fontSize: 14,
+                          ),
+                          TextWidget(
+                            text: '10001800110011001',
+                            fontSize: 10,
+                            color: ColorName.grey,
+                          )
+                        ],
+                      ),
+                      trailing: showCheckDetail && selectBankAccountIndex == i
+                          ? SizedBox(
+                              width: 58,
+                              height: 30,
+                              child: ButtonWidget(
+                                  borderRadius: BorderRadius.circular(20),
+                                  topPadding: 0,
+                                  verticalPadding: 0,
+                                  color: Colors.white,
+                                  borderSide: const BorderSide(
+                                      color: ColorName.primaryColor),
+                                  child: const TextWidget(
+                                    text: 'Change',
+                                    color: ColorName.primaryColor,
+                                    fontSize: 10,
+                                  ),
+                                  onPressed: () {
+                                    if (selectBankAccountIndex == i) {
+                                      setState(() {
+                                        showCheckDetail = false;
+                                        isAnimationFinished = false;
+                                        selectBankAccountIndex = -1;
+                                      });
+                                    }
+                                  }),
+                            )
+                          : Checkbox(
+                              shape: const CircleBorder(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectBankAccountIndex = i;
+                                });
+                              },
+                              value: selectBankAccountIndex == i,
+                            ),
+                    ),
                   ),
                 ),
               ),
@@ -478,24 +530,27 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 
   _buildNote() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const TextWidget(
-            text: 'Note',
-            weight: FontWeight.w700,
-            type: TextType.small,
-          ),
-          const SizedBox(height: 15),
-          TextFieldWidget(
-            maxLines: 3,
-            borderRadius: BorderRadius.circular(10),
-            controller: noteController,
-            hintText: 'Write your note',
-          )
-        ],
+    return Visibility(
+      visible: showCheckDetail == false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const TextWidget(
+              text: 'Note',
+              weight: FontWeight.w700,
+              type: TextType.small,
+            ),
+            const SizedBox(height: 15),
+            TextFieldWidget(
+              maxLines: 3,
+              borderRadius: BorderRadius.circular(10),
+              controller: noteController,
+              hintText: 'Write your note',
+            )
+          ],
+        ),
       ),
     );
   }
