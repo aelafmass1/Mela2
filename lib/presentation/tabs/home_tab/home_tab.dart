@@ -12,7 +12,6 @@ import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/bank_rate_shimmer.dart';
@@ -70,7 +69,7 @@ class _HomeTabState extends State<HomeTab> {
       }
     });
     context.read<WalletBloc>().add(FetchWallets());
-    // context.read<WalletBloc>().add(CreateWallet(currency: 'ETB'));
+    // context.read<WalletBloc>().add(CreateWallet(currency: 'EUR'));
 
     // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());

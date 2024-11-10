@@ -269,6 +269,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/back_space.svg
   String get backSpace => 'assets/images/svgs/back_space.svg';
 
+  /// File path: assets/images/svgs/bank_logo.svg
+  String get bankLogo => 'assets/images/svgs/bank_logo.svg';
+
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
 
@@ -351,6 +354,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/wallet_02.svg
   String get wallet02 => 'assets/images/svgs/wallet_02.svg';
 
+  /// File path: assets/images/svgs/wallet_logo.svg
+  String get walletLogo => 'assets/images/svgs/wallet_logo.svg';
+
   /// File path: assets/images/svgs/wallet_pattern.svg
   String get walletPattern => 'assets/images/svgs/wallet_pattern.svg';
 
@@ -364,6 +370,7 @@ class $AssetsImagesSvgsGen {
         amountIcon,
         backArrow,
         backSpace,
+        bankLogo,
         cameraIcon,
         cardPattern,
         checkmarkIcon,
@@ -391,6 +398,7 @@ class $AssetsImagesSvgsGen {
         transactionIcon,
         userGroup,
         wallet02,
+        walletLogo,
         walletPattern,
         withdrawLogo
       ];

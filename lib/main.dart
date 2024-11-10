@@ -27,6 +27,7 @@ import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet_currency/wallet_currency_bloc.dart';
 import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
@@ -224,6 +225,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => WalletBloc(
+            repository: walletRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => WalletCurrencyBloc(
             repository: walletRepository,
           ),
         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -22,7 +24,7 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.addMoney,
             title: 'Add Money',
             onTab: () {
-              // TODO
+              context.pushNamed(RouteName.addMoney);
             },
           ),
           _buildOptionButton(
@@ -60,7 +62,7 @@ class WalletOptions extends StatelessWidget {
   }) {
     return SizedBox(
       width: 85,
-      height: 60,
+      height: 68,
       child: ButtonWidget(
         borderRadius: BorderRadius.circular(10),
         elevation: 0,
@@ -70,7 +72,7 @@ class WalletOptions extends StatelessWidget {
           children: [
             // ignore: deprecated_member_use
             SvgPicture.asset(iconPath, width: 18, height: 18, color: iconColor),
-            const SizedBox(height: 3),
+            const SizedBox(height: 5),
             TextWidget(
               text: title,
               fontSize: 10,

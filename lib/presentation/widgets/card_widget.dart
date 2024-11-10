@@ -6,7 +6,8 @@ class CardWidget extends StatelessWidget {
   final double? height;
   final EdgeInsets? padding;
   final BorderRadius? borderRadius;
-  final BoxBorder? border;
+  final BoxBorder? boxBorder;
+  final Alignment? alignment;
   const CardWidget({
     super.key,
     required this.child,
@@ -14,18 +15,20 @@ class CardWidget extends StatelessWidget {
     this.height,
     this.padding,
     this.borderRadius,
-    this.border,
+    this.boxBorder,
+    this.alignment,
   });
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
+      alignment: alignment,
       height: height,
       width: width,
       padding: padding,
       decoration: BoxDecoration(
-        border: border,
         color: Colors.white,
+        border: boxBorder,
         borderRadius: borderRadius ?? BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(

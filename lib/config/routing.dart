@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/presentation/screens/add_money_screen/add_money_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page_dynamic.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/equb_creation_sceen.dart';
@@ -68,6 +69,7 @@ class RouteName {
   static const transferToWallet = 'transfer_to_wallet_screen_screen';
   static const transferToOther = 'transfer_to_other_screen';
   static const userSearch = 'user_search_screen';
+  static const addMoney = 'add_money_screen';
 }
 
 final goRouting = GoRouter(
@@ -168,6 +170,11 @@ final goRouting = GoRouter(
           builder: (context, state) => CompletePage(
             equbName: state.extra as String,
           ),
+        ),
+        GoRoute(
+          path: 'add_money_screen',
+          name: RouteName.addMoney,
+          builder: (context, state) => const AddMoneyScreen(),
         ),
       ],
     ),

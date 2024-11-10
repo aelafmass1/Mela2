@@ -40,3 +40,16 @@ final class CreateWalletFail extends WalletState {
 final class CreateWalletSuccess extends WalletState {
   CreateWalletSuccess({required super.wallets});
 }
+
+final class AddFundToWalletLoading extends WalletState {
+  AddFundToWalletLoading({required super.wallets});
+}
+
+final class AddFundToWalletFail extends WalletState {
+  final String reason;
+  AddFundToWalletFail({required super.wallets, required this.reason});
+}
+
+final class AddFundToWalletSuccess extends WalletState {
+  AddFundToWalletSuccess({required super.wallets});
+}

@@ -19,19 +19,22 @@ class WalletCardsStack extends StatefulWidget {
 
 class _WalletCardsStackState extends State<WalletCardsStack> {
   final random = math.Random();
-  double stackHeight = 240;
+  double stackHeight = 190;
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       height: stackHeight,
       width: 93.sw,
       child: BlocConsumer<WalletBloc, WalletState>(
         listener: (context, state) {
           if (state is FetchWalletSuccess) {
-            if (state.wallets.length > 2) {
+            setState(() {
+              stackHeight = 190;
+            });
+            if (state.wallets.length > 1) {
               setState(() {
-                stackHeight = stackHeight + ((state.wallets.length - 2) * 50);
+                stackHeight = stackHeight + ((state.wallets.length - 1) * 50);
               });
             }
           }
@@ -40,13 +43,13 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
           if (state is FetchWalletsLoading) {
             return Stack(
               children: [
-                CustomShimmer(
-                  borderRadius: BorderRadius.circular(24),
-                  width: 93.sw,
-                  height: 160,
-                ),
+                // CustomShimmer(
+                //   borderRadius: BorderRadius.circular(24),
+                //   width: 93.sw,
+                //   height: 160,
+                // ),
                 Positioned(
-                  top: 50,
+                  // top: 50,
                   child: CustomShimmer(
                     baseColor: ColorName.primaryColor.shade300,
                     borderRadius: BorderRadius.circular(24),
