@@ -78,7 +78,8 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
       );
     } catch (error) {
       log(error.toString());
-      emit(MoneyTransferFail(reason: error.toString()));
+      final errorMessage = (error as Map)['errorMessage'];
+      emit(MoneyTransferFail(reason: errorMessage));
     }
   }
 }

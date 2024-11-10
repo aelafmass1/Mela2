@@ -110,7 +110,7 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
                         },
                         borderRadius: BorderRadius.circular(20),
                         child: CardWidget(
-                          border: Border.all(
+                          boxBorder: Border.all(
                             color: isSelected
                                 ? ColorName.primaryColor
                                 : Colors.transparent,

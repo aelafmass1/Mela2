@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-class NoteSection extends StatelessWidget {
+class NoteSection extends StatefulWidget {
   const NoteSection({super.key});
 
+  @override
+  State<NoteSection> createState() => NoteSectionState();
+}
+
+class NoteSectionState extends State<NoteSection> {
+  final noteKey = GlobalKey<FormFieldState>();
+  final controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,7 +34,7 @@ class NoteSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         TextField(
-          controller: TextEditingController(),
+          controller: controller,
           maxLines: 3,
           decoration: InputDecoration(
             hintText: 'Write your note',

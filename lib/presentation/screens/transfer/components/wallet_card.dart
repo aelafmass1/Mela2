@@ -32,7 +32,7 @@ class WalletCard extends StatelessWidget {
           child: CardWidget(
             width: double.infinity,
             padding: const EdgeInsets.all(15),
-            border: Border.all(
+            boxBorder: Border.all(
                 color:
                     isSelected ? ColorName.primaryColor : ColorName.lightBlack),
             child: Row(
@@ -59,16 +59,12 @@ class WalletCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (isSelected)
-                  const Icon(
-                    Icons.check_circle,
-                    color: ColorName.primaryColor,
-                  ),
-                if (!isSelected)
-                  Icon(
-                    Icons.radio_button_unchecked,
-                    color: ColorName.grey.withOpacity(0.5),
-                  ),
+                Checkbox(
+                  activeColor: ColorName.primaryColor,
+                  shape: const CircleBorder(),
+                  value: isSelected,
+                  onChanged: (_) => onTap(),
+                ),
               ],
             ),
           ),

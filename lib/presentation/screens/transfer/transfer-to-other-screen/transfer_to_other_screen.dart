@@ -1,25 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/gen/assets.gen.dart';
-import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/components/enter_amount_section.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/components/note_section.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/components/search_btn.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/components/transfer_to_section.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/components/transfer_app_bar.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../config/routing.dart';
-import '../../../../core/utils/show_login_page.dart';
 import '../../../../core/utils/show_pincode.dart';
 import '../components/check_details_section.dart';
-import '../components/recents_section.dart';
-import '../components/wallet_card.dart';
-import '../components/amount_input.dart';
-import '../components/note_input.dart';
-import '../components/recents/recent_sent_user_vertical_list.dart';
 import '../components/recents/recent_sent_users_horizontal_list.dart';
 
 class TransferToOtherScreen extends StatefulWidget {

@@ -1,23 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/gen/assets.gen.dart';
-import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/enter_amount_section.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/note_section.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/search_btn.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/transfer_to_section.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/transfer_app_bar.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../../../config/routing.dart';
-import '../../../widgets/check_details_section.dart';
-import '../../../widgets/recents_section.dart';
+import '../../../components/check_details_section.dart';
+import '../../../components/enter_amount_section.dart';
+import '../../../components/note_section.dart';
+import '../../../components/search_btn.dart';
+import '../../../components/transfer_app_bar.dart';
+import '../../../components/transfer_to_section.dart';
 import '../../../widgets/wallet_card.dart';
-import '../../../widgets/amount_input.dart';
-import '../../../widgets/note_input.dart';
-import '../recents/recent_sent_user_vertical_list.dart';
 import '../recents/recent_sent_users_horizontal_list.dart';
 
 class TransferMoney extends StatefulWidget {
@@ -113,9 +105,7 @@ class _TransferMoneyState extends State<TransferMoney> {
                   text: 'Transfer Money',
                   color: Colors.white,
                 ),
-                onPressed: () {
-                  // Handle transfer
-                },
+                onPressed: () {},
               ),
             ),
           );

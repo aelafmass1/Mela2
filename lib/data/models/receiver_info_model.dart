@@ -42,7 +42,7 @@ class ReceiverInfo {
           receiverAccountNumber ?? this.receiverAccountNumber,
       amount: amount ?? this.amount,
       serviceChargePayer: serviceChargePayer ?? this.serviceChargePayer,
-      transactionDate: trasactionDate ?? this.transactionDate,
+      transactionDate: trasactionDate ?? transactionDate,
       publicToken: publicToken ?? this.publicToken,
       paymentType: paymentType ?? this.paymentType,
     );

@@ -6,7 +6,6 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../widgets/card_widget.dart';
 import '../../../widgets/transfer_modal_sheet.dart';
 
 class WalletOptions extends StatelessWidget {

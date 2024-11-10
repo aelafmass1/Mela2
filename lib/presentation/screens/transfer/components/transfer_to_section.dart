@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/components/wallet_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/borderd_rounded_button.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../../../bloc/wallet/wallet_bloc.dart';
 
 class TransferWalletsSection extends StatefulWidget {
   const TransferWalletsSection({super.key});
 
   @override
-  State<TransferWalletsSection> createState() => _TransferWalletsSectionState();
+  TransferWalletsSectionState createState() => TransferWalletsSectionState();
 }
 
-class _TransferWalletsSectionState extends State<TransferWalletsSection> {
+class TransferWalletsSectionState extends State<TransferWalletsSection> {
   int selectedWallet = 0;
+  int selectedWalletIndex = 0;
+  @override
+  void initState() {
+    final state = context.read<WalletBloc>().state;
+    selectedWalletIndex = 0;
+    selectedWallet = state.wallets[0].walletId;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,24 +40,82 @@ class _TransferWalletsSectionState extends State<TransferWalletsSection> {
           weight: FontWeight.w600,
         ),
         const SizedBox(height: 14),
-        ...List.generate(
-          3,
-          (index) {
-            final isSelected = index == selectedWallet;
-            return WalletCard(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              currency: 'USD',
-              amount: '\$18,809',
-              flagImage: Assets.images.usaFlag.path,
-              isSelected: isSelected,
-              onTap: () {
-                setState(() {
-                  selectedWallet = index;
-                });
-              },
-            );
-          },
-        ),
+        BlocConsumer<WalletBloc, WalletState>(builder: (context, state) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < state.wallets.length; i++)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CardWidget(
+                      boxBorder: Border.all(
+                        color: selectedWalletIndex == i
+                            ? ColorName.primaryColor
+                            : Colors.transparent,
+                      ),
+                      alignment: Alignment.center,
+                      borderRadius: BorderRadius.circular(24),
+                      width: 100.sw,
+                      height: 65,
+                      child: ListTile(
+                        shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(50)),
+                        onTap: () {
+                          setState(() {
+                            selectedWalletIndex = i;
+                            selectedWallet = state.wallets[i].walletId;
+                          });
+                        },
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 10),
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          clipBehavior: Clip.antiAlias,
+                          decoration:
+                              const BoxDecoration(shape: BoxShape.circle),
+                          child: Image.asset(
+                            'icons/currency/${state.wallets[i].currency.toLowerCase()}.png',
+                            package: 'currency_icons',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidget(
+                              text:
+                                  '${state.wallets[i].currency.toUpperCase()} Wallet',
+                              fontSize: 14,
+                            ),
+                            TextWidget(
+                              text:
+                                  '${state.wallets[i].currency.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
+                              fontSize: 10,
+                            )
+                          ],
+                        ),
+                        trailing: Checkbox(
+                          shape: const CircleBorder(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedWalletIndex = i;
+                            });
+                          },
+                          value: selectedWalletIndex == i,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                  ],
+                ),
+            ],
+          );
+        }, listener: (BuildContext context, WalletState state) {
+          selectedWallet = state.wallets.firstOrNull?.walletId ?? 0;
+        }),
         Align(
           alignment: Alignment.topRight,
           child: SizedBox(

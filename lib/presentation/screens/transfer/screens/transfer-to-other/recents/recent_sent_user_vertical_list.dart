@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/screens/transfer-to-other/recents/recent_sent_users_horizontal_list.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/search_btn.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/widgets/transfer_app_bar.dart';
-
 import '../../../../../widgets/text_widget.dart';
 
 class RecentSentUserVerticallList extends StatefulWidget {

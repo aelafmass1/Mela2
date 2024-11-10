@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../../gen/assets.gen.dart';
+import '../../../../bloc/wallet_currency/wallet_currency_bloc.dart';
 
 class EnterAmountSection extends StatefulWidget {
   const EnterAmountSection({super.key});
 
   @override
-  State<EnterAmountSection> createState() => _EnterAmountSectionState();
+  EnterAmountSectionState createState() => EnterAmountSectionState();
 }
 
-class _EnterAmountSectionState extends State<EnterAmountSection> {
+class EnterAmountSectionState extends State<EnterAmountSection> {
   final TextEditingController controller = TextEditingController();
+  final FocusNode amountFocus = FocusNode();
+  String selectedCurrency = 'usd';
+
+  final key = GlobalKey<FormState>();
+  bool validated() {
+    if (key.currentState?.validate() == true) {
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -25,73 +37,90 @@ class _EnterAmountSectionState extends State<EnterAmountSection> {
           weight: FontWeight.w600,
         ),
         const SizedBox(height: 10),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.start,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          decoration: InputDecoration(
-            suffixIcon: ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: DropdownButton<String>(
-                value: 'USD',
-                underline: Container(),
-                icon: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: ColorName.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 10),
-                        child: CircleAvatar(
-                          radius: 12,
-                          backgroundImage:
-                              AssetImage(Assets.images.usaFlag.path),
-                        ),
-                      ),
-                      const Icon(Icons.keyboard_arrow_down,
-                          color: ColorName.grey),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'USD',
-                    child: SizedBox.shrink(),
-                  ),
-                  DropdownMenuItem(
-                    value: 'EUR',
-                    child: SizedBox.shrink(),
-                  ),
-                  DropdownMenuItem(
-                    value: 'GBP',
-                    child: SizedBox.shrink(),
-                  ),
-                ],
-                onChanged: (String? value) {
-                  // Handle currency selection
-                },
-              ),
-            ),
-            hintText: '0.00',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
-                color: ColorName.grey.withOpacity(0.3),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: const BorderSide(
-                color: ColorName.primaryColor,
-              ),
+        Form(
+          key: key,
+          child: TextFieldWidget(
+            focusNode: amountFocus,
+            onChanged: (p0) {
+              if (p0.isNotEmpty) {
+                setState(() {});
+              }
+            },
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            validator: (text) {
+              if (text?.isEmpty == true) {
+                return 'Amount is Empty';
+              }
+              return null;
+            },
+            keyboardType: TextInputType.phone,
+            fontSize: 20,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+            hintText: '00.00',
+            prefixText: '\$',
+            borderRadius: BorderRadius.circular(24),
+            controller: controller,
+            suffix: BlocBuilder<WalletCurrencyBloc, WalletCurrencyState>(
+              builder: (context, state) {
+                if (state is FetchWalletCurrencySuccess) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
+                    width: 102,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F9F9),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: state.currencies.isNotEmpty
+                        ? DropdownButton(
+                            underline: const SizedBox.shrink(),
+                            value: selectedCurrency,
+                            items: [
+                              for (var currency in state.currencies)
+                                DropdownMenuItem(
+                                  value: currency.toLowerCase(),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 14,
+                                        height: 14,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Image.asset(
+                                          'icons/currency/${currency.toLowerCase()}.png',
+                                          fit: BoxFit.cover,
+                                          package: 'currency_icons',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      TextWidget(
+                                        text: currency,
+                                        fontSize: 12,
+                                        weight: FontWeight.w700,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                            ],
+                            onChanged: (value) {
+                              if (value is String?) {
+                                setState(() {
+                                  selectedCurrency = value ?? 'usd';
+                                });
+                              }
+                            })
+                        : const SizedBox.shrink(),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ),
         ),

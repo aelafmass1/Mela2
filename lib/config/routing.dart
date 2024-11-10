@@ -26,7 +26,6 @@ import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-wallet/transfer_to_wallet_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-other-screen/transfer_to_other_screen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/components/transfer_to_section.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
 
@@ -35,6 +34,7 @@ import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
 import '../presentation/screens/transfer/transfer-user-search/user_search.dart';
+import '../presentation/widgets/receipt_page_2.dart';
 
 class RouteName {
   static const splash = 'splash_screen';
@@ -70,6 +70,8 @@ class RouteName {
   static const transferToOther = 'transfer_to_other_screen';
   static const userSearch = 'user_search_screen';
   static const addMoney = 'add_money_screen';
+
+  static const String receiptPage2 = 'receipt_page_2';
 }
 
 final goRouting = GoRouter(
@@ -144,6 +146,13 @@ final goRouting = GoRouter(
           path: 'receipt',
           name: RouteName.receipt,
           builder: (context, state) => ReceiptScreen(
+            receiverInfo: state.extra as ReceiverInfo,
+          ),
+        ),
+        GoRoute(
+          path: 'receipt_page_2',
+          name: RouteName.receiptPage2,
+          builder: (context, state) => ReceiptPage2(
             receiverInfo: state.extra as ReceiverInfo,
           ),
         ),
