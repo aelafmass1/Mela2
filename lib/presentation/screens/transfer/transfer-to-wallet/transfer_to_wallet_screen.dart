@@ -32,6 +32,15 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   String selectedCurrency = 'USD';
   double facilityFee = 12.08;
   double bankFee = 94.28;
+  bool isNext() {
+    final isTransferToSummerizing = toWaletKey.currentState?.isSummerizing;
+
+    if (isTransferToSummerizing == true) {
+      return true;
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
