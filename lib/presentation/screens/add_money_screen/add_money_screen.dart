@@ -16,6 +16,7 @@ import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/core/utils/show_change_wallet_modal.dart';
+import 'package:transaction_mobile_app/presentation/screens/add_money_screen/components/add_payment_method_widget.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
@@ -537,15 +538,54 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 30),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TextWidget(
-                text: 'Connect Accounts',
-                weight: FontWeight.w700,
-                type: TextType.small,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const TextWidget(
+                    text: 'Connect Accounts',
+                    weight: FontWeight.w700,
+                    type: TextType.small,
+                  ),
+                  SizedBox(
+                    width: 123,
+                    height: 35,
+                    child: ButtonWidget(
+                      topPadding: 0,
+                      verticalPadding: 0,
+                      borderRadius: BorderRadius.circular(10),
+                      elevation: 2,
+                      color: Colors.white,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            color: ColorName.primaryColor,
+                            size: 18,
+                          ),
+                          SizedBox(width: 5),
+                          TextWidget(
+                            text: 'Add New Card',
+                            fontSize: 12,
+                            color: ColorName.primaryColor,
+                          )
+                        ],
+                      ),
+                      onPressed: () async {
+                        showModalBottomSheet(
+                          context: context,
+                          scrollControlDisabledMaxHeightRatio: 1,
+                          builder: (_) => const AddPaymentMethodWidget(),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 20),
             AnimatedOpacity(
               opacity:
                   (showFee == true && selectedPaymentMethodIndex != 0) ? 0 : 1,

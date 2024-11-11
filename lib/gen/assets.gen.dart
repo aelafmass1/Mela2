@@ -64,6 +64,10 @@ class $AssetsImagesGen {
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
 
+  /// File path: assets/images/discover_logo.png
+  AssetGenImage get discoverLogo =>
+      const AssetGenImage('assets/images/discover_logo.png');
+
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
 
@@ -134,6 +138,10 @@ class $AssetsImagesGen {
   AssetGenImage get oromiaBankLogo =>
       const AssetGenImage('assets/images/oromia_bank_logo.png');
 
+  /// File path: assets/images/paypal_logo.png
+  AssetGenImage get paypalLogo =>
+      const AssetGenImage('assets/images/paypal_logo.png');
+
   /// File path: assets/images/profile_image.png
   AssetGenImage get profileImage =>
       const AssetGenImage('assets/images/profile_image.png');
@@ -201,6 +209,7 @@ class $AssetsImagesGen {
         checkedLogo,
         contactPageImage,
         dashnBankLogo,
+        discoverLogo,
         dollar,
         doodles,
         enatBankLogo,
@@ -219,6 +228,7 @@ class $AssetsImagesGen {
         nextArrow,
         nibBankLogo,
         oromiaBankLogo,
+        paypalLogo,
         profileImage,
         receipt,
         reward,

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
@@ -73,14 +74,19 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
   _onPaymentCard(AddPaymentCard event, Emitter emit) async {
     try {
       if (state is! PaymentCardLoading) {
-        List<PaymentCardModel> cards = state.paymentCards;
-
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
-        final token = await getToken();
+        final accessToken = await getToken();
+        final token = await Stripe.instance.createToken(
+          const CreateTokenParams.card(
+            params: CardTokenParams(
+              type: TokenType.Card,
+            ),
+          ),
+        );
 
         final res = await repository.addPaymentCard(
-          accessToken: token!,
-          token: event.token,
+          accessToken: accessToken ?? '',
+          token: token.id,
         );
         if (res.containsKey('error')) {
           return emit(PaymentCardFail(
@@ -88,11 +94,9 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
             paymentCards: state.paymentCards,
           ));
         }
-        final newCard = PaymentCardModel.fromMap(res);
-        cards.add(newCard);
 
         emit(PaymentCardSuccess(
-          paymentCards: cards,
+          paymentCards: state.paymentCards,
         ));
       }
     } on ServerException catch (error, stackTrace) {
@@ -101,6 +105,15 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       await Sentry.captureException(
         error,
         stackTrace: stackTrace,
+      );
+    } on StripeException catch (stripe) {
+      log(state.toString());
+      emit(
+        PaymentCardFail(
+          reason: stripe.error.message ??
+              'Failed to process card. Please try again.',
+          paymentCards: state.paymentCards,
+        ),
       );
     } catch (error) {
       log(error.toString());
