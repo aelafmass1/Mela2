@@ -9,7 +9,6 @@ import '../../../components/note_section.dart';
 import '../../../components/search_btn.dart';
 import '../../../components/transfer_app_bar.dart';
 import '../../../components/transfer_to_section.dart';
-import '../../../widgets/wallet_card.dart';
 import '../recents/recent_sent_users_horizontal_list.dart';
 
 class TransferMoney extends StatefulWidget {

@@ -8,7 +8,6 @@ import '../../../components/enter_amount_section.dart';
 import '../../../components/note_section.dart';
 import '../../../components/transfer_app_bar.dart';
 import '../../../components/transfer_to_section.dart';
-import '../../../widgets/wallet_card.dart';
 
 class SendMoneyScreen extends StatefulWidget {
   const SendMoneyScreen({super.key});
