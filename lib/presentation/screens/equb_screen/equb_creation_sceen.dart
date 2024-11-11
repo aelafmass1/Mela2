@@ -785,7 +785,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                         color: ColorName.primaryColor,
                       ),
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
               // Visibility(
               //     visible: kIsWeb == false,
               //     child: WebViewWidget(
@@ -1346,7 +1346,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   children: [
                     SvgPicture.asset(
                       Assets.images.svgs.endTimeIcon,
-                      color: Color(0xfF6D6D6D),
+                      color: const Color(0xfF6D6D6D),
                     ),
                     const SizedBox(width: 10),
                     const TextWidget(
@@ -1369,7 +1369,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   children: [
                     SvgPicture.asset(
                       Assets.images.svgs.frequencyIcon,
-                      color: Color(0xfF6D6D6D),
+                      color: const Color(0xfF6D6D6D),
                     ),
                     const SizedBox(width: 10),
                     const TextWidget(
@@ -1391,7 +1391,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   children: [
                     SvgPicture.asset(
                       Assets.images.svgs.equbIcon,
-                      color: Color(0xfF6D6D6D),
+                      color: const Color(0xfF6D6D6D),
                       width: 14,
                       height: 14,
                     ),
@@ -1415,7 +1415,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
                   children: [
                     SvgPicture.asset(
                       Assets.images.svgs.amountIcon,
-                      color: Color(0xfF6D6D6D),
+                      color: const Color(0xfF6D6D6D),
                     ),
                     const SizedBox(width: 10),
                     const TextWidget(

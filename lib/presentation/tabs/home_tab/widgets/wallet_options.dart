@@ -6,6 +6,8 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../widgets/transfer_modal_sheet.dart';
+
 class WalletOptions extends StatelessWidget {
   const WalletOptions({super.key});
 
@@ -29,7 +31,7 @@ class WalletOptions extends StatelessWidget {
             iconColor: Colors.black,
             title: 'Transfer',
             onTab: () {
-              // TODO
+              showTransferModalSheet(context);
             },
           ),
           _buildOptionButton(

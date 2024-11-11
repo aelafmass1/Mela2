@@ -52,4 +52,43 @@ class MoneyTransferRepository {
     }
     return processErrorResponse(data);
   }
+
+  /// Transfers money between own wallets
+  ///
+  /// [accessToken] is the authentication token required to make the request.
+  /// [fromWalletId] is the ID of the source wallet
+  /// [toWalletId] is the ID of the destination wallet
+  /// [amount] is the amount to transfer
+  ///
+  /// Returns a map with either a 'success' key containing the response data, or an 'error' key containing an error message.
+  Future<Map> transferToOwnWallet({
+    required String accessToken,
+    required int fromWalletId,
+    required int toWalletId,
+    required double amount,
+    required String note,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "fromWalletId": fromWalletId,
+        "toWalletId": toWalletId,
+        "amount": amount,
+        "note": note,
+      }),
+    );
+
+    String data = res.body;
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      final decodedData = jsonDecode(data);
+      return {'success': decodedData};
+    }
+    return processErrorResponse(data);
+  }
 }

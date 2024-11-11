@@ -18,10 +18,10 @@ class CardWidget extends StatelessWidget {
     this.boxBorder,
     this.alignment,
   });
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       alignment: alignment,
       height: height,
       width: width,

@@ -1,21 +1,15 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 
-import '../../../bloc/auth/auth_bloc.dart';
-import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../widgets/button_widget.dart';
-import '../../widgets/loading_widget.dart';
 import '../../widgets/text_widget.dart';
 
 class SetPincodeScreen extends StatefulWidget {

@@ -4,10 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
-import 'package:transaction_mobile_app/core/utils/check_connectivity.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 
 import '../../data/repository/auth_repository.dart';
 
