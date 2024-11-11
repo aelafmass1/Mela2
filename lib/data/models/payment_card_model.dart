@@ -46,7 +46,7 @@ class PaymentCardModel {
     };
   }
 
-  factory PaymentCardModel.fromMap(Map<String, dynamic> map) {
+  factory PaymentCardModel.fromMap(Map map) {
     return PaymentCardModel(
       id: map['id'] as String,
       cardBrand: map['cardBrand'] as String,
