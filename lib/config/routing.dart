@@ -31,8 +31,10 @@ import 'package:transaction_mobile_app/presentation/screens/win_screen/win_scree
 
 import '../presentation/screens/forget_password_screen/forget_password_screen.dart';
 import '../presentation/screens/home_screen/home_screen.dart';
+import '../presentation/screens/pincode_screen/pincode_screen_deligate.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
+import '../presentation/screens/request-money-screen/request_money_screen.dart';
 import '../presentation/screens/transfer/transfer-user-search/user_search.dart';
 import '../presentation/widgets/receipt_page_2.dart';
 
@@ -72,6 +74,8 @@ class RouteName {
   static const addMoney = 'add_money_screen';
 
   static const String receiptPage2 = 'receipt_page_2';
+  static const pincodeDeligate = 'pincode_deligate';
+  static const requestMoney = 'request_money_screen';
 }
 
 final goRouting = GoRouter(
@@ -193,6 +197,11 @@ final goRouting = GoRouter(
       builder: (context, state) => const SendMoneyScreen(),
     ),
     GoRoute(
+      path: '/request_money_screen',
+      name: RouteName.requestMoney,
+      builder: (context, state) => const RequestMoneyScreen(),
+    ),
+    GoRoute(
       path: '/transfer_to_other_screen',
       name: RouteName.transferToOther,
       builder: (context, state) => const TransferToOtherScreen(),
@@ -227,6 +236,18 @@ final goRouting = GoRouter(
       builder: (context, state) => NewPincodeScreen(
         userModel: state.extra as UserModel,
       ),
+    ),
+    GoRoute(
+      path: '/pincode_deligate',
+      name: RouteName.pincodeDeligate,
+      builder: (context, state) {
+        final onVeriried = state.extra as Function();
+        return PincodeScreenDeligate(
+          overrideButtonText: "Confirm Payment",
+          result: (isValid) {},
+          onVerified: onVeriried,
+        );
+      },
     ),
     GoRoute(
       path: '/signup',
