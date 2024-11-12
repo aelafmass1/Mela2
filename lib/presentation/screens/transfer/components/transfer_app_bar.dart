@@ -24,6 +24,7 @@ class TransferAppBarState extends State<TransferAppBar> {
   @override
   void initState() {
     final state = context.read<WalletBloc>().state;
+
     selectedWalletModel = state.wallets[0];
     super.initState();
   }
@@ -32,6 +33,7 @@ class TransferAppBarState extends State<TransferAppBar> {
   Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
+      centerTitle: true,
       title: BlocListener<WalletBloc, WalletState>(
         listener: (BuildContext context, WalletState state) {
           selectedWalletModel = state.wallets[0];
@@ -41,8 +43,8 @@ class TransferAppBarState extends State<TransferAppBar> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const TextWidget(
-              text: '\$18,809',
+            TextWidget(
+              text: '\$${selectedWalletModel?.balance ?? 0}',
               fontSize: 15,
               weight: FontWeight.bold,
             ),

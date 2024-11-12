@@ -23,6 +23,7 @@ class TextFieldWidget extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? fontSize;
   final EdgeInsetsGeometry? contentPadding;
+  final Function()? onTapOutside;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -43,12 +44,18 @@ class TextFieldWidget extends StatelessWidget {
       this.borderRadius,
       this.fontSize,
       this.contentPadding,
+      this.onTapOutside,
       this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: globalKey,
+      onTapOutside: (event) {
+        if (onTapOutside != null) {
+          onTapOutside!();
+        }
+      },
       focusNode: focusNode,
       onTap: onTab,
       onChanged: onChanged,

@@ -43,6 +43,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   }
 
   @override
+  void dispose() {
+    amountController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
@@ -108,11 +114,14 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                     final amount = double.tryParse(
                         amountKey.currentState?.controller.text ?? '0');
                     final note = noteKey.currentState?.controller.text ?? '';
-                    context.read<MoneyTransferBloc>().add(TransferToOwnWallet(
-                        fromWalletId: fromWalletId ?? 0,
-                        toWalletId: toWalletId ?? 0,
-                        amount: amount ?? 0,
-                        note: note));
+                    context.read<MoneyTransferBloc>().add(
+                          TransferToOwnWallet(
+                            fromWalletId: fromWalletId ?? 0,
+                            toWalletId: toWalletId ?? 0,
+                            amount: amount ?? 0,
+                            note: note,
+                          ),
+                        );
                   });
                 }
               },

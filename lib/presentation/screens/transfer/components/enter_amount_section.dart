@@ -82,6 +82,9 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
 
   TextFieldWidget _buildOnInitial() {
     return TextFieldWidget(
+      onTapOutside: () {
+        amountFocus.unfocus();
+      },
       focusNode: amountFocus,
       onChanged: (p0) {
         if (p0.isNotEmpty) {
