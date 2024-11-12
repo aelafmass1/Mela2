@@ -34,7 +34,6 @@ import '../../../data/models/payment_card_model.dart';
 import '../../../data/models/receiver_info_model.dart';
 import '../../widgets/card_widget.dart';
 import '../../widgets/custom_shimmer.dart';
-import '../../widgets/payment_card_selection.dart';
 
 class AddMoneyScreen extends StatefulWidget {
   const AddMoneyScreen({super.key});
