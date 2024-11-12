@@ -34,8 +34,8 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   double bankFee = 94.28;
   bool isNext() {
     final isTransferToSummerizing = toWaletKey.currentState?.isSummerizing;
-
-    if (isTransferToSummerizing == true) {
+    final isAmountSummerizing = amountKey.currentState?.isSummerizing;
+    if (isTransferToSummerizing == false && isAmountSummerizing == false) {
       return true;
     }
 
@@ -85,24 +85,35 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             return ButtonWidget(
               child: state is MoneyTransferLoading
                   ? const LoadingWidget()
-                  : const TextWidget(
-                      text: 'Add Money',
+                  : TextWidget(
+                      text: isNext() ? "Next" : 'Confirm',
                       color: Colors.white,
                     ),
               onPressed: () {
+                final isAmountValidated = amountKey.currentState?.validated();
                 // Handle transfer
-                if (amountKey.currentState?.validated() == true) {
-                  final fromWalletId =
-                      fromWalletKey.currentState?.selectedWalletModel?.walletId;
-                  final toWalletId = toWaletKey.currentState?.selectedWallet;
-                  final amount = double.tryParse(
-                      amountKey.currentState?.controller.text ?? '0');
-                  final note = noteKey.currentState?.controller.text ?? '';
-                  context.read<MoneyTransferBloc>().add(TransferToOwnWallet(
-                      fromWalletId: fromWalletId ?? 0,
-                      toWalletId: toWalletId ?? 0,
-                      amount: amount ?? 0,
-                      note: note));
+                if (isAmountValidated ?? false) {
+                  if (isNext()) {
+                    //
+                    amountKey.currentState?.setSummerizing();
+                    toWaletKey.currentState?.setSummerizing();
+                    setState(() {});
+                    return;
+                  }
+                  context.pushNamed(RouteName.pincodeDeligate, extra: () {
+                    context.pop();
+                    final fromWalletId = fromWalletKey
+                        .currentState?.selectedWalletModel?.walletId;
+                    final toWalletId = toWaletKey.currentState?.selectedWallet;
+                    final amount = double.tryParse(
+                        amountKey.currentState?.controller.text ?? '0');
+                    final note = noteKey.currentState?.controller.text ?? '';
+                    context.read<MoneyTransferBloc>().add(TransferToOwnWallet(
+                        fromWalletId: fromWalletId ?? 0,
+                        toWalletId: toWalletId ?? 0,
+                        amount: amount ?? 0,
+                        note: note));
+                  });
                 }
               },
             );
