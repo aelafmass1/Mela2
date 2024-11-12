@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -18,6 +19,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/core/utils/show_change_wallet_modal.dart';
 import 'package:transaction_mobile_app/presentation/screens/add_money_screen/components/add_payment_method_widget.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_cards_stack.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
@@ -196,6 +198,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     context.read<BankFeeBloc>().add(FetchBankFee());
     context.read<WalletCurrencyBloc>().add(FetchWalletCurrency());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
+    context.read<FeeBloc>().add(FetchFees());
 
     _streamEvent = PlaidLink.onEvent.listen(_onEvent);
     _streamExit = PlaidLink.onExit.listen(_onExit);
@@ -276,7 +279,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                       : TextWidget(
                                           text: showFee
                                               ? 'Confirm Payment'
-                                              : 'Add Money',
+                                              : 'Continue',
                                           color: Colors.white,
                                           type: TextType.small,
                                         ),
@@ -294,9 +297,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                           setState(() {
                                             showFee = true;
                                           });
-                                          context
-                                              .read<FeeBloc>()
-                                              .add(FetchFees());
 
                                           // Add scroll animation after a brief delay to allow fee content to render
                                           Future.delayed(
@@ -313,114 +313,20 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                         }
                                       }
                                     } else {
-                                      // final isCorrect = await showPincode(context);
-                                      final paymentCardState =
-                                          context.read<PaymentCardBloc>().state;
-                                      if (selectedPaymentMethodIndex != 0) {
-                                        final feeState =
-                                            context.read<FeeBloc>().state;
-                                        final bankState =
-                                            context.read<BankFeeBloc>().state;
-                                        double totalFee = 0;
-                                        if (feeState is FeeSuccess &&
-                                            bankState is BankFeeSuccess) {
-                                          final creditCardAmount = bankState
-                                                  .bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Credit Card fee')
-                                                  .isEmpty
-                                              ? 0
-                                              : bankState.bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Credit Card fee')
-                                                  .first
-                                                  .amount;
-                                          final debitCardAmount = bankState
-                                                  .bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Debit Card fee')
-                                                  .isEmpty
-                                              ? 0
-                                              : bankState.bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Debit Card fee')
-                                                  .first
-                                                  .amount;
-                                          totalFee = ((selectedPaymentMethodIndex ==
-                                                      1
-                                                  ? ((double.tryParse(
-                                                              amountController
-                                                                  .text) ??
-                                                          0) *
-                                                      (debitCardAmount / 100))
-                                                  : selectedPaymentMethodIndex ==
-                                                          2
-                                                      ? (double.tryParse(
-                                                                  amountController
-                                                                      .text) ??
-                                                              0) *
-                                                          (creditCardAmount /
-                                                              100)
-                                                      : 0))
-                                              .toDouble();
-                                          if (paymentCardState
-                                              .paymentCards.isEmpty) {
-                                            context
-                                                .read<PaymentIntentBloc>()
-                                                .add(
-                                                  FetchClientSecret(
-                                                    currency: selectedCurrency
-                                                        .toUpperCase(),
-                                                    amount: double.parse(
-                                                            amountController
-                                                                .text) +
-                                                        totalFee,
-                                                  ),
-                                                );
-                                          } else {
-                                            if (selectedAccountIndex != -1) {
-                                              final cards = context
-                                                  .read<PaymentCardBloc>()
-                                                  .state
-                                                  .paymentCards;
-                                              setState(() {
-                                                selectedPaymentCardId =
-                                                    cards[selectedAccountIndex]
-                                                        .id;
-                                              });
-
-                                              context
-                                                  .read<PaymentIntentBloc>()
-                                                  .add(
-                                                    FetchClientSecret(
-                                                      currency: selectedCurrency
-                                                          .toUpperCase(),
-                                                      amount: double.parse(
-                                                              amountController
-                                                                  .text) +
-                                                          totalFee,
-                                                    ),
-                                                  );
-                                            } else {
-                                              context
-                                                  .read<PaymentIntentBloc>()
-                                                  .add(
-                                                    FetchClientSecret(
-                                                      currency: selectedCurrency
-                                                          .toUpperCase(),
-                                                      amount: double.parse(
-                                                              amountController
-                                                                  .text) +
-                                                          totalFee,
-                                                    ),
-                                                  );
-                                            }
-                                          }
-                                        }
+                                      if (selectedAccountIndex != -1) {
+                                        final cards = context
+                                            .read<PaymentCardBloc>()
+                                            .state
+                                            .paymentCards;
+                                        setState(() {
+                                          selectedPaymentCardId =
+                                              cards[selectedAccountIndex].id;
+                                        });
+                                        _addFundToWallet(
+                                          intentId: '',
+                                          publicToken: '',
+                                          paymentType: 'SAVED_PAYMENT',
+                                        );
                                       } else {
                                         context
                                             .read<PlaidBloc>()
@@ -543,12 +449,12 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const TextWidget(
-                    text: 'Connect Accounts',
+                    text: 'Add Payment Methods',
                     weight: FontWeight.w700,
                     type: TextType.small,
                   ),
                   SizedBox(
-                    width: 123,
+                    width: 130,
                     height: 35,
                     child: ButtonWidget(
                       topPadding: 0,
@@ -693,261 +599,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 ),
               ),
             ),
-            AnimatedOpacity(
-              opacity:
-                  (showFee == true && selectedPaymentMethodIndex != 1) ? 0 : 1,
-              duration: const Duration(milliseconds: 400),
-              onEnd: () {
-                if (showFee == true) {
-                  setState(() {
-                    isAnimationFinished = true;
-                  });
-                }
-              },
-              child: Visibility(
-                visible:
-                    (isAnimationFinished && selectedPaymentMethodIndex != 1) ==
-                        false,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-                  child: CardWidget(
-                      boxBorder: Border.all(
-                          color: selectedPaymentMethodIndex == 1
-                              ? ColorName.primaryColor
-                              : Colors.transparent),
-                      width: 100.sw,
-                      borderRadius: BorderRadius.circular(14),
-                      child: ListTile(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        onTap: () {
-                          if (selectedPaymentMethodIndex == 1) {
-                            setState(() {
-                              showFee = false;
-                              isAnimationFinished = false;
-                              selectedPaymentMethodIndex = -1;
-                              selectedAccountIndex = -1;
-                            });
-                          } else {
-                            setState(() {
-                              selectedPaymentMethodIndex = 1;
-                              selectedAccountIndex = -1;
-                            });
-                          }
-                        },
-                        leading: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: ColorName.primaryColor,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: const Center(
-                            child: TextWidget(
-                              text: 'D',
-                              color: ColorName.white,
-                              weight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 15),
-                        trailing: Checkbox(
-                          activeColor: ColorName.primaryColor,
-                          shape: const CircleBorder(),
-                          value: selectedPaymentMethodIndex == 1,
-                          onChanged: (value) {
-                            if (selectedPaymentMethodIndex == 1) {
-                              setState(() {
-                                showFee = false;
-                                isAnimationFinished = false;
-                                selectedPaymentMethodIndex = -1;
-                                selectedAccountIndex = -1;
-                              });
-                            } else {
-                              setState(() {
-                                selectedPaymentMethodIndex = 1;
-                                selectedAccountIndex = -1;
-                              });
-                            }
-                          },
-                        ),
-                        title: Row(
-                          children: [
-                            const TextWidget(
-                              text: 'Debit Card',
-                              fontSize: 15,
-                            ),
-                            BlocBuilder<BankFeeBloc, BankFeeState>(
-                              builder: (context, state) {
-                                if (state is BankFeeSuccess) {
-                                  return state.bankFees
-                                          .where((bf) =>
-                                              bf.label == 'Debit Card fee')
-                                          .isEmpty
-                                      ? const SizedBox.shrink()
-                                      : Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 10),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 7, vertical: 2),
-                                          decoration: BoxDecoration(
-                                              color:
-                                                  Colors.grey.withOpacity(0.4),
-                                              borderRadius:
-                                                  BorderRadius.circular(10)),
-                                          child: TextWidget(
-                                            text:
-                                                '+${state.bankFees.where((bf) => bf.label == 'Debit Card fee').first.amount}%',
-                                            fontSize: 11,
-                                            color: ColorName.primaryColor,
-                                            weight: FontWeight.w400,
-                                          ),
-                                        );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ],
-                        ),
-                        subtitle: const TextWidget(
-                          text: '',
-                          fontSize: 11,
-                          weight: FontWeight.w400,
-                        ),
-                      )),
-                ),
-              ),
-            ),
-            AnimatedOpacity(
-              opacity: (showFee == true && selectedPaymentMethodIndex != 2)
-                  ? 0.0
-                  : 1.0,
-              duration: const Duration(milliseconds: 400),
-              onEnd: () {
-                if (showFee == true) {
-                  setState(() {
-                    isAnimationFinished = true;
-                  });
-                }
-              },
-              child: Visibility(
-                visible:
-                    (isAnimationFinished && selectedPaymentMethodIndex != 2) ==
-                        false,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-                  child: CardWidget(
-                      boxBorder: Border.all(
-                          color: selectedPaymentMethodIndex == 2
-                              ? ColorName.primaryColor
-                              : Colors.transparent),
-                      width: 100.sw,
-                      borderRadius: BorderRadius.circular(14),
-                      child: ListTile(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        onTap: () {
-                          if (selectedPaymentMethodIndex == 2) {
-                            setState(() {
-                              showFee = false;
-                              isAnimationFinished = false;
-                              selectedPaymentMethodIndex = -1;
-                              selectedAccountIndex = -1;
-                            });
-                          } else {
-                            setState(() {
-                              selectedPaymentMethodIndex = 2;
-                              selectedAccountIndex = -1;
-                            });
-                          }
-                        },
-                        leading: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: ColorName.primaryColor,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: const Center(
-                            child: TextWidget(
-                              text: 'C',
-                              color: ColorName.white,
-                              weight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 15),
-                        trailing: Checkbox(
-                          activeColor: ColorName.primaryColor,
-                          shape: const CircleBorder(),
-                          value: selectedPaymentMethodIndex == 2,
-                          onChanged: (value) {
-                            if (selectedPaymentMethodIndex == 2) {
-                              setState(() {
-                                showFee = false;
-                                isAnimationFinished = false;
-                                selectedPaymentMethodIndex = -1;
-                                selectedAccountIndex = -1;
-                              });
-                            } else {
-                              setState(() {
-                                selectedPaymentMethodIndex = 2;
-                                selectedAccountIndex = -1;
-                              });
-                            }
-                          },
-                        ),
-                        title: Row(
-                          children: [
-                            const TextWidget(
-                              text: 'Credit Card',
-                              fontSize: 15,
-                            ),
-                            BlocBuilder<BankFeeBloc, BankFeeState>(
-                              builder: (context, state) {
-                                if (state is BankFeeSuccess) {
-                                  return state.bankFees
-                                          .where((bf) =>
-                                              bf.label == 'Credit Card fee')
-                                          .isEmpty
-                                      ? const SizedBox.shrink()
-                                      : Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 10),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 7, vertical: 2),
-                                          decoration: BoxDecoration(
-                                              color:
-                                                  Colors.grey.withOpacity(0.4),
-                                              borderRadius:
-                                                  BorderRadius.circular(10)),
-                                          child: TextWidget(
-                                            text:
-                                                '+${state.bankFees.where((bf) => bf.label == 'Credit Card fee').first.amount}%',
-                                            fontSize: 11,
-                                            color: ColorName.primaryColor,
-                                            weight: FontWeight.w400,
-                                          ),
-                                        );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ],
-                        ),
-                        subtitle: const TextWidget(
-                          text: '',
-                          fontSize: 11,
-                          weight: FontWeight.w400,
-                        ),
-                      )),
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -1070,20 +721,32 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       ? WalletCard(
                           height: 120,
                           showPattern: true,
-                          walletName: '${selectedWalletModel!.currency} Wallet',
+                          walletName:
+                              '${selectedWalletModel!.currency.code} Wallet',
                           logo:
-                              'icons/currency/${selectedWalletModel!.currency.toLowerCase()}.png',
+                              'icons/currency/${selectedWalletModel!.currency.code.toLowerCase()}.png',
                           amount: selectedWalletModel!.balance.toDouble(),
-                          color: const Color(0xFF3440EC),
+                          color: selectedWalletModel!.currency.backgroundColor
+                                  ?.toColor() ??
+                              const Color(0xFF3440EC),
+                          textColor: selectedWalletModel!.currency.textColor
+                                  ?.toColor() ??
+                              Colors.white,
                         )
                       : WalletCard(
                           height: 120,
                           showPattern: true,
-                          walletName: '${state.wallets.first.currency} Wallet',
+                          walletName:
+                              '${state.wallets.first.currency.code} Wallet',
                           logo:
-                              'icons/currency/${state.wallets.first.currency.toLowerCase()}.png',
+                              'icons/currency/${state.wallets.first.currency.code.toLowerCase()}.png',
                           amount: state.wallets.first.balance.toDouble(),
-                          color: const Color(0xFF3440EC),
+                          color: state.wallets.first.currency.backgroundColor
+                                  ?.toColor() ??
+                              const Color(0xFF3440EC),
+                          textColor: state.wallets.first.currency.textColor
+                                  ?.toColor() ??
+                              Colors.white,
                         ),
                 );
               }
@@ -1369,9 +1032,16 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           builder: (context, state) {
             if (state is PaymentCardLoading) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
-                  ...List.generate(2, (index) {
+                  const SizedBox(height: 30),
+                  const TextWidget(
+                    text: 'Accounts',
+                    weight: FontWeight.w700,
+                    type: TextType.small,
+                  ),
+                  const SizedBox(height: 10),
+                  ...List.generate(4, (index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 7),
                       child: CustomShimmer(
@@ -1390,7 +1060,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 children: [
                   const SizedBox(height: 30),
                   const TextWidget(
-                    text: 'Accounts',
+                    text: 'Payment Methods',
                     weight: FontWeight.w700,
                     type: TextType.small,
                   ),
@@ -1420,62 +1090,78 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     required String title,
     required String subTitle,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 15),
-      child: CardWidget(
-          boxBorder: Border.all(
-            color: selectedAccountIndex == id
-                ? ColorName.primaryColor
-                : Colors.transparent,
-          ),
-          width: 100.sw,
-          borderRadius: BorderRadius.circular(14),
-          child: ListTile(
-            splashColor: Colors.white,
-            onTap: () {
-              setState(() {
-                selectedAccountIndex = id;
-                selectedPaymentMethodIndex = -1;
-              });
-              //
-            },
-            leading: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                image: DecorationImage(
-                    image: AssetImage(iconPath), fit: BoxFit.cover),
-              ),
+    return Visibility(
+      visible: (showFee && selectedAccountIndex != id) == false,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 15),
+        child: CardWidget(
+            boxBorder: Border.all(
+              color: selectedAccountIndex == id
+                  ? ColorName.primaryColor
+                  : Colors.transparent,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-            trailing: Checkbox(
-              activeColor: ColorName.primaryColor,
-              shape: const CircleBorder(),
-              value: selectedAccountIndex == id,
-              onChanged: (value) {
-                setState(() {
-                  selectedAccountIndex = id;
-                  selectedPaymentMethodIndex = -1;
-                });
+            width: 100.sw,
+            borderRadius: BorderRadius.circular(14),
+            child: ListTile(
+              splashColor: Colors.white,
+              onTap: () {
+                if (selectedAccountIndex == id) {
+                  setState(() {
+                    selectedAccountIndex = -1;
+                    showFee = false;
+                  });
+                } else {
+                  setState(() {
+                    selectedAccountIndex = id;
+                    selectedPaymentMethodIndex = -1;
+                  });
+                }
               },
-            ),
-            title: TextWidget(
-              text: title,
-              fontSize: 15,
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextWidget(
-                  text: subTitle,
-                  fontSize: 11,
-                  weight: FontWeight.w400,
+              leading: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  image: DecorationImage(
+                      image: AssetImage(iconPath), fit: BoxFit.cover),
                 ),
-                const SizedBox(height: 5),
-              ],
-            ),
-          )),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+              trailing: Checkbox(
+                activeColor: ColorName.primaryColor,
+                shape: const CircleBorder(),
+                value: selectedAccountIndex == id,
+                onChanged: (value) {
+                  if (selectedAccountIndex == id) {
+                    setState(() {
+                      selectedAccountIndex = -1;
+                      showFee = false;
+                    });
+                  } else {
+                    setState(() {
+                      selectedAccountIndex = id;
+                      selectedPaymentMethodIndex = -1;
+                    });
+                  }
+                },
+              ),
+              title: TextWidget(
+                text: title,
+                fontSize: 15,
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextWidget(
+                    text: subTitle,
+                    fontSize: 11,
+                    weight: FontWeight.w400,
+                  ),
+                  const SizedBox(height: 5),
+                ],
+              ),
+            )),
+      ),
     );
   }
 }
