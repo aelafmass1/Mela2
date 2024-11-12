@@ -76,7 +76,7 @@ class TransferWalletsSectionState extends State<TransferWalletsSection> {
                           decoration:
                               const BoxDecoration(shape: BoxShape.circle),
                           child: Image.asset(
-                            'icons/currency/${state.wallets[i].currency.toLowerCase()}.png',
+                            'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
                             package: 'currency_icons',
                             fit: BoxFit.cover,
                           ),
@@ -87,12 +87,12 @@ class TransferWalletsSectionState extends State<TransferWalletsSection> {
                           children: [
                             TextWidget(
                               text:
-                                  '${state.wallets[i].currency.toUpperCase()} Wallet',
+                                  '${state.wallets[i].currency.code.toUpperCase()} Wallet',
                               fontSize: 14,
                             ),
                             TextWidget(
                               text:
-                                  '${state.wallets[i].currency.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
+                                  '${state.wallets[i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
                               fontSize: 10,
                             )
                           ],

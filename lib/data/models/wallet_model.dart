@@ -1,11 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class WalletModel {
+import 'package:equatable/equatable.dart';
+
+import 'package:transaction_mobile_app/data/models/wallet_currency_model.dart';
+
+class WalletModel extends Equatable {
   final int walletId;
-  final String currency;
+  final WalletCurrencyModel currency;
   final num balance;
-  WalletModel({
+  const WalletModel({
     required this.walletId,
     required this.currency,
     required this.balance,
@@ -13,7 +17,7 @@ class WalletModel {
 
   WalletModel copyWith({
     int? walletId,
-    String? currency,
+    WalletCurrencyModel? currency,
     num? balance,
   }) {
     return WalletModel(
@@ -26,7 +30,7 @@ class WalletModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'walletId': walletId,
-      'currency': currency,
+      'currency': currency.toMap(),
       'balance': balance,
     };
   }
@@ -34,7 +38,7 @@ class WalletModel {
   factory WalletModel.fromMap(Map map) {
     return WalletModel(
       walletId: map['walletId'] as int,
-      currency: map['currency'] as String,
+      currency: WalletCurrencyModel.fromMap(map['currency'] as Map),
       balance: map['balance'] as num,
     );
   }
@@ -45,18 +49,8 @@ class WalletModel {
       WalletModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() =>
-      'WalletModel(walletId: $walletId, currency: $currency, balance: $balance)';
+  bool get stringify => true;
 
   @override
-  bool operator ==(covariant WalletModel other) {
-    if (identical(this, other)) return true;
-
-    return other.walletId == walletId &&
-        other.currency == currency &&
-        other.balance == balance;
-  }
-
-  @override
-  int get hashCode => walletId.hashCode ^ currency.hashCode ^ balance.hashCode;
+  List<Object> get props => [walletId, currency, balance];
 }
