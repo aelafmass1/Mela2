@@ -16,6 +16,7 @@ import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/core/utils/show_change_wallet_modal.dart';
+import 'package:transaction_mobile_app/presentation/screens/add_money_screen/components/add_payment_method_widget.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
@@ -29,10 +30,10 @@ import '../../../bloc/payment_intent/payment_intent_bloc.dart';
 import '../../../bloc/plaid/plaid_bloc.dart';
 import '../../../bloc/wallet/wallet_bloc.dart';
 import '../../../bloc/wallet_currency/wallet_currency_bloc.dart';
+import '../../../data/models/payment_card_model.dart';
 import '../../../data/models/receiver_info_model.dart';
 import '../../widgets/card_widget.dart';
 import '../../widgets/custom_shimmer.dart';
-import '../../widgets/payment_card_selection.dart';
 
 class AddMoneyScreen extends StatefulWidget {
   const AddMoneyScreen({super.key});
@@ -46,6 +47,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   ScrollController scrollController = ScrollController();
   String selectedCurrency = 'usd';
   int selectedPaymentMethodIndex = -1;
+  int selectedAccountIndex = -1;
+
   bool showFee = false;
   bool isAnimationFinished = false;
   String whoPayFee = 'SENDER';
@@ -61,6 +64,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   StreamSubscription<LinkSuccess>? _streamSuccess;
   String? publicToken;
   WalletModel? selectedWalletModel;
+  List<PaymentCardModel> paymentCards = [];
 
   _addFundToWallet(
       {required String intentId,
@@ -246,7 +250,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       children: [
                         _buildTop(),
                         _buildAmountTextInput(state.currencies),
-                        _buildAddMoneyFrom(),
+                        _buildAccounts(),
+                        _buildConnectAccounts(),
                         _buildCheckDetail(),
                       ],
                     ),
@@ -280,7 +285,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                     if (showFee == false) {
                                       if (_formKey.currentState?.validate() ==
                                           true) {
-                                        if (selectedPaymentMethodIndex == -1) {
+                                        if (selectedPaymentMethodIndex == -1 &&
+                                            selectedAccountIndex == -1) {
                                           showSnackbar(context,
                                               description:
                                                   'Select Payment Method');
@@ -376,61 +382,43 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                                   ),
                                                 );
                                           } else {
-                                            showModalBottomSheet(
-                                              context: context,
-                                              backgroundColor: Colors.white,
-                                              isScrollControlled: true,
-                                              shape:
-                                                  const ContinuousRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                topLeft: Radius.circular(30),
-                                                topRight: Radius.circular(30),
-                                              )),
-                                              builder: (_) =>
-                                                  PaymentCardSelection(
-                                                onTab: (selectedPaymentCard) {
-                                                  setState(() {
-                                                    selectedPaymentCardId =
-                                                        selectedPaymentCard.id;
-                                                  });
-                                                  context
-                                                      .read<PaymentIntentBloc>()
-                                                      .add(
-                                                        FetchClientSecret(
-                                                          currency:
-                                                              selectedCurrency
-                                                                  .toUpperCase(),
-                                                          amount: double.parse(
-                                                                  amountController
-                                                                      .text) +
-                                                              totalFee,
-                                                        ),
-                                                      );
-                                                  context.pop();
-                                                },
-                                                paymentCards: paymentCardState
-                                                    .paymentCards,
-                                                onAddNewCardPressed: () {
-                                                  context
-                                                      .read<PaymentIntentBloc>()
-                                                      .add(
-                                                        FetchClientSecret(
-                                                          currency:
-                                                              selectedCurrency
-                                                                  .toUpperCase(),
-                                                          amount: double.parse(
-                                                                  amountController
-                                                                      .text) +
-                                                              totalFee,
-                                                        ),
-                                                      );
-                                                  setState(() {
-                                                    selectedPaymentCardId = '';
-                                                  });
-                                                },
-                                              ),
-                                            );
+                                            if (selectedAccountIndex != -1) {
+                                              final cards = context
+                                                  .read<PaymentCardBloc>()
+                                                  .state
+                                                  .paymentCards;
+                                              setState(() {
+                                                selectedPaymentCardId =
+                                                    cards[selectedAccountIndex]
+                                                        .id;
+                                              });
+
+                                              context
+                                                  .read<PaymentIntentBloc>()
+                                                  .add(
+                                                    FetchClientSecret(
+                                                      currency: selectedCurrency
+                                                          .toUpperCase(),
+                                                      amount: double.parse(
+                                                              amountController
+                                                                  .text) +
+                                                          totalFee,
+                                                    ),
+                                                  );
+                                            } else {
+                                              context
+                                                  .read<PaymentIntentBloc>()
+                                                  .add(
+                                                    FetchClientSecret(
+                                                      currency: selectedCurrency
+                                                          .toUpperCase(),
+                                                      amount: double.parse(
+                                                              amountController
+                                                                  .text) +
+                                                          totalFee,
+                                                    ),
+                                                  );
+                                            }
                                           }
                                         }
                                       } else {
@@ -456,9 +444,18 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     );
   }
 
-  _buildAddMoneyFrom() {
+  _buildConnectAccounts() {
     return MultiBlocListener(
       listeners: [
+        BlocListener<PaymentCardBloc, PaymentCardState>(
+          listener: (context, state) {
+            if (state is PaymentCardSuccess) {
+              setState(() {
+                paymentCards = state.paymentCards;
+              });
+            }
+          },
+        ),
         BlocListener<PaymentIntentBloc, PaymentIntentState>(
             listener: (context, paymentState) async {
           if (paymentState is PaymentIntentFail) {
@@ -480,7 +477,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       paymentIntentClientSecret: clientSecret,
                       customerId: paymentState.customerId,
                       merchantDisplayName: 'Mela Fi',
-                      customFlow: true,
+                      customFlow: false,
                       appearance: const PaymentSheetAppearance(
                         colors: PaymentSheetAppearanceColors(
                           primary: ColorName.primaryColor,
@@ -534,342 +531,426 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           }
         }),
       ],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 30),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TextWidget(
-              text: 'Add Money From',
-              weight: FontWeight.w700,
-              type: TextType.small,
-            ),
-          ),
-          const SizedBox(height: 15),
-          AnimatedOpacity(
-            opacity:
-                (showFee == true && selectedPaymentMethodIndex != 0) ? 0 : 1,
-            duration: const Duration(milliseconds: 400),
-            onEnd: () {
-              if (showFee == true) {
-                setState(() {
-                  isAnimationFinished = true;
-                });
-              }
-            },
-            child: Visibility(
-              visible:
-                  (isAnimationFinished && selectedPaymentMethodIndex != 0) ==
-                      false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: CardWidget(
-                    boxBorder: Border.all(
-                        color: selectedPaymentMethodIndex == 0
-                            ? ColorName.primaryColor
-                            : Colors.transparent),
-                    width: 100.sw,
-                    borderRadius: BorderRadius.circular(14),
-                    child: ListTile(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      onTap: () {
-                        if (selectedPaymentMethodIndex == 0) {
-                          setState(() {
-                            showFee = false;
-                            isAnimationFinished = false;
-                            selectedPaymentMethodIndex = -1;
-                          });
-                        } else {
-                          setState(() {
-                            selectedPaymentMethodIndex = 0;
-                          });
-                        }
-                      },
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: ColorName.primaryColor,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Center(
-                          child: SvgPicture.asset(Assets.images.svgs.bankLogo),
-                        ),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 15),
-                      trailing: Checkbox(
-                        activeColor: ColorName.primaryColor,
-                        shape: const CircleBorder(),
-                        value: selectedPaymentMethodIndex == 0,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedPaymentMethodIndex = 0;
-                          });
-                        },
-                      ),
-                      title: Row(
+      child: Visibility(
+        visible: !(showFee && selectedAccountIndex != -1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const TextWidget(
+                    text: 'Connect Accounts',
+                    weight: FontWeight.w700,
+                    type: TextType.small,
+                  ),
+                  SizedBox(
+                    width: 123,
+                    height: 35,
+                    child: ButtonWidget(
+                      topPadding: 0,
+                      verticalPadding: 0,
+                      borderRadius: BorderRadius.circular(10),
+                      elevation: 2,
+                      color: Colors.white,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const TextWidget(
-                            text: 'Bank Account',
-                            fontSize: 15,
+                          Icon(
+                            Icons.add,
+                            color: ColorName.primaryColor,
+                            size: 18,
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(left: 10),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                                color: ColorName.green,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: const TextWidget(
-                              text: 'Free',
-                              fontSize: 11,
+                          SizedBox(width: 5),
+                          TextWidget(
+                            text: 'Add New Card',
+                            fontSize: 12,
+                            color: ColorName.primaryColor,
+                          )
+                        ],
+                      ),
+                      onPressed: () async {
+                        showModalBottomSheet(
+                          context: context,
+                          scrollControlDisabledMaxHeightRatio: 1,
+                          builder: (_) => const AddPaymentMethodWidget(),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            AnimatedOpacity(
+              opacity:
+                  (showFee == true && selectedPaymentMethodIndex != 0) ? 0 : 1,
+              duration: const Duration(milliseconds: 400),
+              onEnd: () {
+                if (showFee == true) {
+                  setState(() {
+                    isAnimationFinished = true;
+                  });
+                }
+              },
+              child: Visibility(
+                visible:
+                    (isAnimationFinished && selectedPaymentMethodIndex != 0) ==
+                        false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: CardWidget(
+                      boxBorder: Border.all(
+                          color: selectedPaymentMethodIndex == 0
+                              ? ColorName.primaryColor
+                              : Colors.transparent),
+                      width: 100.sw,
+                      borderRadius: BorderRadius.circular(14),
+                      child: ListTile(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        onTap: () {
+                          if (selectedPaymentMethodIndex == 0) {
+                            setState(() {
+                              showFee = false;
+                              isAnimationFinished = false;
+                              selectedPaymentMethodIndex = -1;
+                              selectedAccountIndex = -1;
+                            });
+                          } else {
+                            setState(() {
+                              selectedPaymentMethodIndex = 0;
+                              selectedAccountIndex = -1;
+                            });
+                          }
+                        },
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: ColorName.primaryColor,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Center(
+                            child:
+                                SvgPicture.asset(Assets.images.svgs.bankLogo),
+                          ),
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 15),
+                        trailing: Checkbox(
+                          activeColor: ColorName.primaryColor,
+                          shape: const CircleBorder(),
+                          value: selectedPaymentMethodIndex == 0,
+                          onChanged: (value) {
+                            if (selectedPaymentMethodIndex == 0) {
+                              setState(() {
+                                showFee = false;
+                                isAnimationFinished = false;
+                                selectedPaymentMethodIndex = -1;
+                                selectedAccountIndex = -1;
+                              });
+                            } else {
+                              setState(() {
+                                selectedPaymentMethodIndex = 0;
+                                selectedAccountIndex = -1;
+                              });
+                            }
+                          },
+                        ),
+                        title: Row(
+                          children: [
+                            const TextWidget(
+                              text: 'Bank Account',
+                              fontSize: 15,
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(left: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                  color: ColorName.green,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: const TextWidget(
+                                text: 'Free',
+                                fontSize: 11,
+                                color: ColorName.white,
+                                weight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: const TextWidget(
+                          text: 'Free service charge ',
+                          fontSize: 11,
+                          weight: FontWeight.w400,
+                        ),
+                      )),
+                ),
+              ),
+            ),
+            AnimatedOpacity(
+              opacity:
+                  (showFee == true && selectedPaymentMethodIndex != 1) ? 0 : 1,
+              duration: const Duration(milliseconds: 400),
+              onEnd: () {
+                if (showFee == true) {
+                  setState(() {
+                    isAnimationFinished = true;
+                  });
+                }
+              },
+              child: Visibility(
+                visible:
+                    (isAnimationFinished && selectedPaymentMethodIndex != 1) ==
+                        false,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+                  child: CardWidget(
+                      boxBorder: Border.all(
+                          color: selectedPaymentMethodIndex == 1
+                              ? ColorName.primaryColor
+                              : Colors.transparent),
+                      width: 100.sw,
+                      borderRadius: BorderRadius.circular(14),
+                      child: ListTile(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        onTap: () {
+                          if (selectedPaymentMethodIndex == 1) {
+                            setState(() {
+                              showFee = false;
+                              isAnimationFinished = false;
+                              selectedPaymentMethodIndex = -1;
+                              selectedAccountIndex = -1;
+                            });
+                          } else {
+                            setState(() {
+                              selectedPaymentMethodIndex = 1;
+                              selectedAccountIndex = -1;
+                            });
+                          }
+                        },
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: ColorName.primaryColor,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: const Center(
+                            child: TextWidget(
+                              text: 'D',
                               color: ColorName.white,
                               weight: FontWeight.w400,
                             ),
                           ),
-                        ],
-                      ),
-                      subtitle: const TextWidget(
-                        text: 'Free service charge ',
-                        fontSize: 11,
-                        weight: FontWeight.w400,
-                      ),
-                    )),
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 15),
+                        trailing: Checkbox(
+                          activeColor: ColorName.primaryColor,
+                          shape: const CircleBorder(),
+                          value: selectedPaymentMethodIndex == 1,
+                          onChanged: (value) {
+                            if (selectedPaymentMethodIndex == 1) {
+                              setState(() {
+                                showFee = false;
+                                isAnimationFinished = false;
+                                selectedPaymentMethodIndex = -1;
+                                selectedAccountIndex = -1;
+                              });
+                            } else {
+                              setState(() {
+                                selectedPaymentMethodIndex = 1;
+                                selectedAccountIndex = -1;
+                              });
+                            }
+                          },
+                        ),
+                        title: Row(
+                          children: [
+                            const TextWidget(
+                              text: 'Debit Card',
+                              fontSize: 15,
+                            ),
+                            BlocBuilder<BankFeeBloc, BankFeeState>(
+                              builder: (context, state) {
+                                if (state is BankFeeSuccess) {
+                                  return state.bankFees
+                                          .where((bf) =>
+                                              bf.label == 'Debit Card fee')
+                                          .isEmpty
+                                      ? const SizedBox.shrink()
+                                      : Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 10),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                              color:
+                                                  Colors.grey.withOpacity(0.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: TextWidget(
+                                            text:
+                                                '+${state.bankFees.where((bf) => bf.label == 'Debit Card fee').first.amount}%',
+                                            fontSize: 11,
+                                            color: ColorName.primaryColor,
+                                            weight: FontWeight.w400,
+                                          ),
+                                        );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: const TextWidget(
+                          text: '',
+                          fontSize: 11,
+                          weight: FontWeight.w400,
+                        ),
+                      )),
+                ),
               ),
             ),
-          ),
-          AnimatedOpacity(
-            opacity:
-                (showFee == true && selectedPaymentMethodIndex != 1) ? 0 : 1,
-            duration: const Duration(milliseconds: 400),
-            onEnd: () {
-              if (showFee == true) {
-                setState(() {
-                  isAnimationFinished = true;
-                });
-              }
-            },
-            child: Visibility(
-              visible:
-                  (isAnimationFinished && selectedPaymentMethodIndex != 1) ==
-                      false,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-                child: CardWidget(
-                    boxBorder: Border.all(
-                        color: selectedPaymentMethodIndex == 1
-                            ? ColorName.primaryColor
-                            : Colors.transparent),
-                    width: 100.sw,
-                    borderRadius: BorderRadius.circular(14),
-                    child: ListTile(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      onTap: () {
-                        if (selectedPaymentMethodIndex == 1) {
-                          setState(() {
-                            showFee = false;
-                            isAnimationFinished = false;
-                            selectedPaymentMethodIndex = -1;
-                          });
-                        } else {
-                          setState(() {
-                            selectedPaymentMethodIndex = 1;
-                          });
-                        }
-                      },
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: ColorName.primaryColor,
-                          borderRadius: BorderRadius.circular(100),
+            AnimatedOpacity(
+              opacity: (showFee == true && selectedPaymentMethodIndex != 2)
+                  ? 0.0
+                  : 1.0,
+              duration: const Duration(milliseconds: 400),
+              onEnd: () {
+                if (showFee == true) {
+                  setState(() {
+                    isAnimationFinished = true;
+                  });
+                }
+              },
+              child: Visibility(
+                visible:
+                    (isAnimationFinished && selectedPaymentMethodIndex != 2) ==
+                        false,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+                  child: CardWidget(
+                      boxBorder: Border.all(
+                          color: selectedPaymentMethodIndex == 2
+                              ? ColorName.primaryColor
+                              : Colors.transparent),
+                      width: 100.sw,
+                      borderRadius: BorderRadius.circular(14),
+                      child: ListTile(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        child: const Center(
-                          child: TextWidget(
-                            text: 'D',
-                            color: ColorName.white,
-                            weight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 15),
-                      trailing: Checkbox(
-                        activeColor: ColorName.primaryColor,
-                        shape: const CircleBorder(),
-                        value: selectedPaymentMethodIndex == 1,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedPaymentMethodIndex = 1;
-                          });
+                        onTap: () {
+                          if (selectedPaymentMethodIndex == 2) {
+                            setState(() {
+                              showFee = false;
+                              isAnimationFinished = false;
+                              selectedPaymentMethodIndex = -1;
+                              selectedAccountIndex = -1;
+                            });
+                          } else {
+                            setState(() {
+                              selectedPaymentMethodIndex = 2;
+                              selectedAccountIndex = -1;
+                            });
+                          }
                         },
-                      ),
-                      title: Row(
-                        children: [
-                          const TextWidget(
-                            text: 'Debit Card',
-                            fontSize: 15,
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: ColorName.primaryColor,
+                            borderRadius: BorderRadius.circular(100),
                           ),
-                          BlocBuilder<BankFeeBloc, BankFeeState>(
-                            builder: (context, state) {
-                              if (state is BankFeeSuccess) {
-                                return state.bankFees
-                                        .where((bf) =>
-                                            bf.label == 'Debit Card fee')
-                                        .isEmpty
-                                    ? const SizedBox.shrink()
-                                    : Container(
-                                        margin: const EdgeInsets.only(left: 10),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                            color: Colors.grey.withOpacity(0.4),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        child: TextWidget(
-                                          text:
-                                              '+${state.bankFees.where((bf) => bf.label == 'Debit Card fee').first.amount}%',
-                                          fontSize: 11,
-                                          color: ColorName.primaryColor,
-                                          weight: FontWeight.w400,
-                                        ),
-                                      );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: const TextWidget(
-                        text: '',
-                        fontSize: 11,
-                        weight: FontWeight.w400,
-                      ),
-                    )),
-              ),
-            ),
-          ),
-          AnimatedOpacity(
-            opacity: (showFee == true && selectedPaymentMethodIndex != 2)
-                ? 0.0
-                : 1.0,
-            duration: const Duration(milliseconds: 400),
-            onEnd: () {
-              if (showFee == true) {
-                setState(() {
-                  isAnimationFinished = true;
-                });
-              }
-            },
-            child: Visibility(
-              visible:
-                  (isAnimationFinished && selectedPaymentMethodIndex != 2) ==
-                      false,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-                child: CardWidget(
-                    boxBorder: Border.all(
-                        color: selectedPaymentMethodIndex == 2
-                            ? ColorName.primaryColor
-                            : Colors.transparent),
-                    width: 100.sw,
-                    borderRadius: BorderRadius.circular(14),
-                    child: ListTile(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      onTap: () {
-                        if (selectedPaymentMethodIndex == 2) {
-                          setState(() {
-                            showFee = false;
-                            isAnimationFinished = false;
-                            selectedPaymentMethodIndex = -1;
-                          });
-                        } else {
-                          setState(() {
-                            selectedPaymentMethodIndex = 2;
-                          });
-                        }
-                      },
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: ColorName.primaryColor,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: const Center(
-                          child: TextWidget(
-                            text: 'C',
-                            color: ColorName.white,
-                            weight: FontWeight.w400,
+                          child: const Center(
+                            child: TextWidget(
+                              text: 'C',
+                              color: ColorName.white,
+                              weight: FontWeight.w400,
+                            ),
                           ),
                         ),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 15),
-                      trailing: Checkbox(
-                        activeColor: ColorName.primaryColor,
-                        shape: const CircleBorder(),
-                        value: selectedPaymentMethodIndex == 2,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedPaymentMethodIndex = 2;
-                          });
-                        },
-                      ),
-                      title: Row(
-                        children: [
-                          const TextWidget(
-                            text: 'Credit Card',
-                            fontSize: 15,
-                          ),
-                          BlocBuilder<BankFeeBloc, BankFeeState>(
-                            builder: (context, state) {
-                              if (state is BankFeeSuccess) {
-                                return state.bankFees
-                                        .where((bf) =>
-                                            bf.label == 'Credit Card fee')
-                                        .isEmpty
-                                    ? const SizedBox.shrink()
-                                    : Container(
-                                        margin: const EdgeInsets.only(left: 10),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                            color: Colors.grey.withOpacity(0.4),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        child: TextWidget(
-                                          text:
-                                              '+${state.bankFees.where((bf) => bf.label == 'Credit Card fee').first.amount}%',
-                                          fontSize: 11,
-                                          color: ColorName.primaryColor,
-                                          weight: FontWeight.w400,
-                                        ),
-                                      );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: const TextWidget(
-                        text: '',
-                        fontSize: 11,
-                        weight: FontWeight.w400,
-                      ),
-                    )),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 15),
+                        trailing: Checkbox(
+                          activeColor: ColorName.primaryColor,
+                          shape: const CircleBorder(),
+                          value: selectedPaymentMethodIndex == 2,
+                          onChanged: (value) {
+                            if (selectedPaymentMethodIndex == 2) {
+                              setState(() {
+                                showFee = false;
+                                isAnimationFinished = false;
+                                selectedPaymentMethodIndex = -1;
+                                selectedAccountIndex = -1;
+                              });
+                            } else {
+                              setState(() {
+                                selectedPaymentMethodIndex = 2;
+                                selectedAccountIndex = -1;
+                              });
+                            }
+                          },
+                        ),
+                        title: Row(
+                          children: [
+                            const TextWidget(
+                              text: 'Credit Card',
+                              fontSize: 15,
+                            ),
+                            BlocBuilder<BankFeeBloc, BankFeeState>(
+                              builder: (context, state) {
+                                if (state is BankFeeSuccess) {
+                                  return state.bankFees
+                                          .where((bf) =>
+                                              bf.label == 'Credit Card fee')
+                                          .isEmpty
+                                      ? const SizedBox.shrink()
+                                      : Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 10),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                              color:
+                                                  Colors.grey.withOpacity(0.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: TextWidget(
+                                            text:
+                                                '+${state.bankFees.where((bf) => bf.label == 'Credit Card fee').first.amount}%',
+                                            fontSize: 11,
+                                            color: ColorName.primaryColor,
+                                            weight: FontWeight.w400,
+                                          ),
+                                        );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: const TextWidget(
+                          text: '',
+                          fontSize: 11,
+                          weight: FontWeight.w400,
+                        ),
+                      )),
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
@@ -1009,7 +1090,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               return const SizedBox(
                 height: 120,
                 child: Center(
-                  child: TextWidget(text: "No Wallet Found"),
+                  child: TextWidget(
+                    text: "No Wallet Found",
+                    type: TextType.small,
+                    weight: FontWeight.w400,
+                  ),
                 ),
               );
             },
@@ -1065,7 +1150,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextWidget(
@@ -1222,9 +1307,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                               .first
                                               .amount;
 
-                                      log('credit: $creditCardAmount');
-                                      log('debit: $debitCardAmount');
-
                                       return Row(
                                         children: [
                                           if (feeState is FeeSuccess)
@@ -1273,6 +1355,127 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  _buildAccounts() {
+    return Visibility(
+      visible: (showFee && selectedAccountIndex == -1) == false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 15,
+        ),
+        child: BlocBuilder<PaymentCardBloc, PaymentCardState>(
+          builder: (context, state) {
+            if (state is PaymentCardLoading) {
+              return Column(
+                children: [
+                  const SizedBox(height: 20),
+                  ...List.generate(2, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      child: CustomShimmer(
+                        width: 100.sw,
+                        height: 55,
+                      ),
+                    );
+                  }),
+                ],
+              );
+            }
+            return Visibility(
+              visible: paymentCards.isNotEmpty,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 30),
+                  const TextWidget(
+                    text: 'Accounts',
+                    weight: FontWeight.w700,
+                    type: TextType.small,
+                  ),
+                  for (int i = 0; i < paymentCards.length; i++)
+                    _buildPaymentMethodTile(
+                      id: i,
+                      iconPath: paymentCards[i].cardBrand == 'visa'
+                          ? Assets.images.visaCard.path
+                          : Assets.images.masteredCard.path,
+                      title: paymentCards[i].cardBrand,
+                      subTitle:
+                          '${paymentCards[i].cardBrand} ending **${paymentCards[i].last4Digits}',
+                    ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  _buildPaymentMethodTile({
+    required int id,
+    required String iconPath,
+    required String title,
+    required String subTitle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 15),
+      child: CardWidget(
+          boxBorder: Border.all(
+            color: selectedAccountIndex == id
+                ? ColorName.primaryColor
+                : Colors.transparent,
+          ),
+          width: 100.sw,
+          borderRadius: BorderRadius.circular(14),
+          child: ListTile(
+            splashColor: Colors.white,
+            onTap: () {
+              setState(() {
+                selectedAccountIndex = id;
+                selectedPaymentMethodIndex = -1;
+              });
+              //
+            },
+            leading: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                image: DecorationImage(
+                    image: AssetImage(iconPath), fit: BoxFit.cover),
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+            trailing: Checkbox(
+              activeColor: ColorName.primaryColor,
+              shape: const CircleBorder(),
+              value: selectedAccountIndex == id,
+              onChanged: (value) {
+                setState(() {
+                  selectedAccountIndex = id;
+                  selectedPaymentMethodIndex = -1;
+                });
+              },
+            ),
+            title: TextWidget(
+              text: title,
+              fontSize: 15,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextWidget(
+                  text: subTitle,
+                  fontSize: 11,
+                  weight: FontWeight.w400,
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          )),
     );
   }
 }

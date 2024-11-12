@@ -24,7 +24,7 @@ class PaymentCardRepository {
   ///
   /// Returns:
   /// A `Future<Map<String, dynamic>>` containing the payment card data or an error response.
-  Future<Map<String, dynamic>> addPaymentCard({
+  Future<Map> addPaymentCard({
     required String accessToken,
     required String token,
   }) async {

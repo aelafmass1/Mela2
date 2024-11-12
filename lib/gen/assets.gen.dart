@@ -64,6 +64,10 @@ class $AssetsImagesGen {
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
 
+  /// File path: assets/images/discover_logo.png
+  AssetGenImage get discoverLogo =>
+      const AssetGenImage('assets/images/discover_logo.png');
+
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
 
@@ -126,6 +130,10 @@ class $AssetsImagesGen {
   AssetGenImage get masteredCard =>
       const AssetGenImage('assets/images/mastered_card.png');
 
+  /// File path: assets/images/mela_logo.png
+  AssetGenImage get melaLogo =>
+      const AssetGenImage('assets/images/mela_logo.png');
+
   /// File path: assets/images/news_background.png
   AssetGenImage get newsBackground =>
       const AssetGenImage('assets/images/news_background.png');
@@ -141,6 +149,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/oromia_bank_logo.png
   AssetGenImage get oromiaBankLogo =>
       const AssetGenImage('assets/images/oromia_bank_logo.png');
+
+  /// File path: assets/images/paypal_logo.png
+  AssetGenImage get paypalLogo =>
+      const AssetGenImage('assets/images/paypal_logo.png');
 
   /// File path: assets/images/profile_image.png
   AssetGenImage get profileImage =>
@@ -164,7 +176,6 @@ class $AssetsImagesGen {
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
 
-  /// Directory path: assets/images/svgs
   $AssetsImagesSvgsGen get svgs => const $AssetsImagesSvgsGen();
 
   /// File path: assets/images/transaction_icon.png
@@ -214,6 +225,7 @@ class $AssetsImagesGen {
         checkedLogo,
         contactPageImage,
         dashnBankLogo,
+        discoverLogo,
         dollar,
         doodles,
         enatBankLogo,
@@ -230,10 +242,12 @@ class $AssetsImagesGen {
         homeIcon,
         increaseArrow,
         masteredCard,
+        melaLogo,
         newsBackground,
         nextArrow,
         nibBankLogo,
         oromiaBankLogo,
+        paypalLogo,
         profileImage,
         receipt,
         reward,
@@ -342,6 +356,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
 
+  /// File path: assets/images/svgs/share.svg
+  String get share => 'assets/images/svgs/share.svg';
+
   /// File path: assets/images/svgs/spin_wheel.svg
   String get spinWheel => 'assets/images/svgs/spin_wheel.svg';
 
@@ -398,6 +415,7 @@ class $AssetsImagesSvgsGen {
         requestLogo,
         search,
         sendIcon,
+        share,
         spinWheel,
         transactionIcon,
         transactionIconVertical,
@@ -412,24 +430,13 @@ class $AssetsImagesSvgsGen {
 class Assets {
   Assets._();
 
-  static const String aEnv = '.env';
   static const $AssetsImagesGen images = $AssetsImagesGen();
-
-  /// List of all assets
-  static List<String> get values => [aEnv];
 }
 
 class AssetGenImage {
-  const AssetGenImage(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-  });
+  const AssetGenImage(this._assetName);
 
   final String _assetName;
-
-  final Size? size;
-  final Set<String> flavors;
 
   Image image({
     Key? key,
@@ -449,7 +456,7 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = true,
+    bool gaplessPlayback = false,
     bool isAntiAlias = false,
     String? package,
     FilterQuality filterQuality = FilterQuality.low,

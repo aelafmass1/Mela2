@@ -10,18 +10,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final WalletRepository repository;
   WalletBloc({required this.repository})
       : super(WalletState(
-          wallets: [
-            WalletModel(
-              walletId: 20,
-              currency: "ETB",
-              balance: 0.0,
-            ),
-            WalletModel(
-              walletId: 21,
-              currency: "CAD",
-              balance: 0.0,
-            ),
-          ],
+          wallets: [],
         )) {
     on<FetchWallets>(_onFetchWallets);
     on<CreateWallet>(_onCreateWallet);

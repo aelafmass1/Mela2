@@ -32,55 +32,62 @@ class RecentMembers extends StatelessWidget {
                   ))
             ],
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                Column(
-                  children: [
-                    IconButton.outlined(
-                      color: ColorName.grey,
-                      onPressed: () {
-                        //
-                      },
-                      icon: const Icon(
-                        Icons.add,
-                      ),
+          Row(
+            children: [
+              Column(
+                children: [
+                  IconButton.outlined(
+                    color: ColorName.grey,
+                    onPressed: () {
+                      //
+                    },
+                    icon: const Icon(
+                      Icons.add,
                     ),
-                    const TextWidget(
-                      text: 'Send',
-                      fontSize: 8,
-                      weight: FontWeight.w400,
-                    )
-                  ],
+                  ),
+                  const TextWidget(
+                    text: 'Send',
+                    fontSize: 8,
+                    weight: FontWeight.w400,
+                  )
+                ],
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      ...List.generate(
+                          8,
+                          (index) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundImage:
+                                          Assets.images.profileImage.provider(),
+                                    ),
+                                    const TextWidget(
+                                      text: 'Beza',
+                                      fontSize: 8,
+                                      weight: FontWeight.w400,
+                                      color: ColorName.grey,
+                                    ),
+                                    const TextWidget(
+                                      text: '\$50.00',
+                                      fontSize: 8,
+                                      weight: FontWeight.w700,
+                                    )
+                                  ],
+                                ),
+                              ))
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 5),
-                ...List.generate(
-                    8,
-                    (index) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Column(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    Assets.images.profileImage.provider(),
-                              ),
-                              const TextWidget(
-                                text: 'Beza',
-                                fontSize: 8,
-                                weight: FontWeight.w400,
-                                color: ColorName.grey,
-                              ),
-                              const TextWidget(
-                                text: '\$50.00',
-                                fontSize: 8,
-                                weight: FontWeight.w700,
-                              )
-                            ],
-                          ),
-                        ))
-              ],
-            ),
+              )
+            ],
           ),
           const SizedBox(height: 20)
         ],

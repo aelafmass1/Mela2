@@ -69,7 +69,7 @@ class _HomeTabState extends State<HomeTab> {
       }
     });
     context.read<WalletBloc>().add(FetchWallets());
-    // context.read<WalletBloc>().add(CreateWallet(currency: 'EUR'));
+    // context.read<WalletBloc>().add(CreateWallet(currency: 'USD'));
 
     // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
@@ -923,7 +923,24 @@ class _HomeTabState extends State<HomeTab> {
               scrollDirection: Axis.horizontal,
               child: BlocBuilder<CurrencyBloc, CurrencyState>(
                 builder: (context, state) {
-                  if (state is CurrencySuccess) {
+                  if (state is CurrencyLoading) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          ...List.generate(3, (index) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5),
+                              child: CustomShimmer(
+                                width: 200,
+                                height: 90,
+                              ),
+                            );
+                          })
+                        ],
+                      ),
+                    );
+                  } else if (state is CurrencySuccess) {
                     return Row(
                       children: [
                         for (var currency in state.currencies)
