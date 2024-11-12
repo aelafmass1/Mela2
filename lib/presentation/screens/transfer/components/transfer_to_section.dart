@@ -21,7 +21,7 @@ class TransferWalletsSection extends StatefulWidget {
 class TransferWalletsSectionState extends State<TransferWalletsSection> {
   int selectedWallet = 0;
   int selectedWalletIndex = 0;
-  bool isSummerizing = true;
+  bool isSummerizing = false;
   @override
   void initState() {
     final state = context.read<WalletBloc>().state;

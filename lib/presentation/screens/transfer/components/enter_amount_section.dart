@@ -26,15 +26,16 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
   bool isSummerizing = false;
   final key = GlobalKey<FormState>();
   bool validated() {
-    if (key.currentState?.validate() == true) {
+    final validate = key.currentState?.validate();
+    if (validate ?? false) {
       return true;
     }
     return false;
   }
 
-  void setSummerizing(bool value) {
+  void setSummerizing() {
     setState(() {
-      isSummerizing = value;
+      isSummerizing = !isSummerizing;
     });
   }
 
@@ -69,101 +70,99 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
         const Gap(8),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child: isSummerizing
-              ? _buildOnSummerizing()
-              : Form(
-                  key: key,
-                  child: TextFieldWidget(
-                    focusNode: amountFocus,
-                    onChanged: (p0) {
-                      if (p0.isNotEmpty) {
-                        setState(() {});
-                      }
-                    },
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    validator: (text) {
-                      if (text?.isEmpty == true) {
-                        return 'Amount is Empty';
-                      }
-                      return null;
-                    },
-                    keyboardType: TextInputType.phone,
-                    fontSize: 20,
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 15),
-                    hintText: '00.00',
-                    prefixText: '\$',
-                    borderRadius: BorderRadius.circular(24),
-                    controller: controller,
-                    suffix:
-                        BlocBuilder<WalletCurrencyBloc, WalletCurrencyState>(
-                      builder: (context, state) {
-                        if (state is FetchWalletCurrencySuccess) {
-                          return Container(
-                            margin: const EdgeInsets.only(
-                                right: 3, top: 3, bottom: 3),
-                            width: 102,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF9F9F9),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: state.currencies.isNotEmpty
-                                ? DropdownButton(
-                                    underline: const SizedBox.shrink(),
-                                    value: selectedCurrency,
-                                    items: [
-                                      for (var currency in state.currencies)
-                                        DropdownMenuItem(
-                                          value: currency.toLowerCase(),
-                                          alignment: Alignment.center,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                width: 14,
-                                                height: 14,
-                                                decoration: const BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Image.asset(
-                                                  'icons/currency/${currency.toLowerCase()}.png',
-                                                  fit: BoxFit.cover,
-                                                  package: 'currency_icons',
-                                                ),
-                                              ),
-                                              const SizedBox(width: 5),
-                                              TextWidget(
-                                                text: currency,
-                                                fontSize: 12,
-                                                weight: FontWeight.w700,
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                    ],
-                                    onChanged: (value) {
-                                      if (value is String?) {
-                                        setState(() {
-                                          selectedCurrency = value ?? 'usd';
-                                        });
-                                      }
-                                    })
-                                : const SizedBox.shrink(),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                ),
+          child: Form(
+            key: key,
+            child: isSummerizing ? _buildOnSummerizing() : _buildOnInitial(),
+          ),
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  TextFieldWidget _buildOnInitial() {
+    return TextFieldWidget(
+      focusNode: amountFocus,
+      onChanged: (p0) {
+        if (p0.isNotEmpty) {
+          setState(() {});
+        }
+      },
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      validator: (text) {
+        if (text?.isEmpty == true) {
+          return 'Amount is Empty';
+        }
+        return null;
+      },
+      keyboardType: TextInputType.phone,
+      fontSize: 20,
+      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      hintText: '00.00',
+      prefixText: '\$',
+      borderRadius: BorderRadius.circular(24),
+      controller: controller,
+      suffix: BlocBuilder<WalletCurrencyBloc, WalletCurrencyState>(
+        builder: (context, state) {
+          if (state is FetchWalletCurrencySuccess) {
+            return Container(
+              margin: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
+              width: 102,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9F9F9),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: state.currencies.isNotEmpty
+                  ? DropdownButton(
+                      underline: const SizedBox.shrink(),
+                      value: selectedCurrency,
+                      items: [
+                        for (var currency in state.currencies)
+                          DropdownMenuItem(
+                            value: currency.toLowerCase(),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Image.asset(
+                                    'icons/currency/${currency.toLowerCase()}.png',
+                                    fit: BoxFit.cover,
+                                    package: 'currency_icons',
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                TextWidget(
+                                  text: currency,
+                                  fontSize: 12,
+                                  weight: FontWeight.w700,
+                                ),
+                              ],
+                            ),
+                          )
+                      ],
+                      onChanged: (value) {
+                        if (value is String?) {
+                          setState(() {
+                            selectedCurrency = value ?? 'usd';
+                          });
+                        }
+                      })
+                  : const SizedBox.shrink(),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 
@@ -173,7 +172,6 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
         Column(
           children: [
             TextFieldWidget(
-              focusNode: amountFocus,
               onChanged: (p0) {
                 if (p0.isNotEmpty) {
                   setState(() {});
@@ -183,9 +181,6 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
                 FilteringTextInputFormatter.digitsOnly,
               ],
               validator: (text) {
-                if (text?.isEmpty == true) {
-                  return 'Amount is Empty';
-                }
                 return null;
               },
               keyboardType: TextInputType.phone,
@@ -195,7 +190,7 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
               hintText: '00.00',
               prefixText: '\$',
               borderRadius: BorderRadius.circular(24),
-              controller: controller,
+              controller: TextEditingController(),
               suffix: BlocBuilder<WalletCurrencyBloc, WalletCurrencyState>(
                 builder: (context, state) {
                   if (state is FetchWalletCurrencySuccess) {
@@ -270,9 +265,6 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
                 FilteringTextInputFormatter.digitsOnly,
               ],
               validator: (text) {
-                if (text?.isEmpty == true) {
-                  return 'Amount is Empty';
-                }
                 return null;
               },
               keyboardType: TextInputType.phone,
@@ -357,7 +349,7 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
               radius: 30,
               backgroundColor: ColorName.primaryColor,
               child: SvgPicture.asset(
-                Assets.images.svgs.transactionIcon,
+                Assets.images.svgs.transactionIconVertical,
                 color: Colors.white,
               ),
             ),
