@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/show_qr_generator.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -38,7 +39,11 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.requestLogo,
             title: 'Request',
             onTab: () {
-              // TODO
+              showQrGenerator(
+                context: context,
+                shareLink: 'Mela Fi App Link',
+                amount: 1000,
+              );
             },
           ),
           _buildOptionButton(
