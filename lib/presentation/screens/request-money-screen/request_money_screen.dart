@@ -10,6 +10,7 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../config/routing.dart';
 import '../../../../core/utils/show_pincode.dart';
+import '../../../core/utils/show_qr_generator.dart';
 import '../../../gen/assets.gen.dart';
 import '../transfer/components/check_details_section.dart';
 import '../transfer/components/recents/recent_sent_users_horizontal_list.dart';
@@ -109,7 +110,11 @@ class _RequestMoneyScreenState extends State<RequestMoneyScreen> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  showPincode(context);
+                  showQrGenerator(
+                    context: context,
+                    shareLink: 'Mela Fi App Link',
+                    amount: 1000,
+                  );
                 },
               ),
             ),
