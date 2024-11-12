@@ -60,6 +60,7 @@ dependencies:
   currency_icons: ^0.3.0
   gap: ^3.0.1
   pretty_qr_code: ^3.3.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

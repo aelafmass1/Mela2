@@ -447,12 +447,12 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const TextWidget(
-                    text: 'Connect Accounts',
+                    text: 'Add Payment Methods',
                     weight: FontWeight.w700,
                     type: TextType.small,
                   ),
                   SizedBox(
-                    width: 170,
+                    width: 130,
                     height: 35,
                     child: ButtonWidget(
                       topPadding: 0,
@@ -470,7 +470,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                           ),
                           SizedBox(width: 5),
                           TextWidget(
-                            text: 'Add New Payment Card',
+                            text: 'Add New Card',
                             fontSize: 12,
                             color: ColorName.primaryColor,
                           )
@@ -1046,7 +1046,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 children: [
                   const SizedBox(height: 30),
                   const TextWidget(
-                    text: 'Accounts',
+                    text: 'Payment Methods',
                     weight: FontWeight.w700,
                     type: TextType.small,
                   ),
