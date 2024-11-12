@@ -75,35 +75,41 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
               swipeOrientation: CardOrientation.both,
               cardDismissOrientation: CardOrientation.both,
               positionFactor: 3,
-              scaleFactor: 0.5,
+              scaleFactor: 0.3,
               alignment: Alignment.center,
               reverseOrder: true,
               animateCardScale: true,
               dismissedCardDuration: const Duration(milliseconds: 600),
               cardList: [
                 if (walletTapped)
-                  for (var wallet in tappedWallets)
+                  for (int i = 0; i < tappedWallets.length; i++)
                     CardModel(
                         shadowBlurRadius: 0,
                         radius: const Radius.circular(24),
+                        border: Border.all(color: Colors.transparent, width: 0),
                         child: WalletCard(
-                          showPattern: false,
-                          walletName: '${wallet.currency} Wallet',
+                          showPattern: i % 2 == 0,
+                          walletName:
+                              '${tappedWallets[i].currency.code} Wallet',
                           logo:
-                              'icons/currency/${wallet.currency.toLowerCase()}.png',
-                          amount: wallet.balance.toDouble(),
-                          textColor: wallet.textColor?.toColor(),
-                          color: wallet.backgroundColor != null
-                              ? wallet.backgroundColor!.toColor()
-                              : Color.fromARGB(
-                                  255, // Set alpha to fully opaque
-                                  random.nextInt(256), // Red channel
-                                  random.nextInt(256), // Green channel
-                                  random.nextInt(256), // Blue channel
-                                ),
+                              'icons/currency/${tappedWallets[i].currency.code.toLowerCase()}.png',
+                          amount: tappedWallets[i].balance.toDouble(),
+                          textColor:
+                              tappedWallets[i].currency.textColor?.toColor(),
+                          color: tappedWallets[i]
+                                  .currency
+                                  .backgroundColor
+                                  ?.toColor() ??
+                              Color.fromARGB(
+                                255, // Set alpha to fully opaque
+                                random.nextInt(256), // Red channel
+                                random.nextInt(256), // Green channel
+                                random.nextInt(256), // Blue channel
+                              ),
                           onTab: () {
+                            final currentWallet = tappedWallets[i];
                             tappedWallets.clear();
-                            tappedWallets.add(wallet);
+                            tappedWallets.add(currentWallet);
                             for (var w in state.wallets) {
                               if (tappedWallets.contains(w) == false) {
                                 tappedWallets.add(w);
@@ -116,25 +122,31 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                           },
                         ))
                 else
-                  for (var wallet in state.wallets)
+                  for (int i = 0; i < state.wallets.length; i++)
                     CardModel(
                         shadowBlurRadius: 0,
                         radius: const Radius.circular(24),
+                        border: Border.all(color: Colors.transparent, width: 0),
                         child: WalletCard(
-                          showPattern: false,
-                          walletName: '${wallet.currency} Wallet',
+                          showPattern: i % 2 == 0,
+                          walletName:
+                              '${state.wallets[i].currency.code} Wallet',
                           logo:
-                              'icons/currency/${wallet.currency.toLowerCase()}.png',
-                          amount: wallet.balance.toDouble(),
-                          color: Color.fromARGB(
-                            255, // Set alpha to fully opaque
-                            random.nextInt(256), // Red channel
-                            random.nextInt(256), // Green channel
-                            random.nextInt(256), // Blue channel
-                          ),
+                              'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
+                          amount: state.wallets[i].balance.toDouble(),
+                          textColor:
+                              state.wallets[i].currency.textColor?.toColor(),
+                          color: state.wallets[i].currency.backgroundColor
+                                  ?.toColor() ??
+                              Color.fromARGB(
+                                255, // Set alpha to fully opaque
+                                random.nextInt(256), // Red channel
+                                random.nextInt(256), // Green channel
+                                random.nextInt(256), // Blue channel
+                              ),
                           onTab: () {
                             tappedWallets.clear();
-                            tappedWallets.add(wallet);
+                            tappedWallets.add(state.wallets[i]);
                             for (var w in state.wallets) {
                               if (tappedWallets.contains(w) == false) {
                                 tappedWallets.add(w);

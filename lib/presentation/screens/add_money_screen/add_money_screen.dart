@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -18,6 +19,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/core/utils/show_change_wallet_modal.dart';
 import 'package:transaction_mobile_app/presentation/screens/add_money_screen/components/add_payment_method_widget.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_cards_stack.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
@@ -719,20 +721,32 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       ? WalletCard(
                           height: 120,
                           showPattern: true,
-                          walletName: '${selectedWalletModel!.currency} Wallet',
+                          walletName:
+                              '${selectedWalletModel!.currency.code} Wallet',
                           logo:
-                              'icons/currency/${selectedWalletModel!.currency.toLowerCase()}.png',
+                              'icons/currency/${selectedWalletModel!.currency.code.toLowerCase()}.png',
                           amount: selectedWalletModel!.balance.toDouble(),
-                          color: const Color(0xFF3440EC),
+                          color: selectedWalletModel!.currency.backgroundColor
+                                  ?.toColor() ??
+                              const Color(0xFF3440EC),
+                          textColor: selectedWalletModel!.currency.textColor
+                                  ?.toColor() ??
+                              Colors.white,
                         )
                       : WalletCard(
                           height: 120,
                           showPattern: true,
-                          walletName: '${state.wallets.first.currency} Wallet',
+                          walletName:
+                              '${state.wallets.first.currency.code} Wallet',
                           logo:
-                              'icons/currency/${state.wallets.first.currency.toLowerCase()}.png',
+                              'icons/currency/${state.wallets.first.currency.code.toLowerCase()}.png',
                           amount: state.wallets.first.balance.toDouble(),
-                          color: const Color(0xFF3440EC),
+                          color: state.wallets.first.currency.backgroundColor
+                                  ?.toColor() ??
+                              const Color(0xFF3440EC),
+                          textColor: state.wallets.first.currency.textColor
+                                  ?.toColor() ??
+                              Colors.white,
                         ),
                 );
               }
