@@ -19,7 +19,6 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/core/utils/show_change_wallet_modal.dart';
 import 'package:transaction_mobile_app/presentation/screens/add_money_screen/components/add_payment_method_widget.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_cards_stack.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
@@ -72,11 +71,10 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
       {required String intentId,
       required String publicToken,
       String? paymentType}) {
-    final feeState = context.read<FeeBloc>().state;
     final bankState = context.read<BankFeeBloc>().state;
     final wallets = context.read<WalletBloc>().state.wallets;
     double totalFee = 0;
-    if (feeState is FeeSuccess && bankState is BankFeeSuccess) {
+    if (bankState is BankFeeSuccess) {
       final creditCardAmount = bankState.bankFees
               .where((bf) => bf.label == 'Credit Card fee')
               .isEmpty
@@ -198,7 +196,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     context.read<BankFeeBloc>().add(FetchBankFee());
     context.read<WalletCurrencyBloc>().add(FetchWalletCurrency());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
-    context.read<FeeBloc>().add(FetchFees());
 
     _streamEvent = PlaidLink.onEvent.listen(_onEvent);
     _streamExit = PlaidLink.onExit.listen(_onExit);
@@ -230,122 +227,100 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           fontSize: 20,
         ),
       ),
-      body: BlocConsumer<WalletCurrencyBloc, WalletCurrencyState>(
-        listener: (context, state) {
-          if (state is FetchWalletCurrencyFail) {
-            showSnackbar(context, description: state.reason);
-          }
-        },
-        builder: (context, state) {
-          if (state is FetchWalletCurrencyLoading) {
-            return const Center(
-                child: LoadingWidget(
-              color: ColorName.primaryColor,
-            ));
-          } else if (state is FetchWalletCurrencySuccess) {
-            return Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTop(),
-                        _buildAmountTextInput(state.currencies),
-                        _buildAccounts(),
-                        _buildConnectAccounts(),
-                        _buildCheckDetail(),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: BlocBuilder<PlaidBloc, PlaidState>(
-                    builder: (context, plaidState) {
-                      return BlocBuilder<PaymentIntentBloc, PaymentIntentState>(
-                        builder: (context, paymentState) {
-                          return BlocBuilder<WalletBloc, WalletState>(
-                            builder: (context, state) {
-                              return ButtonWidget(
-                                  child: paymentState is PaymentIntentLoading ||
-                                          plaidState is PlaidLinkTokenLoading ||
-                                          plaidState
-                                              is PlaidPublicTokenLoading ||
-                                          state is AddFundToWalletLoading
-                                      ? const LoadingWidget()
-                                      : TextWidget(
-                                          text: showFee
-                                              ? 'Confirm Payment'
-                                              : 'Continue',
-                                          color: Colors.white,
-                                          type: TextType.small,
-                                        ),
-                                  onPressed: () async {
-                                    amonutFocus.unfocus();
-                                    if (showFee == false) {
-                                      if (_formKey.currentState?.validate() ==
-                                          true) {
-                                        if (selectedPaymentMethodIndex == -1 &&
-                                            selectedAccountIndex == -1) {
-                                          showSnackbar(context,
-                                              description:
-                                                  'Select Payment Method');
-                                        } else {
-                                          setState(() {
-                                            showFee = true;
-                                          });
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTop(),
+                  _buildAmountTextInput(),
+                  _buildAccounts(),
+                  _buildConnectAccounts(),
+                  _buildCheckDetail(),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child: BlocBuilder<PlaidBloc, PlaidState>(
+              builder: (context, plaidState) {
+                return BlocBuilder<PaymentIntentBloc, PaymentIntentState>(
+                  builder: (context, paymentState) {
+                    return BlocBuilder<WalletBloc, WalletState>(
+                      builder: (context, state) {
+                        return ButtonWidget(
+                            child: paymentState is PaymentIntentLoading ||
+                                    plaidState is PlaidLinkTokenLoading ||
+                                    plaidState is PlaidPublicTokenLoading ||
+                                    state is AddFundToWalletLoading
+                                ? const LoadingWidget()
+                                : TextWidget(
+                                    text: showFee
+                                        ? 'Confirm Payment'
+                                        : 'Continue',
+                                    color: Colors.white,
+                                    type: TextType.small,
+                                  ),
+                            onPressed: () async {
+                              amonutFocus.unfocus();
+                              if (showFee == false) {
+                                if (_formKey.currentState?.validate() == true) {
+                                  if (selectedPaymentMethodIndex == -1 &&
+                                      selectedAccountIndex == -1) {
+                                    showSnackbar(context,
+                                        description: 'Select Payment Method');
+                                  } else {
+                                    setState(() {
+                                      showFee = true;
+                                    });
 
-                                          // Add scroll animation after a brief delay to allow fee content to render
-                                          Future.delayed(
-                                              const Duration(milliseconds: 100),
-                                              () {
-                                            scrollController.animateTo(
-                                              scrollController
-                                                  .position.maxScrollExtent,
-                                              duration: const Duration(
-                                                  milliseconds: 300),
-                                              curve: Curves.easeOut,
-                                            );
-                                          });
-                                        }
-                                      }
-                                    } else {
-                                      if (selectedAccountIndex != -1) {
-                                        final cards = context
-                                            .read<PaymentCardBloc>()
-                                            .state
-                                            .paymentCards;
-                                        setState(() {
-                                          selectedPaymentCardId =
-                                              cards[selectedAccountIndex].id;
-                                        });
-                                        _addFundToWallet(
-                                          intentId: '',
-                                          publicToken: '',
-                                          paymentType: 'SAVED_PAYMENT',
-                                        );
-                                      } else {
-                                        context
-                                            .read<PlaidBloc>()
-                                            .add(CreateLinkToken());
-                                      }
-                                    }
+                                    // Add scroll animation after a brief delay to allow fee content to render
+                                    Future.delayed(
+                                        const Duration(milliseconds: 100), () {
+                                      scrollController.animateTo(
+                                        scrollController
+                                            .position.maxScrollExtent,
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        curve: Curves.easeOut,
+                                      );
+                                    });
+                                  }
+                                }
+                              } else {
+                                if (selectedAccountIndex != -1) {
+                                  final cards = context
+                                      .read<PaymentCardBloc>()
+                                      .state
+                                      .paymentCards;
+                                  setState(() {
+                                    selectedPaymentCardId =
+                                        cards[selectedAccountIndex].id;
                                   });
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          }
-          return const SizedBox();
-        },
+                                  _addFundToWallet(
+                                    intentId: '',
+                                    publicToken: '',
+                                    paymentType: 'SAVED_PAYMENT',
+                                  );
+                                } else {
+                                  context
+                                      .read<PlaidBloc>()
+                                      .add(CreateLinkToken());
+                                }
+                              }
+                            });
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -606,7 +581,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     );
   }
 
-  _buildAmountTextInput(List currencies) {
+  _buildAmountTextInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Form(
@@ -620,84 +595,89 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               type: TextType.small,
             ),
             const SizedBox(height: 15),
-            TextFieldWidget(
-              focusNode: amonutFocus,
-              onChanged: (p0) {
-                if (p0.isNotEmpty) {
-                  setState(() {});
-                }
-              },
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              validator: (text) {
-                if (text?.isEmpty == true) {
-                  return 'Amount is Empty';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.phone,
-              fontSize: 20,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-              hintText: '00.00',
-              prefixText: '\$',
-              borderRadius: BorderRadius.circular(24),
-              controller: amountController,
-              suffix: Container(
-                margin: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
-                width: 102,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9F9F9),
-                  borderRadius: BorderRadius.circular(
-                    30,
+            BlocBuilder<WalletBloc, WalletState>(
+              builder: (context, state) {
+                return TextFieldWidget(
+                  focusNode: amonutFocus,
+                  onChanged: (p0) {
+                    if (p0.isNotEmpty) {
+                      setState(() {});
+                    }
+                  },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  validator: (text) {
+                    if (text?.isEmpty == true) {
+                      return 'Amount is Empty';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.phone,
+                  fontSize: 20,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                  hintText: '00.00',
+                  prefixText: '\$',
+                  borderRadius: BorderRadius.circular(24),
+                  controller: amountController,
+                  suffix: Container(
+                    margin: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
+                    width: 102,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F9F9),
+                      borderRadius: BorderRadius.circular(
+                        30,
+                      ),
+                    ),
+                    child: state.wallets.isNotEmpty
+                        ? DropdownButton(
+                            underline: const SizedBox.shrink(),
+                            value: selectedCurrency,
+                            items: [
+                              for (var currency
+                                  in state.wallets.map((w) => w.currency.code))
+                                DropdownMenuItem(
+                                  value: currency.toLowerCase(),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 14,
+                                        height: 14,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Image.asset(
+                                          'icons/currency/${currency.toLowerCase()}.png',
+                                          fit: BoxFit.cover,
+                                          package: 'currency_icons',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      TextWidget(
+                                        text: currency,
+                                        fontSize: 12,
+                                        weight: FontWeight.w700,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                            ],
+                            onChanged: (value) {
+                              if (value is String?) {
+                                setState(() {
+                                  selectedCurrency = value ?? 'usd';
+                                });
+                              }
+                            })
+                        : const SizedBox.shrink(),
                   ),
-                ),
-                child: currencies.isNotEmpty
-                    ? DropdownButton(
-                        underline: const SizedBox.shrink(),
-                        value: selectedCurrency,
-                        items: [
-                          for (var currency in currencies)
-                            DropdownMenuItem(
-                              value: currency.toLowerCase(),
-                              alignment: Alignment.center,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 14,
-                                    height: 14,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Image.asset(
-                                      'icons/currency/${currency.toLowerCase()}.png',
-                                      fit: BoxFit.cover,
-                                      package: 'currency_icons',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  TextWidget(
-                                    text: currency,
-                                    fontSize: 12,
-                                    weight: FontWeight.w700,
-                                  ),
-                                ],
-                              ),
-                            )
-                        ],
-                        onChanged: (value) {
-                          if (value is String?) {
-                            setState(() {
-                              selectedCurrency = value ?? 'usd';
-                            });
-                          }
-                        })
-                    : const SizedBox.shrink(),
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -972,19 +952,12 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
                                       return Row(
                                         children: [
-                                          if (feeState is FeeSuccess)
-                                            TextWidget(
-                                              text:
-                                                  '\$${((selectedPaymentMethodIndex == 1 ? ((double.tryParse(amountController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? ((double.tryParse(amountController.text) ?? 0) * (creditCardAmount / 100)) : 0)).toStringAsFixed(2)}',
-                                              fontSize: 16,
-                                              weight: FontWeight.w500,
-                                            )
-                                          else
-                                            const TextWidget(
-                                              text: '\$--',
-                                              fontSize: 16,
-                                              weight: FontWeight.w500,
-                                            ),
+                                          TextWidget(
+                                            text:
+                                                '\$${((selectedPaymentMethodIndex == 1 ? ((double.tryParse(amountController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? ((double.tryParse(amountController.text) ?? 0) * (creditCardAmount / 100)) : 0)).toStringAsFixed(2)}',
+                                            fontSize: 16,
+                                            weight: FontWeight.w500,
+                                          ),
                                           IconButton(
                                             style: IconButton.styleFrom(
                                               padding: EdgeInsets.zero,
