@@ -241,7 +241,7 @@ final goRouting = GoRouter(
       path: '/pincode_deligate',
       name: RouteName.pincodeDeligate,
       builder: (context, state) {
-        final onVeriried = state.extra as Function();
+        final onVeriried = state.extra as Function(String pincode);
         return PincodeScreenDeligate(
           overrideButtonText: "Confirm Payment",
           result: (isValid) {},

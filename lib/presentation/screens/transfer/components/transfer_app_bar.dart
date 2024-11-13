@@ -63,7 +63,8 @@ class TransferAppBarState extends State<TransferAppBar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextWidget(
-                    text: " ${selectedWalletModel?.currency ?? 'USD'} Wallet",
+                    text:
+                        " ${selectedWalletModel?.currency.code ?? 'USD'} Wallet",
                     fontSize: 15,
                     color: ColorName.grey,
                   ),

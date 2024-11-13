@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -94,6 +95,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                   : TextWidget(
                       text: isNext() ? "Next" : 'Confirm',
                       color: Colors.white,
+                      type: TextType.small,
                     ),
               onPressed: () {
                 final isAmountValidated = amountKey.currentState?.validated();
@@ -106,7 +108,8 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                     setState(() {});
                     return;
                   }
-                  context.pushNamed(RouteName.pincodeDeligate, extra: () {
+                  context.pushNamed(RouteName.pincodeDeligate,
+                      extra: (pincode) {
                     context.pop();
                     final fromWalletId = fromWalletKey
                         .currentState?.selectedWalletModel?.walletId;
@@ -129,15 +132,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           },
           listener: (BuildContext context, MoneyTransferState state) {
             if (state is MoneyTransferOwnWalletSuccess) {
-              context.pushNamed(RouteName.receiptPage2,
-                  extra: ReceiverInfo(
-                    receiverName: '',
-                    receiverPhoneNumber: '',
-                    receiverBankName: '',
-                    receiverAccountNumber: '',
-                    amount: 0,
-                    paymentType: '',
-                  ));
+              if (state.walletTransactionModel != null) {
+                showWalletReceipt(context, state.walletTransactionModel!);
+              }
             }
             if (state is MoneyTransferFail) {
               showSnackbar(context, description: state.reason);

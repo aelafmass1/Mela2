@@ -12,7 +12,7 @@ import '../../widgets/text_widget.dart';
 
 class PincodeScreenDeligate extends StatefulWidget {
   final Function(bool isValid) result;
-  final Function() onVerified;
+  final Function(String pincode) onVerified;
   final String? overrideButtonText;
 
   const PincodeScreenDeligate(
@@ -240,11 +240,10 @@ class _PincodeScreenDeligateState extends State<PincodeScreenDeligate> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  // final pins = getAllPins();
-                  // context.read<PincodeBloc>().add(
-                  //       VerifyPincode(pincode: pins.join()),
-                  //     );
-                  widget.onVerified();
+                  if (isValid) {
+                    final pins = getAllPins();
+                    widget.onVerified(pins.join());
+                  }
                 }),
             _buildKeypad(),
             const SizedBox(height: 20),

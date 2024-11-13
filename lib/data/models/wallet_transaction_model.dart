@@ -5,11 +5,11 @@ class WalletTransactionModel {
   final int fromWalletId;
   final int toWalletId;
   final int transactionId;
-  final num fromWalletBalance;
+  final num? fromWalletBalance;
   final num amount;
-  final String transactionType;
-  final DateTime transactionTimestamp;
-  final String note;
+  final String? transactionType;
+  final DateTime timestamp;
+  final String? note;
   WalletTransactionModel({
     required this.fromWalletId,
     required this.toWalletId,
@@ -17,7 +17,7 @@ class WalletTransactionModel {
     required this.fromWalletBalance,
     required this.amount,
     required this.transactionType,
-    required this.transactionTimestamp,
+    required this.timestamp,
     required this.note,
   });
 
@@ -38,7 +38,7 @@ class WalletTransactionModel {
       fromWalletBalance: fromWalletBalance ?? this.fromWalletBalance,
       amount: amount ?? this.amount,
       transactionType: transactionType ?? this.transactionType,
-      transactionTimestamp: transactionTimestamp ?? this.transactionTimestamp,
+      timestamp: transactionTimestamp ?? this.timestamp,
       note: note ?? this.note,
     );
   }
@@ -51,7 +51,7 @@ class WalletTransactionModel {
       'fromWalletBalance': fromWalletBalance,
       'amount': amount,
       'transactionType': transactionType,
-      'transactionTimestamp': transactionTimestamp.millisecondsSinceEpoch,
+      'transactionTimestamp': timestamp.millisecondsSinceEpoch,
       'note': note,
     };
   }
@@ -61,11 +61,11 @@ class WalletTransactionModel {
       fromWalletId: map['fromWalletId'] as int,
       toWalletId: map['toWalletId'] as int,
       transactionId: map['transactionId'] as int,
-      fromWalletBalance: map['fromWalletBalance'] as num,
+      fromWalletBalance: map['fromWalletBalance'] as num?,
       amount: map['amount'] as num,
-      transactionType: map['transactionType'] as String,
-      transactionTimestamp: DateTime.parse(map['transactionTimestamp']),
-      note: map['note'] as String,
+      transactionType: map['transactionType'] as String?,
+      timestamp: DateTime.parse(map['timestamp']),
+      note: map['note'] as String?,
     );
   }
 
@@ -77,7 +77,7 @@ class WalletTransactionModel {
 
   @override
   String toString() {
-    return 'WalletTransactionModel(fromWalletId: $fromWalletId, toWalletId: $toWalletId, transactionId: $transactionId, fromWalletBalance: $fromWalletBalance, amount: $amount, transactionType: $transactionType, transactionTimestamp: $transactionTimestamp, note: $note)';
+    return 'WalletTransactionModel(fromWalletId: $fromWalletId, toWalletId: $toWalletId, transactionId: $transactionId, fromWalletBalance: $fromWalletBalance, amount: $amount, transactionType: $transactionType, transactionTimestamp: $timestamp, note: $note)';
   }
 
   @override
@@ -90,7 +90,7 @@ class WalletTransactionModel {
         other.fromWalletBalance == fromWalletBalance &&
         other.amount == amount &&
         other.transactionType == transactionType &&
-        other.transactionTimestamp == transactionTimestamp &&
+        other.timestamp == timestamp &&
         other.note == note;
   }
 
@@ -102,7 +102,7 @@ class WalletTransactionModel {
         fromWalletBalance.hashCode ^
         amount.hashCode ^
         transactionType.hashCode ^
-        transactionTimestamp.hashCode ^
+        timestamp.hashCode ^
         note.hashCode;
   }
 }

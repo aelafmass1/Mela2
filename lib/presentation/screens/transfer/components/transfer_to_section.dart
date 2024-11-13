@@ -54,75 +54,12 @@ class TransferWalletsSectionState extends State<TransferWalletsSection> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (Widget child, Animation<double> animation) {
-                  return Column(
-                    children: [
-                      for (int i = 0; i < state.wallets.length; i++)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CardWidget(
-                              boxBorder: Border.all(
-                                color: selectedWalletIndex == i
-                                    ? ColorName.primaryColor
-                                    : Colors.transparent,
-                              ),
-                              alignment: Alignment.center,
-                              borderRadius: BorderRadius.circular(24),
-                              width: 100.sw,
-                              height: 65,
-                              child: ListTile(
-                                shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50)),
-                                onTap: () {
-                                  setState(() {
-                                    selectedWalletIndex = i;
-                                    selectedWallet = state.wallets[i].walletId;
-                                  });
-                                },
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: const BoxDecoration(
-                                      shape: BoxShape.circle),
-                                  child: Image.asset(
-                                    'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
-                                    package: 'currency_icons',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                title: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextWidget(
-                                      text:
-                                          '${state.wallets[i].currency.code.toUpperCase()} Wallet',
-                                      fontSize: 14,
-                                    ),
-                                    TextWidget(
-                                      text:
-                                          '${state.wallets[i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
-                                      fontSize: 10,
-                                    )
-                                  ],
-                                ),
-                                trailing: Checkbox(
-                                  shape: const CircleBorder(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedWalletIndex = i;
-                                    });
-                                  },
-                                  value: selectedWalletIndex == i,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
                   );
                 },
                 child: (isSummerizing)
