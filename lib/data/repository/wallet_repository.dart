@@ -93,4 +93,21 @@ class WalletRepository {
     }
     return processErrorResponse(data);
   }
+
+  Future<Map> fetchWalletTransaction({required String accessToken}) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/transactions',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return {'data': data};
+    }
+    return processErrorResponse(data);
+  }
 }

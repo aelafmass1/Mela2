@@ -1009,7 +1009,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 children: [
                   const SizedBox(height: 30),
                   const TextWidget(
-                    text: 'Accounts',
+                    text: 'Payment Methods',
                     weight: FontWeight.w700,
                     type: TextType.small,
                   ),
