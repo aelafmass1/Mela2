@@ -1,18 +1,22 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
+
 class WalletCurrencyModel {
   final int id;
   final String code;
   final String label;
   final String? backgroundColor;
   final String? textColor;
+  final MelaUser? holder;
   WalletCurrencyModel({
     required this.id,
     required this.code,
     required this.label,
     this.backgroundColor,
     this.textColor,
+    this.holder,
   });
 
   WalletCurrencyModel copyWith({
@@ -21,6 +25,7 @@ class WalletCurrencyModel {
     String? label,
     String? backgroundColor,
     String? textColor,
+    MelaUser? holder,
   }) {
     return WalletCurrencyModel(
       id: id ?? this.id,
@@ -28,6 +33,7 @@ class WalletCurrencyModel {
       label: label ?? this.label,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textColor: textColor ?? this.textColor,
+      holder: holder ?? this.holder,
     );
   }
 
@@ -38,6 +44,7 @@ class WalletCurrencyModel {
       'label': label,
       'backgroundColor': backgroundColor,
       'textColor': textColor,
+      'holder': holder?.toMap(),
     };
   }
 
@@ -50,6 +57,9 @@ class WalletCurrencyModel {
           ? map['backgroundColor'] as String
           : null,
       textColor: map['textColor'] != null ? map['textColor'] as String : null,
+      holder: map['holder'] != null
+          ? MelaUser.fromMap(map['holder'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -60,7 +70,7 @@ class WalletCurrencyModel {
 
   @override
   String toString() {
-    return 'WalletCurrencyModel(id: $id, code: $code, label: $label, backgroundColor: $backgroundColor, textColor: $textColor)';
+    return 'WalletCurrencyModel(id: $id, code: $code, label: $label, backgroundColor: $backgroundColor, textColor: $textColor, holder: $holder)';
   }
 
   @override
@@ -71,7 +81,8 @@ class WalletCurrencyModel {
         other.code == code &&
         other.label == label &&
         other.backgroundColor == backgroundColor &&
-        other.textColor == textColor;
+        other.textColor == textColor &&
+        other.holder == holder;
   }
 
   @override
@@ -80,6 +91,7 @@ class WalletCurrencyModel {
         code.hashCode ^
         label.hashCode ^
         backgroundColor.hashCode ^
-        textColor.hashCode;
+        textColor.hashCode ^
+        holder.hashCode;
   }
 }

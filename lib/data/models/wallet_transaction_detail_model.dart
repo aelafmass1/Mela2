@@ -13,8 +13,9 @@ class WalletTransactionDetailModel {
   final DateTime timestamp;
   final num? convertedAmount;
   final String? note;
-  final ExchangeRateModel? exchangeRate;
   final MelaUser? toUser;
+  final WalletCurrencyModel? fromCurrency;
+  final WalletCurrencyModel? toCurrency;
   WalletTransactionDetailModel({
     required this.transactionId,
     this.amount,
@@ -24,8 +25,9 @@ class WalletTransactionDetailModel {
     required this.timestamp,
     this.convertedAmount,
     this.note,
-    this.exchangeRate,
     this.toUser,
+    this.fromCurrency,
+    this.toCurrency,
   });
 
   WalletTransactionDetailModel copyWith({
@@ -37,8 +39,9 @@ class WalletTransactionDetailModel {
     DateTime? timestamp,
     num? convertedAmount,
     String? note,
-    ExchangeRateModel? exchangeRate,
     MelaUser? toUser,
+    WalletCurrencyModel? fromCurrency,
+    WalletCurrencyModel? toCurrency,
   }) {
     return WalletTransactionDetailModel(
       transactionId: transactionId ?? this.transactionId,
@@ -49,8 +52,9 @@ class WalletTransactionDetailModel {
       timestamp: timestamp ?? this.timestamp,
       convertedAmount: convertedAmount ?? this.convertedAmount,
       note: note ?? this.note,
-      exchangeRate: exchangeRate ?? this.exchangeRate,
       toUser: toUser ?? this.toUser,
+      fromCurrency: fromCurrency ?? this.fromCurrency,
+      toCurrency: toCurrency ?? this.toCurrency,
     );
   }
 
@@ -64,8 +68,9 @@ class WalletTransactionDetailModel {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'convertedAmount': convertedAmount,
       'note': note,
-      'exchangeRate': exchangeRate?.toMap(),
       'toUser': toUser?.toMap(),
+      'fromCurrency': fromCurrency?.toMap(),
+      'toCurrency': toCurrency?.toMap(),
     };
   }
 
@@ -76,15 +81,21 @@ class WalletTransactionDetailModel {
       currency: map['currency'] != null ? map['currency'] as String : null,
       transactionType: map['transactionType'] as String,
       status: map['status'] as String,
-      timestamp: DateTime.parse(map['timestamp']),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
       convertedAmount:
           map['convertedAmount'] != null ? map['convertedAmount'] as num : null,
       note: map['note'] != null ? map['note'] as String : null,
-      exchangeRate: map['exchangeRate'] != null
-          ? ExchangeRateModel.fromMap(map['exchangeRate'] as Map)
+      toUser: map['toUser'] != null
+          ? MelaUser.fromMap(map['toUser'] as Map<String, dynamic>)
           : null,
-      toUser:
-          map['toUser'] != null ? MelaUser.fromMap(map['toUser'] as Map) : null,
+      fromCurrency: map['fromCurrency'] != null
+          ? WalletCurrencyModel.fromMap(
+              map['fromCurrency'] as Map<String, dynamic>)
+          : null,
+      toCurrency: map['toCurrency'] != null
+          ? WalletCurrencyModel.fromMap(
+              map['toCurrency'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -96,7 +107,7 @@ class WalletTransactionDetailModel {
 
   @override
   String toString() {
-    return 'WalletTransactionDetailModel(transactionId: $transactionId, amount: $amount, currency: $currency, transactionType: $transactionType, status: $status, timestamp: $timestamp, convertedAmount: $convertedAmount, note: $note, exchangeRate: $exchangeRate, toUser: $toUser)';
+    return 'WalletTransactionDetailModel(transactionId: $transactionId, amount: $amount, currency: $currency, transactionType: $transactionType, status: $status, timestamp: $timestamp, convertedAmount: $convertedAmount, note: $note, toUser: $toUser, fromCurrency: $fromCurrency, toCurrency: $toCurrency)';
   }
 
   @override
@@ -111,8 +122,9 @@ class WalletTransactionDetailModel {
         other.timestamp == timestamp &&
         other.convertedAmount == convertedAmount &&
         other.note == note &&
-        other.exchangeRate == exchangeRate &&
-        other.toUser == toUser;
+        other.toUser == toUser &&
+        other.fromCurrency == fromCurrency &&
+        other.toCurrency == toCurrency;
   }
 
   @override
@@ -125,83 +137,7 @@ class WalletTransactionDetailModel {
         timestamp.hashCode ^
         convertedAmount.hashCode ^
         note.hashCode ^
-        exchangeRate.hashCode ^
-        toUser.hashCode;
-  }
-}
-
-class ExchangeRateModel {
-  final int id;
-  final num rate;
-  final WalletCurrencyModel? fromCurrency;
-  final WalletCurrencyModel? toCurrency;
-  ExchangeRateModel({
-    required this.id,
-    required this.rate,
-    this.fromCurrency,
-    this.toCurrency,
-  });
-
-  ExchangeRateModel copyWith({
-    int? id,
-    num? rate,
-    WalletCurrencyModel? fromCurrency,
-    WalletCurrencyModel? toCurrency,
-  }) {
-    return ExchangeRateModel(
-      id: id ?? this.id,
-      rate: rate ?? this.rate,
-      fromCurrency: fromCurrency ?? this.fromCurrency,
-      toCurrency: toCurrency ?? this.toCurrency,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'rate': rate,
-      'fromCurrency': fromCurrency?.toMap(),
-      'toCurrency': toCurrency?.toMap(),
-    };
-  }
-
-  factory ExchangeRateModel.fromMap(Map map) {
-    return ExchangeRateModel(
-      id: map['id'] as int,
-      rate: map['rate'] as num,
-      fromCurrency: map['fromCurrency'] != null
-          ? WalletCurrencyModel.fromMap(map['fromCurrency'] as Map)
-          : null,
-      toCurrency: map['toCurrency'] != null
-          ? WalletCurrencyModel.fromMap(map['toCurrency'] as Map)
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory ExchangeRateModel.fromJson(String source) =>
-      ExchangeRateModel.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() {
-    return 'ExchangeRateModel(id: $id, rate: $rate, fromCurrency: $fromCurrency, toCurrency: $toCurrency)';
-  }
-
-  @override
-  bool operator ==(covariant ExchangeRateModel other) {
-    if (identical(this, other)) return true;
-
-    return other.id == id &&
-        other.rate == rate &&
-        other.fromCurrency == fromCurrency &&
-        other.toCurrency == toCurrency;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        rate.hashCode ^
+        toUser.hashCode ^
         fromCurrency.hashCode ^
         toCurrency.hashCode;
   }
