@@ -1,36 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../../../bloc/check-details-bloc/check_details_bloc.dart';
 
 class CheckDetailsSection extends StatelessWidget {
   const CheckDetailsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const TextWidget(
-          text: 'Check Details',
-          fontSize: 18,
-          weight: FontWeight.w600,
-        ),
-        const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: ColorName.grey.withOpacity(0.3),
+    return BlocConsumer<CheckDetailsBloc, CheckDetailsState>(
+      listener: (context, state) {
+        if (state is CheckDetailsError) {
+          showSnackbar(context, description: state.message);
+        }
+      },
+      builder: (context, state) {
+        if (state is CheckDetailsLoaded) {
+          if (state.fees.isEmpty) {
+            return const SizedBox.shrink();
+          }
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const TextWidget(
+                  text: 'Check Details',
+                  fontSize: 18,
+                  weight: FontWeight.w600,
+                ),
+                if (state is CheckDetailsLoading)
+                  const CircularProgressIndicator.adaptive(),
+              ],
             ),
-          ),
-          child: Column(
-            children: [
-              _buildFeeDetails(),
-            ], // Content will go here
-          ),
-        ),
-      ],
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: ColorName.grey.withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                children: [
+                  if (state is CheckDetailsLoaded) _buildFeeDetails(),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

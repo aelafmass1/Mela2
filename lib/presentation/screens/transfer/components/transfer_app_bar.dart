@@ -12,7 +12,9 @@ import '../../../../data/models/wallet_model.dart';
 class TransferAppBar extends StatefulWidget {
   const TransferAppBar({
     super.key,
+    this.onWalletChanged,
   });
+  final Function(int selectedWallet)? onWalletChanged;
 
   @override
   State<TransferAppBar> createState() => TransferAppBarState();
@@ -56,6 +58,7 @@ class TransferAppBarState extends State<TransferAppBar> {
                   setState(() {
                     selectedWalletModel = selectedWallet;
                   });
+                  widget.onWalletChanged?.call(selectedWallet.walletId);
                 }
               },
               child: Row(

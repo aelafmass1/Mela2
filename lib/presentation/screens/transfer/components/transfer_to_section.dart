@@ -12,20 +12,20 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
 
 class TransferWalletsSection extends StatefulWidget {
-  const TransferWalletsSection({super.key});
-
+  const TransferWalletsSection({super.key, this.onWalletChanged});
+  final Function(int selectedWallet)? onWalletChanged;
   @override
   TransferWalletsSectionState createState() => TransferWalletsSectionState();
 }
 
 class TransferWalletsSectionState extends State<TransferWalletsSection> {
-  int selectedWallet = 0;
-  int selectedWalletIndex = 0;
+  int selectedWallet = -1;
+  int selectedWalletIndex = -1;
   bool isSummerizing = false;
   @override
   void initState() {
     final state = context.read<WalletBloc>().state;
-    selectedWalletIndex = 0;
+    selectedWalletIndex = -1;
     selectedWallet = state.wallets[0].walletId;
     super.initState();
   }
@@ -135,6 +135,8 @@ class TransferWalletsSectionState extends State<TransferWalletsSection> {
                                         selectedWalletIndex = i;
                                         selectedWallet =
                                             state.wallets[i].walletId;
+                                        widget.onWalletChanged
+                                            ?.call(state.wallets[i].walletId);
                                       });
                                     },
                                     contentPadding: const EdgeInsets.symmetric(

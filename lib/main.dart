@@ -44,6 +44,8 @@ import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
+import 'bloc/check-details-bloc/check_details_bloc.dart';
+import 'bloc/transfer-rate/transfer_rate_bloc.dart';
 import 'config/routing.dart';
 import 'data/repository/auth_repository.dart';
 import 'data/services/api/api_service.dart';
@@ -231,6 +233,16 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         BlocProvider(
           create: (context) => WalletCurrencyBloc(
             repository: walletRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => TransferRateBloc(
+            walletRepository: walletRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => CheckDetailsBloc(
+            walletRepository: walletRepository,
           ),
         ),
       ],
