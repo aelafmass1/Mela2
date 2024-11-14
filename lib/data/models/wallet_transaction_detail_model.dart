@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_currency_model.dart';
 
+import 'wallet_model.dart';
+
 class WalletTransactionDetailModel {
   final int transactionId;
   final num? amount;
@@ -13,9 +15,8 @@ class WalletTransactionDetailModel {
   final DateTime timestamp;
   final num? convertedAmount;
   final String? note;
-  final MelaUser? toUser;
-  final WalletCurrencyModel? fromCurrency;
-  final WalletCurrencyModel? toCurrency;
+  final WalletModel? fromWallet;
+  final WalletModel? toWallet;
   WalletTransactionDetailModel({
     required this.transactionId,
     this.amount,
@@ -25,9 +26,8 @@ class WalletTransactionDetailModel {
     required this.timestamp,
     this.convertedAmount,
     this.note,
-    this.toUser,
-    this.fromCurrency,
-    this.toCurrency,
+    this.fromWallet,
+    this.toWallet,
   });
 
   WalletTransactionDetailModel copyWith({
@@ -39,9 +39,8 @@ class WalletTransactionDetailModel {
     DateTime? timestamp,
     num? convertedAmount,
     String? note,
-    MelaUser? toUser,
-    WalletCurrencyModel? fromCurrency,
-    WalletCurrencyModel? toCurrency,
+    WalletModel? fromCurrency,
+    WalletModel? toCurrency,
   }) {
     return WalletTransactionDetailModel(
       transactionId: transactionId ?? this.transactionId,
@@ -52,9 +51,8 @@ class WalletTransactionDetailModel {
       timestamp: timestamp ?? this.timestamp,
       convertedAmount: convertedAmount ?? this.convertedAmount,
       note: note ?? this.note,
-      toUser: toUser ?? this.toUser,
-      fromCurrency: fromCurrency ?? this.fromCurrency,
-      toCurrency: toCurrency ?? this.toCurrency,
+      fromWallet: fromCurrency ?? this.fromWallet,
+      toWallet: toCurrency ?? this.toWallet,
     );
   }
 
@@ -68,9 +66,8 @@ class WalletTransactionDetailModel {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'convertedAmount': convertedAmount,
       'note': note,
-      'toUser': toUser?.toMap(),
-      'fromCurrency': fromCurrency?.toMap(),
-      'toCurrency': toCurrency?.toMap(),
+      'fromCurrency': fromWallet?.toMap(),
+      'toCurrency': toWallet?.toMap(),
     };
   }
 
@@ -81,20 +78,15 @@ class WalletTransactionDetailModel {
       currency: map['currency'] != null ? map['currency'] as String : null,
       transactionType: map['transactionType'] as String,
       status: map['status'] as String,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
+      timestamp: DateTime.parse(map['timestamp']),
       convertedAmount:
           map['convertedAmount'] != null ? map['convertedAmount'] as num : null,
       note: map['note'] != null ? map['note'] as String : null,
-      toUser: map['toUser'] != null
-          ? MelaUser.fromMap(map['toUser'] as Map<String, dynamic>)
+      fromWallet: map['fromWallet'] != null
+          ? WalletModel.fromMap(map['fromWallet'] as Map)
           : null,
-      fromCurrency: map['fromCurrency'] != null
-          ? WalletCurrencyModel.fromMap(
-              map['fromCurrency'] as Map<String, dynamic>)
-          : null,
-      toCurrency: map['toCurrency'] != null
-          ? WalletCurrencyModel.fromMap(
-              map['toCurrency'] as Map<String, dynamic>)
+      toWallet: map['toWallet'] != null
+          ? WalletModel.fromMap(map['toWallet'] as Map)
           : null,
     );
   }
@@ -107,7 +99,7 @@ class WalletTransactionDetailModel {
 
   @override
   String toString() {
-    return 'WalletTransactionDetailModel(transactionId: $transactionId, amount: $amount, currency: $currency, transactionType: $transactionType, status: $status, timestamp: $timestamp, convertedAmount: $convertedAmount, note: $note, toUser: $toUser, fromCurrency: $fromCurrency, toCurrency: $toCurrency)';
+    return 'WalletTransactionDetailModel(transactionId: $transactionId, amount: $amount, currency: $currency, transactionType: $transactionType, status: $status, timestamp: $timestamp, convertedAmount: $convertedAmount, note: $note, fromCurrency: $fromWallet, toCurrency: $toWallet)';
   }
 
   @override
@@ -122,9 +114,8 @@ class WalletTransactionDetailModel {
         other.timestamp == timestamp &&
         other.convertedAmount == convertedAmount &&
         other.note == note &&
-        other.toUser == toUser &&
-        other.fromCurrency == fromCurrency &&
-        other.toCurrency == toCurrency;
+        other.fromWallet == fromWallet &&
+        other.toWallet == toWallet;
   }
 
   @override
@@ -137,8 +128,7 @@ class WalletTransactionDetailModel {
         timestamp.hashCode ^
         convertedAmount.hashCode ^
         note.hashCode ^
-        toUser.hashCode ^
-        fromCurrency.hashCode ^
-        toCurrency.hashCode;
+        fromWallet.hashCode ^
+        toWallet.hashCode;
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
@@ -44,7 +46,7 @@ class WalletTransactionBloc
             groupedTransactions[formattedDate] = [transaction];
           }
         }
-
+        log(groupedTransactions.toString());
         emit(
           WalletTransactionSuccess(
             walletTransactions: groupedTransactions,

@@ -117,15 +117,35 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
             if (widget.walletTransaction.transactionType ==
                     'WALLET_TO_WALLET' ||
                 widget.walletTransaction.transactionType == 'BANK_TO_WALLET')
-              const TextWidget(
-                text: "You",
-                fontSize: 16,
-                weight: FontWeight.w500,
-              )
+              if (widget.walletTransaction.transactionType ==
+                      'WALLET_TO_WALLET' &&
+                  widget.walletTransaction.toWallet?.holder != null)
+                FutureBuilder(
+                    future: getUserContactInfo(
+                      melaUser: widget.walletTransaction.toWallet?.holder ??
+                          MelaUser(
+                            phoneNumber: 0,
+                            countryCode: 1,
+                          ),
+                    ),
+                    builder: (context, snapshot) {
+                      return TextWidget(
+                        text: snapshot.data?.displayName ??
+                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unknown'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
+                        fontSize: 16,
+                        weight: FontWeight.w500,
+                      );
+                    })
+              else
+                const TextWidget(
+                  text: "You",
+                  fontSize: 16,
+                  weight: FontWeight.w500,
+                )
             else
               FutureBuilder(
                   future: getUserContactInfo(
-                    melaUser: widget.walletTransaction.toUser ??
+                    melaUser: widget.walletTransaction.toWallet?.holder ??
                         MelaUser(
                           phoneNumber: 0,
                           countryCode: 1,
@@ -134,7 +154,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
                   builder: (context, snapshot) {
                     return TextWidget(
                       text: snapshot.data?.displayName ??
-                          "${widget.walletTransaction.toUser?.firstName ?? 'Unknown'} ${widget.walletTransaction.toUser?.lastName ?? 'User'}",
+                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unknown'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
                       fontSize: 16,
                       weight: FontWeight.w500,
                     );

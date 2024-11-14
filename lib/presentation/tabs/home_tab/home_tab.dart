@@ -80,7 +80,7 @@ class _HomeTabState extends State<HomeTab> {
     context.read<UserBloc>().add(FetchMe());
     // context.read<MoneyTransferBloc>().add(
     //       TransferToOwnWallet(
-    //         amount: 90,
+    //         amount: 10,
     //         fromWalletId: 9,
     //         toWalletId: 3,
     //         note: 'test',

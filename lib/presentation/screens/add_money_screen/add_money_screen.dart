@@ -705,7 +705,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                               '${selectedWalletModel!.currency.code} Wallet',
                           logo:
                               'icons/currency/${selectedWalletModel!.currency.code.toLowerCase()}.png',
-                          amount: selectedWalletModel!.balance.toDouble(),
+                          amount: selectedWalletModel!.balance?.toDouble() ?? 0,
                           color: selectedWalletModel!.currency.backgroundColor
                                   ?.toColor() ??
                               const Color(0xFF3440EC),
@@ -720,7 +720,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                               '${state.wallets.first.currency.code} Wallet',
                           logo:
                               'icons/currency/${state.wallets.first.currency.code.toLowerCase()}.png',
-                          amount: state.wallets.first.balance.toDouble(),
+                          amount: state.wallets.first.balance?.toDouble() ?? 0,
                           color: state.wallets.first.currency.backgroundColor
                                   ?.toColor() ??
                               const Color(0xFF3440EC),

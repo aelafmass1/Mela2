@@ -5,25 +5,31 @@ import 'package:equatable/equatable.dart';
 
 import 'package:transaction_mobile_app/data/models/wallet_currency_model.dart';
 
+import 'equb_member_model.dart';
+
 class WalletModel extends Equatable {
   final int walletId;
   final WalletCurrencyModel currency;
-  final num balance;
+  final num? balance;
+  final MelaUser? holder;
   const WalletModel({
     required this.walletId,
     required this.currency,
     required this.balance,
+    this.holder,
   });
 
   WalletModel copyWith({
     int? walletId,
     WalletCurrencyModel? currency,
     num? balance,
+    MelaUser? holder,
   }) {
     return WalletModel(
       walletId: walletId ?? this.walletId,
       currency: currency ?? this.currency,
       balance: balance ?? this.balance,
+      holder: holder ?? this.holder,
     );
   }
 
@@ -32,6 +38,7 @@ class WalletModel extends Equatable {
       'walletId': walletId,
       'currency': currency.toMap(),
       'balance': balance,
+      'holder': holder?.toMap(),
     };
   }
 
@@ -39,7 +46,9 @@ class WalletModel extends Equatable {
     return WalletModel(
       walletId: map['walletId'] as int,
       currency: WalletCurrencyModel.fromMap(map['currency'] as Map),
-      balance: map['balance'] as num,
+      balance: map['balance'] as num?,
+      holder:
+          map['holder'] != null ? MelaUser.fromMap(map['holder'] as Map) : null,
     );
   }
 
@@ -52,5 +61,5 @@ class WalletModel extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [walletId, currency, balance];
+  List<Object> get props => [walletId, currency];
 }

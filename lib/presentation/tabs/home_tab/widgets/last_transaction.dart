@@ -170,7 +170,7 @@ class _LastTransactionState extends State<LastTransaction> {
                   ],
                 ),
                 const SizedBox(height: 15),
-                BlocBuilder<TransactionBloc, TransactionState>(
+                BlocBuilder<WalletTransactionBloc, WalletTransactionState>(
                   builder: (context, state) {
                     if (state is TransactionLoading) {
                       return Column(
@@ -185,8 +185,8 @@ class _LastTransactionState extends State<LastTransaction> {
                           CustomShimmer(width: 100.sw, height: 55),
                         ],
                       );
-                    } else if (state is TransactionSuccess) {
-                      if (state.data.isEmpty) {
+                    } else if (state is WalletTransactionSuccess) {
+                      if (state.walletTransactions.isEmpty) {
                         return Container(
                           margin: const EdgeInsets.only(top: 10),
                           alignment: Alignment.center,
@@ -199,7 +199,7 @@ class _LastTransactionState extends State<LastTransaction> {
                       } else {
                         return Column(children: [
                           for (int index = 0;
-                              index < state.data.length;
+                              index < state.walletTransactions.length;
                               index++)
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

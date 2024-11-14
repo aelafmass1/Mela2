@@ -93,7 +93,7 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                               '${tappedWallets[i].currency.code} Wallet',
                           logo:
                               'icons/currency/${tappedWallets[i].currency.code.toLowerCase()}.png',
-                          amount: tappedWallets[i].balance.toDouble(),
+                          amount: tappedWallets[i].balance?.toDouble() ?? 0,
                           textColor:
                               tappedWallets[i].currency.textColor?.toColor(),
                           color: tappedWallets[i]
@@ -133,7 +133,7 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                               '${state.wallets[i].currency.code} Wallet',
                           logo:
                               'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
-                          amount: state.wallets[i].balance.toDouble(),
+                          amount: state.wallets[i].balance?.toDouble() ?? 0,
                           textColor:
                               state.wallets[i].currency.textColor?.toColor(),
                           color: state.wallets[i].currency.backgroundColor
