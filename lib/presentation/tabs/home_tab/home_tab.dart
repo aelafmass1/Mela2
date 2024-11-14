@@ -8,6 +8,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
+import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
@@ -23,6 +24,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../bloc/money_transfer/money_transfer_bloc.dart';
 import '../../../bloc/transaction/transaction_bloc.dart';
 import '../../screens/home_screen/components/exchange_rate_card.dart';
 import 'widgets/wallet_cards_stack.dart';
@@ -75,6 +77,15 @@ class _HomeTabState extends State<HomeTab> {
     // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     context.read<TransactionBloc>().add(FetchTrasaction());
+    context.read<UserBloc>().add(FetchMe());
+    // context.read<MoneyTransferBloc>().add(
+    //       TransferToOwnWallet(
+    //         amount: 90,
+    //         fromWalletId: 9,
+    //         toWalletId: 3,
+    //         note: 'test',
+    //       ),
+    //     );
 
     super.initState();
   }
