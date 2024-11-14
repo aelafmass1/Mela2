@@ -35,7 +35,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
     }
   }
 
-  Future<ContactEqubMember> getUserContactInfo({
+  Future<ContactEqubMember?> getUserContactInfo({
     required MelaUser melaUser,
   }) async {
     await _fetchContacts();
@@ -43,7 +43,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
         '+${melaUser.countryCode}${melaUser.phoneNumber}');
 
     if (phoneN == null) {
-      return ContactEqubMember(displayName: 'Unknown User', phoneNumber: '---');
+      return null;
     }
 
     final user = contacts
@@ -61,7 +61,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
           displayName: '${melaUser.firstName} ${melaUser.lastName}',
           phoneNumber: '+${melaUser.countryCode}${melaUser.phoneNumber}');
     }
-    return ContactEqubMember(displayName: 'Unknown User', phoneNumber: '---');
+    return null;
   }
 
   @override
@@ -103,7 +103,8 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
             ),
             const SizedBox(height: 5),
             TextWidget(
-              text: '+\$${widget.walletTransaction.amount}',
+              text:
+                  '+\$${NumberFormat('##,###.##').format(widget.walletTransaction.amount)}',
               fontSize: 16,
               weight: FontWeight.w700,
               color: ColorName.green,

@@ -1,10 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/home_transaction_tile.dart';
@@ -12,12 +9,11 @@ import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart'
 
 import '../../../../bloc/transaction/transaction_bloc.dart';
 import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
-import '../../../../core/utils/get_member_contact_info.dart';
-import '../../../../data/models/equb_member_model.dart';
 import '../../../widgets/text_widget.dart';
 
 class LastTransaction extends StatefulWidget {
-  const LastTransaction({super.key});
+  final void Function() onFilterChanged;
+  const LastTransaction({super.key, required this.onFilterChanged});
 
   @override
   State<LastTransaction> createState() => _LastTransactionState();
@@ -25,7 +21,7 @@ class LastTransaction extends StatefulWidget {
 
 class _LastTransactionState extends State<LastTransaction> {
   String? selectedDayFilter;
-  List<WalletTransactionDetailModel> selectedReceiverInfo = [];
+  List<WalletTransactionDetailModel> selectedWallets = [];
   bool showThisPage = true;
 
   @override
@@ -40,7 +36,8 @@ class _LastTransactionState extends State<LastTransaction> {
       visible: showThisPage,
       child: Stack(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
             width: 100.sw,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             margin: const EdgeInsets.only(top: 20),
@@ -75,10 +72,18 @@ class _LastTransactionState extends State<LastTransaction> {
                         listener: (context, state) {
                           if (state is WalletTransactionSuccess) {
                             if (state.walletTransactions.isNotEmpty) {
+                              // Convert map entries to a sorted list
+                              var sortedEntries =
+                                  state.walletTransactions.entries.toList()
+                                    ..sort((a, b) => DateTime.parse(b.key)
+                                        .compareTo(DateTime.parse(a.key)));
+                              // Create a new sorted map from the sorted entries
+                              var sortedTransactions =
+                                  Map.fromEntries(sortedEntries);
                               setState(() {
                                 selectedDayFilter =
-                                    state.walletTransactions.entries.first.key;
-                                selectedReceiverInfo = state.walletTransactions[
+                                    sortedTransactions.keys.first;
+                                selectedWallets = state.walletTransactions[
                                         selectedDayFilter] ??
                                     [];
                               });
@@ -139,9 +144,10 @@ class _LastTransactionState extends State<LastTransaction> {
                                       ),
                                   ],
                                   onChanged: (value) {
+                                    widget.onFilterChanged();
                                     setState(() {
                                       selectedDayFilter = value ?? 'today';
-                                      selectedReceiverInfo =
+                                      selectedWallets =
                                           state.walletTransactions[value] ?? [];
                                     });
                                   }),
@@ -198,7 +204,7 @@ class _LastTransactionState extends State<LastTransaction> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                for (var transaction in selectedReceiverInfo)
+                                for (var transaction in selectedWallets)
                                   HomeTransactionTile(
                                       walletTransaction: transaction),
                               ],

@@ -36,6 +36,7 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final moneyController = TextEditingController();
+  final scrollController = ScrollController();
   String? imageUrl;
   String? displayName;
 
@@ -76,6 +77,12 @@ class _HomeTabState extends State<HomeTab> {
     context.read<TransactionBloc>().add(FetchTrasaction());
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -161,6 +168,7 @@ class _HomeTabState extends State<HomeTab> {
           ),
           Expanded(
               child: SingleChildScrollView(
+            controller: scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -173,7 +181,17 @@ class _HomeTabState extends State<HomeTab> {
                 // _buildSendMoneyCard(),
                 _buildExchangeRate(),
                 // _buildBankRates(),
-                const LastTransaction(),
+                LastTransaction(
+                  onFilterChanged: () {
+                    Future.delayed(const Duration(milliseconds: 5), () {
+                      scrollController.animateTo(
+                        scrollController.position.maxScrollExtent,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeOut,
+                      );
+                    });
+                  },
+                ),
               ],
             ),
           ))
