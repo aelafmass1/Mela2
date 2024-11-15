@@ -473,7 +473,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                         if (text?.isEmpty == true) {
                           return 'Please enter amount';
                         } else if ((double.tryParse(text ?? '0') ?? 0) >=
-                            (transferFromWalletModel?.balance.toDouble() ??
+                            (transferFromWalletModel?.balance?.toDouble() ??
                                 0)) {
                           return 'Insfficient balance';
                         }
