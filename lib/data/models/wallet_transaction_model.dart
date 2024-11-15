@@ -58,8 +58,8 @@ class WalletTransactionModel {
 
   factory WalletTransactionModel.fromMap(Map map) {
     return WalletTransactionModel(
-      fromWalletId: map['fromWalletId'] as int,
-      toWalletId: map['toWalletId'] as int,
+      fromWalletId: map['fromWallet']['walletId'] as int,
+      toWalletId: map['toWallet']['walletId'] as int,
       transactionId: map['transactionId'] as int,
       fromWalletBalance: map['fromWalletBalance'] as num?,
       amount: map['amount'] as num,

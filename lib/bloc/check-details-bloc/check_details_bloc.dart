@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../core/utils/settings.dart';
@@ -18,15 +18,23 @@ class CheckDetailsBloc extends Bloc<CheckDetailsEvent, CheckDetailsState> {
 
   Future<void> _onFetchTransferFees(
       FetchTransferFeesEvent event, Emitter<CheckDetailsState> emit) async {
-    emit(CheckDetailsLoading());
     try {
-      final accessToken = await getToken();
-      final fees = await walletRepository.fetchTransferFees(
-        accessToken: accessToken ?? '',
-        fromWalletId: event.fromWalletId,
-        toWalletId: event.toWalletId,
-      );
-      emit(CheckDetailsLoaded(fees: fees));
+      if (state is! CheckDetailsLoading) {
+        emit(CheckDetailsLoading());
+        final accessToken = await getToken();
+        final res = await walletRepository.fetchTransferFees(
+          accessToken: accessToken ?? '',
+          fromWalletId: event.fromWalletId,
+          toWalletId: event.toWalletId,
+        );
+        if (res.containsKey('error')) {
+          return emit(CheckDetailsError(message: res['error']));
+        }
+        final fees = (res['successResponse'] as List)
+            .map((f) => TransferFeesModel.fromJson(f))
+            .toList();
+        emit(CheckDetailsLoaded(fees: fees));
+      }
     } catch (e) {
       emit(CheckDetailsError(message: e.toString()));
     }

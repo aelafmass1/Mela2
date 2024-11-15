@@ -57,23 +57,22 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
       if (state is! MoneyTransferLoading) {
         emit(MoneyTransferLoading());
         final token = await getToken();
-        if (token != null) {
-          final res = await repository.transferToOwnWallet(
-            accessToken: token,
-            fromWalletId: event.fromWalletId,
-            toWalletId: event.toWalletId,
-            amount: event.amount,
-            note: event.note,
-          );
-          if (res.containsKey('error')) {
-            return emit(MoneyTransferFail(reason: res['error']));
-          }
-          final walletTransaction =
-              WalletTransactionModel.fromMap(res['successResponse'] as Map);
-          emit(MoneyTransferOwnWalletSuccess(
-            walletTransactionModel: walletTransaction,
-          ));
+
+        final res = await repository.transferToOwnWallet(
+          accessToken: token ?? '',
+          fromWalletId: event.fromWalletId,
+          toWalletId: event.toWalletId,
+          amount: event.amount,
+          note: event.note,
+        );
+        if (res.containsKey('error')) {
+          return emit(MoneyTransferFail(reason: res['error']));
         }
+        final walletTransaction =
+            WalletTransactionModel.fromMap(res['successResponse'] as Map);
+        emit(MoneyTransferOwnWalletSuccess(
+          walletTransactionModel: walletTransaction,
+        ));
       }
     } on ServerException catch (error, stackTrace) {
       emit(MoneyTransferFail(reason: error.message));

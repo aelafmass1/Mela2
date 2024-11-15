@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -81,7 +83,18 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
                       weight: FontWeight.bold,
                     );
                   }
-                  return const CircularProgressIndicator.adaptive();
+                  if (state is TransferRateLoading) {
+                    return CustomShimmer(
+                      borderRadius: BorderRadius.circular(5),
+                      width: 100,
+                      height: 20,
+                    );
+                  }
+                  return const TextWidget(
+                    text: '---',
+                    fontSize: 14,
+                    weight: FontWeight.bold,
+                  );
                 },
               ),
             ],
@@ -101,9 +114,6 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
 
   TextFieldWidget _buildOnInitial() {
     return TextFieldWidget(
-      onTapOutside: () {
-        amountFocus.unfocus();
-      },
       focusNode: amountFocus,
       onChanged: (p0) {
         if (p0.isNotEmpty) {
@@ -392,6 +402,25 @@ class EnterAmountSectionState extends State<EnterAmountSection> {
                 ),
               )
             ],
+          );
+        } else if (state is TransferRateLoading) {
+          return SizedBox(
+            height: 200,
+            child: Column(
+              children: [
+                CustomShimmer(
+                  borderRadius: BorderRadius.circular(20),
+                  width: 100.sw,
+                  height: 55,
+                ),
+                const SizedBox(height: 10),
+                CustomShimmer(
+                  borderRadius: BorderRadius.circular(20),
+                  width: 100.sw,
+                  height: 55,
+                ),
+              ],
+            ),
           );
         }
         return const SizedBox.shrink();

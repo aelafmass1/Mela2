@@ -127,36 +127,29 @@ class WalletRepository {
     }
   }
 
-  Future<List<TransferFeesModel>> fetchTransferFees({
+  Future<Map> fetchTransferFees({
     required String accessToken,
     required int fromWalletId,
     required int toWalletId,
   }) async {
-    try {
-      final res = await client.get(
-        Uri.parse(
-          '$baseUrl/api/wallet/transfer/fees',
-        ),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        params: {"fromWalletId": fromWalletId, "toWalletId": toWalletId},
-      );
-      final data = jsonDecode(res.body);
-      final successResponse = data['successResponse'];
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer/fees',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      params: {
+        "fromWalletId": fromWalletId.toString(),
+        "toWalletId": toWalletId.toString(),
+      },
+    );
+    final data = jsonDecode(res.body);
 
-      if (successResponse?.isEmpty ?? true) {
-        return Future.value(<TransferFeesModel>[]);
-      }
-      if (res.statusCode == 200 || res.statusCode == 204) {
-        return successResponse!
-            .map((fee) => TransferFeesModel.fromJson(fee))
-            .toList();
-      }
-      return processErrorResponse(data)['message'];
-    } catch (e) {
-      throw e.toString();
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
     }
+    return processErrorResponse(data);
   }
 }

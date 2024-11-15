@@ -13,7 +13,7 @@ class TransferFeesModel {
     this.paymentMethod,
   });
 
-  factory TransferFeesModel.fromJson(Map<String, dynamic> json) {
+  factory TransferFeesModel.fromJson(Map json) {
     return TransferFeesModel(
       id: json['id'],
       label: json['label'],

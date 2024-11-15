@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
@@ -68,26 +69,33 @@ class MoneyTransferRepository {
     required double amount,
     required String note,
   }) async {
-    final res = await client.post(
-      Uri.parse(
-        '$baseUrl/api/wallet/transfer',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "fromWalletId": fromWalletId,
-        "toWalletId": toWalletId,
-        "amount": amount,
-        "note": note,
-      }),
-    );
+    try {
+      final res = await client.post(
+        Uri.parse(
+          '$baseUrl/api/wallet/transfer',
+        ),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "fromWalletId": fromWalletId,
+          "toWalletId": toWalletId,
+          "amount": amount,
+          "note": note,
+        }),
+      );
+      // log(res.body);
 
-    final data = jsonDecode(res.body);
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      return data;
+      final data = jsonDecode(res.body);
+      log(res.body);
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return data;
+      }
+      return processErrorResponse(data);
+    } catch (error) {
+      throw Exception(error);
     }
-    return processErrorResponse(data);
   }
 }

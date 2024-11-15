@@ -243,6 +243,7 @@ class _PincodeScreenDeligateState extends State<PincodeScreenDeligate> {
                   if (isValid) {
                     final pins = getAllPins();
                     widget.onVerified(pins.join());
+                    context.pop();
                   }
                 }),
             _buildKeypad(),
