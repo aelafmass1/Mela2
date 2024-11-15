@@ -8,6 +8,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'package:transaction_mobile_app/bloc/currency/currency_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
+import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/bank_image.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
@@ -23,6 +24,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../../bloc/money_transfer/money_transfer_bloc.dart';
 import '../../../bloc/transaction/transaction_bloc.dart';
 import '../../screens/home_screen/components/exchange_rate_card.dart';
 import 'widgets/wallet_cards_stack.dart';
@@ -36,6 +38,7 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final moneyController = TextEditingController();
+  final scrollController = ScrollController();
   String? imageUrl;
   String? displayName;
 
@@ -74,8 +77,23 @@ class _HomeTabState extends State<HomeTab> {
     // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     context.read<TransactionBloc>().add(FetchTrasaction());
+    context.read<UserBloc>().add(FetchMe());
+    // context.read<MoneyTransferBloc>().add(
+    //       TransferToOwnWallet(
+    //         amount: 10,
+    //         fromWalletId: 9,
+    //         toWalletId: 3,
+    //         note: 'test',
+    //       ),
+    //     );
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -161,6 +179,7 @@ class _HomeTabState extends State<HomeTab> {
           ),
           Expanded(
               child: SingleChildScrollView(
+            controller: scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -173,7 +192,17 @@ class _HomeTabState extends State<HomeTab> {
                 // _buildSendMoneyCard(),
                 _buildExchangeRate(),
                 // _buildBankRates(),
-                const LastTransaction(),
+                LastTransaction(
+                  onFilterChanged: () {
+                    Future.delayed(const Duration(milliseconds: 5), () {
+                      scrollController.animateTo(
+                        scrollController.position.maxScrollExtent,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeOut,
+                      );
+                    });
+                  },
+                ),
               ],
             ),
           ))

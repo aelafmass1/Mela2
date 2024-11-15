@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
+import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/home_transaction_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 
 import '../../../../bloc/transaction/transaction_bloc.dart';
+import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../widgets/text_widget.dart';
 
 class LastTransaction extends StatefulWidget {
-  const LastTransaction({super.key});
+  final void Function() onFilterChanged;
+  const LastTransaction({super.key, required this.onFilterChanged});
 
   @override
   State<LastTransaction> createState() => _LastTransactionState();
@@ -19,15 +21,23 @@ class LastTransaction extends StatefulWidget {
 
 class _LastTransactionState extends State<LastTransaction> {
   String? selectedDayFilter;
-  List<ReceiverInfo> selectedReceiverInfo = [];
+  List<WalletTransactionDetailModel> selectedWallets = [];
   bool showThisPage = true;
+
+  @override
+  void initState() {
+    context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Visibility(
       visible: showThisPage,
       child: Stack(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
             width: 100.sw,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             margin: const EdgeInsets.only(top: 20),
@@ -57,15 +67,25 @@ class _LastTransactionState extends State<LastTransaction> {
                         borderRadius: BorderRadius.circular(40),
                         border: Border.all(color: const Color(0xFFE8E8E8)),
                       ),
-                      child: BlocConsumer<TransactionBloc, TransactionState>(
+                      child: BlocConsumer<WalletTransactionBloc,
+                          WalletTransactionState>(
                         listener: (context, state) {
-                          if (state is TransactionSuccess) {
-                            if (state.data.isNotEmpty) {
+                          if (state is WalletTransactionSuccess) {
+                            if (state.walletTransactions.isNotEmpty) {
+                              // Convert map entries to a sorted list
+                              var sortedEntries =
+                                  state.walletTransactions.entries.toList()
+                                    ..sort((a, b) => DateTime.parse(b.key)
+                                        .compareTo(DateTime.parse(a.key)));
+                              // Create a new sorted map from the sorted entries
+                              var sortedTransactions =
+                                  Map.fromEntries(sortedEntries);
                               setState(() {
                                 selectedDayFilter =
-                                    state.data.entries.first.key;
-                                selectedReceiverInfo =
-                                    state.data[selectedDayFilter] ?? [];
+                                    sortedTransactions.keys.first;
+                                selectedWallets = state.walletTransactions[
+                                        selectedDayFilter] ??
+                                    [];
                               });
                             } else {
                               setState(() {
@@ -75,8 +95,8 @@ class _LastTransactionState extends State<LastTransaction> {
                           }
                         },
                         builder: (context, state) {
-                          if (state is TransactionSuccess) {
-                            if (state.data.isEmpty) {
+                          if (state is WalletTransactionSuccess) {
+                            if (state.walletTransactions.isEmpty) {
                               return const SizedBox(
                                 width: 50,
                                 height: 23,
@@ -96,12 +116,15 @@ class _LastTransactionState extends State<LastTransaction> {
                                   dropdownColor: Colors.white,
                                   isDense: true,
                                   underline: const SizedBox(),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 3),
                                   elevation: 0,
                                   value: selectedDayFilter,
                                   icon: const Icon(
                                       Icons.keyboard_arrow_down_rounded),
                                   items: [
-                                    for (var entery in state.data.keys)
+                                    for (var entery
+                                        in state.walletTransactions.keys)
                                       DropdownMenuItem(
                                         value: entery,
                                         child: TextWidget(
@@ -109,9 +132,8 @@ class _LastTransactionState extends State<LastTransaction> {
                                                       .format(DateTime.now()) ==
                                                   entery
                                               ? 'Today'
-                                              : (DateTime.parse(entery).day -
-                                                          1) ==
-                                                      DateTime.now().day
+                                              : (DateTime.now().day - 1) ==
+                                                      DateTime.parse(entery).day
                                                   ? 'Yesterday'
                                                   : DateFormat('d-MMMM').format(
                                                       DateTime.parse(entery)),
@@ -122,10 +144,11 @@ class _LastTransactionState extends State<LastTransaction> {
                                       ),
                                   ],
                                   onChanged: (value) {
+                                    widget.onFilterChanged();
                                     setState(() {
                                       selectedDayFilter = value ?? 'today';
-                                      selectedReceiverInfo =
-                                          state.data[value] ?? [];
+                                      selectedWallets =
+                                          state.walletTransactions[value] ?? [];
                                     });
                                   }),
                             );
@@ -147,7 +170,7 @@ class _LastTransactionState extends State<LastTransaction> {
                   ],
                 ),
                 const SizedBox(height: 15),
-                BlocBuilder<TransactionBloc, TransactionState>(
+                BlocBuilder<WalletTransactionBloc, WalletTransactionState>(
                   builder: (context, state) {
                     if (state is TransactionLoading) {
                       return Column(
@@ -162,8 +185,8 @@ class _LastTransactionState extends State<LastTransaction> {
                           CustomShimmer(width: 100.sw, height: 55),
                         ],
                       );
-                    } else if (state is TransactionSuccess) {
-                      if (state.data.isEmpty) {
+                    } else if (state is WalletTransactionSuccess) {
+                      if (state.walletTransactions.isEmpty) {
                         return Container(
                           margin: const EdgeInsets.only(top: 10),
                           alignment: Alignment.center,
@@ -176,14 +199,14 @@ class _LastTransactionState extends State<LastTransaction> {
                       } else {
                         return Column(children: [
                           for (int index = 0;
-                              index < state.data.length;
+                              index < state.walletTransactions.length;
                               index++)
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                for (var transaction in selectedReceiverInfo)
+                                for (var transaction in selectedWallets)
                                   HomeTransactionTile(
-                                      receiverInfo: transaction),
+                                      walletTransaction: transaction),
                               ],
                             ),
                         ]);

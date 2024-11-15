@@ -26,8 +26,10 @@ import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.d
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_currency/wallet_currency_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
@@ -93,8 +95,12 @@ void main() async {
       // Setting to 1.0 will profile 100% of sampled transactions:
       options.profilesSampleRate = 1.0;
     },
-    appRunner: () =>
-        runApp(DevicePreview(enabled: kIsWeb, builder: (_) => const MainApp())),
+    appRunner: () => runApp(
+      DevicePreview(
+        enabled: kIsWeb,
+        builder: (_) => const MainApp(),
+      ),
+    ),
   );
 }
 
@@ -245,6 +251,16 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
             walletRepository: walletRepository,
           ),
         ),
+        BlocProvider(
+          create: (context) => WalletTransactionBloc(
+            repository: walletRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => UserBloc(
+            authRepository: authRepo,
+          ),
+        )
       ],
       child: ResponsiveApp(
         builder: (_) => MaterialApp.router(

@@ -4,9 +4,7 @@ sealed class WalletCurrencyState {}
 
 final class WalletCurrencyInitial extends WalletCurrencyState {}
 
-final class FetchWalletCurrencyLoading extends WalletCurrencyState {
-  FetchWalletCurrencyLoading();
-}
+final class FetchWalletCurrencyLoading extends WalletCurrencyState {}
 
 final class FetchWalletCurrencyFail extends WalletCurrencyState {
   final String reason;
