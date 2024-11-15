@@ -17,7 +17,7 @@ import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 /// @param contacts The list of contacts to search through.
 /// @return A [Future] that completes with a [ContactEqubMember] containing the found user information.
 Future<ContactEqubMember> getMemberContactInfo({
-  required EqubUser equbUser,
+  required MelaUser equbUser,
   required List<Contact> contacts,
 }) async {
   final phoneN = await removeCountryCode(
