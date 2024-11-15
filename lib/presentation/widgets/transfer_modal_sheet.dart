@@ -13,6 +13,7 @@ import 'text_widget.dart';
 showTransferModalSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
+    backgroundColor: const Color(0xFFFDFDFD),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(20),
@@ -68,24 +69,25 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Gap(24),
                         const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextWidget(
                               text: 'Transfer To ?',
                               fontSize: 16,
+                              weight: FontWeight.w700,
                             ),
                             TextWidget(
                               text:
                                   'Lorem ipsum dolor sit amet consectetur. Non.',
-                              fontSize: 13,
+                              fontSize: 10,
                               color: ColorName.grey,
                             ),
                           ],
                         ),
                         IconButton.filled(
                           style: IconButton.styleFrom(
+                            elevation: 20,
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
                           ),
@@ -125,6 +127,7 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
+                                      color: const Color(0xFFF9F9F9),
                                       borderRadius: BorderRadius.circular(100),
                                       border:
                                           Border.all(color: ColorName.grey)),
@@ -146,17 +149,20 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
                     );
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 30),
                 AbsorbPointer(
                   absorbing: selectedTransferToModel.value == null,
                   child: ButtonWidget(
-                      color: selectedTransferToModel.value == null
-                          ? ColorName.grey.withOpacity(.2)
-                          : ColorName.primaryColor,
-                      child: const Text("Next"),
-                      onPressed: () {
-                        selectedTransferToModel.value?.onTap();
-                      }),
+                      onPressed: selectedTransferToModel.value == null
+                          ? null
+                          : () {
+                              selectedTransferToModel.value?.onTap();
+                            },
+                      child: const TextWidget(
+                        text: "Next",
+                        color: Colors.white,
+                        type: TextType.small,
+                      )),
                 )
               ],
             ),

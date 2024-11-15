@@ -10,145 +10,39 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../../bloc/wallet/wallet_bloc.dart';
+import 'transfer_app_bar.dart';
 
 class TransferWalletsSection extends StatefulWidget {
-  const TransferWalletsSection({super.key});
-
+  const TransferWalletsSection({super.key, this.onWalletChanged});
+  final Function(int selectedWallet)? onWalletChanged;
   @override
   TransferWalletsSectionState createState() => TransferWalletsSectionState();
 }
 
 class TransferWalletsSectionState extends State<TransferWalletsSection> {
-  int selectedWallet = 0;
-  int selectedWalletIndex = 0;
+  int selectedWallet = -1;
+  int selectedWalletIndex = -1;
+  bool isSummerizing = false;
+  final fromWalletKey = GlobalKey<TransferAppBarState>();
   @override
   void initState() {
     final state = context.read<WalletBloc>().state;
-    selectedWalletIndex = 0;
+    selectedWalletIndex = -1;
     selectedWallet = state.wallets[0].walletId;
     super.initState();
+  }
+
+  void setSummerizing() {
+    setState(() {
+      isSummerizing = !isSummerizing;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const TextWidget(
-          text: 'Transfer To',
-          fontSize: 18,
-          weight: FontWeight.w600,
-        ),
-        const SizedBox(height: 14),
-        BlocConsumer<WalletBloc, WalletState>(builder: (context, state) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (int i = 0; i < state.wallets.length; i++)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CardWidget(
-                      boxBorder: Border.all(
-                        color: selectedWalletIndex == i
-                            ? ColorName.primaryColor
-                            : Colors.transparent,
-                      ),
-                      alignment: Alignment.center,
-                      borderRadius: BorderRadius.circular(24),
-                      width: 100.sw,
-                      height: 65,
-                      child: ListTile(
-                        shape: ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                        onTap: () {
-                          setState(() {
-                            selectedWalletIndex = i;
-                            selectedWallet = state.wallets[i].walletId;
-                          });
-                        },
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                        leading: Container(
-                          width: 44,
-                          height: 44,
-                          clipBehavior: Clip.antiAlias,
-                          decoration:
-                              const BoxDecoration(shape: BoxShape.circle),
-                          child: Image.asset(
-                            'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
-                            package: 'currency_icons',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        title: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextWidget(
-                              text:
-                                  '${state.wallets[i].currency.code.toUpperCase()} Wallet',
-                              fontSize: 14,
-                            ),
-                            TextWidget(
-                              text:
-                                  '${state.wallets[i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
-                              fontSize: 10,
-                            )
-                          ],
-                        ),
-                        trailing: Checkbox(
-                          shape: const CircleBorder(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedWalletIndex = i;
-                            });
-                          },
-                          value: selectedWalletIndex == i,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                  ],
-                ),
-            ],
-          );
-        }, listener: (BuildContext context, WalletState state) {
-          selectedWallet = state.wallets.firstOrNull?.walletId ?? 0;
-        }),
-        Align(
-          alignment: Alignment.topRight,
-          child: SizedBox(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: ColorName.primaryColor,
-                backgroundColor: Colors.white,
-                elevation: 7,
-                shadowColor: Colors.black.withOpacity(0.3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {},
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add),
-                    TextWidget(
-                      text: 'Add New Card',
-                      color: ColorName.primaryColor,
-                      fontSize: 13,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      children: [],
     );
   }
 }

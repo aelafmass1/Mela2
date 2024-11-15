@@ -36,7 +36,9 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
           return Scaffold(
             body: CustomScrollView(
               slivers: [
-                const TransferAppBar(),
+                TransferAppBar(
+                  onWalletChanged: (toWalletId) {},
+                ),
                 const SliverToBoxAdapter(child: SizedBox(height: 14)),
                 SearchBtn(onTap: () async {
                   final res = await context.pushNamed(RouteName.userSearch);

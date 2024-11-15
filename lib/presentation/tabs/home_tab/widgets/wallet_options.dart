@@ -39,11 +39,7 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.requestLogo,
             title: 'Request',
             onTab: () {
-              showQrGenerator(
-                context: context,
-                shareLink: 'Mela Fi App Link',
-                amount: 1000,
-              );
+              context.pushNamed(RouteName.requestMoney);
             },
           ),
           _buildOptionButton(

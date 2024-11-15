@@ -72,7 +72,7 @@ class _HomeTabState extends State<HomeTab> {
       }
     });
     context.read<WalletBloc>().add(FetchWallets());
-    // context.read<WalletBloc>().add(CreateWallet(currency: 'AED'));
+    // context.read<WalletBloc>().add(CreateWallet(currency: 'EUR'));
 
     // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());

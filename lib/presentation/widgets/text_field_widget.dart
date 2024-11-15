@@ -49,6 +49,7 @@ class TextFieldWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       key: globalKey,
+      autofocus: false,
       focusNode: focusNode,
       onTap: onTab,
       onChanged: onChanged,

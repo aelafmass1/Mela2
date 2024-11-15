@@ -365,6 +365,10 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
+  /// File path: assets/images/svgs/transaction_icon_vertical.svg
+  String get transactionIconVertical =>
+      'assets/images/svgs/transaction_icon_vertical.svg';
+
   /// File path: assets/images/svgs/user_group.svg
   String get userGroup => 'assets/images/svgs/user_group.svg';
 
@@ -414,6 +418,7 @@ class $AssetsImagesSvgsGen {
         share,
         spinWheel,
         transactionIcon,
+        transactionIconVertical,
         userGroup,
         wallet02,
         walletLogo,

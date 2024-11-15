@@ -4,6 +4,8 @@ import 'package:http_interceptor/http_interceptor.dart';
 
 import '../../core/constants/url_constants.dart';
 import '../../core/utils/process_error_response_.dart';
+import '../models/transfer_fees_model.dart';
+import '../models/transfer_rate_model.dart';
 
 class WalletRepository {
   final InterceptedClient client;
@@ -88,6 +90,63 @@ class WalletRepository {
           "walletId": walletId,
         }));
     final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<TransferRateModel> fetchTransferRate({
+    required String accessToken,
+    required int fromWalletId,
+    required int toWalletId,
+    required num amount,
+  }) async {
+    try {
+      final res = await client.get(
+        Uri.parse(
+          '$baseUrl/api/wallet/transfer/rate',
+        ),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        params: {
+          "fromWalletId": fromWalletId.toString(),
+          "toWalletId": toWalletId.toString(),
+        },
+      );
+      final data = jsonDecode(res.body);
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        final successResponse = data['successResponse'];
+        return TransferRateModel.fromJson(successResponse);
+      }
+      return processErrorResponse(data)['message'];
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<Map> fetchTransferFees({
+    required String accessToken,
+    required int fromWalletId,
+    required int toWalletId,
+  }) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer/fees',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      params: {
+        "fromWalletId": fromWalletId.toString(),
+        "toWalletId": toWalletId.toString(),
+      },
+    );
+    final data = jsonDecode(res.body);
+
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }

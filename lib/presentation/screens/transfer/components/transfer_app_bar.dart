@@ -12,7 +12,9 @@ import '../../../../data/models/wallet_model.dart';
 class TransferAppBar extends StatefulWidget {
   const TransferAppBar({
     super.key,
+    this.onWalletChanged,
   });
+  final Function(int selectedWallet)? onWalletChanged;
 
   @override
   State<TransferAppBar> createState() => TransferAppBarState();
@@ -24,6 +26,7 @@ class TransferAppBarState extends State<TransferAppBar> {
   @override
   void initState() {
     final state = context.read<WalletBloc>().state;
+
     selectedWalletModel = state.wallets[0];
     super.initState();
   }
@@ -32,6 +35,7 @@ class TransferAppBarState extends State<TransferAppBar> {
   Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
+      centerTitle: true,
       title: BlocListener<WalletBloc, WalletState>(
         listener: (BuildContext context, WalletState state) {
           selectedWalletModel = state.wallets[0];
@@ -41,8 +45,8 @@ class TransferAppBarState extends State<TransferAppBar> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const TextWidget(
-              text: '\$18,809',
+            TextWidget(
+              text: '\$${selectedWalletModel?.balance ?? 0}',
               fontSize: 15,
               weight: FontWeight.bold,
             ),
@@ -54,6 +58,7 @@ class TransferAppBarState extends State<TransferAppBar> {
                   setState(() {
                     selectedWalletModel = selectedWallet;
                   });
+                  widget.onWalletChanged?.call(selectedWallet.walletId);
                 }
               },
               child: Row(
@@ -61,7 +66,8 @@ class TransferAppBarState extends State<TransferAppBar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextWidget(
-                    text: " ${selectedWalletModel?.currency ?? 'USD'} Wallet",
+                    text:
+                        " ${selectedWalletModel?.currency.code ?? 'USD'} Wallet",
                     fontSize: 15,
                     color: ColorName.grey,
                   ),
