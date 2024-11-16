@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -343,7 +340,8 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextWidget(
-            text: '\$${transferFromWalletModel?.balance ?? 0}',
+            text:
+                '\$${NumberFormat('##,###.##').format(transferFromWalletModel?.balance ?? 0)}',
             fontSize: 15,
             weight: FontWeight.bold,
           ),
@@ -403,9 +401,11 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                 BlocConsumer<TransferRateBloc, TransferRateState>(
                   listener: (context, state) {
                     if (state is TransferRateFailure) {
-                      showSnackbar(context,
-                          description:
-                              'Exchange rate not found for the specified currency pair');
+                      showSnackbar(
+                        context,
+                        description:
+                            'Exchange rate not found for the specified currency pair',
+                      );
                     }
                   },
                   builder: (context, state) {
@@ -472,7 +472,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       validator: (text) {
                         if (text?.isEmpty == true) {
                           return 'Please enter amount';
-                        } else if ((double.tryParse(text ?? '0') ?? 0) >=
+                        } else if ((double.tryParse(text ?? '0') ?? 0) >
                             (transferFromWalletModel?.balance?.toDouble() ??
                                 0)) {
                           return 'Insfficient balance';

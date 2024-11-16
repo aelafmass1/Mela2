@@ -18,3 +18,5 @@ class FetchTransferFeesEvent extends CheckDetailsEvent {
   @override
   List<Object> get props => [fromWalletId, toWalletId];
 }
+
+class ResetTransferFee extends CheckDetailsEvent {}

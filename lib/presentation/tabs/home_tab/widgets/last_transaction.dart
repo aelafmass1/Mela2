@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/home_transaction_tile.dart';
@@ -92,6 +93,11 @@ class _LastTransactionState extends State<LastTransaction> {
                                 showThisPage = false;
                               });
                             }
+                          } else if (state is WalletTransactionFail) {
+                            showSnackbar(
+                              context,
+                              description: state.reason,
+                            );
                           }
                         },
                         builder: (context, state) {

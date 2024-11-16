@@ -12,8 +12,10 @@ import 'card_widget.dart';
 import 'text_widget.dart';
 
 class WalletSelectionWidget extends StatefulWidget {
+  final List<WalletModel>? wallets;
   final Function(WalletModel selectedWallet) onSelect;
-  const WalletSelectionWidget({super.key, required this.onSelect});
+  const WalletSelectionWidget(
+      {super.key, required this.onSelect, this.wallets});
 
   @override
   State<WalletSelectionWidget> createState() => _WalletSelectionWidgetState();
@@ -74,72 +76,142 @@ class _WalletSelectionWidgetState extends State<WalletSelectionWidget> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (int i = 0; i < state.wallets.length; i++)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CardWidget(
-                              boxBorder: Border.all(
-                                color: selectedWalletIndex == i
-                                    ? ColorName.primaryColor
-                                    : Colors.transparent,
-                              ),
-                              alignment: Alignment.center,
-                              borderRadius: BorderRadius.circular(24),
-                              width: 100.sw,
-                              height: 65,
-                              child: ListTile(
-                                shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50)),
-                                onTap: () {
-                                  setState(() {
-                                    selectedWalletIndex = i;
-                                  });
-                                },
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: const BoxDecoration(
-                                      shape: BoxShape.circle),
-                                  child: Image.asset(
-                                    'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
-                                    package: 'currency_icons',
-                                    fit: BoxFit.cover,
-                                  ),
+                      if (widget.wallets == null)
+                        for (int i = 0; i < state.wallets.length; i++)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CardWidget(
+                                boxBorder: Border.all(
+                                  color: selectedWalletIndex == i
+                                      ? ColorName.primaryColor
+                                      : Colors.transparent,
                                 ),
-                                title: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextWidget(
-                                      text:
-                                          '${state.wallets[i].currency.code.toUpperCase()} Wallet',
-                                      fontSize: 14,
-                                    ),
-                                    TextWidget(
-                                      text:
-                                          '${state.wallets[i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
-                                      fontSize: 10,
-                                    )
-                                  ],
-                                ),
-                                trailing: Checkbox(
-                                  shape: const CircleBorder(),
-                                  onChanged: (value) {
+                                alignment: Alignment.center,
+                                borderRadius: BorderRadius.circular(24),
+                                width: 100.sw,
+                                height: 65,
+                                child: ListTile(
+                                  shape: ContinuousRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50)),
+                                  onTap: () {
                                     setState(() {
                                       selectedWalletIndex = i;
                                     });
                                   },
-                                  value: selectedWalletIndex == i,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  leading: Container(
+                                    width: 44,
+                                    height: 44,
+                                    clipBehavior: Clip.antiAlias,
+                                    decoration: const BoxDecoration(
+                                        shape: BoxShape.circle),
+                                    child: Image.asset(
+                                      'icons/currency/${state.wallets[i].currency.code.toLowerCase()}.png',
+                                      package: 'currency_icons',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  title: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextWidget(
+                                        text:
+                                            '${state.wallets[i].currency.code.toUpperCase()} Wallet',
+                                        fontSize: 14,
+                                      ),
+                                      TextWidget(
+                                        text:
+                                            '${state.wallets[i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
+                                        fontSize: 10,
+                                      )
+                                    ],
+                                  ),
+                                  trailing: Checkbox(
+                                    shape: const CircleBorder(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedWalletIndex = i;
+                                      });
+                                    },
+                                    value: selectedWalletIndex == i,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 15),
-                          ],
-                        ),
+                              const SizedBox(height: 15),
+                            ],
+                          )
+                      else
+                        for (int i = 0; i < widget.wallets!.length; i++)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CardWidget(
+                                boxBorder: Border.all(
+                                  color: selectedWalletIndex == i
+                                      ? ColorName.primaryColor
+                                      : Colors.transparent,
+                                ),
+                                alignment: Alignment.center,
+                                borderRadius: BorderRadius.circular(24),
+                                width: 100.sw,
+                                height: 65,
+                                child: ListTile(
+                                  shape: ContinuousRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50)),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedWalletIndex = i;
+                                    });
+                                  },
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  leading: Container(
+                                    width: 44,
+                                    height: 44,
+                                    clipBehavior: Clip.antiAlias,
+                                    decoration: const BoxDecoration(
+                                        shape: BoxShape.circle),
+                                    child: Image.asset(
+                                      'icons/currency/${widget.wallets![i].currency.code.toLowerCase()}.png',
+                                      package: 'currency_icons',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  title: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextWidget(
+                                        text:
+                                            '${widget.wallets![i].currency.code.toUpperCase()} Wallet',
+                                        fontSize: 14,
+                                      ),
+                                      // TextWidget(
+                                      //   text:
+                                      //       '${widget.wallets![i].currency.code.toUpperCase()} ${NumberFormat('##,###.##').format(state.wallets[i].balance)}',
+                                      //   fontSize: 10,
+                                      // )
+                                    ],
+                                  ),
+                                  trailing: Checkbox(
+                                    shape: const CircleBorder(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedWalletIndex = i;
+                                      });
+                                    },
+                                    value: selectedWalletIndex == i,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                            ],
+                          ),
                     ],
                   );
                 }),
@@ -150,8 +222,12 @@ class _WalletSelectionWidgetState extends State<WalletSelectionWidget> {
                   ? null
                   : () {
                       if (selectedWalletIndex != -1) {
-                        final state = context.read<WalletBloc>().state;
-                        widget.onSelect(state.wallets[selectedWalletIndex]);
+                        if (widget.wallets == null) {
+                          final state = context.read<WalletBloc>().state;
+                          widget.onSelect(state.wallets[selectedWalletIndex]);
+                        } else {
+                          widget.onSelect(widget.wallets![selectedWalletIndex]);
+                        }
                       }
                       context.pop();
                     },
