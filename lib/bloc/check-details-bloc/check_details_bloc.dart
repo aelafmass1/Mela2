@@ -13,7 +13,11 @@ class CheckDetailsBloc extends Bloc<CheckDetailsEvent, CheckDetailsState> {
   CheckDetailsBloc({required this.walletRepository})
       : super(CheckDetailsInitial()) {
     on<FetchTransferFeesEvent>(_onFetchTransferFees);
-    on<CheckDetailsEvent>((event, emit) {});
+    on<ResetTransferFee>(_onResetTransferFee);
+  }
+
+  _onResetTransferFee(ResetTransferFee event, Emitter emit) {
+    emit(CheckDetailsInitial());
   }
 
   Future<void> _onFetchTransferFees(

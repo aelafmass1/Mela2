@@ -19,3 +19,5 @@ class FetchTransferRate extends TransferRateEvent {
   @override
   List<Object> get props => [fromWalletId, toWalletId];
 }
+
+class ResetTransferRate extends TransferRateEvent {}

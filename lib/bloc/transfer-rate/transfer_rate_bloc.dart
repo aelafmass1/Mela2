@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../core/utils/settings.dart';
 import '../../data/models/transfer_rate_model.dart';
@@ -13,6 +13,11 @@ class TransferRateBloc extends Bloc<TransferRateEvent, TransferRateState> {
   TransferRateBloc({required this.walletRepository})
       : super(TransferRateInitial()) {
     on<FetchTransferRate>(_onFetchTransferRate);
+    on<ResetTransferRate>(_onResetTransferRate);
+  }
+
+  _onResetTransferRate(ResetTransferRate event, Emitter emit) {
+    emit(TransferRateInitial());
   }
 
   Future<void> _onFetchTransferRate(

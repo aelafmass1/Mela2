@@ -23,6 +23,8 @@ class TextFieldWidget extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? fontSize;
   final EdgeInsetsGeometry? contentPadding;
+  final InputBorder? border;
+  final bool? autoFocus;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -43,13 +45,15 @@ class TextFieldWidget extends StatelessWidget {
       this.borderRadius,
       this.fontSize,
       this.contentPadding,
+      this.border,
+      this.autoFocus,
       this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: globalKey,
-      autofocus: false,
+      autofocus: autoFocus ?? false,
       focusNode: focusNode,
       onTap: onTab,
       onChanged: onChanged,
@@ -81,18 +85,20 @@ class TextFieldWidget extends StatelessWidget {
           fontSize: fontSize ?? 15,
           fontWeight: FontWeight.w500,
         ),
-        border: OutlineInputBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(40),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(40),
-          borderSide: enableFocusColor
-              ? const BorderSide(
-                  color: ColorName.primaryColor,
-                  width: 2,
-                )
-              : const BorderSide(),
-        ),
+        border: border ??
+            OutlineInputBorder(
+              borderRadius: borderRadius ?? BorderRadius.circular(40),
+            ),
+        focusedBorder: border ??
+            OutlineInputBorder(
+              borderRadius: borderRadius ?? BorderRadius.circular(40),
+              borderSide: enableFocusColor
+                  ? const BorderSide(
+                      color: ColorName.primaryColor,
+                      width: 2,
+                    )
+                  : const BorderSide(),
+            ),
       ),
     );
   }
