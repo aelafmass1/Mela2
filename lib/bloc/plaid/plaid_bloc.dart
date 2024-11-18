@@ -15,7 +15,32 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
   PlaidBloc({required this.repository}) : super(PlaidInitial()) {
     on<CreateLinkToken>(_onCreateLinkToken);
     on<ExchangePublicToken>(_onExchangePublicToken);
+    on<AddBankAccount>(_onAddBankAccount);
   }
+  _onAddBankAccount(AddBankAccount event, Emitter emit) async {
+    try {
+      if (state is! AddBankAccountLoading) {
+        emit(AddBankAccountLoading());
+        final token = await getToken();
+
+        final res = await repository.addBankAccount(token!, event.publicToken);
+        if (res.containsKey('error')) {
+          return emit(AddBankAccountFail(reason: res['error']));
+        }
+        emit(AddBankAccountSuccess());
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(AddBankAccountFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(AddBankAccountFail(reason: error.toString()));
+    }
+  }
+
   _onExchangePublicToken(ExchangePublicToken event, Emitter emit) async {
     try {
       if (state is! PlaidPublicTokenLoading) {
