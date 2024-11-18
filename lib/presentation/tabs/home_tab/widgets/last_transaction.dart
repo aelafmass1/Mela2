@@ -13,8 +13,9 @@ import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../widgets/text_widget.dart';
 
 class LastTransaction extends StatefulWidget {
-  final void Function() onFilterChanged;
-  const LastTransaction({super.key, required this.onFilterChanged});
+  const LastTransaction({
+    super.key,
+  });
 
   @override
   State<LastTransaction> createState() => _LastTransactionState();
@@ -150,7 +151,6 @@ class _LastTransactionState extends State<LastTransaction> {
                                       ),
                                   ],
                                   onChanged: (value) {
-                                    widget.onFilterChanged();
                                     setState(() {
                                       selectedDayFilter = value ?? 'today';
                                       selectedWallets =

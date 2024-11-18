@@ -38,7 +38,6 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final moneyController = TextEditingController();
-  final scrollController = ScrollController();
   String? imageUrl;
   String? displayName;
 
@@ -74,26 +73,10 @@ class _HomeTabState extends State<HomeTab> {
     context.read<WalletBloc>().add(FetchWallets());
     // context.read<WalletBloc>().add(CreateWallet(currency: 'EUR'));
 
-    // context.read<BankCurrencyRateBloc>().add(FetchCurrencyRate());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
-    context.read<TransactionBloc>().add(FetchTrasaction());
     context.read<UserBloc>().add(FetchMe());
-    // context.read<MoneyTransferBloc>().add(
-    //       TransferToOwnWallet(
-    //         amount: 10,
-    //         fromWalletId: 9,
-    //         toWalletId: 3,
-    //         note: 'test',
-    //       ),
-    //     );
 
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
   }
 
   @override
@@ -179,7 +162,6 @@ class _HomeTabState extends State<HomeTab> {
           ),
           Expanded(
               child: SingleChildScrollView(
-            controller: scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -192,17 +174,7 @@ class _HomeTabState extends State<HomeTab> {
                 // _buildSendMoneyCard(),
                 _buildExchangeRate(),
                 // _buildBankRates(),
-                LastTransaction(
-                  onFilterChanged: () {
-                    Future.delayed(const Duration(milliseconds: 5), () {
-                      scrollController.animateTo(
-                        scrollController.position.maxScrollExtent,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeOut,
-                      );
-                    });
-                  },
-                ),
+                const LastTransaction(),
               ],
             ),
           ))

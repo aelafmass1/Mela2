@@ -621,6 +621,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                   validator: (text) {
                     if (text?.isEmpty == true) {
                       return 'Amount is Empty';
+                    } else if ((double.tryParse(amountController.text) ?? 0) ==
+                        0) {
+                      return 'Invalid Amount';
                     }
                     return null;
                   },
