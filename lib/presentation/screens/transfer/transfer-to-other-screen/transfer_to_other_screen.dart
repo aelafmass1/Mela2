@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/show_qr_generator.dart';
 import 'package:transaction_mobile_app/presentation/screens/transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -30,7 +31,8 @@ import '../../../widgets/loading_widget.dart';
 import '../../../widgets/text_field_widget.dart';
 
 class TransferToOtherScreen extends StatefulWidget {
-  const TransferToOtherScreen({super.key});
+  final bool isFromRequest;
+  const TransferToOtherScreen({super.key, required this.isFromRequest});
   @override
   State<TransferToOtherScreen> createState() => _TransferToOtherScreenState();
 }
@@ -70,22 +72,25 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
         setState(() {
           transferToWalletModel = selectedContact?.wallets?.first;
         });
-        context.read<TransferRateBloc>().add(FetchTransferRate(
-              fromWalletId: transferFromWalletModel!.walletId,
-              toWalletId: transferToWalletModel!.walletId,
-            ));
-        context.read<CheckDetailsBloc>().add(
-              FetchTransferFeesEvent(
+        if (widget.isFromRequest == false) {
+          context.read<TransferRateBloc>().add(FetchTransferRate(
                 fromWalletId: transferFromWalletModel!.walletId,
                 toWalletId: transferToWalletModel!.walletId,
-              ),
-            );
+              ));
+          context.read<CheckDetailsBloc>().add(
+                FetchTransferFeesEvent(
+                  fromWalletId: transferFromWalletModel!.walletId,
+                  toWalletId: transferToWalletModel!.walletId,
+                ),
+              );
+        }
       } else {
         setState(() {
           transferToWalletModel = null;
         });
         clearStates();
       }
+      scrollDown();
     }
   }
 
@@ -134,7 +139,13 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 icon: const Icon(Icons.arrow_back),
               )
             : const SizedBox.shrink(),
-        title: _buildChangeWallet(),
+        title: widget.isFromRequest
+            ? const TextWidget(
+                text: 'Request Money',
+                fontSize: 20,
+                weight: FontWeight.w700,
+              )
+            : _buildChangeWallet(),
         toolbarHeight: 70,
         actions: [
           Padding(
@@ -173,25 +184,33 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                   ? null
                   : () {
                       if (_formKey.currentState!.validate()) {
-                        if (transferFromWalletModel != null &&
-                            transferToWalletModel != null) {
-                          scrollDown();
-                          context.read<MoneyTransferBloc>().add(
-                                TransferToOwnWallet(
-                                  amount:
-                                      double.tryParse(amountController.text) ??
-                                          0,
-                                  note: noteController.text,
-                                  fromWalletId:
-                                      transferFromWalletModel!.walletId,
-                                  toWalletId: transferToWalletModel!.walletId,
-                                ),
-                              );
-                        } else {
-                          showSnackbar(
-                            context,
-                            description: "Unregistered User",
+                        if (widget.isFromRequest) {
+                          showQrGenerator(
+                            context: context,
+                            shareLink: 'Mela App Link',
+                            amount: double.tryParse(amountController.text) ?? 0,
                           );
+                        } else {
+                          if (transferFromWalletModel != null &&
+                              transferToWalletModel != null) {
+                            scrollDown();
+                            context.read<MoneyTransferBloc>().add(
+                                  TransferToOwnWallet(
+                                    amount: double.tryParse(
+                                            amountController.text) ??
+                                        0,
+                                    note: noteController.text,
+                                    fromWalletId:
+                                        transferFromWalletModel!.walletId,
+                                    toWalletId: transferToWalletModel!.walletId,
+                                  ),
+                                );
+                          } else {
+                            showSnackbar(
+                              context,
+                              description: "Unregistered User",
+                            );
+                          }
                         }
                       }
                     },
@@ -507,53 +526,57 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               weight: FontWeight.w600,
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                const TextWidget(
-                  text: 'Today\'s Exchange Rate',
-                  fontSize: 12,
-                  color: ColorName.grey,
-                ),
-                const Gap(8),
-                BlocConsumer<TransferRateBloc, TransferRateState>(
-                  listener: (context, state) {
-                    if (state is TransferRateFailure) {
-                      showSnackbar(
-                        context,
-                        description:
-                            'Exchange rate not found for the specified currency pair',
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is TransferRateSuccess) {
-                      final convertedAmount =
-                          state.transferRate.rate?.toStringAsFixed(2);
-                      return TextWidget(
-                        text:
-                            '1 ${state.transferRate.fromCurrency?.code ?? ""} = $convertedAmount ${state.transferRate.toCurrency?.code ?? ""}',
+            Visibility(
+              visible: widget.isFromRequest == false,
+              child: Row(
+                children: [
+                  const TextWidget(
+                    text: 'Today\'s Exchange Rate',
+                    fontSize: 12,
+                    color: ColorName.grey,
+                  ),
+                  const Gap(8),
+                  BlocConsumer<TransferRateBloc, TransferRateState>(
+                    listener: (context, state) {
+                      if (state is TransferRateFailure) {
+                        showSnackbar(
+                          context,
+                          description:
+                              'Exchange rate not found for the specified currency pair',
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is TransferRateSuccess) {
+                        final convertedAmount =
+                            state.transferRate.rate?.toStringAsFixed(2);
+                        return TextWidget(
+                          text:
+                              '1 ${state.transferRate.fromCurrency?.code ?? ""} = $convertedAmount ${state.transferRate.toCurrency?.code ?? ""}',
+                          fontSize: 12,
+                          color: ColorName.primaryColor,
+                          weight: FontWeight.bold,
+                        );
+                      }
+                      if (state is TransferRateLoading) {
+                        return CustomShimmer(
+                          borderRadius: BorderRadius.circular(5),
+                          width: 100,
+                          height: 20,
+                        );
+                      }
+                      return const TextWidget(
+                        text: '---',
                         fontSize: 12,
-                        color: ColorName.primaryColor,
                         weight: FontWeight.bold,
                       );
-                    }
-                    if (state is TransferRateLoading) {
-                      return CustomShimmer(
-                        borderRadius: BorderRadius.circular(5),
-                        width: 100,
-                        height: 20,
-                      );
-                    }
-                    return const TextWidget(
-                      text: '---',
-                      fontSize: 12,
-                      weight: FontWeight.bold,
-                    );
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
-            const Gap(15),
+            Visibility(
+                visible: widget.isFromRequest == false, child: const Gap(15)),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child: _buildOnSummerizing(),
@@ -606,6 +629,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
                     ],
                     validator: (text) {
                       if (text?.isEmpty == true) {
@@ -640,7 +664,8 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                 setState(() {
                                   transferFromWalletModel = wallet;
                                 });
-                                if (transferToWalletModel != null) {
+                                if (transferToWalletModel != null &&
+                                    widget.isFromRequest == false) {
                                   context
                                       .read<TransferRateBloc>()
                                       .add(FetchTransferRate(
@@ -708,100 +733,103 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                         : const SizedBox.shrink(),
                   ),
                   const Gap(10),
-                  TextFieldWidget(
-                    readOnly: true,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    validator: (text) {
-                      return null;
-                    },
-                    keyboardType: TextInputType.phone,
-                    fontSize: 20,
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 15),
-                    hintText: '00.00',
-                    prefixText: '\$',
-                    borderRadius: BorderRadius.circular(24),
-                    controller: TextEditingController(
-                      text: convertedAmount.toStringAsFixed(2),
-                    ),
-                    suffix: (transferToWalletModel != null)
-                        ? GestureDetector(
-                            onTap: () async {
-                              final wallet = await showChangeWalletModal(
-                                context: context,
-                                wallets: selectedContact?.wallets,
-                              );
+                  Visibility(
+                    visible: widget.isFromRequest == false,
+                    child: TextFieldWidget(
+                      readOnly: true,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (text) {
+                        return null;
+                      },
+                      keyboardType: TextInputType.phone,
+                      fontSize: 20,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 15),
+                      hintText: '00.00',
+                      prefixText: '\$',
+                      borderRadius: BorderRadius.circular(24),
+                      controller: TextEditingController(
+                        text: convertedAmount.toStringAsFixed(2),
+                      ),
+                      suffix: (transferToWalletModel != null)
+                          ? GestureDetector(
+                              onTap: () async {
+                                final wallet = await showChangeWalletModal(
+                                  context: context,
+                                  wallets: selectedContact?.wallets,
+                                );
 
-                              if (wallet != null) {
-                                setState(() {
-                                  transferToWalletModel = wallet;
-                                });
-                                context
-                                    .read<TransferRateBloc>()
-                                    .add(FetchTransferRate(
-                                      fromWalletId:
-                                          transferFromWalletModel!.walletId,
-                                      toWalletId:
-                                          transferToWalletModel!.walletId,
-                                    ));
-                                context.read<CheckDetailsBloc>().add(
-                                      FetchTransferFeesEvent(
+                                if (wallet != null) {
+                                  setState(() {
+                                    transferToWalletModel = wallet;
+                                  });
+                                  context
+                                      .read<TransferRateBloc>()
+                                      .add(FetchTransferRate(
                                         fromWalletId:
                                             transferFromWalletModel!.walletId,
                                         toWalletId:
                                             transferToWalletModel!.walletId,
-                                      ),
-                                    );
-                              }
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(
-                                  right: 5, top: 3, bottom: 3),
-                              width: 102,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF9F9F9),
-                                borderRadius: BorderRadius.circular(
-                                  30,
+                                      ));
+                                  context.read<CheckDetailsBloc>().add(
+                                        FetchTransferFeesEvent(
+                                          fromWalletId:
+                                              transferFromWalletModel!.walletId,
+                                          toWalletId:
+                                              transferToWalletModel!.walletId,
+                                        ),
+                                      );
+                                }
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(
+                                    right: 5, top: 3, bottom: 3),
+                                width: 102,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF9F9F9),
+                                  borderRadius: BorderRadius.circular(
+                                    30,
+                                  ),
                                 ),
+                                child: Center(
+                                    child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 14,
+                                      height: 14,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.asset(
+                                        'icons/currency/${transferToWalletModel?.currency.code.toLowerCase() ?? 'etb'}.png',
+                                        fit: BoxFit.cover,
+                                        package: 'currency_icons',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    TextWidget(
+                                      text: transferToWalletModel?.currency.code
+                                              .toUpperCase() ??
+                                          '',
+                                      fontSize: 12,
+                                      weight: FontWeight.w700,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    const Icon(
+                                      Icons.keyboard_arrow_down_outlined,
+                                      size: 18,
+                                    )
+                                  ],
+                                )),
                               ),
-                              child: Center(
-                                  child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 14,
-                                    height: 14,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Image.asset(
-                                      'icons/currency/${transferToWalletModel?.currency.code.toLowerCase() ?? 'etb'}.png',
-                                      fit: BoxFit.cover,
-                                      package: 'currency_icons',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  TextWidget(
-                                    text: transferToWalletModel?.currency.code
-                                            .toUpperCase() ??
-                                        '',
-                                    fontSize: 12,
-                                    weight: FontWeight.w700,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down_outlined,
-                                    size: 18,
-                                  )
-                                ],
-                              )),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   )
                 ],
               ),
@@ -811,14 +839,17 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               bottom: 0,
               top: 0,
               left: 0,
-              child: Center(
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: ColorName.primaryColor,
-                  child: SvgPicture.asset(
-                    Assets.images.svgs.transactionIconVertical,
-                    // ignore: deprecated_member_use
-                    color: Colors.white,
+              child: Visibility(
+                visible: widget.isFromRequest == false,
+                child: Center(
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: ColorName.primaryColor,
+                    child: SvgPicture.asset(
+                      Assets.images.svgs.transactionIconVertical,
+                      // ignore: deprecated_member_use
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -899,7 +930,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
             return const SizedBox.shrink();
           } else {
             return Visibility(
-              visible: selectedContact != null,
+              visible: selectedContact != null && widget.isFromRequest == false,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 15),

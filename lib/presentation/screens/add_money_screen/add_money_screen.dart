@@ -226,8 +226,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 children: [
                   _buildTop(),
                   _buildAmountTextInput(),
-                  _buildAccounts(),
-                  _buildConnectAccounts(),
+                  _buidPaymentMethods(),
+                  _buildAddPaymentMethods(),
                   _buildCheckDetail(),
                 ],
               ),
@@ -308,7 +308,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     );
   }
 
-  _buildConnectAccounts() {
+  _buildAddPaymentMethods() {
     return MultiBlocListener(
       listeners: [
         BlocListener<PaymentCardBloc, PaymentCardState>(
@@ -317,6 +317,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               setState(() {
                 paymentCards = state.paymentCards;
               });
+            } else if (state is PaymentCardFail) {
+              showSnackbar(
+                context,
+                description: state.reason,
+              );
             }
           },
         ),
@@ -617,6 +622,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                   },
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
                   ],
                   validator: (text) {
                     if (text?.isEmpty == true) {
@@ -1007,7 +1013,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     );
   }
 
-  _buildAccounts() {
+  _buidPaymentMethods() {
     return Visibility(
       visible: (showFee && selectedAccountIndex == -1) == false,
       child: Padding(
@@ -1055,10 +1061,14 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       id: i,
                       iconPath: paymentCards[i].cardBrand == 'visa'
                           ? Assets.images.visaCard.path
-                          : Assets.images.masteredCard.path,
-                      title: paymentCards[i].cardBrand,
+                          : paymentCards[i].type == 'us_bank_account'
+                              ? Assets.images.svgs.bankLogo
+                              : Assets.images.masteredCard.path,
+                      title: paymentCards[i].cardBrand ??
+                          paymentCards[i].bankName ??
+                          '',
                       subTitle:
-                          '${paymentCards[i].cardBrand} ending **${paymentCards[i].last4Digits}',
+                          '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
                     ),
                   const SizedBox(height: 20),
                 ],
@@ -1103,14 +1113,27 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 }
               },
               leading: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  image: DecorationImage(
-                      image: AssetImage(iconPath), fit: BoxFit.cover),
-                ),
-              ),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: iconPath == Assets.images.svgs.bankLogo
+                        ? ColorName.primaryColor
+                        : null,
+                    shape: BoxShape.circle,
+                    image: iconPath == Assets.images.svgs.bankLogo
+                        ? null
+                        : DecorationImage(
+                            image: AssetImage(iconPath), fit: BoxFit.cover),
+                  ),
+                  child: iconPath == Assets.images.svgs.bankLogo
+                      ? Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            iconPath,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : null),
               contentPadding: const EdgeInsets.symmetric(horizontal: 15),
               trailing: Checkbox(
                 activeColor: ColorName.primaryColor,

@@ -42,15 +42,19 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
           subtitle: "Send money One Of the contact",
           iconPath: Assets.images.svgs.userGroup,
           onTap: () {
-            Navigator.pop(context);
-            context.pushNamed(RouteName.transferToOther);
+            context.pop();
+            context.pushNamed(
+              RouteName.transferToOther,
+              extra: false,
+            );
           }),
       _TransferToModel(
           title: "To Wallet",
           subtitle: "Withdraw the balance of money to my local bank.",
           iconPath: Assets.images.svgs.wallet02,
           onTap: () {
-            Navigator.pop(context);
+            context.pop();
+
             context.pushNamed(RouteName.transferToWallet);
           })
     ];
