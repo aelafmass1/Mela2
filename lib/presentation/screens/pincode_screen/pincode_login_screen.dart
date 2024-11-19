@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -110,6 +112,14 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       } else {
         pin6Node.unfocus();
       }
+    }
+    if (isValid) {
+      final pins = getAllPins();
+      context.read<AuthBloc>().add(
+            LoginWithPincode(
+              pincode: pins.join(),
+            ),
+          );
     }
 
     getAllPins();

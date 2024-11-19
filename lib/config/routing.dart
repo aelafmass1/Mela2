@@ -204,7 +204,9 @@ final goRouting = GoRouter(
     GoRoute(
       path: '/transfer_to_other_screen',
       name: RouteName.transferToOther,
-      builder: (context, state) => const TransferToOtherScreen(),
+      builder: (context, state) => TransferToOtherScreen(
+        isFromRequest: state.extra as bool,
+      ),
     ),
     GoRoute(
       path: '/user_search_screen',

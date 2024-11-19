@@ -39,7 +39,10 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.requestLogo,
             title: 'Request',
             onTab: () {
-              context.pushNamed(RouteName.requestMoney);
+              context.pushNamed(
+                RouteName.transferToOther,
+                extra: true,
+              );
             },
           ),
           _buildOptionButton(

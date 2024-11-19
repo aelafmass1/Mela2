@@ -471,6 +471,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       },
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
                       ],
                       validator: (text) {
                         if (text?.isEmpty == true) {

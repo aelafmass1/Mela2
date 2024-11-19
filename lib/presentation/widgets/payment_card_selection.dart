@@ -78,7 +78,7 @@ class _PaymentCardSelectionState extends State<PaymentCardSelection> {
                             iconPath: widget.paymentCards[i].cardBrand == 'visa'
                                 ? Assets.images.visaCard.path
                                 : Assets.images.masteredCard.path,
-                            title: widget.paymentCards[i].cardBrand,
+                            title: widget.paymentCards[i].cardBrand ?? '---',
                             subTitle:
                                 '${widget.paymentCards[i].cardBrand} ending **${widget.paymentCards[i].last4Digits}',
                           )
