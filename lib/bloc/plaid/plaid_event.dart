@@ -9,3 +9,9 @@ final class ExchangePublicToken extends PlaidEvent {
 
   ExchangePublicToken({required this.publicToken});
 }
+
+final class AddBankAccount extends PlaidEvent {
+  final String publicToken;
+
+  AddBankAccount({required this.publicToken});
+}

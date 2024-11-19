@@ -9,6 +9,7 @@ Future<ContactStatusModel?> showMoneyReceiverSelection(
   ContactStatusModel? selectedContact;
   await showModalBottomSheet(
     context: context,
+    sheetAnimationStyle: AnimationStyle.noAnimation,
     scrollControlDisabledMaxHeightRatio: 1,
     builder: (_) => SearchReceiverPage(
       onSelected: (c) {

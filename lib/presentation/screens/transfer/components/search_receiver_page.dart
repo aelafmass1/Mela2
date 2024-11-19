@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,7 +30,6 @@ class SearchReceiverPage extends StatefulWidget {
 
 class _SearchReceiverPageState extends State<SearchReceiverPage> {
   final searchController = TextEditingController();
-  final searchFocusNode = FocusNode();
 
   List<Contact> contacts = [];
   List<Contact> filteredContacts = [];
@@ -49,15 +50,19 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
       // if (searchFocusNode.hasFocus == false) {
       //   searchFocusNode.requestFocus();
       // }
-      // ignore: use_build_context_synchronously
-      context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
+      final contactState = context.read<ContactBloc>().state;
+      if (contactState is! ContactSuccess) {
+        context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
+      } else if (contactState.contacts.isNotEmpty) {
+        setState(() {
+          melaMemberContacts =
+              contactState.contacts.map((c) => c.contactId).toList();
+        });
+      }
     } else {
       setState(() {
         isPermissionDenied = true;
       });
-      if (searchFocusNode.hasFocus) {
-        searchFocusNode.unfocus();
-      }
     }
   }
 
@@ -70,7 +75,6 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   @override
   void dispose() {
     searchController.dispose();
-    searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -79,60 +83,28 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: BlocConsumer<ContactBloc, ContactState>(
-          listener: (context, state) {
-            if (state is ContactSuccess) {
-              if (state.contacts.isNotEmpty) {
-                setState(() {
-                  melaMemberContacts =
-                      state.contacts.map((c) => c.contactId).toList();
-                });
-              }
-            } else if (state is ContactFail) {
-              showSnackbar(
-                context,
-                description: state.message,
-              );
-            }
-          },
-          builder: (context, state) {
-            return Column(
-              children: [
-                const SizedBox(height: 60),
-                _buildSearchField(),
-                if (state is ContactLoading)
-                  const Expanded(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: LoadingWidget(
-                        color: ColorName.primaryColor,
-                      ),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (isPermissionDenied)
-                          _buildPermissionDeniedWidget()
-                        else
-                          _buildContactsList(),
-                      ],
-                    ),
-                  )
-              ],
-            );
-          },
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
+            _buildSearchField(),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isPermissionDenied)
+                    _buildPermissionDeniedWidget()
+                  else
+                    _buildContactsList(),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
   }
 
   _buildPermissionDeniedWidget() {
-    if (searchFocusNode.hasFocus) {
-      searchFocusNode.unfocus();
-    }
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -192,60 +164,76 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   }
 
   _buildSearchField() {
-    return CardWidget(
-      width: 100.sw,
-      child: TextFieldWidget(
-        onChanged: (text) {
-          if (text.isEmpty) {
+    return BlocListener<ContactBloc, ContactState>(
+      listener: (context, state) {
+        if (state is ContactSuccess) {
+          if (state.contacts.isNotEmpty) {
             setState(() {
-              isSearching = false;
-            });
-          } else {
-            filteredContacts = contacts.where((contact) {
-              final name = contact.displayName.toLowerCase();
-              final phoneNumber = contact.phones.first.number.toLowerCase();
-              final searchTextLower = text.toLowerCase();
-              return name.contains(searchTextLower) ||
-                  phoneNumber.contains(searchTextLower);
-            }).toList();
-            setState(() {
-              isSearching = true;
-              filteredContacts = filteredContacts;
+              melaMemberContacts =
+                  state.contacts.map((c) => c.contactId).toList();
             });
           }
-        },
-        focusNode: searchFocusNode,
-        border: InputBorder.none,
-        hintText: '',
-        prefix: SvgPicture.asset(
-          Assets.images.svgs.search,
-          width: 10,
-          height: 10,
-          fit: BoxFit.scaleDown,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        controller: searchController,
-        suffix: SizedBox(
-          width: 68,
-          child: CardWidget(
+        } else if (state is ContactFail) {
+          showSnackbar(
+            context,
+            description: state.message,
+          );
+        }
+      },
+      child: CardWidget(
+        width: 100.sw,
+        child: TextFieldWidget(
+          onChanged: (text) {
+            if (text.isEmpty) {
+              setState(() {
+                isSearching = false;
+              });
+            } else {
+              filteredContacts = contacts.where((contact) {
+                final name = contact.displayName.toLowerCase();
+                final phoneNumber = contact.phones.first.number.toLowerCase();
+                final searchTextLower = text.toLowerCase();
+                return name.contains(searchTextLower) ||
+                    phoneNumber.contains(searchTextLower);
+              }).toList();
+              setState(() {
+                isSearching = true;
+                filteredContacts = filteredContacts;
+              });
+            }
+          },
+          border: InputBorder.none,
+          hintText: '',
+          prefix: SvgPicture.asset(
+            Assets.images.svgs.search,
+            width: 10,
+            height: 10,
+            fit: BoxFit.scaleDown,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          controller: searchController,
+          suffix: SizedBox(
             width: 68,
-            child: ButtonWidget(
-                elevation: 0,
-                color: ColorName.white,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                  topLeft: Radius.zero,
-                  bottomLeft: Radius.zero,
-                ),
-                onPressed: () {
-                  context.pop();
-                },
-                child: const TextWidget(
-                  text: 'Cancel',
-                  fontSize: 14,
-                  color: ColorName.primaryColor,
-                )),
+            child: CardWidget(
+              width: 68,
+              child: ButtonWidget(
+                  elevation: 0,
+                  color: ColorName.white,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                    topLeft: Radius.zero,
+                    bottomLeft: Radius.zero,
+                  ),
+                  onPressed: () {
+                    context.pop();
+                  },
+                  child: const TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: ColorName.primaryColor,
+                  )),
+            ),
           ),
         ),
       ),

@@ -27,3 +27,13 @@ final class PlaidPublicTokenFail extends PlaidState {
 }
 
 final class PlaidPublicTokenSuccess extends PlaidState {}
+
+final class AddBankAccountLoading extends PlaidState {}
+
+final class AddBankAccountFail extends PlaidState {
+  final String reason;
+
+  AddBankAccountFail({required this.reason});
+}
+
+final class AddBankAccountSuccess extends PlaidState {}

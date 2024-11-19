@@ -13,6 +13,7 @@ import 'package:transaction_mobile_app/presentation/screens/transfer/utils/show_
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../bloc/check-details-bloc/check_details_bloc.dart';
+import '../../../../bloc/contact/contact_bloc.dart';
 import '../../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
 import '../../../../core/utils/show_change_wallet_modal.dart';
@@ -451,26 +452,42 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
   }
 
   _buildTransferTo() {
-    return Visibility(
-      visible: selectedContact != null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 15),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TextWidget(
-              text: 'Transfer To',
-              fontSize: 18,
-              weight: FontWeight.w600,
+    return BlocListener<ContactBloc, ContactState>(
+      listener: (context, state) {
+        if (state is ContactSuccess) {
+          if (state.contacts.isNotEmpty) {
+            final melaMemberContacts =
+                state.contacts.map((c) => c.contactId).toList();
+            if (melaMemberContacts.contains(selectedContact?.contactId)) {
+              setState(() {
+                selectedContact = state.contacts.firstWhere(
+                    (c) => c.contactId == selectedContact?.contactId);
+              });
+            }
+          }
+        }
+      },
+      child: Visibility(
+        visible: selectedContact != null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 15),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: TextWidget(
+                text: 'Transfer To',
+                fontSize: 18,
+                weight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 15),
-          if (selectedContact != null)
-            _buildContactTile(
-              selectedContact!,
-            )
-        ],
+            const SizedBox(height: 15),
+            if (selectedContact != null)
+              _buildContactTile(
+                selectedContact!,
+              )
+          ],
+        ),
       ),
     );
   }
@@ -593,6 +610,10 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     validator: (text) {
                       if (text?.isEmpty == true) {
                         return 'Please enter amount';
+                      } else if ((double.tryParse(amountController.text) ??
+                              0) ==
+                          0) {
+                        return 'Invalid Amount';
                       } else if ((double.tryParse(text ?? '0') ?? 0) >
                           (transferFromWalletModel?.balance?.toDouble() ?? 0)) {
                         return 'Insfficient balance';
