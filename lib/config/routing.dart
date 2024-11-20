@@ -34,7 +34,6 @@ import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/pincode_screen/pincode_screen_deligate.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
-import '../presentation/screens/request-money-screen/request_money_screen.dart';
 import '../presentation/screens/transfer/transfer-user-search/user_search.dart';
 import '../presentation/widgets/receipt_page_2.dart';
 
@@ -73,9 +72,7 @@ class RouteName {
   static const userSearch = 'user_search_screen';
   static const addMoney = 'add_money_screen';
 
-  static const String receiptPage2 = 'receipt_page_2';
   static const pincodeDeligate = 'pincode_deligate';
-  static const requestMoney = 'request_money_screen';
 }
 
 final goRouting = GoRouter(
@@ -154,13 +151,6 @@ final goRouting = GoRouter(
           ),
         ),
         GoRoute(
-          path: 'receipt_page_2',
-          name: RouteName.receiptPage2,
-          builder: (context, state) => ReceiptPage2(
-            receiverInfo: state.extra as ReceiverInfo,
-          ),
-        ),
-        GoRoute(
           path: 'contact_permission',
           name: RouteName.contactPermission,
           builder: (context, state) => ContactPermissionScreen(
@@ -195,11 +185,6 @@ final goRouting = GoRouter(
       path: '/transfer_to_wallet_screen',
       name: RouteName.transferToWallet,
       builder: (context, state) => const SendMoneyScreen(),
-    ),
-    GoRoute(
-      path: '/request_money_screen',
-      name: RouteName.requestMoney,
-      builder: (context, state) => const RequestMoneyScreen(),
     ),
     GoRoute(
       path: '/transfer_to_other_screen',

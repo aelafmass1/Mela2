@@ -58,9 +58,16 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   void initState() {
     final wallets = context.read<WalletBloc>().state.wallets;
     if (wallets.isNotEmpty) {
-      setState(() {
-        transferFromWalletModel = wallets.first;
-      });
+      final w = wallets.where((w) => w.currency.code == "USD");
+      if (w.isEmpty) {
+        setState(() {
+          transferFromWalletModel = wallets.first;
+        });
+      } else {
+        setState(() {
+          transferFromWalletModel = w.first;
+        });
+      }
     }
 
     super.initState();
@@ -293,41 +300,41 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             );
           },
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 15),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: SizedBox(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: ColorName.primaryColor,
-                  backgroundColor: Colors.white,
-                  elevation: 7,
-                  shadowColor: Colors.black.withOpacity(0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {},
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add),
-                      TextWidget(
-                        text: 'Add New Card',
-                        color: ColorName.primaryColor,
-                        fontSize: 13,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.only(right: 15),
+        //   child: Align(
+        //     alignment: Alignment.topRight,
+        //     child: SizedBox(
+        //       child: ElevatedButton(
+        //         style: ElevatedButton.styleFrom(
+        //           foregroundColor: ColorName.primaryColor,
+        //           backgroundColor: Colors.white,
+        //           elevation: 7,
+        //           shadowColor: Colors.black.withOpacity(0.3),
+        //           shape: RoundedRectangleBorder(
+        //             borderRadius: BorderRadius.circular(10),
+        //           ),
+        //         ),
+        //         onPressed: () {},
+        //         child: const Padding(
+        //           padding: EdgeInsets.all(8.0),
+        //           child: Row(
+        //             mainAxisSize: MainAxisSize.min,
+        //             mainAxisAlignment: MainAxisAlignment.center,
+        //             children: [
+        //               Icon(Icons.add),
+        //               TextWidget(
+        //                 text: 'Add New Card',
+        //                 color: ColorName.primaryColor,
+        //                 fontSize: 13,
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
@@ -350,8 +357,10 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           ),
           InkWell(
             onTap: () async {
-              final selectedWallet =
-                  await showChangeWalletModal(context: context);
+              final selectedWallet = await showChangeWalletModal(
+                context: context,
+                selectedWalletId: transferFromWalletModel?.walletId,
+              );
               if (selectedWallet != null) {
                 setState(() {
                   transferFromWalletModel = selectedWallet;

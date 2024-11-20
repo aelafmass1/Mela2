@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -56,6 +58,11 @@ class TextFieldWidget extends StatelessWidget {
       autofocus: autoFocus ?? false,
       focusNode: focusNode,
       onTap: onTab,
+      onTapOutside: (p) {
+        if (Platform.isIOS) {
+          FocusScope.of(context).unfocus();
+        }
+      },
       onChanged: onChanged,
       obscureText: obscurePassword,
       controller: controller,

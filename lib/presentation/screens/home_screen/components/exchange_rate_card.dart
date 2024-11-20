@@ -27,7 +27,7 @@ class ExchangeRateCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildLeft(),
-          _buildRight(),
+          // _buildRight(),
         ],
       ),
     );
@@ -41,9 +41,18 @@ class ExchangeRateCard extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: 10,
-              backgroundImage: Assets.images.usaFlag.provider(),
+            Container(
+              width: 20,
+              height: 20,
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Image.asset(
+                'icons/currency/${currencyModel.currencyCode.toLowerCase()}.png',
+                package: 'currency_icons',
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(width: 7),
             Column(
@@ -98,35 +107,16 @@ class ExchangeRateCard extends StatelessWidget {
 
   _buildRight() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40),
-            border: Border.all(
-              color: ColorName.borderColor,
-            ),
-          ),
-          child: Row(
-            children: [
-              const TextWidget(
-                text: 'CBE',
-                fontSize: 8,
-              ),
-              const SizedBox(width: 5),
-              Assets.images.cbeLogo.image(
-                width: 14,
-                height: 14,
-              ),
-            ],
-          ),
-        ),
         TextWidget(
           text: '${currencyModel.rate} ETB',
           fontSize: 14,
+          color: ColorName.primaryColor,
+          weight: FontWeight.w600,
         ),
+        const SizedBox(height: 10),
         Row(
           children: [
             SvgPicture.asset(

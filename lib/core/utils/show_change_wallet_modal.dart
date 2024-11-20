@@ -8,6 +8,7 @@ import '../../presentation/widgets/wallet_selection_widget.dart';
 
 Future<WalletModel?> showChangeWalletModal({
   required BuildContext context,
+  required int? selectedWalletId,
   List<WalletModel>? wallets,
 }) async {
   WalletModel? selectedWallet;
@@ -16,6 +17,7 @@ Future<WalletModel?> showChangeWalletModal({
     scrollControlDisabledMaxHeightRatio: 70.sh,
     backgroundColor: Colors.white,
     builder: (context) => WalletSelectionWidget(
+      selectedWalletId: selectedWalletId,
       wallets: wallets,
       onSelect: (s) {
         log('selected Wallet');
