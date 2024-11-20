@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,7 +74,6 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
     // context.read<WalletBloc>().add(CreateWallet(currency: 'EUR'));
 
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
-    context.read<UserBloc>().add(FetchMe());
 
     WidgetsBinding.instance.addObserver(this); // Add the observer
     super.initState();
