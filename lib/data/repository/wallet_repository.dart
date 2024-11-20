@@ -4,7 +4,6 @@ import 'package:http_interceptor/http_interceptor.dart';
 
 import '../../core/constants/url_constants.dart';
 import '../../core/utils/process_error_response_.dart';
-import '../models/transfer_fees_model.dart';
 import '../models/transfer_rate_model.dart';
 
 class WalletRepository {
@@ -157,6 +156,24 @@ class WalletRepository {
     final res = await client.get(
       Uri.parse(
         '$baseUrl/api/wallet/transactions',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return {'data': data};
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> fetchRecentWalletTransactions(
+      {required String accessToken}) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/recent-recipients',
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',

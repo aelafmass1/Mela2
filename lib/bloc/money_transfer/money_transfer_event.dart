@@ -27,3 +27,14 @@ final class TransferToOwnWallet extends MoneyTransferEvent {
     required this.note,
   });
 }
+
+final class TransferToUnregisteredUser extends MoneyTransferEvent {
+  final String phoneNumber;
+  final double amount;
+  final int senderWalletId;
+
+  TransferToUnregisteredUser(
+      {required this.phoneNumber,
+      required this.amount,
+      required this.senderWalletId});
+}

@@ -98,4 +98,35 @@ class MoneyTransferRepository {
       throw Exception(error);
     }
   }
+
+  Future<Map> transferToUnregisteredUser({
+    required String accessToken,
+    required int senderWalletId,
+    required String recipientPhoneNumber,
+    required double amount,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer/unregistered',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "senderWalletId": senderWalletId,
+        "recipientPhoneNumber": recipientPhoneNumber,
+        "amount": amount,
+      }),
+    );
+    // log(res.body);
+
+    final data = jsonDecode(res.body);
+    log(res.body);
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
 }

@@ -19,7 +19,45 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
       : super(MoneyTransferInitial()) {
     on<SendMoney>(_onSendMoney);
     on<TransferToOwnWallet>(_onTransferToOwnWallet);
+    on<TransferToUnregisteredUser>(_onTransferToUnregisteredUser);
   }
+
+  _onTransferToUnregisteredUser(
+      TransferToUnregisteredUser event, Emitter emit) async {
+    try {
+      if (state is! MoneyTransferLoading) {
+        emit(MoneyTransferLoading());
+        final token = await getToken();
+
+        if (token != null) {
+          final res = await repository.transferToUnregisteredUser(
+            accessToken: token,
+            amount: event.amount,
+            recipientPhoneNumber: event.phoneNumber,
+            senderWalletId: event.senderWalletId,
+          );
+          if (res.containsKey('error')) {
+            return emit(MoneyTransferFail(reason: res['error']));
+          }
+          final walletTransaction =
+              WalletTransactionModel.fromMap(res['successResponse'] as Map);
+          emit(MoneyTransferUnregisteredUserSuccess(
+            walletTransactionModel: walletTransaction,
+          ));
+        }
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(MoneyTransferFail(reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(MoneyTransferFail(reason: error.toString()));
+    }
+  }
+
   _onSendMoney(SendMoney event, Emitter emit) async {
     try {
       if (state is! MoneyTransferLoading) {

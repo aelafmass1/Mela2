@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class WalletTransactionModel {
   final int fromWalletId;
-  final int toWalletId;
+  final int? toWalletId;
   final int transactionId;
   final num? fromWalletBalance;
   final num amount;
@@ -59,7 +59,8 @@ class WalletTransactionModel {
   factory WalletTransactionModel.fromMap(Map map) {
     return WalletTransactionModel(
       fromWalletId: map['fromWallet']['walletId'] as int,
-      toWalletId: map['toWallet']['walletId'] as int,
+      toWalletId:
+          map['toWallet'] != null ? (map['toWallet']['walletId'] as int) : null,
       transactionId: map['transactionId'] as int,
       fromWalletBalance: map['fromWalletBalance'] as num?,
       amount: map['amount'] as num,

@@ -214,10 +214,18 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                   ),
                                 );
                           } else {
-                            showSnackbar(
-                              context,
-                              description: "Unregistered User",
-                            );
+                            context.read<MoneyTransferBloc>().add(
+                                  TransferToUnregisteredUser(
+                                    phoneNumber:
+                                        selectedContact?.contactPhoneNumber ??
+                                            '',
+                                    amount: double.tryParse(
+                                            amountController.text) ??
+                                        0,
+                                    senderWalletId:
+                                        transferFromWalletModel?.walletId ?? 0,
+                                  ),
+                                );
                           }
                         }
                       }
@@ -225,6 +233,11 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               child: BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
                 listener: (context, state) {
                   if (state is MoneyTransferOwnWalletSuccess) {
+                    showWalletReceipt(
+                      context,
+                      state.walletTransactionModel!,
+                    );
+                  } else if (state is MoneyTransferUnregisteredUserSuccess) {
                     showWalletReceipt(
                       context,
                       state.walletTransactionModel!,
