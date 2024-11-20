@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
@@ -24,8 +27,7 @@ import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../bloc/money_transfer/money_transfer_bloc.dart';
-import '../../../bloc/transaction/transaction_bloc.dart';
+import '../../../config/routing.dart';
 import '../../screens/home_screen/components/exchange_rate_card.dart';
 import 'widgets/wallet_cards_stack.dart';
 
@@ -36,7 +38,7 @@ class HomeTab extends StatefulWidget {
   State<HomeTab> createState() => _HomeTabState();
 }
 
-class _HomeTabState extends State<HomeTab> {
+class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
   final moneyController = TextEditingController();
   String? imageUrl;
   String? displayName;
@@ -76,7 +78,23 @@ class _HomeTabState extends State<HomeTab> {
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     context.read<UserBloc>().add(FetchMe());
 
+    WidgetsBinding.instance.addObserver(this); // Add the observer
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Remove the observer
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      if (mounted) {
+        context.goNamed(RouteName.loginPincode);
+      }
+    }
   }
 
   @override
