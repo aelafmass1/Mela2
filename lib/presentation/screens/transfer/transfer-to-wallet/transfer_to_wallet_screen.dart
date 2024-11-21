@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -136,6 +137,10 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
               child: BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
                 listener: (context, state) {
                   if (state is MoneyTransferOwnWalletSuccess) {
+                    context.pop();
+
+                    context.read<WalletBloc>().add(FetchWallets());
+
                     showWalletReceipt(
                       context,
                       state.walletTransactionModel!,

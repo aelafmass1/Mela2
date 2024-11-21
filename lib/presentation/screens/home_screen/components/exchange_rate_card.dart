@@ -27,7 +27,7 @@ class ExchangeRateCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildLeft(),
-          // _buildRight(),
+          _buildRight(),
         ],
       ),
     );

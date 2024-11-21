@@ -30,6 +30,7 @@ import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_currency/wallet_currency_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet_recent_transaction/wallet_recent_transaction_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/config/theme.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
@@ -265,6 +266,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         BlocProvider(
           create: (context) => UserBloc(
             authRepository: authRepo,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => WalletRecentTransactionBloc(
+            repository: walletRepository,
           ),
         )
       ],

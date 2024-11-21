@@ -91,7 +91,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                 width: 60.sw,
                                 child: const TextWidget(
                                   text:
-                                      'Money has been successfully added to your wallet.',
+                                      'Money has been successfully added to the wallet.',
                                   textAlign: TextAlign.center,
                                   fontSize: 14,
                                   weight: FontWeight.w400,
@@ -173,8 +173,6 @@ class WalletReceiptWidget extends StatelessWidget {
                     color: ColorName.primaryColor,
                   ),
                   onPressed: () {
-                    context.read<WalletBloc>().add(FetchWallets());
-                    context.pop();
                     context.pop();
                   }),
             ),

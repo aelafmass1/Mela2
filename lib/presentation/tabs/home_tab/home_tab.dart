@@ -87,7 +87,8 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       if (mounted) {
         context.goNamed(RouteName.loginPincode);
       }

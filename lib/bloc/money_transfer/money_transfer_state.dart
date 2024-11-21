@@ -19,3 +19,9 @@ final class MoneyTransferOwnWalletSuccess extends MoneyTransferState {
 
   MoneyTransferOwnWalletSuccess({this.walletTransactionModel});
 }
+
+final class MoneyTransferUnregisteredUserSuccess extends MoneyTransferState {
+  final WalletTransactionModel? walletTransactionModel;
+
+  MoneyTransferUnregisteredUserSuccess({required this.walletTransactionModel});
+}

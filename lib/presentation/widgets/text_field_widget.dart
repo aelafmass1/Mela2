@@ -27,6 +27,7 @@ class TextFieldWidget extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   final InputBorder? border;
   final bool? autoFocus;
+  final TextStyle? hintTextStyle;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -49,6 +50,7 @@ class TextFieldWidget extends StatelessWidget {
       this.contentPadding,
       this.border,
       this.autoFocus,
+      this.hintTextStyle,
       this.errorText});
 
   @override
@@ -80,11 +82,12 @@ class TextFieldWidget extends StatelessWidget {
         contentPadding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         hintText: hintText,
-        hintStyle: TextStyle(
-          fontSize: fontSize ?? 15,
-          color: const Color(0xFF8E8E8E),
-          fontWeight: FontWeight.w500,
-        ),
+        hintStyle: hintTextStyle ??
+            TextStyle(
+              fontSize: fontSize ?? 15,
+              color: const Color(0xFF8E8E8E),
+              fontWeight: FontWeight.w500,
+            ),
         prefixText: prefixText != null ? '$prefixText ' : null,
         prefixIcon: prefix,
         suffixIcon: suffix,
