@@ -19,25 +19,19 @@ showTransferModalSheet(BuildContext context) {
         top: Radius.circular(20),
       ),
     ),
-    builder: (context) => const _TransferModalSheetBody(),
+    builder: (context) => TransferModalSheetBody(),
   );
 }
 
-class _TransferModalSheetBody extends StatefulWidget {
-  const _TransferModalSheetBody();
+class TransferModalSheetBody extends StatelessWidget {
+  TransferModalSheetBody({super.key});
 
-  @override
-  State<_TransferModalSheetBody> createState() =>
-      _TransferModalSheetBodyState();
-}
+  ValueNotifier<TransferToModel?> selectedTransferToModel = ValueNotifier(null);
 
-class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
-  ValueNotifier<_TransferToModel?> selectedTransferToModel =
-      ValueNotifier(null);
   @override
   Widget build(BuildContext context) {
     final transferToItems = [
-      _TransferToModel(
+      TransferToModel(
           title: "To Other",
           subtitle: "Send money One Of the contact",
           iconPath: Assets.images.svgs.userGroup,
@@ -48,7 +42,7 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
               extra: false,
             );
           }),
-      _TransferToModel(
+      TransferToModel(
           title: "To Wallet",
           subtitle: "Withdraw the balance of money to my local bank.",
           iconPath: Assets.images.svgs.wallet02,
@@ -175,13 +169,13 @@ class _TransferModalSheetBodyState extends State<_TransferModalSheetBody> {
   }
 }
 
-class _TransferToModel {
+class TransferToModel {
   final String title;
   final String subtitle;
   final String iconPath;
   final VoidCallback onTap;
 
-  _TransferToModel(
+  TransferToModel(
       {required this.title,
       required this.subtitle,
       required this.iconPath,
@@ -190,7 +184,7 @@ class _TransferToModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is _TransferToModel &&
+    return other is TransferToModel &&
         other.title == title &&
         other.subtitle == subtitle &&
         other.iconPath == iconPath;

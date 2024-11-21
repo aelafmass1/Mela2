@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,29 +41,34 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   bool isSearching = false;
 
   Future<void> _fetchContacts() async {
-    if (kIsWeb) return;
+    try {
+      if (kIsWeb) return;
 
-    if (await FlutterContacts.requestPermission(readonly: true)) {
-      List<Contact> c = await FlutterContacts.getContacts(withProperties: true);
-      setState(() {
-        contacts = c;
-      });
-      // if (searchFocusNode.hasFocus == false) {
-      //   searchFocusNode.requestFocus();
-      // }
-      final contactState = context.read<ContactBloc>().state;
-      if (contactState is! ContactSuccess) {
-        context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
-      } else if (contactState.contacts.isNotEmpty) {
+      if (await FlutterContacts.requestPermission(readonly: true)) {
+        List<Contact> c =
+            await FlutterContacts.getContacts(withProperties: true);
         setState(() {
-          melaMemberContacts =
-              contactState.contacts.map((c) => c.contactId).toList();
+          contacts = c;
+        });
+        // if (searchFocusNode.hasFocus == false) {
+        //   searchFocusNode.requestFocus();
+        // }
+        final contactState = context.read<ContactBloc>().state;
+        if (contactState is! ContactSuccess) {
+          context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
+        } else if (contactState.contacts.isNotEmpty) {
+          setState(() {
+            melaMemberContacts =
+                contactState.contacts.map((c) => c.contactId).toList();
+          });
+        }
+      } else {
+        setState(() {
+          isPermissionDenied = true;
         });
       }
-    } else {
-      setState(() {
-        isPermissionDenied = true;
-      });
+    } catch (e) {
+      log(e.toString());
     }
   }
 
@@ -231,7 +238,9 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                     bottomLeft: Radius.zero,
                   ),
                   onPressed: () {
-                    context.pop();
+                    if (mounted) {
+                      context.pop();
+                    }
                   },
                   child: const TextWidget(
                     text: 'Cancel',
@@ -289,28 +298,34 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   _buildContactTile(Contact contact) {
     return ListTile(
       onTap: () {
-        if (melaMemberContacts.contains(contact.id)) {
-          final state = context.read<ContactBloc>().state;
-          if (state is ContactSuccess) {
-            final selectedContact =
-                state.contacts.firstWhere((c) => c.contactId == contact.id);
-            widget.onSelected(selectedContact.copyWith(
-              contactName: contact.displayName,
-              contactPhoneNumber: contact.phones.first.number,
-            ));
-          }
-        } else {
-          widget.onSelected(
-            ContactStatusModel(
-                contactId: contact.id,
-                contactStatus: 'Selected',
-                userId: -1,
+        try {
+          if (melaMemberContacts.contains(contact.id)) {
+            final state = context.read<ContactBloc>().state;
+            if (state is ContactSuccess) {
+              final selectedContact =
+                  state.contacts.firstWhere((c) => c.contactId == contact.id);
+              widget.onSelected(selectedContact.copyWith(
                 contactName: contact.displayName,
                 contactPhoneNumber: contact.phones.first.number,
-                wallets: []),
-          );
+              ));
+            }
+          } else {
+            widget.onSelected(
+              ContactStatusModel(
+                  contactId: contact.id,
+                  contactStatus: 'Selected',
+                  userId: -1,
+                  contactName: contact.displayName,
+                  contactPhoneNumber: contact.phones.first.number,
+                  wallets: []),
+            );
+          }
+          if (mounted) {
+            context.pop();
+          }
+        } catch (e) {
+          log(e.toString());
         }
-        context.pop();
       },
       leading: Container(
         width: 44,

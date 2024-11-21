@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -98,38 +100,47 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
   }
 
   scrollDown() async {
-    await Future.delayed(const Duration(milliseconds: 100), () {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    });
+    try {
+      await Future.delayed(const Duration(milliseconds: 100), () {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
   void initState() {
-    final wallets = context.read<WalletBloc>().state.wallets;
-    if (wallets.isNotEmpty) {
-      final w = wallets.where((w) => w.currency.code == "USD");
-      if (w.isEmpty) {
-        setState(() {
-          transferFromWalletModel = wallets.first;
-        });
-      } else {
-        setState(() {
-          transferFromWalletModel = w.first;
-        });
+    try {
+      final wallets = context.read<WalletBloc>().state.wallets;
+      if (wallets.isNotEmpty) {
+        final w = wallets.where((w) => w.currency.code == "USD");
+        if (w.isEmpty) {
+          setState(() {
+            transferFromWalletModel = wallets.first;
+          });
+        } else {
+          setState(() {
+            transferFromWalletModel = w.first;
+          });
+        }
       }
-    }
-    final walletRecent = context.read<WalletRecentTransactionBloc>().state;
-    if (walletRecent is WalletRecentTransactionSuccess) {
-      if (walletRecent.transactions.isEmpty) {
-        context.read<WalletRecentTransactionBloc>().add(
-              FetchRecentTransaction(),
-            );
+      final walletRecent = context.read<WalletRecentTransactionBloc>().state;
+      if (walletRecent is WalletRecentTransactionSuccess) {
+        if (walletRecent.transactions.isEmpty) {
+          context.read<WalletRecentTransactionBloc>().add(
+                FetchRecentTransaction(),
+              );
+        }
       }
+    } catch (e) {
+      log(e.toString());
     }
+
     super.initState();
   }
 
@@ -579,9 +590,24 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 state.contacts.map((c) => c.contactId).toList();
             if (melaMemberContacts.contains(selectedContact?.contactId)) {
               setState(() {
-                selectedContact = state.contacts.firstWhere(
-                    (c) => c.contactId == selectedContact?.contactId);
+                selectedContact = state.contacts
+                    .firstWhere(
+                        (c) => c.contactId == selectedContact?.contactId)
+                    .copyWith(
+                      contactName: selectedContact?.contactName,
+                      contactPhoneNumber: selectedContact?.contactPhoneNumber,
+                    );
               });
+              context.read<TransferRateBloc>().add(FetchTransferRate(
+                    fromWalletId: transferFromWalletModel!.walletId,
+                    toWalletId: transferToWalletModel!.walletId,
+                  ));
+              context.read<CheckDetailsBloc>().add(
+                    FetchTransferFeesEvent(
+                      fromWalletId: transferFromWalletModel!.walletId,
+                      toWalletId: transferToWalletModel!.walletId,
+                    ),
+                  );
             }
           }
         }

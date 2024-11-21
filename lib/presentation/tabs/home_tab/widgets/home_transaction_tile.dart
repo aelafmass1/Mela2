@@ -26,15 +26,15 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
   Future<void> _fetchContacts() async {
     if (kIsWeb) return;
 
-    if (await FlutterContacts.requestPermission(readonly: true)) {
-      if (contacts.isEmpty) {
-        List<Contact> c =
-            await FlutterContacts.getContacts(withProperties: true);
-        setState(() {
-          contacts = c;
-        });
-      }
-    }
+    // if (await FlutterContacts.requestPermission(readonly: true)) {
+    //   if (contacts.isEmpty) {
+    //     List<Contact> c =
+    //         await FlutterContacts.getContacts(withProperties: true);
+    //     setState(() {
+    //       contacts = c;
+    //     });
+    //   }
+    // }
   }
 
   Future<ContactEqubMember?> getUserContactInfo({
@@ -145,7 +145,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
                     builder: (context, snapshot) {
                       return TextWidget(
                         text: snapshot.data?.displayName ??
-                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unknown'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
+                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unregistered'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
                         fontSize: 16,
                         weight: FontWeight.w500,
                       );
@@ -168,7 +168,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
                   builder: (context, snapshot) {
                     return TextWidget(
                       text: snapshot.data?.displayName ??
-                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unknown'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
+                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unregistered'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
                       fontSize: 16,
                       weight: FontWeight.w500,
                     );
