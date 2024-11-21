@@ -13,6 +13,7 @@ import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -429,8 +430,14 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           if (state is AddFundToWalletFail) {
             showSnackbar(context, description: state.reason);
           } else if (state is AddFundToWalletSuccess) {
-            context.read<WalletBloc>().add(FetchWallets());
             context.pop();
+            if (mounted) {
+              context.read<WalletBloc>().add(FetchWallets());
+              showWalletReceipt(
+                context,
+                state.walletTransactionModel,
+              );
+            }
           }
         }),
       ],

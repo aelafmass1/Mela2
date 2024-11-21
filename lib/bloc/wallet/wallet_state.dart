@@ -51,5 +51,10 @@ final class AddFundToWalletFail extends WalletState {
 }
 
 final class AddFundToWalletSuccess extends WalletState {
-  AddFundToWalletSuccess({required super.wallets});
+  final WalletTransactionModel walletTransactionModel;
+
+  AddFundToWalletSuccess({
+    required super.wallets,
+    required this.walletTransactionModel,
+  });
 }

@@ -5,6 +5,8 @@ import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 
+import '../../data/models/wallet_transaction_model.dart';
+
 part 'wallet_event.dart';
 part 'wallet_state.dart';
 
@@ -42,9 +44,21 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
             AddFundToWalletFail(wallets: state.wallets, reason: res['error']),
           );
         }
+        final data = res['successResponse'];
+        final walletTransaction = WalletTransactionModel(
+          fromWalletId: data['walletId'],
+          toWalletId: data['walletId'],
+          transactionId: data['transactionId'],
+          fromWalletBalance: null,
+          amount: data['balance'],
+          transactionType: data['transactionType'],
+          timestamp: DateTime.parse(data['transactionTimestamp']),
+          note: '',
+        );
 
         emit(
           AddFundToWalletSuccess(
+            walletTransactionModel: walletTransaction,
             wallets: state.wallets,
           ),
         );

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 
+import '../../../../data/models/wallet_transaction_model.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
@@ -77,7 +79,19 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
         minVerticalPadding: 0,
         onTap: () {
-          //
+          showWalletReceipt(
+            context,
+            WalletTransactionModel(
+              amount: widget.walletTransaction.amount ?? 0,
+              note: widget.walletTransaction.note,
+              fromWalletBalance: widget.walletTransaction.convertedAmount,
+              fromWalletId: widget.walletTransaction.fromWallet?.walletId ?? 0,
+              timestamp: widget.walletTransaction.timestamp,
+              toWalletId: widget.walletTransaction.toWallet?.walletId,
+              transactionId: widget.walletTransaction.transactionId,
+              transactionType: widget.walletTransaction.transactionType,
+            ),
+          );
         },
         leading: Container(
           width: 34,

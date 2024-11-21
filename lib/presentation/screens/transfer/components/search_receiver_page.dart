@@ -204,7 +204,11 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
             }
           },
           border: InputBorder.none,
-          hintText: '',
+          hintText: 'Search by @username, name or phone number',
+          hintTextStyle: TextStyle(
+            fontSize: 12,
+            color: ColorName.grey.shade300,
+          ),
           prefix: SvgPicture.asset(
             Assets.images.svgs.search,
             width: 10,

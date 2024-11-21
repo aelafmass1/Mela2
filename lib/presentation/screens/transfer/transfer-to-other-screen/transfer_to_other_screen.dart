@@ -17,6 +17,7 @@ import '../../../../bloc/check-details-bloc/check_details_bloc.dart';
 import '../../../../bloc/contact/contact_bloc.dart';
 import '../../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
+import '../../../../bloc/wallet_recent_transaction/wallet_recent_transaction_bloc.dart';
 import '../../../../core/utils/show_change_wallet_modal.dart';
 import '../../../../core/utils/show_snackbar.dart';
 import '../../../../core/utils/show_wallet_receipt.dart';
@@ -53,6 +54,8 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
 
   ContactStatusModel? selectedContact;
   ContactStatusModel? previousSelectedContact;
+
+  bool isEmpty = false;
 
   final _formKey = GlobalKey<FormState>();
   // int transferToWalletId = -1;
@@ -119,6 +122,14 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
         });
       }
     }
+    final walletRecent = context.read<WalletRecentTransactionBloc>().state;
+    if (walletRecent is WalletRecentTransactionSuccess) {
+      if (walletRecent.transactions.isEmpty) {
+        context.read<WalletRecentTransactionBloc>().add(
+              FetchRecentTransaction(),
+            );
+      }
+    }
     super.initState();
   }
 
@@ -173,6 +184,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
             child: SingleChildScrollView(
               controller: scrollController,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSearchButton(),
                   _buildRecentUsers(),
@@ -233,11 +245,18 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               child: BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
                 listener: (context, state) {
                   if (state is MoneyTransferOwnWalletSuccess) {
+                    context.pop();
+                    context.read<WalletBloc>().add(FetchWallets());
+
                     showWalletReceipt(
                       context,
                       state.walletTransactionModel!,
                     );
                   } else if (state is MoneyTransferUnregisteredUserSuccess) {
+                    context.pop();
+
+                    context.read<WalletBloc>().add(FetchWallets());
+
                     showWalletReceipt(
                       context,
                       state.walletTransactionModel!,
@@ -395,25 +414,83 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  ...List.generate(
-                      8,
-                      (index) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage:
-                                      Assets.images.profileImage.provider(),
+                  BlocConsumer<WalletRecentTransactionBloc,
+                      WalletRecentTransactionState>(
+                    listener: (context, state) {
+                      if (state is WalletRecentTransactionSuccess) {
+                        if (state.transactions.isEmpty) {
+                          setState(() {
+                            isEmpty = true;
+                          });
+                        }
+                      }
+                    },
+                    builder: (context, state) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (state is WalletRecentTransactionLoading)
+                            ...List.generate(
+                                6,
+                                (index) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10),
+                                      child: Column(
+                                        children: [
+                                          CustomShimmer(
+                                            width: 40,
+                                            height: 40,
+                                            borderRadius:
+                                                BorderRadius.circular(100),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          const CustomShimmer(
+                                            width: 30,
+                                            height: 5,
+                                          ),
+                                          const SizedBox(height: 1),
+                                          const CustomShimmer(
+                                            width: 30,
+                                            height: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                          else if (state is WalletRecentTransactionSuccess)
+                            for (int index = 0;
+                                index < state.transactions.length;
+                                index++)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 5),
+                                    CircleAvatar(
+                                      backgroundImage:
+                                          Assets.images.profileImage.provider(),
+                                    ),
+                                    TextWidget(
+                                      text: state.transactions[index].holder
+                                              ?.firstName ??
+                                          '',
+                                      fontSize: 8,
+                                      weight: FontWeight.w400,
+                                      color: ColorName.grey,
+                                    ),
+                                    TextWidget(
+                                      text:
+                                          '${state.transactions[index].balance ?? '---'}',
+                                      fontSize: 8,
+                                      weight: FontWeight.w700,
+                                    )
+                                  ],
                                 ),
-                                const TextWidget(
-                                  text: 'Beza',
-                                  fontSize: 10,
-                                  weight: FontWeight.w400,
-                                  color: ColorName.grey,
-                                ),
-                              ],
-                            ),
-                          ))
+                              )
+                        ],
+                      );
+                    },
+                  )
                 ],
               ),
             ),
