@@ -13,7 +13,6 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -193,8 +192,10 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                 final name = contact.displayName.toLowerCase();
                 final phoneNumber = contact.phones.first.number.toLowerCase();
                 final searchTextLower = text.toLowerCase();
-                return name.contains(searchTextLower) ||
-                    phoneNumber.contains(searchTextLower);
+                return name.contains(searchTextLower.replaceAll(" ", '')) ||
+                    phoneNumber
+                        .replaceAll(" ", "")
+                        .contains(searchTextLower.replaceAll(" ", ""));
               }).toList();
               setState(() {
                 isSearching = true;

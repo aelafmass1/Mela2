@@ -65,6 +65,11 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
         setState(() {
           isValid = true;
         });
+        context.read<AuthBloc>().add(
+              LoginWithPincode(
+                pincode: [pin1, pin2, pin3, pin4, pin5, pin6].join(),
+              ),
+            );
       }
 
       return [pin1, pin2, pin3, pin4, pin5, pin6];
@@ -112,14 +117,6 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
       } else {
         pin6Node.unfocus();
       }
-    }
-    if (isValid) {
-      final pins = getAllPins();
-      context.read<AuthBloc>().add(
-            LoginWithPincode(
-              pincode: pins.join(),
-            ),
-          );
     }
 
     getAllPins();

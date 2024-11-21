@@ -180,11 +180,24 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     }
   }
 
+  _selectDefault() {
+    final wallets = context.read<WalletBloc>().state.wallets;
+    final filteredWallets = wallets.where((w) => w.currency.code == "USD");
+    if (wallets.isNotEmpty) {
+      if (filteredWallets.isEmpty) {
+        selectedWalletModel = wallets.first;
+      } else {
+        selectedWalletModel = filteredWallets.first;
+      }
+    }
+  }
+
   @override
   void initState() {
     context.read<BankFeeBloc>().add(FetchBankFee());
     context.read<WalletCurrencyBloc>().add(FetchWalletCurrency());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
+    _selectDefault();
 
     _streamEvent = PlaidLink.onEvent.listen(_onEvent);
     _streamExit = PlaidLink.onExit.listen(_onExit);
@@ -615,6 +628,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               builder: (context, state) {
                 return TextFieldWidget(
                   focusNode: amonutFocus,
+                  //
                   onChanged: (p0) {
                     if (p0.isNotEmpty) {
                       setState(() {});
@@ -641,60 +655,62 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                   prefixText: '\$',
                   borderRadius: BorderRadius.circular(24),
                   controller: amountController,
-                  suffix: Container(
-                    margin: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
-                    width: 102,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9F9F9),
-                      borderRadius: BorderRadius.circular(
-                        30,
+                  suffix: GestureDetector(
+                    onTap: () async {
+                      final selectedWallet = await showChangeWalletModal(
+                        context: context,
+                        selectedWalletId: selectedWalletModel?.walletId,
+                      );
+                      if (selectedWallet != null) {
+                        setState(() {
+                          selectedWalletModel = selectedWallet;
+                        });
+                      }
+                    },
+                    child: Container(
+                      margin:
+                          const EdgeInsets.only(right: 3, top: 3, bottom: 3),
+                      width: 102,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9F9F9),
+                        borderRadius: BorderRadius.circular(
+                          30,
+                        ),
                       ),
-                    ),
-                    child: state.wallets.isNotEmpty
-                        ? DropdownButton(
-                            underline: const SizedBox.shrink(),
-                            value: selectedCurrency,
-                            items: [
-                              for (var currency
-                                  in state.wallets.map((w) => w.currency.code))
-                                DropdownMenuItem(
-                                  value: currency.toLowerCase(),
-                                  alignment: Alignment.center,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 14,
-                                        height: 14,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Image.asset(
-                                          'icons/currency/${currency.toLowerCase()}.png',
-                                          fit: BoxFit.cover,
-                                          package: 'currency_icons',
-                                        ),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      TextWidget(
-                                        text: currency,
-                                        fontSize: 12,
-                                        weight: FontWeight.w700,
-                                      ),
-                                    ],
+                      child: state.wallets.isNotEmpty
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
                                   ),
+                                  child: Image.asset(
+                                    'icons/currency/${selectedWalletModel?.currency.code.toLowerCase() ?? 'usd'}.png',
+                                    fit: BoxFit.cover,
+                                    package: 'currency_icons',
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                TextWidget(
+                                  text:
+                                      selectedWalletModel?.currency.code ?? '',
+                                  fontSize: 12,
+                                  weight: FontWeight.w700,
+                                ),
+                                const SizedBox(width: 5),
+                                const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 18,
                                 )
-                            ],
-                            onChanged: (value) {
-                              if (value is String?) {
-                                setState(() {
-                                  selectedCurrency = value ?? 'usd';
-                                });
-                              }
-                            })
-                        : const SizedBox.shrink(),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ),
                 );
               },
@@ -787,8 +803,10 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                   ],
                 ),
                 onPressed: () async {
-                  final selectedWallet =
-                      await showChangeWalletModal(context: context);
+                  final selectedWallet = await showChangeWalletModal(
+                    context: context,
+                    selectedWalletId: selectedWalletModel?.walletId,
+                  );
                   if (selectedWallet != null) {
                     setState(() {
                       selectedWalletModel = selectedWallet;

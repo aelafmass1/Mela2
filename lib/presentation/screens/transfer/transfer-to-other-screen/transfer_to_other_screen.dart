@@ -107,9 +107,17 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
   @override
   void initState() {
     final wallets = context.read<WalletBloc>().state.wallets;
-
     if (wallets.isNotEmpty) {
-      transferFromWalletModel = wallets.first;
+      final w = wallets.where((w) => w.currency.code == "USD");
+      if (w.isEmpty) {
+        setState(() {
+          transferFromWalletModel = wallets.first;
+        });
+      } else {
+        setState(() {
+          transferFromWalletModel = w.first;
+        });
+      }
     }
     super.initState();
   }
@@ -183,7 +191,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               onPressed: selectedContact == null
                   ? null
                   : () {
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState?.validate() == true) {
                         if (widget.isFromRequest) {
                           showQrGenerator(
                             context: context,
@@ -264,8 +272,10 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
           ),
           InkWell(
             onTap: () async {
-              final selectedWallet =
-                  await showChangeWalletModal(context: context);
+              final selectedWallet = await showChangeWalletModal(
+                context: context,
+                selectedWalletId: transferFromWalletModel?.walletId,
+              );
               if (selectedWallet != null) {
                 setState(() {
                   transferFromWalletModel = selectedWallet;
@@ -658,6 +668,8 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                             onTap: () async {
                               final wallet = await showChangeWalletModal(
                                 context: context,
+                                selectedWalletId:
+                                    transferFromWalletModel?.walletId,
                               );
 
                               if (wallet != null) {
@@ -756,31 +768,47 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                       suffix: (transferToWalletModel != null)
                           ? GestureDetector(
                               onTap: () async {
-                                final wallet = await showChangeWalletModal(
-                                  context: context,
-                                  wallets: selectedContact?.wallets,
-                                );
+                                if ((selectedContact?.wallets?.length ?? 0) >
+                                    1) {
+                                  WalletModel? wallet;
+                                  if (transferToWalletModel == null) {
+                                    wallet = await showChangeWalletModal(
+                                      context: context,
+                                      wallets: selectedContact?.wallets,
+                                      selectedWalletId: selectedContact
+                                          ?.wallets?.first.walletId,
+                                    );
+                                  } else {
+                                    wallet = await showChangeWalletModal(
+                                      context: context,
+                                      wallets: selectedContact?.wallets,
+                                      selectedWalletId:
+                                          transferToWalletModel?.walletId,
+                                    );
+                                  }
 
-                                if (wallet != null) {
-                                  setState(() {
-                                    transferToWalletModel = wallet;
-                                  });
-                                  context
-                                      .read<TransferRateBloc>()
-                                      .add(FetchTransferRate(
-                                        fromWalletId:
-                                            transferFromWalletModel!.walletId,
-                                        toWalletId:
-                                            transferToWalletModel!.walletId,
-                                      ));
-                                  context.read<CheckDetailsBloc>().add(
-                                        FetchTransferFeesEvent(
+                                  if (wallet != null) {
+                                    setState(() {
+                                      transferToWalletModel = wallet;
+                                    });
+                                    context
+                                        .read<TransferRateBloc>()
+                                        .add(FetchTransferRate(
                                           fromWalletId:
                                               transferFromWalletModel!.walletId,
                                           toWalletId:
                                               transferToWalletModel!.walletId,
-                                        ),
-                                      );
+                                        ));
+                                    context.read<CheckDetailsBloc>().add(
+                                          FetchTransferFeesEvent(
+                                            fromWalletId:
+                                                transferFromWalletModel!
+                                                    .walletId,
+                                            toWalletId:
+                                                transferToWalletModel!.walletId,
+                                          ),
+                                        );
+                                  }
                                 }
                               },
                               child: Container(
