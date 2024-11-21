@@ -203,19 +203,14 @@ class _LastTransactionState extends State<LastTransaction> {
                           ),
                         );
                       } else {
-                        return Column(children: [
-                          for (int index = 0;
-                              index < state.walletTransactions.length;
-                              index++)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var transaction in selectedWallets)
-                                  HomeTransactionTile(
-                                      walletTransaction: transaction),
-                              ],
-                            ),
-                        ]);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var transaction in selectedWallets)
+                              HomeTransactionTile(
+                                  walletTransaction: transaction),
+                          ],
+                        );
                       }
                     }
                     return const SizedBox();
