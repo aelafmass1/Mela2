@@ -20,12 +20,6 @@ class _RecentMembersState extends State<RecentMembers> {
   bool isEmpty = false;
 
   @override
-  void initState() {
-    context.read<WalletRecentTransactionBloc>().add(FetchRecentTransaction());
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -112,11 +106,6 @@ class _RecentMembersState extends State<RecentMembers> {
                                               width: 30,
                                               height: 5,
                                             ),
-                                            const SizedBox(height: 1),
-                                            const CustomShimmer(
-                                              width: 30,
-                                              height: 5,
-                                            ),
                                           ],
                                         ),
                                       ))
@@ -129,7 +118,7 @@ class _RecentMembersState extends State<RecentMembers> {
                                       horizontal: 10),
                                   child: Column(
                                     children: [
-                                      const SizedBox(height: 5),
+                                      const SizedBox(height: 15),
                                       CircleAvatar(
                                         backgroundImage: Assets
                                             .images.profileImage
@@ -145,7 +134,7 @@ class _RecentMembersState extends State<RecentMembers> {
                                       ),
                                       TextWidget(
                                         text:
-                                            '${state.transactions[index].balance ?? '---'}',
+                                            '${state.transactions[index].balance ?? ''}',
                                         fontSize: 8,
                                         weight: FontWeight.w700,
                                       )

@@ -472,8 +472,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                 index < state.transactions.length;
                                 index++)
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                                padding: const EdgeInsets.only(right: 20),
                                 child: Column(
                                   children: [
                                     const SizedBox(height: 5),
@@ -491,7 +490,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                     ),
                                     TextWidget(
                                       text:
-                                          '${state.transactions[index].balance ?? '---'}',
+                                          '${state.transactions[index].balance ?? ''}',
                                       fontSize: 8,
                                       weight: FontWeight.w700,
                                     )
@@ -755,7 +754,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
+                      LengthLimitingTextInputFormatter(6),
                     ],
                     validator: (text) {
                       if (text?.isEmpty == true) {
@@ -1136,8 +1135,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
           Column(
             children: [
               _buildFeeRow(
-                label: fee.label ?? '---',
-                amount: '\$${fee.amount ?? '---'}',
+                fee: fee,
               ),
               Visibility(
                   visible: fees.last.id != fee.id, child: const Divider()),
@@ -1157,8 +1155,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
   }
 
   Widget _buildFeeRow({
-    required String label,
-    required String amount,
+    required TransferFeesModel fee,
     bool isTotal = false,
   }) {
     return Padding(
@@ -1166,15 +1163,30 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          TextWidget(
-            text: label,
-            color: isTotal ? null : ColorName.grey,
-            fontSize: isTotal ? 16 : 14,
+          Row(
+            children: [
+              TextWidget(
+                text: fee.label ?? '',
+                color: isTotal ? null : ColorName.grey,
+                fontSize: isTotal ? 16 : 14,
+              ),
+              Visibility(
+                visible: fee.type == 'PERCENTAGE',
+                child: TextWidget(
+                  text:
+                      '  ${NumberFormat('##,###.##').format(fee.amount ?? 0)}%',
+                  fontSize: isTotal ? 16 : 14,
+                  weight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
           Row(
             children: [
               TextWidget(
-                text: amount,
+                text: fee.type == 'PERCENTAGE'
+                    ? "\$${((fee.amount ?? 0) / 100) * (double.tryParse(amountController.text) ?? 0)}"
+                    : "\$${NumberFormat('##,###.##').format((fee.amount ?? 0))}",
                 weight: FontWeight.w700,
                 fontSize: 14,
               ),
