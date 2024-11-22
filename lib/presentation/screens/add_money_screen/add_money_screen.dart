@@ -638,12 +638,14 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                   //
                   onChanged: (p0) {
                     if (p0.isNotEmpty) {
-                      setState(() {});
+                      if (mounted) {
+                        setState(() {});
+                      }
                     }
                   },
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
+                    LengthLimitingTextInputFormatter(6),
                   ],
                   validator: (text) {
                     if (text?.isEmpty == true) {

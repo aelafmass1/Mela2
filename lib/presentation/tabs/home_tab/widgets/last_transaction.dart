@@ -27,12 +27,6 @@ class _LastTransactionState extends State<LastTransaction> {
   bool showThisPage = true;
 
   @override
-  void initState() {
-    context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Visibility(
       visible: showThisPage,
@@ -124,8 +118,9 @@ class _LastTransactionState extends State<LastTransaction> {
                                   isDense: true,
                                   underline: const SizedBox(),
                                   padding:
-                                      const EdgeInsets.symmetric(horizontal: 3),
+                                      const EdgeInsets.symmetric(horizontal: 1),
                                   elevation: 0,
+                                  alignment: Alignment.center,
                                   value: selectedDayFilter,
                                   icon: const Icon(
                                       Icons.keyboard_arrow_down_rounded),
@@ -134,6 +129,7 @@ class _LastTransactionState extends State<LastTransaction> {
                                         in state.walletTransactions.keys)
                                       DropdownMenuItem(
                                         value: entery,
+                                        alignment: Alignment.center,
                                         child: TextWidget(
                                           text: DateFormat('yyyy-MM-dd')
                                                       .format(DateTime.now()) ==
@@ -178,7 +174,7 @@ class _LastTransactionState extends State<LastTransaction> {
                 const SizedBox(height: 15),
                 BlocBuilder<WalletTransactionBloc, WalletTransactionState>(
                   builder: (context, state) {
-                    if (state is TransactionLoading) {
+                    if (state is WalletTransactionLoading) {
                       return Column(
                         children: [
                           const SizedBox(height: 10),
@@ -203,19 +199,14 @@ class _LastTransactionState extends State<LastTransaction> {
                           ),
                         );
                       } else {
-                        return Column(children: [
-                          for (int index = 0;
-                              index < state.walletTransactions.length;
-                              index++)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var transaction in selectedWallets)
-                                  HomeTransactionTile(
-                                      walletTransaction: transaction),
-                              ],
-                            ),
-                        ]);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var transaction in selectedWallets)
+                              HomeTransactionTile(
+                                  walletTransaction: transaction),
+                          ],
+                        );
                       }
                     }
                     return const SizedBox();
