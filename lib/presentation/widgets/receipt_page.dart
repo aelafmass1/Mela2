@@ -93,7 +93,8 @@ class ReceiptPage extends StatelessWidget {
                             ),
                             _buildTransactionDetail(
                               key: 'From',
-                              value: '**** **** 0011',
+                              value:
+                                  '**** **** ${receiverInfo.lastDigit ?? ''}',
                             ),
                             _buildTransactionDetail(
                               key: 'Recipient Amount',
@@ -101,37 +102,37 @@ class ReceiptPage extends StatelessWidget {
                             ),
                             _buildTransactionDetail(
                               key: 'Details',
-                              value: 'Equb Payment',
+                              value: 'Local Bank Transfer',
                             ),
                             _buildTransactionDetail(
                               key: 'Transaction ID',
                               value: '00000111100',
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 20, top: 10),
-                              child: Row(
-                                children: [
-                                  Assets.images.masteredCard.image(
-                                    fit: BoxFit.cover,
-                                  ),
-                                  const SizedBox(width: 15),
-                                  const Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextWidget(
-                                        text: 'Credit Card',
-                                        fontSize: 16,
-                                      ),
-                                      TextWidget(
-                                        text: 'Mastercard ending   ** 0011',
-                                        fontSize: 10,
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            )
+                            // Padding(
+                            //   padding: const EdgeInsets.only(left: 20, top: 10),
+                            //   child: Row(
+                            //     children: [
+                            //       Assets.images.masteredCard.image(
+                            //         fit: BoxFit.cover,
+                            //       ),
+                            //       const SizedBox(width: 15),
+                            //       const Column(
+                            //         crossAxisAlignment:
+                            //             CrossAxisAlignment.start,
+                            //         children: [
+                            //           TextWidget(
+                            //             text: 'Credit Card',
+                            //             fontSize: 16,
+                            //           ),
+                            //           TextWidget(
+                            //             text: 'Mastercard ending   ** 0011',
+                            //             fontSize: 10,
+                            //           ),
+                            //         ],
+                            //       )
+                            //     ],
+                            //   ),
+                            // )
                           ],
                         ),
                       ))

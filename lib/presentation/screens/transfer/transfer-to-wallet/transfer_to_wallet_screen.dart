@@ -17,6 +17,7 @@ import '../../../../bloc/check-details-bloc/check_details_bloc.dart';
 import '../../../../bloc/money_transfer/money_transfer_bloc.dart';
 import '../../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
+import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../../core/utils/show_change_wallet_modal.dart';
 import '../../../../data/models/wallet_model.dart';
 import '../../../../gen/assets.gen.dart';
@@ -140,6 +141,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                     context.pop();
 
                     context.read<WalletBloc>().add(FetchWallets());
+                    context
+                        .read<WalletTransactionBloc>()
+                        .add(FetchWalletTransaction());
 
                     showWalletReceipt(
                       context,

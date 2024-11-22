@@ -110,7 +110,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
           children: [
             TextWidget(
               text: DateFormat('hh:mm a')
-                  .format(widget.walletTransaction.timestamp),
+                  .format(widget.walletTransaction.timestamp.toLocal()),
               fontSize: 10,
               weight: FontWeight.w400,
               color: ColorName.grey,

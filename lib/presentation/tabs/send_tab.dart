@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -26,10 +26,10 @@ import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/screens/transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/payment_card_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -55,10 +55,7 @@ class _SentTabState extends State<SentTab> {
   String selectedBanks = '';
 
   double sliderWidth = 0;
-  double contactListHeight = 250;
 
-  bool isSearching = false;
-  bool showBorder = true;
   bool isPermissionDenied = false;
   bool isScrolledDown = false;
 
@@ -68,9 +65,8 @@ class _SentTabState extends State<SentTab> {
   String selectedBank = '';
   String selectedPaymentCardId = '';
 
-  List<Contact> contacts = [];
-  List<Contact> filteredContacts = [];
   List<PaymentCardModel> paymentCards = [];
+  String? selectedPhoneNumber;
 
   final scrollController = ScrollController();
 
@@ -78,8 +74,6 @@ class _SentTabState extends State<SentTab> {
 
   final _exchangeRateFormKey = GlobalKey<FormState>();
   final _recipientSelectionFormKey = GlobalKey<FormState>();
-
-  Contact? selectedContact;
 
   double percentageFee = 0;
 
@@ -147,19 +141,15 @@ class _SentTabState extends State<SentTab> {
     // if (await isPermissionAsked() == false) {
     // Permission has not been asked before
     if (await FlutterContacts.requestPermission(readonly: true)) {
-      List<Contact> c = await FlutterContacts.getContacts(withProperties: true);
       setState(() {
-        contacts = c;
         isPermissionDenied = false;
       });
     } else {
       // Permission has been asked before
-      if (contacts.isEmpty) {
-        // Permission was denied
-        setState(() {
-          isPermissionDenied = true;
-        });
-      }
+      // Permission was denied
+      setState(() {
+        isPermissionDenied = true;
+      });
       checkContactPermission();
     }
   }
@@ -230,14 +220,9 @@ class _SentTabState extends State<SentTab> {
       index = 0;
       selectedBanks = '';
       sliderWidth = 0;
-      contactListHeight = 250;
-      isSearching = false;
-      showBorder = true;
       selectedPaymentMethodIndex = 1;
       whoPayFee = 'SENDER';
       selectedBank = '';
-      contacts = [];
-      filteredContacts = [];
       searchContactController.text = '';
       receiverName.text = '';
       usdController.text = '';
@@ -929,204 +914,57 @@ class _SentTabState extends State<SentTab> {
                       hintText: 'Enter phone number',
                       controller: phoneNumberController,
                     ),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      onEnd: () {
-                        if (contactListHeight != 250) {
-                          setState(() {
-                            showBorder = false;
-                          });
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'receiver is selected';
+                        }
+                        return null;
+                      },
+                      onTapOutside: (event) {
+                        if (Platform.isIOS) {
+                          Focus.of(context).unfocus();
                         }
                       },
-                      height: contactListHeight,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          border: showBorder
-                              ? Border.all(
-                                  color: ColorName.borderColor,
-                                )
-                              : null),
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'receiver is selected';
-                              }
-                              return null;
-                            },
-                            onChanged: (text) {
-                              if (text.isEmpty) {
-                                setState(() {
-                                  isSearching = false;
-                                });
-                              } else {
-                                setState(() {
-                                  isSearching = true;
-                                  filteredContacts = contacts
-                                      .where((contact) => contact.displayName
-                                          .toLowerCase()
-                                          .contains(searchContactController.text
-                                              .toLowerCase()))
-                                      .toList();
-                                });
-                              }
-                              setState(() {
-                                contactListHeight = 250;
-                                showBorder = true;
-                              });
-                            },
-                            controller: searchContactController,
-                            decoration: InputDecoration(
-                              suffixIcon:
-                                  searchContactController.text.isNotEmpty
-                                      ? IconButton(
-                                          style: IconButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                          ),
-                                          icon: const Icon(
-                                            Icons.close,
-                                            size: 20,
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              searchContactController.text = '';
-                                              isSearching = false;
-                                              contactListHeight = 250;
-                                              showBorder = true;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                              prefixIcon: const Icon(BoxIcons.bx_search),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.black45),
-                                  borderRadius: BorderRadius.circular(40)),
-                              border: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.black45),
-                                  borderRadius: BorderRadius.circular(40)),
-                            ),
-                          ),
-                          Visibility(
-                            visible: showBorder,
-                            child: Expanded(
-                              child: isSearching
-                                  ? ListView.builder(
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          onTap: () {
-                                            searchContactController.text =
-                                                filteredContacts[index]
-                                                    .displayName;
-                                            setState(() {
-                                              selectedContact =
-                                                  filteredContacts[index];
-                                              contactListHeight = 58;
-                                            });
-                                          },
-                                          leading: contacts[index].photo == null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 36,
-                                                    height: 36,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    alignment: Alignment.center,
-                                                    child: TextWidget(
-                                                      text: contacts[index]
-                                                          .displayName[0],
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Image.memory(
-                                                    contacts[index].photo!,
-                                                    width: 36,
-                                                    height: 36,
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                          title: TextWidget(
-                                            text: filteredContacts[index]
-                                                .displayName,
-                                            fontSize: 13,
-                                          ),
-                                          subtitle: TextWidget(
-                                            text: filteredContacts[index]
-                                                .phones
-                                                .first
-                                                .number,
-                                            fontSize: 13,
-                                          ),
-                                        );
-                                      },
-                                      itemCount: filteredContacts.length,
-                                    )
-                                  : ListView.builder(
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          onTap: () {
-                                            searchContactController.text =
-                                                contacts[index].displayName;
-                                            setState(() {
-                                              selectedContact = contacts[index];
-                                              contactListHeight = 58;
-                                            });
-                                          },
-                                          leading: contacts[index].photo == null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 36,
-                                                    height: 36,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    alignment: Alignment.center,
-                                                    child: TextWidget(
-                                                      text: contacts[index]
-                                                          .displayName[0],
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Image.memory(
-                                                    contacts[index].photo!,
-                                                    width: 36,
-                                                    height: 36,
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                          title: TextWidget(
-                                            text: contacts[index].displayName,
-                                            fontSize: 13,
-                                          ),
-                                          subtitle: TextWidget(
-                                            text: contacts[index]
-                                                .phones
-                                                .first
-                                                .number,
-                                            fontSize: 13,
-                                          ),
-                                        );
-                                      },
-                                      itemCount: contacts.length,
-                                    ),
-                            ),
-                          )
-                        ],
+                      onTap: () async {
+                        final selectedContact =
+                            await showMoneyReceiverSelection(context);
+                        searchContactController.text =
+                            selectedContact?.contactName ?? '';
+
+                        setState(() {
+                          selectedPhoneNumber = selectedContact
+                              ?.contactPhoneNumber
+                              ?.replaceAll(" ", "");
+                        });
+                      },
+                      readOnly: true,
+                      controller: searchContactController,
+                      decoration: InputDecoration(
+                        suffixIcon: searchContactController.text.isNotEmpty
+                            ? IconButton(
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                ),
+                                icon: const Icon(
+                                  Icons.close,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    searchContactController.text = '';
+                                    selectedPhoneNumber = null;
+                                  });
+                                },
+                              )
+                            : null,
+                        prefixIcon: const Icon(BoxIcons.bx_search),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.black45),
+                            borderRadius: BorderRadius.circular(40)),
+                        border: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.black45),
+                            borderRadius: BorderRadius.circular(40)),
                       ),
                     ),
                   ),
@@ -1227,6 +1065,11 @@ class _SentTabState extends State<SentTab> {
                       }
                       return null;
                     },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 17),
@@ -1255,6 +1098,11 @@ class _SentTabState extends State<SentTab> {
                         return 'bank account is empty';
                       }
                       return null;
+                    },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
@@ -1700,9 +1548,18 @@ class _SentTabState extends State<SentTab> {
                     description: state.reason,
                   );
                 } else if (state is MoneyTransferSuccess) {
+                  String? lastDigit;
+                  final state = context.read<PaymentCardBloc>().state;
+                  if (state is PaymentCardSuccess) {
+                    final card = state.paymentCards[selectedPaymentMethodIndex];
+
+                    lastDigit = card.last4Digits;
+                  }
                   context.pushNamed(
                     RouteName.receipt,
-                    extra: receiverInfo,
+                    extra: receiverInfo?.copyWith(
+                      lastDigit: lastDigit,
+                    ),
                   );
 
                   clearSendInfo();
@@ -1740,8 +1597,8 @@ class _SentTabState extends State<SentTab> {
                               receiverInfo = ReceiverInfo(
                                 receiverName: receiverName.text,
                                 receiverPhoneNumber: isPermissionDenied
-                                    ? phoneNumberController.text
-                                    : selectedContact!.phones.first.number,
+                                    ? phoneNumberController.text.trim()
+                                    : selectedPhoneNumber?.trim() ?? '',
                                 receiverBankName: selectedBank,
                                 receiverAccountNumber:
                                     bankAcocuntController.text,
@@ -2034,6 +1891,11 @@ class _SentTabState extends State<SentTab> {
                 }
                 return null;
               },
+              onTapOutside: (event) {
+                if (Platform.isIOS) {
+                  Focus.of(context).unfocus();
+                }
+              },
               onChanged: (value) {
                 try {
                   final money = double.parse(value);
@@ -2145,6 +2007,11 @@ class _SentTabState extends State<SentTab> {
               //   }
               //   return null;
               // },
+              onTapOutside: (event) {
+                if (Platform.isIOS) {
+                  Focus.of(context).unfocus();
+                }
+              },
               onChanged: (value) {
                 try {
                   final money = double.parse(value);

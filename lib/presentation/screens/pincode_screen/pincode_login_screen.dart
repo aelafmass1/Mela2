@@ -157,6 +157,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
 
   @override
   void initState() {
+    deleteToken();
     pin1Node.requestFocus();
     super.initState();
   }
@@ -324,7 +325,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   // Build the custom numeric keypad
   Widget _buildKeypad() {
     return Padding(
-      padding: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.only(top: 40),
       child: Column(
         children: [
           Row(
@@ -404,19 +405,24 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   // Build each button of the keypad
   Widget _buildKey(String value) {
     return SizedBox(
-      width: 100,
-      height: 60,
-      child: ButtonWidget(
-        elevation: 0,
-        horizontalPadding: 0,
-        topPadding: 0,
-        verticalPadding: 0,
-        color: Colors.grey[100],
-        child: TextWidget(
-          text: value,
-          fontSize: 25,
+      width: 105,
+      height: 65,
+      child: GestureDetector(
+        onTap: () => _onKeyPressed(value),
+        onVerticalDragStart: (e) => _onKeyPressed(value),
+        onHorizontalDragStart: (e) => _onKeyPressed(value),
+        child: ButtonWidget(
+          elevation: 0,
+          horizontalPadding: 0,
+          topPadding: 0,
+          verticalPadding: 0,
+          color: Colors.grey[100],
+          onPressed: null,
+          child: TextWidget(
+            text: value,
+            fontSize: 25,
+          ),
         ),
-        onPressed: () => _onKeyPressed(value),
       ),
     );
   }

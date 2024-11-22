@@ -69,6 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
         });
       }
     });
+
     super.initState();
   }
 

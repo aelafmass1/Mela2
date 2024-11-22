@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
@@ -38,7 +39,8 @@ import '../../widgets/card_widget.dart';
 import '../../widgets/custom_shimmer.dart';
 
 class AddMoneyScreen extends StatefulWidget {
-  const AddMoneyScreen({super.key});
+  final String selectedWallet;
+  const AddMoneyScreen({super.key, required this.selectedWallet});
 
   @override
   State<AddMoneyScreen> createState() => _AddMoneyScreenState();
@@ -47,7 +49,6 @@ class AddMoneyScreen extends StatefulWidget {
 class _AddMoneyScreenState extends State<AddMoneyScreen> {
   final amountController = TextEditingController();
   ScrollController scrollController = ScrollController();
-  String selectedCurrency = 'usd';
   int selectedAccountIndex = -1;
 
   bool showFee = false;
@@ -183,7 +184,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
   _selectDefault() {
     final wallets = context.read<WalletBloc>().state.wallets;
-    final filteredWallets = wallets.where((w) => w.currency.code == "USD");
+    final filteredWallets =
+        wallets.where((w) => w.currency.code == widget.selectedWallet);
     if (wallets.isNotEmpty) {
       if (filteredWallets.isEmpty) {
         selectedWalletModel = wallets.first;
@@ -430,13 +432,22 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           if (state is AddFundToWalletFail) {
             showSnackbar(context, description: state.reason);
           } else if (state is AddFundToWalletSuccess) {
+            amountController.clear();
+            setState(() {
+              showFee = false;
+              selectedAccountIndex = -1;
+            });
+
             context.pop();
             if (mounted) {
-              context.read<WalletBloc>().add(FetchWallets());
               showWalletReceipt(
                 context,
                 state.walletTransactionModel,
               );
+              context.read<WalletBloc>().add(FetchWallets());
+              context
+                  .read<WalletTransactionBloc>()
+                  .add(FetchWalletTransaction());
             }
           }
         }),

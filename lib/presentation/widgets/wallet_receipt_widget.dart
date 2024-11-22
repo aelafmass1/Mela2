@@ -113,7 +113,8 @@ class WalletReceiptWidget extends StatelessWidget {
                               ),
                               _buildTransactionDetail(
                                 key: 'To Wallet ID',
-                                value: '${walletTransactionModel.toWalletId}',
+                                value:
+                                    '${walletTransactionModel.toWalletId ?? ''}',
                               ),
                               _buildTransactionDetail(
                                 key: 'From Wallet ID',
@@ -126,8 +127,11 @@ class WalletReceiptWidget extends StatelessWidget {
                               ),
                               _buildTransactionDetail(
                                 key: 'Remark ',
-                                value:
-                                    '${(walletTransactionModel.note?.length ?? 0) > 20 ? '${walletTransactionModel.note!.substring(0, 20)}...' : walletTransactionModel.note}',
+                                value: (walletTransactionModel.note?.length ??
+                                            0) >
+                                        20
+                                    ? '${walletTransactionModel.note!.substring(0, 20)}...'
+                                    : walletTransactionModel.note ?? '',
                               ),
                             ],
                           ),

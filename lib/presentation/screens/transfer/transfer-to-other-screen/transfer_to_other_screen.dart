@@ -20,6 +20,7 @@ import '../../../../bloc/contact/contact_bloc.dart';
 import '../../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
 import '../../../../bloc/wallet_recent_transaction/wallet_recent_transaction_bloc.dart';
+import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../../core/utils/show_change_wallet_modal.dart';
 import '../../../../core/utils/show_snackbar.dart';
 import '../../../../core/utils/show_wallet_receipt.dart';
@@ -257,21 +258,31 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 listener: (context, state) {
                   if (state is MoneyTransferOwnWalletSuccess) {
                     context.pop();
-                    context.read<WalletBloc>().add(FetchWallets());
+                    if (mounted) {
+                      context.read<WalletBloc>().add(FetchWallets());
+                      context
+                          .read<WalletTransactionBloc>()
+                          .add(FetchWalletTransaction());
 
-                    showWalletReceipt(
-                      context,
-                      state.walletTransactionModel!,
-                    );
+                      showWalletReceipt(
+                        context,
+                        state.walletTransactionModel!,
+                      );
+                    }
                   } else if (state is MoneyTransferUnregisteredUserSuccess) {
                     context.pop();
 
-                    context.read<WalletBloc>().add(FetchWallets());
+                    if (mounted) {
+                      context.read<WalletBloc>().add(FetchWallets());
+                      context
+                          .read<WalletTransactionBloc>()
+                          .add(FetchWalletTransaction());
 
-                    showWalletReceipt(
-                      context,
-                      state.walletTransactionModel!,
-                    );
+                      showWalletReceipt(
+                        context,
+                        state.walletTransactionModel!,
+                      );
+                    }
                   } else if (state is MoneyTransferFail) {
                     showSnackbar(
                       context,
