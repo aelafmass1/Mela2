@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
@@ -128,8 +126,6 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
           );
         }
         final wallets = res['successResponse'] as List;
-
-        log(wallets.toString());
 
         emit(
           FetchWalletSuccess(

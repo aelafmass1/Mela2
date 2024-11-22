@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:card_stack_widget/card_stack_widget.dart';
@@ -14,7 +15,8 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../bloc/wallet/wallet_bloc.dart';
 
 class WalletCardsStack extends StatefulWidget {
-  const WalletCardsStack({super.key});
+  final Function(String currencyCode) onTopChange;
+  const WalletCardsStack({super.key, required this.onTopChange});
 
   @override
   State<WalletCardsStack> createState() => _WalletCardsStackState();
@@ -42,9 +44,16 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                 stackHeight = stackHeight + ((state.wallets.length - 1) * 60);
               });
             }
+            if (walletTapped) {
+              setState(() {
+                tappedWallets.clear();
+                tappedWallets = state.wallets;
+              });
+            }
           }
         },
         builder: (context, state) {
+          log("Refreshed ${state.wallets}");
           if (state is FetchWalletsLoading) {
             return Stack(
               children: [
@@ -115,10 +124,13 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                                 tappedWallets.add(w);
                               }
                             }
+
                             setState(() {
                               walletTapped = true;
                               tappedWallets = tappedWallets;
                             });
+                            widget
+                                .onTopChange(tappedWallets.first.currency.code);
                           },
                         ))
                 else
@@ -156,6 +168,8 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                               walletTapped = true;
                               tappedWallets = tappedWallets;
                             });
+                            widget
+                                .onTopChange(tappedWallets.first.currency.code);
                           },
                         ))
               ],

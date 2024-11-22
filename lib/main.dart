@@ -53,10 +53,12 @@ import 'bloc/transfer-rate/transfer_rate_bloc.dart';
 import 'config/routing.dart';
 import 'data/repository/auth_repository.dart';
 import 'data/services/api/api_service.dart';
+import 'data/services/observer/lifecycle_manager.dart';
 
 //main method
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // LifecycleManager().initialize(); // Initialize lifecycle manager
   if (kIsWeb == false) {
     await dotenv.load(fileName: ".env");
 
@@ -276,6 +278,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
       ],
       child: ResponsiveApp(
         builder: (_) => MaterialApp.router(
+          key: navigatorKey,
           debugShowCheckedModeBanner: false,
           routerConfig: goRouting,
           theme: themeData(),

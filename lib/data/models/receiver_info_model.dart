@@ -11,6 +11,9 @@ class ReceiverInfo {
   final DateTime? transactionDate;
   final String? publicToken;
   final String paymentType;
+  final String? lastDigit;
+  final String? details;
+  final String? transactionId;
   ReceiverInfo({
     required this.receiverName,
     required this.receiverPhoneNumber,
@@ -21,6 +24,9 @@ class ReceiverInfo {
     this.transactionDate,
     this.publicToken,
     required this.paymentType,
+    this.details,
+    this.lastDigit,
+    this.transactionId,
   });
 
   ReceiverInfo copyWith({
@@ -33,6 +39,9 @@ class ReceiverInfo {
     DateTime? trasactionDate,
     String? publicToken,
     String? paymentType,
+    final String? lastDigit,
+    final String? details,
+    final String? transactionId,
   }) {
     return ReceiverInfo(
       receiverName: receiverName ?? this.receiverName,
@@ -45,6 +54,9 @@ class ReceiverInfo {
       transactionDate: trasactionDate ?? transactionDate,
       publicToken: publicToken ?? this.publicToken,
       paymentType: paymentType ?? this.paymentType,
+      details: details ?? this.details,
+      lastDigit: lastDigit ?? this.lastDigit,
+      transactionId: transactionId ?? this.transactionId,
     );
   }
 

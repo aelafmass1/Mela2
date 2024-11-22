@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,7 +37,7 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
   final moneyController = TextEditingController();
   String? imageUrl;
   String? displayName;
-
+  String currencyCode = 'USD';
   String getGreeting() {
     DateTime now = DateTime.now();
     int hour = now.hour;
@@ -47,6 +50,8 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
       return 'Good Evening';
     }
   }
+
+  Timer? logoutTimer;
 
   @override
   void initState() {
@@ -85,9 +90,11 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      if (mounted) {
+      logoutTimer = Timer(const Duration(seconds: 30), () {
         context.goNamed(RouteName.loginPincode);
-      }
+      });
+    } else if (state == AppLifecycleState.resumed) {
+      logoutTimer?.cancel();
     }
   }
 
@@ -189,8 +196,16 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  const WalletCardsStack(),
-                  const WalletOptions(),
+                  WalletCardsStack(
+                    onTopChange: (code) {
+                      setState(() {
+                        currencyCode = code;
+                      });
+                    },
+                  ),
+                  WalletOptions(
+                    currencyCode: currencyCode,
+                  ),
                   const RecentMembers(),
                   _buildExchangeRate(),
                   const LastTransaction(),

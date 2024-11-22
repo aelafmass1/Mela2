@@ -250,7 +250,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(LoginWithPincodeFail(reason: res['error']));
         }
         final token = res['successResponse']['jwtToken'];
-        log(token);
 
         storeToken(token);
         emit(LoginWithPincodeSuccess());
@@ -355,8 +354,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         final data = res['successResponse'];
         final token = data['jwtToken'];
-        log(token);
-
         await storeToken(token);
         storeDisplayName('${data['firstName']} ${data['lastName']}');
         storePhoneNumber(event.phoneNumber);

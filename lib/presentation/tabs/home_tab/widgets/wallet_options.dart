@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/core/utils/show_qr_generator.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -10,7 +9,8 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../widgets/transfer_modal_sheet.dart';
 
 class WalletOptions extends StatelessWidget {
-  const WalletOptions({super.key});
+  final String currencyCode;
+  const WalletOptions({super.key, required this.currencyCode});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class WalletOptions extends StatelessWidget {
             iconPath: Assets.images.svgs.addMoney,
             title: 'Add Money',
             onTab: () {
-              context.pushNamed(RouteName.addMoney);
+              context.pushNamed(RouteName.addMoney, extra: currencyCode);
             },
           ),
           _buildOptionButton(
@@ -45,13 +45,13 @@ class WalletOptions extends StatelessWidget {
               );
             },
           ),
-          _buildOptionButton(
-            iconPath: Assets.images.svgs.withdrawLogo,
-            title: 'Withdraw',
-            onTab: () {
-              // TODO
-            },
-          ),
+          // _buildOptionButton(
+          //   iconPath: Assets.images.svgs.withdrawLogo,
+          //   title: 'Withdraw',
+          //   onTab: () {
+          //     // TODO
+          //   },
+          // ),
         ],
       ),
     );

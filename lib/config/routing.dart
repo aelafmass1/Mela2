@@ -35,7 +35,6 @@ import '../presentation/screens/pincode_screen/pincode_screen_deligate.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
 import '../presentation/screens/transfer/transfer-user-search/user_search.dart';
-import '../presentation/widgets/receipt_page_2.dart';
 
 class RouteName {
   static const splash = 'splash_screen';
@@ -77,6 +76,7 @@ class RouteName {
 
 final goRouting = GoRouter(
   initialLocation: '/splash',
+
   // initialLocation: '/transfer_to_wallet_screen',
 
   routes: [
@@ -177,7 +177,9 @@ final goRouting = GoRouter(
         GoRoute(
           path: 'add_money_screen',
           name: RouteName.addMoney,
-          builder: (context, state) => const AddMoneyScreen(),
+          builder: (context, state) => AddMoneyScreen(
+            selectedWallet: state.extra as String,
+          ),
         ),
       ],
     ),
