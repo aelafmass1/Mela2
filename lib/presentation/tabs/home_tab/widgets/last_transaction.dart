@@ -5,10 +5,9 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/home_transaction_tile.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_transaction_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 
-import '../../../../bloc/transaction/transaction_bloc.dart';
 import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../widgets/text_widget.dart';
 
@@ -203,7 +202,7 @@ class _LastTransactionState extends State<LastTransaction> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             for (var transaction in selectedWallets)
-                              HomeTransactionTile(
+                              WalletTransactionTile(
                                   walletTransaction: transaction),
                           ],
                         );

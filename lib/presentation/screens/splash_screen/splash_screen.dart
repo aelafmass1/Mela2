@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -33,7 +35,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     checkStatus();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // WidgetsBinding.instance.removeObserver(this); // Remove the observer
+    super.dispose();
   }
 
   @override

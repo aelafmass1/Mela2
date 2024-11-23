@@ -10,6 +10,7 @@ import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
 import '../../../config/routing.dart';
+import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -120,14 +121,16 @@ class _NewPincodeScreenState extends State<NewPincodeScreen> {
             const SizedBox(height: 20),
             const SizedBox(height: 30),
             BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
+              listener: (context, state) async {
                 if (state is ResetFail) {
                   showSnackbar(
                     context,
                     description: state.reason,
                   );
                 } else if (state is ResetSuccess) {
-                  context.goNamed(RouteName.login);
+                  final token = await getToken();
+                  log(token.toString());
+                  context.goNamed(RouteName.home);
                 }
               },
               builder: (context, state) {

@@ -1,26 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
 import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
+import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 
+import '../../../../config/routing.dart';
 import '../../../../data/models/wallet_transaction_model.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
 
-class HomeTransactionTile extends StatefulWidget {
+class WalletTransactionTile extends StatefulWidget {
   final WalletTransactionDetailModel walletTransaction;
-  const HomeTransactionTile({super.key, required this.walletTransaction});
+  const WalletTransactionTile({super.key, required this.walletTransaction});
 
   @override
-  State<HomeTransactionTile> createState() => _HomeTransactionTileState();
+  State<WalletTransactionTile> createState() => _WalletTransactionTileState();
 }
 
-class _HomeTransactionTileState extends State<HomeTransactionTile> {
+class _WalletTransactionTileState extends State<WalletTransactionTile> {
   List<Contact> contacts = [];
 
   Future<void> _fetchContacts() async {
@@ -79,19 +82,40 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
         minVerticalPadding: 0,
         onTap: () {
-          showWalletReceipt(
-            context,
-            WalletTransactionModel(
-              amount: widget.walletTransaction.amount ?? 0,
-              note: widget.walletTransaction.note,
-              fromWalletBalance: widget.walletTransaction.convertedAmount,
-              fromWalletId: widget.walletTransaction.fromWallet?.walletId ?? 0,
-              timestamp: widget.walletTransaction.timestamp,
-              toWalletId: widget.walletTransaction.toWallet?.walletId,
-              transactionId: widget.walletTransaction.transactionId,
-              transactionType: widget.walletTransaction.transactionType,
-            ),
-          );
+          if (widget.walletTransaction.transactionType == 'REMITTANCE') {
+            final receiverInfo = ReceiverInfo(
+              receiverName: widget.walletTransaction.receiverName ?? '',
+              receiverPhoneNumber:
+                  widget.walletTransaction.receiverPhoneNumber ?? '',
+              receiverBankName: widget.walletTransaction.receiverBank ?? '',
+              receiverAccountNumber:
+                  widget.walletTransaction.receiverAccountNumber ?? '',
+              amount: widget.walletTransaction.amount?.toDouble() ?? 0,
+              paymentType: widget.walletTransaction.transactionType,
+            );
+            context.pushNamed(
+              RouteName.receipt,
+              extra: receiverInfo,
+            );
+          } else {
+            showWalletReceipt(
+              context,
+              WalletTransactionModel(
+                amount: widget.walletTransaction.amount ?? 0,
+                note: widget.walletTransaction.note,
+                fromWalletBalance: widget.walletTransaction.convertedAmount,
+                fromWalletId:
+                    widget.walletTransaction.fromWallet?.walletId ?? 0,
+                timestamp: widget.walletTransaction.timestamp,
+                toWalletId: widget.walletTransaction.toWallet?.walletId,
+                transactionId: widget.walletTransaction.transactionId ?? 0,
+                transactionType: widget.walletTransaction.transactionType,
+                from:
+                    "${widget.walletTransaction.fromWallet?.holder?.firstName} ${widget.walletTransaction.fromWallet?.holder?.lastName}",
+                to: "${widget.walletTransaction.toWallet?.holder?.firstName} ${widget.walletTransaction.toWallet?.holder?.lastName}",
+              ),
+            );
+          }
         },
         leading: Container(
           width: 34,
@@ -145,7 +169,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
                     builder: (context, snapshot) {
                       return TextWidget(
                         text: snapshot.data?.displayName ??
-                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unregistered'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
+                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
                         fontSize: 16,
                         weight: FontWeight.w500,
                       );
@@ -168,7 +192,7 @@ class _HomeTransactionTileState extends State<HomeTransactionTile> {
                   builder: (context, snapshot) {
                     return TextWidget(
                       text: snapshot.data?.displayName ??
-                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? 'Unregistered'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? 'User'}",
+                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
                       fontSize: 16,
                       weight: FontWeight.w500,
                     );

@@ -18,7 +18,7 @@ class WalletOptions extends StatelessWidget {
       height: 70,
       margin: const EdgeInsets.symmetric(horizontal: 15),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildOptionButton(
             iconPath: Assets.images.svgs.addMoney,

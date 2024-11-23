@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/data/services/observer/lifecycle_manager.dart';
 import 'package:transaction_mobile_app/presentation/screens/add_money_screen/add_money_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page_dynamic.dart';
@@ -74,217 +77,229 @@ class RouteName {
   static const pincodeDeligate = 'pincode_deligate';
 }
 
-final goRouting = GoRouter(
-  initialLocation: '/splash',
+class MyAppRouter {
+  static final MyAppRouter instance = MyAppRouter._internal();
 
-  // initialLocation: '/transfer_to_wallet_screen',
+  factory MyAppRouter() => instance;
 
-  routes: [
-    GoRoute(
-      path: '/welcome',
-      name: RouteName.welcome,
-      builder: (context, state) => const WelcomeScreen(),
-    ),
-    GoRoute(
-      path: '/splash',
-      name: RouteName.splash,
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/home',
-      name: RouteName.home,
-      builder: (context, state) => const HomeScreen(),
-      routes: [
-        GoRoute(
-            path: 'win_screen',
-            name: RouteName.win,
-            builder: (context, state) {
-              List data = state.extra as List;
-              return WinScreen(
-                round: data[0],
-                equbInviteeModel: data[1],
-              );
-            }),
-        GoRoute(
-          path: 'equb_creation',
-          name: RouteName.equbCreation,
-          builder: (context, state) => const EqubCreationScreen(),
-        ),
-        GoRoute(
-          path: 'send_invitation',
-          name: RouteName.sendInvitation,
-          builder: (context, state) => const SendInvitationScreen(),
-        ),
-        GoRoute(
-          path: 'equb_admin_detail',
-          name: RouteName.equbAdminDetail,
-          builder: (context, state) => EqubAdminDetailScreen(
-            equbDetailModel: state.extra as EqubDetailModel,
-          ),
-        ),
-        GoRoute(
-          path: 'equb_member_detail',
-          name: RouteName.equbMemberDetail,
-          builder: (context, state) => EqubMemberDetailScreen(
-            equbDetailModel: state.extra as EqubDetailModel,
-          ),
-        ),
-        GoRoute(
-          path: 'equb_edit',
-          name: RouteName.equbEdit,
-          builder: (context, state) => EqubEditScreen(
-            equb: state.extra as EqubDetailModel,
-          ),
-        ),
-        GoRoute(
-          path: 'equb_action_completed',
-          name: RouteName.equbActionCompleted,
-          builder: (context, state) => CompletePageDynamic(
-            completePageArgs: state.extra as CompletePageDto,
-          ),
-        ),
-        GoRoute(
-          path: 'receipt',
-          name: RouteName.receipt,
-          builder: (context, state) => ReceiptScreen(
-            receiverInfo: state.extra as ReceiverInfo,
-          ),
-        ),
-        GoRoute(
-          path: 'contact_permission',
-          name: RouteName.contactPermission,
-          builder: (context, state) => ContactPermissionScreen(
-            checkContactPermission: state.extra as Function(),
-          ),
-        ),
-        GoRoute(
-          path: 'profile_edit',
-          name: RouteName.profileEdit,
-          builder: (context, state) => const ProfileEditScreen(),
-        ),
-        GoRoute(
-          path: 'password_edit',
-          name: RouteName.passwordEdit,
-          builder: (context, state) => const PasswordEditScreen(),
-        ),
-        GoRoute(
-          path: 'complete_page',
-          name: RouteName.completePage,
-          builder: (context, state) => CompletePage(
-            equbName: state.extra as String,
-          ),
-        ),
-        GoRoute(
-          path: 'add_money_screen',
-          name: RouteName.addMoney,
-          builder: (context, state) => AddMoneyScreen(
-            selectedWallet: state.extra as String,
-          ),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/transfer_to_wallet_screen',
-      name: RouteName.transferToWallet,
-      builder: (context, state) => const SendMoneyScreen(),
-    ),
-    GoRoute(
-      path: '/transfer_to_other_screen',
-      name: RouteName.transferToOther,
-      builder: (context, state) => TransferToOtherScreen(
-        isFromRequest: state.extra as bool,
+  MyAppRouter._internal();
+
+  final GoRouter router = GoRouter(
+    initialLocation: '/splash',
+    routes: [
+      GoRoute(
+        path: '/welcome',
+        name: RouteName.welcome,
+        builder: (context, state) => const WelcomeScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/user_search_screen',
-      name: RouteName.userSearch,
-      builder: (context, state) => const UserSearchScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      name: RouteName.login,
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/forgetPassword',
-      name: RouteName.forgetPassword,
-      builder: (context, state) => ForgetPasswordScreen(
-        routeName: state.extra as String,
+      GoRoute(
+        path: '/splash',
+        name: RouteName.splash,
+        builder: (context, state) => const SplashScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/newPassword',
-      name: RouteName.newPassword,
-      builder: (context, state) => NewPasswordScreen(
-        userModel: state.extra as UserModel,
+      GoRoute(
+        path: '/home',
+        name: RouteName.home,
+        builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+              path: 'win_screen',
+              name: RouteName.win,
+              builder: (context, state) {
+                List data = state.extra as List;
+                return WinScreen(
+                  round: data[0],
+                  equbInviteeModel: data[1],
+                );
+              }),
+          GoRoute(
+            path: 'equb_creation',
+            name: RouteName.equbCreation,
+            builder: (context, state) => const EqubCreationScreen(),
+          ),
+          GoRoute(
+            path: 'send_invitation',
+            name: RouteName.sendInvitation,
+            builder: (context, state) => const SendInvitationScreen(),
+          ),
+          GoRoute(
+            path: 'equb_admin_detail',
+            name: RouteName.equbAdminDetail,
+            builder: (context, state) => EqubAdminDetailScreen(
+              equbDetailModel: state.extra as EqubDetailModel,
+            ),
+          ),
+          GoRoute(
+            path: 'equb_member_detail',
+            name: RouteName.equbMemberDetail,
+            builder: (context, state) => EqubMemberDetailScreen(
+              equbDetailModel: state.extra as EqubDetailModel,
+            ),
+          ),
+          GoRoute(
+            path: 'equb_edit',
+            name: RouteName.equbEdit,
+            builder: (context, state) => EqubEditScreen(
+              equb: state.extra as EqubDetailModel,
+            ),
+          ),
+          GoRoute(
+            path: 'equb_action_completed',
+            name: RouteName.equbActionCompleted,
+            builder: (context, state) => CompletePageDynamic(
+              completePageArgs: state.extra as CompletePageDto,
+            ),
+          ),
+          GoRoute(
+            path: 'receipt',
+            name: RouteName.receipt,
+            builder: (context, state) => ReceiptScreen(
+              receiverInfo: state.extra as ReceiverInfo,
+            ),
+          ),
+          GoRoute(
+            path: 'contact_permission',
+            name: RouteName.contactPermission,
+            builder: (context, state) => ContactPermissionScreen(
+              checkContactPermission: state.extra as Function(),
+            ),
+          ),
+          GoRoute(
+            path: 'profile_edit',
+            name: RouteName.profileEdit,
+            builder: (context, state) => const ProfileEditScreen(),
+          ),
+          GoRoute(
+            path: 'password_edit',
+            name: RouteName.passwordEdit,
+            builder: (context, state) => const PasswordEditScreen(),
+          ),
+          GoRoute(
+            path: 'complete_page',
+            name: RouteName.completePage,
+            builder: (context, state) => CompletePage(
+              equbName: state.extra as String,
+            ),
+          ),
+          GoRoute(
+            path: 'add_money_screen',
+            name: RouteName.addMoney,
+            builder: (context, state) => AddMoneyScreen(
+              selectedWallet: state.extra as String,
+            ),
+          ),
+        ],
       ),
-    ),
-    GoRoute(
-      path: '/newPincode',
-      name: RouteName.newPincode,
-      builder: (context, state) => NewPincodeScreen(
-        userModel: state.extra as UserModel,
+      GoRoute(
+        path: '/transfer_to_wallet_screen',
+        name: RouteName.transferToWallet,
+        builder: (context, state) => const SendMoneyScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/pincode_deligate',
-      name: RouteName.pincodeDeligate,
-      builder: (context, state) {
-        final onVeriried = state.extra as Function(String pincode);
-        return PincodeScreenDeligate(
-          overrideButtonText: "Confirm Payment",
-          result: (isValid) {},
-          onVerified: onVeriried,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/signup',
-      name: RouteName.signup,
-      builder: (context, state) => const SignupScreen(),
-    ),
-    GoRoute(
-      path: '/otp',
-      name: RouteName.otp,
-      builder: (context, state) => OTPScreen(
-        userModel: state.extra as UserModel,
+      GoRoute(
+        path: '/transfer_to_other_screen',
+        name: RouteName.transferToOther,
+        builder: (context, state) => TransferToOtherScreen(
+          isFromRequest: state.extra as bool,
+        ),
       ),
-    ),
-    GoRoute(
-      path: '/setPincode',
-      name: RouteName.setPinCode,
-      builder: (context, state) => SetPincodeScreen(
-        user: state.extra as UserModel,
+      GoRoute(
+        path: '/user_search_screen',
+        name: RouteName.userSearch,
+        builder: (context, state) => const UserSearchScreen(),
       ),
-    ),
-    GoRoute(
-        path: '/confirmPincode',
-        name: RouteName.confirmPinCode,
+      GoRoute(
+        path: '/login',
+        name: RouteName.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/forgetPassword',
+        name: RouteName.forgetPassword,
+        builder: (context, state) => ForgetPasswordScreen(
+          routeName: state.extra as String,
+        ),
+      ),
+      GoRoute(
+        path: '/newPassword',
+        name: RouteName.newPassword,
+        builder: (context, state) => NewPasswordScreen(
+          userModel: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+        path: '/newPincode',
+        name: RouteName.newPincode,
+        builder: (context, state) => NewPincodeScreen(
+          userModel: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+        path: '/pincode_deligate',
+        name: RouteName.pincodeDeligate,
         builder: (context, state) {
-          List data = state.extra as List;
-          return ConfirmPincodeScreen(
-            user: data[0],
-            pincode: data[1],
+          final onVeriried = state.extra as Function(String pincode);
+          return PincodeScreenDeligate(
+            overrideButtonText: "Confirm Payment",
+            result: (isValid) {},
+            onVerified: onVeriried,
           );
-        }),
-    GoRoute(
-      path: '/create_account',
-      name: RouteName.createAccount,
-      builder: (context, state) => CreateAccountScreen(
-        userModel: state.extra as UserModel,
+        },
       ),
-    ),
-    GoRoute(
-      path: '/profile_upload',
-      name: RouteName.profileUpload,
-      builder: (context, state) => ProfileUploadScreen(
-        userModel: state.extra as UserModel,
+      GoRoute(
+        path: '/signup',
+        name: RouteName.signup,
+        builder: (context, state) => const SignupScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/pincode_login',
-      name: RouteName.loginPincode,
-      builder: (context, state) => const PincodeLoginScreen(),
-    ),
-  ],
-);
+      GoRoute(
+        path: '/otp',
+        name: RouteName.otp,
+        builder: (context, state) => OTPScreen(
+          userModel: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+        path: '/setPincode',
+        name: RouteName.setPinCode,
+        builder: (context, state) => SetPincodeScreen(
+          user: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+          path: '/confirmPincode',
+          name: RouteName.confirmPinCode,
+          builder: (context, state) {
+            List data = state.extra as List;
+            return ConfirmPincodeScreen(
+              user: data[0],
+              pincode: data[1],
+            );
+          }),
+      GoRoute(
+        path: '/create_account',
+        name: RouteName.createAccount,
+        builder: (context, state) => CreateAccountScreen(
+          userModel: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+        path: '/profile_upload',
+        name: RouteName.profileUpload,
+        builder: (context, state) => ProfileUploadScreen(
+          userModel: state.extra as UserModel,
+        ),
+      ),
+      GoRoute(
+        path: '/pincode_login',
+        name: RouteName.loginPincode,
+        builder: (context, state) => const PincodeLoginScreen(),
+      ),
+    ],
+  );
+
+  /// Navigates to the pincode login screen if the current route starts with "/home".
+  void navigateToPincodeLogin() {
+    if (router.routeInformationProvider.value.uri.path.startsWith("/home")) {
+      router.go('/pincode_login'); // Navigate to login screen
+    }
+  }
+}

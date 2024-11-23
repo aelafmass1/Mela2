@@ -5,13 +5,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 
@@ -112,13 +110,15 @@ class WalletReceiptWidget extends StatelessWidget {
                                 value: '${walletTransactionModel.amount}',
                               ),
                               _buildTransactionDetail(
-                                key: 'To Wallet ID',
-                                value:
-                                    '${walletTransactionModel.toWalletId ?? ''}',
+                                key: 'To',
+                                value: walletTransactionModel.to ?? '',
                               ),
                               _buildTransactionDetail(
-                                key: 'From Wallet ID',
-                                value: '${walletTransactionModel.fromWalletId}',
+                                key: 'From',
+                                value:
+                                    walletTransactionModel.from == 'null null'
+                                        ? 'You'
+                                        : walletTransactionModel.from ?? '',
                               ),
                               _buildTransactionDetail(
                                 key: 'Type',

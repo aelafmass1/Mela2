@@ -3,14 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
+import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../core/utils/show_wallet_receipt.dart';
+import '../../data/models/receiver_info_model.dart';
+import '../../data/models/wallet_transaction_model.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
@@ -23,7 +27,10 @@ class _HistoryTabState extends State<HistoryTab> {
   String selectedFilter = 'all';
   @override
   void initState() {
-    context.read<TransactionBloc>().add(FetchTrasaction());
+    final state = context.read<WalletTransactionBloc>().state;
+    if (state is! WalletTransactionSuccess) {
+      context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
+    }
     super.initState();
   }
 
@@ -158,9 +165,9 @@ class _HistoryTabState extends State<HistoryTab> {
                 color: ColorName.borderColor,
               ),
             ),
-            BlocConsumer<TransactionBloc, TransactionState>(
+            BlocConsumer<WalletTransactionBloc, WalletTransactionState>(
               listener: (context, state) {
-                if (state is TransactionFail) {
+                if (state is WalletTransactionFail) {
                   showSnackbar(
                     context,
                     title: 'Error',
@@ -169,7 +176,7 @@ class _HistoryTabState extends State<HistoryTab> {
                 }
               },
               builder: (context, state) {
-                if (state is TransactionLoading) {
+                if (state is WalletTransactionLoading) {
                   return const Expanded(
                     child: Align(
                       alignment: Alignment.center,
@@ -178,43 +185,47 @@ class _HistoryTabState extends State<HistoryTab> {
                       ),
                     ),
                   );
-                } else if (state is TransactionSuccess) {
-                  if (state.data.isNotEmpty) {
+                } else if (state is WalletTransactionSuccess) {
+                  if (state.walletTransactions.isNotEmpty) {
                     return Expanded(
                       child: RefreshIndicator(
                         onRefresh: () async {
                           context
-                              .read<TransactionBloc>()
-                              .add(FetchTrasaction());
+                              .read<WalletTransactionBloc>()
+                              .add(FetchWalletTransaction());
                         },
                         child: ListView.separated(
                           separatorBuilder: (context, index) => const Divider(
                             color: ColorName.borderColor,
                           ),
-                          itemCount: state.data.length,
+                          itemCount: state.walletTransactions.length,
                           itemBuilder: (context, index) => Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               TextWidget(
                                 text: DateFormat('yyyy-MM-dd')
                                             .format(DateTime.now()) ==
-                                        state.data.keys.elementAt(index)
+                                        state.walletTransactions.keys
+                                            .elementAt(index)
                                     ? 'Today'
-                                    : (DateTime.parse(state.data.keys
+                                    : (DateTime.parse(state
+                                                        .walletTransactions.keys
                                                         .elementAt(index))
                                                     .day -
                                                 1) ==
                                             DateTime.now().day
                                         ? 'Yesterday'
                                         : DateFormat('d-MMMM yyyy').format(
-                                            DateTime.parse(state.data.keys
+                                            DateTime.parse(state
+                                                .walletTransactions.keys
                                                 .elementAt(index))),
                                 color: ColorName.primaryColor,
                                 fontSize: 14,
                                 weight: FontWeight.w600,
                               ),
-                              for (var transaction
-                                  in state.data.values.elementAt(index))
+                              for (var transaction in state
+                                  .walletTransactions.values
+                                  .elementAt(index))
                                 _buildTrasactionTile(transaction),
                             ],
                           ),
@@ -246,13 +257,40 @@ class _HistoryTabState extends State<HistoryTab> {
     );
   }
 
-  _buildTrasactionTile(ReceiverInfo receiverInfo) {
+  _buildTrasactionTile(WalletTransactionDetailModel transaction) {
     return ListTile(
       onTap: () {
-        context.pushNamed(
-          RouteName.receipt,
-          extra: receiverInfo,
-        );
+        if (transaction.transactionType == 'REMITTANCE') {
+          final receiverInfo = ReceiverInfo(
+            receiverName: transaction.receiverName ?? '',
+            receiverPhoneNumber: transaction.receiverPhoneNumber ?? '',
+            receiverBankName: transaction.receiverBank ?? '',
+            receiverAccountNumber: transaction.receiverAccountNumber ?? '',
+            amount: transaction.amount?.toDouble() ?? 0,
+            paymentType: transaction.transactionType,
+          );
+          context.pushNamed(
+            RouteName.receipt,
+            extra: receiverInfo,
+          );
+        } else {
+          showWalletReceipt(
+            context,
+            WalletTransactionModel(
+              amount: transaction.amount ?? 0,
+              note: transaction.note,
+              fromWalletBalance: transaction.convertedAmount,
+              fromWalletId: transaction.fromWallet?.walletId ?? 0,
+              timestamp: transaction.timestamp,
+              toWalletId: transaction.toWallet?.walletId,
+              transactionId: transaction.transactionId ?? 0,
+              transactionType: transaction.transactionType,
+              from:
+                  "${transaction.fromWallet?.holder?.firstName} ${transaction.fromWallet?.holder?.lastName}",
+              to: "${transaction.toWallet?.holder?.firstName} ${transaction.toWallet?.holder?.lastName}",
+            ),
+          );
+        }
       },
       leading: Container(
         width: 34,
@@ -274,24 +312,30 @@ class _HistoryTabState extends State<HistoryTab> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           TextWidget(
-            text: '\$${receiverInfo.amount}',
+            text: '\$${transaction.amount}',
             fontSize: 14,
             weight: FontWeight.w600,
           ),
           TextWidget(
-            text: DateFormat('hh:mm a').format(receiverInfo.transactionDate!),
+            text: DateFormat('hh:mm a').format(transaction.timestamp.toLocal()),
             fontSize: 10,
             weight: FontWeight.w400,
           )
         ],
       ),
       title: TextWidget(
-        text: receiverInfo.receiverName,
+        text: transaction.receiverName ??
+            (transaction.toWallet == null
+                ? 'Unregistered User'
+                : '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}'),
         fontSize: 14,
         weight: FontWeight.w400,
       ),
       subtitle: TextWidget(
-        text: receiverInfo.receiverPhoneNumber,
+        text: transaction.receiverPhoneNumber ??
+            (transaction.toWallet == null
+                ? '${transaction.pendingTransfer?['recipientPhoneNumber'] ?? ''}'
+                : ("+${transaction.toWallet?.holder?.countryCode ?? ''} ${transaction.toWallet?.holder?.phoneNumber ?? ''}")),
         fontSize: 10,
         weight: FontWeight.w400,
       ),
