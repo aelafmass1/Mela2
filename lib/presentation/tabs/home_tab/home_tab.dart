@@ -1,9 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -14,8 +14,10 @@ import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_recent_transaction/wallet_recent_transaction_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/last_transaction.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/recent_wallet_transactions.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_options.dart';
@@ -23,6 +25,7 @@ import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart'
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../config/routing.dart';
+import '../../../data/services/observer/lifecycle_manager.dart';
 import '../../screens/home_screen/components/exchange_rate_card.dart';
 import 'widgets/wallet_cards_stack.dart';
 
@@ -33,7 +36,7 @@ class HomeTab extends StatefulWidget {
   State<HomeTab> createState() => _HomeTabState();
 }
 
-class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
+class _HomeTabState extends State<HomeTab> {
   final moneyController = TextEditingController();
   String? imageUrl;
   String? displayName;
@@ -68,6 +71,17 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
         });
       }
     });
+    getToken().then((token) {
+      if (token == null) {
+        showSnackbar(context, description: "Please Login to continue");
+        context.goNamed(RouteName.loginPincode);
+      }
+    });
+    LifecycleManager().onLogout = () {
+      // Update app state or navigation stack
+      MyAppRouter.instance.navigateToPincodeLogin();
+    };
+
     context.read<WalletBloc>().add(FetchWallets());
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
     context.read<WalletTransactionBloc>().add(
@@ -76,26 +90,7 @@ class _HomeTabState extends State<HomeTab> with WidgetsBindingObserver {
     context.read<WalletRecentTransactionBloc>().add(
           FetchRecentTransaction(),
         );
-    WidgetsBinding.instance.addObserver(this); // Add the observer
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Remove the observer
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      logoutTimer = Timer(const Duration(seconds: 30), () {
-        context.goNamed(RouteName.loginPincode);
-      });
-    } else if (state == AppLifecycleState.resumed) {
-      logoutTimer?.cancel();
-    }
   }
 
   @override

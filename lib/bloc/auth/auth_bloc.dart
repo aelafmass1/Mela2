@@ -212,6 +212,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (res.containsKey('error')) {
           return emit(ResetFail(reason: res['error']));
         }
+        await deleteToken();
+        final data = res['successResponse'];
+        await storeToken(data['jwtToken']);
+        storeDisplayName('${data['firstName']} ${data['lastName']}');
         emit(ResetSuccess());
       }
     } on ServerException catch (error, stackTrace) {

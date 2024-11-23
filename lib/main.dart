@@ -26,7 +26,6 @@ import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart'
 import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
-import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
 import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet/wallet_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_currency/wallet_currency_bloc.dart';
@@ -58,7 +57,7 @@ import 'data/services/observer/lifecycle_manager.dart';
 //main method
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // LifecycleManager().initialize(); // Initialize lifecycle manager
+  LifecycleManager().initialize();
   if (kIsWeb == false) {
     await dotenv.load(fileName: ".env");
 
@@ -159,19 +158,14 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => BankCurrencyRateBloc(
-            repository: currencyRateRepository,
-          ),
+          create: (context) =>
+              BankCurrencyRateBloc(repository: currencyRateRepository),
         ),
         BlocProvider(
           create: (context) => EqubBloc(repository: equbRepository),
         ),
         BlocProvider(
           create: (context) => AuthBloc(repository: authRepo),
-        ),
-        BlocProvider(
-          create: (context) =>
-              TransactionBloc(repository: transactionRepository),
         ),
         BlocProvider(
           create: (context) =>
@@ -278,10 +272,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
       ],
       child: ResponsiveApp(
         builder: (_) => MaterialApp.router(
-          key: navigatorKey,
           debugShowCheckedModeBanner: false,
-          routerConfig: goRouting,
           theme: themeData(),
+          routerConfig: MyAppRouter.instance.router,
         ),
       ),
     );

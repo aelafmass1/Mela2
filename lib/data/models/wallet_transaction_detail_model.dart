@@ -1,22 +1,24 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
-import 'package:transaction_mobile_app/data/models/wallet_currency_model.dart';
-
 import 'wallet_model.dart';
 
 class WalletTransactionDetailModel {
-  final int transactionId;
+  final int? transactionId;
   final num? amount;
   final String? currency;
   final String transactionType;
-  final String status;
+  final String? status;
   final DateTime timestamp;
   final num? convertedAmount;
   final String? note;
   final WalletModel? fromWallet;
   final WalletModel? toWallet;
+  final String? receiverName;
+  final String? receiverPhoneNumber;
+  final String? receiverBank;
+  final String? receiverAccountNumber;
+  final Map? pendingTransfer;
   WalletTransactionDetailModel({
     required this.transactionId,
     this.amount,
@@ -28,6 +30,11 @@ class WalletTransactionDetailModel {
     this.note,
     this.fromWallet,
     this.toWallet,
+    this.receiverName,
+    this.receiverPhoneNumber,
+    this.receiverBank,
+    this.receiverAccountNumber,
+    this.pendingTransfer,
   });
 
   WalletTransactionDetailModel copyWith({
@@ -41,6 +48,11 @@ class WalletTransactionDetailModel {
     String? note,
     WalletModel? fromCurrency,
     WalletModel? toCurrency,
+    String? receiverName,
+    String? receiverPhoneNumber,
+    String? receiverBank,
+    String? receiverAccountNumber,
+    Map? pendingTransfer,
   }) {
     return WalletTransactionDetailModel(
       transactionId: transactionId ?? this.transactionId,
@@ -53,6 +65,12 @@ class WalletTransactionDetailModel {
       note: note ?? this.note,
       fromWallet: fromCurrency ?? this.fromWallet,
       toWallet: toCurrency ?? this.toWallet,
+      receiverName: receiverName ?? this.receiverName,
+      receiverPhoneNumber: receiverPhoneNumber ?? this.receiverPhoneNumber,
+      receiverBank: receiverBank ?? this.receiverBank,
+      receiverAccountNumber:
+          receiverAccountNumber ?? this.receiverAccountNumber,
+      pendingTransfer: pendingTransfer ?? this.pendingTransfer,
     );
   }
 
@@ -73,11 +91,11 @@ class WalletTransactionDetailModel {
 
   factory WalletTransactionDetailModel.fromMap(Map map) {
     return WalletTransactionDetailModel(
-      transactionId: map['transactionId'] as int,
+      transactionId: map['transactionId'] as int?,
       amount: map['amount'] != null ? map['amount'] as num : null,
       currency: map['currency'] != null ? map['currency'] as String : null,
       transactionType: map['transactionType'] as String,
-      status: map['status'] as String,
+      status: map['status'] as String?,
       timestamp: DateTime.parse(map['timestamp']),
       convertedAmount:
           map['convertedAmount'] != null ? map['convertedAmount'] as num : null,
@@ -88,6 +106,19 @@ class WalletTransactionDetailModel {
       toWallet: map['toWallet'] != null
           ? WalletModel.fromMap(map['toWallet'] as Map)
           : null,
+      receiverName:
+          map['receiverName'] != null ? map['receiverName'] as String : null,
+      receiverPhoneNumber: map['receiverPhoneNumber'] != null
+          ? map['receiverPhoneNumber'] as String
+          : null,
+      receiverBank: map['receiverBank'] != null
+          ? map['receiverBank']['name'] as String
+          : null,
+      receiverAccountNumber: map['receiverAccountNumber'] != null
+          ? map['receiverAccountNumber'] as String
+          : null,
+      pendingTransfer:
+          map['pendingTransfer'] != null ? map['pendingTransfer'] as Map : null,
     );
   }
 

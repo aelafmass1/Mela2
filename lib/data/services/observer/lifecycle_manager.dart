@@ -1,12 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transaction_mobile_app/config/routing.dart';
-import 'package:transaction_mobile_app/presentation/screens/pincode_screen/pincode_login_screen.dart';
-import 'package:transaction_mobile_app/presentation/widgets/transfer_modal_sheet.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class LifecycleManager extends WidgetsBindingObserver {
   static final LifecycleManager _instance = LifecycleManager._internal();
+
+  Timer? _timer;
 
   factory LifecycleManager() {
     return _instance;
@@ -14,27 +12,35 @@ class LifecycleManager extends WidgetsBindingObserver {
 
   LifecycleManager._internal();
 
+  VoidCallback? onLogout; // Callback to trigger logout navigation
+
   void initialize() {
-    WidgetsBinding.instance.addObserver(this); // Start observing lifecycle
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
+
+  /// Handles changes in the app's lifecycle state.
+  ///
+  /// When the app is paused, a 30-second timer is started. If the app remains
+  /// paused for the full 30 seconds, the `onLogout` callback is called to trigger
+  /// a logout navigation.
+  ///
+  /// When the app is resumed, the 30-second timer is canceled.
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      // Logout logic when app goes to background or is closed
-      await _logoutUser();
+      if (onLogout == null) return;
+      _timer = Timer(const Duration(seconds: 30), () {
+        onLogout?.call(); // Trigger logout navigation
+      });
+    } else if (state == AppLifecycleState.resumed) {
+      _timer?.cancel();
     }
   }
 
-  Future<void> _logoutUser() async {
-    navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const PincodeLoginScreen()),
-      (route) => false, // Remove all previous routes
-    );
-  }
-
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Stop observing lifecycle
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
   }
 }

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:card_stack_widget/card_stack_widget.dart';
@@ -53,7 +52,6 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
           }
         },
         builder: (context, state) {
-          log("Refreshed ${state.wallets}");
           if (state is FetchWalletsLoading) {
             return Stack(
               children: [

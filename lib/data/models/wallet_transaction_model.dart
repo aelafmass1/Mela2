@@ -10,6 +10,8 @@ class WalletTransactionModel {
   final String? transactionType;
   final DateTime timestamp;
   final String? note;
+  final String? from;
+  final String? to;
   WalletTransactionModel({
     required this.fromWalletId,
     required this.toWalletId,
@@ -19,6 +21,8 @@ class WalletTransactionModel {
     required this.transactionType,
     required this.timestamp,
     required this.note,
+    this.from,
+    this.to,
   });
 
   WalletTransactionModel copyWith({
