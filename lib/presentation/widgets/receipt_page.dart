@@ -94,7 +94,10 @@ class ReceiptPage extends StatelessWidget {
                                       .format(DateTime.now())),
                               _buildTransactionDetail(
                                 key: 'To',
-                                value: receiverInfo.receiverName,
+                                value: receiverInfo.receiverName.trim() ==
+                                        'null null'
+                                    ? 'Unregsistered User'
+                                    : receiverInfo.receiverName.trim(),
                               ),
                               _buildTransactionDetail(
                                 key: 'From',

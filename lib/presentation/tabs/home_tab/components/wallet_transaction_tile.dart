@@ -24,8 +24,6 @@ class WalletTransactionTile extends StatefulWidget {
 }
 
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
-  List<Contact> contacts = [];
-
   Future<void> _fetchContacts() async {
     if (kIsWeb) return;
 
@@ -40,27 +38,9 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
     // }
   }
 
-  Future<ContactEqubMember?> getUserContactInfo({
+  ContactEqubMember? getUserContactInfo({
     required MelaUser melaUser,
-  }) async {
-    await _fetchContacts();
-    final phoneN = await removeCountryCode(
-        '+${melaUser.countryCode}${melaUser.phoneNumber}');
-
-    if (phoneN == null) {
-      return null;
-    }
-
-    final user = contacts
-        .where((c) => c.phones.first.number
-            .replaceAll(RegExp(r'\s+'), '')
-            .endsWith(phoneN))
-        .toList();
-    if (user.isNotEmpty) {
-      final phoneNumber = user.first.phones.first.number;
-      final userName = user.first.displayName;
-      return ContactEqubMember(displayName: userName, phoneNumber: phoneNumber);
-    }
+  }) {
     if (melaUser.firstName != null && melaUser.lastName != null) {
       return ContactEqubMember(
           displayName: '${melaUser.firstName} ${melaUser.lastName}',
@@ -158,22 +138,18 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
               if (widget.walletTransaction.transactionType ==
                       'WALLET_TO_WALLET' &&
                   widget.walletTransaction.toWallet?.holder != null)
-                FutureBuilder(
-                    future: getUserContactInfo(
-                      melaUser: widget.walletTransaction.toWallet?.holder ??
-                          MelaUser(
-                            phoneNumber: 0,
-                            countryCode: 1,
-                          ),
-                    ),
-                    builder: (context, snapshot) {
-                      return TextWidget(
-                        text: snapshot.data?.displayName ??
-                            "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
-                        fontSize: 16,
-                        weight: FontWeight.w500,
-                      );
-                    })
+                TextWidget(
+                  text: getUserContactInfo(
+                        melaUser: widget.walletTransaction.toWallet?.holder ??
+                            MelaUser(
+                              phoneNumber: 0,
+                              countryCode: 1,
+                            ),
+                      )?.displayName ??
+                      "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
+                  fontSize: 16,
+                  weight: FontWeight.w500,
+                )
               else
                 const TextWidget(
                   text: "You",
@@ -181,22 +157,18 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                   weight: FontWeight.w500,
                 )
             else
-              FutureBuilder(
-                  future: getUserContactInfo(
-                    melaUser: widget.walletTransaction.toWallet?.holder ??
-                        MelaUser(
-                          phoneNumber: 0,
-                          countryCode: 1,
-                        ),
-                  ),
-                  builder: (context, snapshot) {
-                    return TextWidget(
-                      text: snapshot.data?.displayName ??
-                          "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
-                      fontSize: 16,
-                      weight: FontWeight.w500,
-                    );
-                  }),
+              TextWidget(
+                text: getUserContactInfo(
+                      melaUser: widget.walletTransaction.toWallet?.holder ??
+                          MelaUser(
+                            phoneNumber: 0,
+                            countryCode: 1,
+                          ),
+                    )?.displayName ??
+                    "${widget.walletTransaction.toWallet?.holder?.firstName ?? widget.walletTransaction.receiverName ?? 'Unregistered User'} ${widget.walletTransaction.toWallet?.holder?.lastName ?? ''}",
+                fontSize: 16,
+                weight: FontWeight.w500,
+              ),
           ],
         ),
         subtitle: TextWidget(

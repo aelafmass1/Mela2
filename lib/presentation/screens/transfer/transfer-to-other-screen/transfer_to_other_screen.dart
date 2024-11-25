@@ -83,6 +83,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 fromWalletId: transferFromWalletModel!.walletId,
                 toWalletId: transferToWalletModel!.walletId,
               ));
+
           context.read<CheckDetailsBloc>().add(
                 FetchTransferFeesEvent(
                   fromWalletId: transferFromWalletModel!.walletId,
@@ -95,6 +96,21 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
           transferToWalletModel = null;
         });
         clearStates();
+        if (transferFromWalletModel != null && transferToWalletModel != null) {
+          context.read<CheckDetailsBloc>().add(
+                FetchTransferFeesEvent(
+                  fromWalletId: transferFromWalletModel!.walletId,
+                  toWalletId: transferToWalletModel!.walletId,
+                ),
+              );
+        } else {
+          context.read<CheckDetailsBloc>().add(
+                FetchTransferFeeFromCurrencies(
+                  toCurrency: 'USD',
+                  fromCurrency: transferFromWalletModel?.currency.code ?? 'USD',
+                ),
+              );
+        }
       }
       scrollDown();
     }
@@ -348,12 +364,24 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                           fromWalletId: transferFromWalletModel!.walletId,
                           toWalletId: transferToWalletModel!.walletId,
                         ));
-                    context.read<CheckDetailsBloc>().add(
-                          FetchTransferFeesEvent(
-                            fromWalletId: transferFromWalletModel!.walletId,
-                            toWalletId: transferToWalletModel!.walletId,
-                          ),
-                        );
+                    if (transferFromWalletModel != null &&
+                        transferToWalletModel != null) {
+                      context.read<CheckDetailsBloc>().add(
+                            FetchTransferFeesEvent(
+                              fromWalletId: transferFromWalletModel!.walletId,
+                              toWalletId: transferToWalletModel!.walletId,
+                            ),
+                          );
+                    } else {
+                      context.read<CheckDetailsBloc>().add(
+                            FetchTransferFeeFromCurrencies(
+                              toCurrency: 'USD',
+                              fromCurrency:
+                                  transferFromWalletModel?.currency.code ??
+                                      'USD',
+                            ),
+                          );
+                    }
                   } else {
                     clearStates();
                   }
@@ -366,7 +394,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
               children: [
                 TextWidget(
                   text:
-                      " ${transferFromWalletModel?.currency.code ?? 'USD'} Wallet",
+                      "${transferFromWalletModel?.currency.code ?? 'USD'} Wallet",
                   fontSize: 15,
                   color: ColorName.grey,
                 ),
@@ -812,12 +840,22 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                         toWalletId:
                                             transferToWalletModel!.walletId,
                                       ));
+
                                   context.read<CheckDetailsBloc>().add(
                                         FetchTransferFeesEvent(
                                           fromWalletId:
                                               transferFromWalletModel!.walletId,
                                           toWalletId:
                                               transferToWalletModel!.walletId,
+                                        ),
+                                      );
+                                } else {
+                                  context.read<CheckDetailsBloc>().add(
+                                        FetchTransferFeeFromCurrencies(
+                                          toCurrency: 'USD',
+                                          fromCurrency: transferFromWalletModel
+                                                  ?.currency.code ??
+                                              'USD',
                                         ),
                                       );
                                 }

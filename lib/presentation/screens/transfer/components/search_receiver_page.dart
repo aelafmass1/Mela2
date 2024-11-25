@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,8 @@ class SearchReceiverPage extends StatefulWidget {
 
 class _SearchReceiverPageState extends State<SearchReceiverPage> {
   final searchController = TextEditingController();
+
+  Timer? _debounce;
 
   List<Contact> contacts = [];
   List<Contact> filteredContacts = [];
@@ -81,6 +84,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   @override
   void dispose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -195,18 +199,21 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                 isSearching = false;
               });
             } else {
-              filteredContacts = contacts.where((contact) {
-                final name = contact.displayName.toLowerCase();
-                final phoneNumber = contact.phones.first.number.toLowerCase();
-                final searchTextLower = text.toLowerCase();
-                return name.contains(searchTextLower.replaceAll(" ", '')) ||
-                    phoneNumber
-                        .replaceAll(" ", "")
-                        .contains(searchTextLower.replaceAll(" ", ""));
-              }).toList();
-              setState(() {
-                isSearching = true;
-                filteredContacts = filteredContacts;
+              if (_debounce?.isActive ?? false) _debounce!.cancel();
+              _debounce = Timer(const Duration(milliseconds: 200), () {
+                filteredContacts = contacts.where((contact) {
+                  final name = contact.displayName.toLowerCase();
+                  final phoneNumber = contact.phones.first.number.toLowerCase();
+                  final searchTextLower = text.toLowerCase();
+                  return name.contains(searchTextLower.replaceAll(" ", '')) ||
+                      phoneNumber
+                          .replaceAll(" ", "")
+                          .contains(searchTextLower.replaceAll(" ", ""));
+                }).toList();
+                setState(() {
+                  isSearching = true;
+                  filteredContacts = filteredContacts;
+                });
               });
             }
           },
