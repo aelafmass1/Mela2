@@ -17,17 +17,16 @@ import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/last_transaction.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/recent_wallet_transactions.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_options.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/components/last_transaction.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/components/recent_wallet_transactions.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/components/wallet_options.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../config/routing.dart';
 import '../../../data/services/observer/lifecycle_manager.dart';
 import '../../screens/home_screen/components/exchange_rate_card.dart';
-import 'widgets/wallet_cards_stack.dart';
+import 'components/wallet_cards_stack.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -53,8 +52,6 @@ class _HomeTabState extends State<HomeTab> {
       return 'Good Evening';
     }
   }
-
-  Timer? logoutTimer;
 
   @override
   void initState() {
@@ -215,7 +212,7 @@ class _HomeTabState extends State<HomeTab> {
 
   _buildExchangeRate() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.only(left: 15, right: 15, top: 20),
       child: SizedBox(
         width: 100.sw,
         child: Column(

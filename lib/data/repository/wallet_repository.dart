@@ -126,6 +126,32 @@ class WalletRepository {
     }
   }
 
+  Future<Map> fetchTransferFeesForUnregisteredUser({
+    required String accessToken,
+    required String fromCurrency,
+    required String toCurrency,
+  }) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer/fees/by-currency',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      params: {
+        "fromCurrency": fromCurrency,
+        "toCurrency": toCurrency,
+      },
+    );
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode == 200 || res.statusCode == 204) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
   Future<Map> fetchTransferFees({
     required String accessToken,
     required int fromWalletId,

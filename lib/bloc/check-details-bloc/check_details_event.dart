@@ -20,3 +20,13 @@ class FetchTransferFeesEvent extends CheckDetailsEvent {
 }
 
 class ResetTransferFee extends CheckDetailsEvent {}
+
+class FetchTransferFeeFromCurrencies extends CheckDetailsEvent {
+  final String fromCurrency;
+  final String toCurrency;
+
+  const FetchTransferFeeFromCurrencies({
+    required this.fromCurrency,
+    required this.toCurrency,
+  });
+}

@@ -1070,6 +1070,9 @@ class _SentTabState extends State<SentTab> {
                         Focus.of(context).unfocus();
                       }
                     },
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 17),
@@ -1106,8 +1109,7 @@ class _SentTabState extends State<SentTab> {
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^[0-9]*[]?[0-9]*$')),
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                     ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(

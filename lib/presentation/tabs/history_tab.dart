@@ -128,34 +128,6 @@ class _HistoryTabState extends State<HistoryTab> {
                           });
                         }),
                   ),
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 75,
-                    height: 30,
-                    child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: selectedFilter == 'equb'
-                              ? ColorName.primaryColor
-                              : null,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: selectedFilter == 'equb'
-                                ? BorderSide.none
-                                : const BorderSide(),
-                          ),
-                        ),
-                        child: TextWidget(
-                          text: 'Equb',
-                          fontSize: 12,
-                          color: selectedFilter == 'equb' ? Colors.white : null,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            selectedFilter = 'equb';
-                          });
-                        }),
-                  )
                 ],
               ),
             ),
@@ -233,14 +205,14 @@ class _HistoryTabState extends State<HistoryTab> {
                       ),
                     );
                   }
-                  return const Column(
+                  return Column(
                     children: [
-                      SizedBox(height: 30),
-                      // Assets.images.noTransaction.image(
-                      //   width: 350,
-                      //   height: 350,
-                      // ),
-                      TextWidget(
+                      const SizedBox(height: 30),
+                      Assets.images.noTransaction.image(
+                        width: 350,
+                        height: 350,
+                      ),
+                      const TextWidget(
                         text: 'oops, You don’t have any History.',
                         weight: FontWeight.w600,
                         fontSize: 16,

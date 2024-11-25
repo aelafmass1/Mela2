@@ -1,32 +1,30 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
-import 'package:transaction_mobile_app/config/routing.dart';
 
-import '../../../core/utils/settings.dart';
-import '../../../core/utils/show_snackbar.dart';
-import '../../../gen/assets.gen.dart';
-import '../../../gen/colors.gen.dart';
-import '../../widgets/button_widget.dart';
-import '../../widgets/loading_widget.dart';
-import '../../widgets/text_widget.dart';
+import '../../gen/assets.gen.dart';
+import '../../gen/colors.gen.dart';
+import 'button_widget.dart';
+import 'text_widget.dart';
 
-class PincodeLoginScreen extends StatefulWidget {
-  const PincodeLoginScreen({
+class CustomKeyboard extends StatefulWidget {
+  final Function(String pins) onComplete;
+  final Widget buttonWidget;
+  final Function()? onAutoComplete;
+  const CustomKeyboard({
     super.key,
+    required this.onComplete,
+    required this.buttonWidget,
+    this.onAutoComplete,
   });
 
   @override
-  State<PincodeLoginScreen> createState() => _PincodeLoginScreenState();
+  State<CustomKeyboard> createState() => _CustomKeyboardState();
 }
 
-class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
-  bool showResendButton = false;
+class _CustomKeyboardState extends State<CustomKeyboard> {
   final pin1Controller = TextEditingController();
   final pin2Controller = TextEditingController();
   final pin3Controller = TextEditingController();
@@ -42,12 +40,8 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   final pin6Node = FocusNode();
 
   bool isValid = false;
-  bool isAuthenticated = false;
 
-  String firstPincode = '';
-  String displayName = '';
-
-  List<String> getAllPins() {
+  getAllPins() {
     String pin1 = pin1Controller.text;
     String pin2 = pin2Controller.text;
     String pin3 = pin3Controller.text;
@@ -64,22 +58,17 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
         setState(() {
           isValid = true;
         });
-        context.read<AuthBloc>().add(
-              LoginWithPincode(
-                pincode: [pin1, pin2, pin3, pin4, pin5, pin6].join(),
-              ),
-            );
       }
-
-      return [pin1, pin2, pin3, pin4, pin5, pin6];
+      if (widget.onAutoComplete != null) {
+        widget.onAutoComplete!();
+      }
     }
     if (mounted) {
       setState(() {
         isValid = false;
       });
     }
-
-    return [];
+    widget.onComplete([pin1, pin2, pin3, pin4, pin5, pin6].join().trim());
   }
 
   /// Handles the key press event for the PIN code input fields.
@@ -156,15 +145,6 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
 
   @override
   void initState() {
-    getDisplayName().then((name) {
-      final names = name?.trim().split(' ');
-      if (names?.isNotEmpty == true) {
-        setState(() {
-          displayName = names?.first ?? '';
-        });
-      }
-    });
-    deleteToken();
     pin1Node.requestFocus();
     super.initState();
   }
@@ -177,151 +157,36 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
     pin4Controller.dispose();
     pin5Controller.dispose();
     pin6Controller.dispose();
-
-    //pincode dispose
     pin1Node.dispose();
     pin2Node.dispose();
     pin3Node.dispose();
     pin4Node.dispose();
     pin5Node.dispose();
     pin6Node.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        toolbarHeight: 70,
-        leading: const SizedBox.shrink(),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: TextButton(
-                child: const TextWidget(
-                  text: 'Logout',
-                  type: TextType.small,
-                  color: ColorName.primaryColor,
-                ),
-                onPressed: () {
-                  deleteToken();
-                  deleteDisplayName();
-                  deletePhoneNumber();
-                  deleteLogInStatus();
-                  deleteCountryCode();
-                  context.goNamed(RouteName.signup);
-                }),
-          ),
+    return Column(children: [
+      const SizedBox(height: 40),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildPinBox(controller: pin1Controller, focusNode: pin1Node),
+          _buildPinBox(controller: pin2Controller, focusNode: pin2Node),
+          _buildPinBox(controller: pin3Controller, focusNode: pin3Node),
+          _buildPinBox(controller: pin4Controller, focusNode: pin4Node),
+          _buildPinBox(controller: pin5Controller, focusNode: pin5Node),
+          _buildPinBox(controller: pin6Controller, focusNode: pin6Node),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 30),
-              Align(
-                alignment: Alignment.center,
-                child: TextWidget(
-                  text: 'Hi, welcome $displayName',
-                  fontSize: 24,
-                  weight: FontWeight.w700,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildPinBox(
-                        controller: pin1Controller, focusNode: pin1Node),
-                    _buildPinBox(
-                        controller: pin2Controller, focusNode: pin2Node),
-                    _buildPinBox(
-                        controller: pin3Controller, focusNode: pin3Node),
-                    _buildPinBox(
-                        controller: pin4Controller, focusNode: pin4Node),
-                    _buildPinBox(
-                        controller: pin5Controller, focusNode: pin5Node),
-                    _buildPinBox(
-                        controller: pin6Controller, focusNode: pin6Node),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 60),
-              BlocConsumer<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is LoginWithPincodeFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  } else if (state is LoginWithPincodeSuccess) {
-                    setIsLoggedIn(true);
-                    context.goNamed(RouteName.home);
-                  }
-                },
-                builder: (context, state) {
-                  return ButtonWidget(
-                      color: isValid
-                          ? ColorName.primaryColor
-                          : ColorName.grey.shade200,
-                      child: state is LoginWithPincodeLoading
-                          ? const LoadingWidget()
-                          : const TextWidget(
-                              text: 'Continue',
-                              type: TextType.small,
-                              color: Colors.white,
-                            ),
-                      onPressed: () {
-                        if (isValid) {
-                          final pins = getAllPins();
-                          context.read<AuthBloc>().add(
-                                LoginWithPincode(
-                                  pincode: pins.join(),
-                                ),
-                              );
-                        }
-                      });
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const TextWidget(
-                      text: 'Forgot my PIN?',
-                      fontSize: 15,
-                      weight: FontWeight.w300,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.pushNamed(
-                          RouteName.forgetPassword,
-                          extra: RouteName.newPincode,
-                        );
-                      },
-                      child: const TextWidget(
-                        text: 'Reset',
-                        fontSize: 18,
-                        color: ColorName.primaryColor,
-                        weight: FontWeight.w600,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              _buildKeypad(),
-            ],
-          ),
-        ),
-      ),
-    );
+      const SizedBox(height: 90),
+      widget.buttonWidget,
+      const SizedBox(height: 40),
+      _buildKeypad(),
+    ]);
   }
 
   // Build the custom numeric keypad
@@ -404,31 +269,6 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
     );
   }
 
-  // Build each button of the keypad
-  Widget _buildKey(String value) {
-    return SizedBox(
-      width: 105,
-      height: 65,
-      child: GestureDetector(
-        onTap: () => _onKeyPressed(value),
-        onVerticalDragStart: (e) => _onKeyPressed(value),
-        onHorizontalDragStart: (e) => _onKeyPressed(value),
-        child: ButtonWidget(
-          elevation: 0,
-          horizontalPadding: 0,
-          topPadding: 0,
-          verticalPadding: 0,
-          color: Colors.grey[100],
-          onPressed: null,
-          child: TextWidget(
-            text: value,
-            fontSize: 25,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPinBox(
       {required TextEditingController controller,
       required FocusNode focusNode}) {
@@ -466,6 +306,31 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                 color: ColorName.primaryColor,
                 width: 2,
               )),
+        ),
+      ),
+    );
+  }
+
+  // Build each button of the keypad
+  Widget _buildKey(String value) {
+    return SizedBox(
+      width: 105,
+      height: 65,
+      child: GestureDetector(
+        onTap: () => _onKeyPressed(value),
+        onVerticalDragStart: (e) => _onKeyPressed(value),
+        onHorizontalDragStart: (e) => _onKeyPressed(value),
+        child: ButtonWidget(
+          elevation: 0,
+          horizontalPadding: 0,
+          topPadding: 0,
+          verticalPadding: 0,
+          color: Colors.grey[100],
+          onPressed: null,
+          child: TextWidget(
+            text: value,
+            fontSize: 25,
+          ),
         ),
       ),
     );

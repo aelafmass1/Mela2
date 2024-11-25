@@ -111,7 +111,9 @@ class WalletReceiptWidget extends StatelessWidget {
                               ),
                               _buildTransactionDetail(
                                 key: 'To',
-                                value: walletTransactionModel.to ?? '',
+                                value: walletTransactionModel.to == 'null null'
+                                    ? 'Unregistered User'
+                                    : walletTransactionModel.to ?? '',
                               ),
                               _buildTransactionDetail(
                                 key: 'From',

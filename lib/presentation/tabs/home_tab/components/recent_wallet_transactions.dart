@@ -119,10 +119,45 @@ class _RecentMembersState extends State<RecentMembers> {
                                   child: Column(
                                     children: [
                                       const SizedBox(height: 15),
-                                      CircleAvatar(
-                                        backgroundImage: Assets
-                                            .images.profileImage
-                                            .provider(),
+                                      Stack(
+                                        children: [
+                                          Container(
+                                            width: 39,
+                                            height: 39,
+                                            margin: const EdgeInsets.only(
+                                                bottom: 4),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: ColorName
+                                                  .primaryColor.shade100,
+                                            ),
+                                            child: Center(
+                                              child: TextWidget(
+                                                text:
+                                                    '${state.transactions[index].holder?.firstName?.substring(0, 1) ?? ''}${state.transactions[index].holder?.lastName?.substring(0, 1) ?? ''}',
+                                                type: TextType.small,
+                                                color: ColorName.white,
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                              right: 0,
+                                              bottom: 2,
+                                              child: Container(
+                                                width: 15,
+                                                height: 15,
+                                                clipBehavior: Clip.antiAlias,
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.amber,
+                                                ),
+                                                child: Image.asset(
+                                                  'icons/currency/${state.transactions[index].currency.code.toLowerCase()}.png',
+                                                  package: 'currency_icons',
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ))
+                                        ],
                                       ),
                                       TextWidget(
                                         text: state.transactions[index].holder

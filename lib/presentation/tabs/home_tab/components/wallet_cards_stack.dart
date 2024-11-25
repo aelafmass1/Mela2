@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:card_stack_widget/card_stack_widget.dart';
@@ -7,7 +8,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab/widgets/wallet_card.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/components/wallet_card.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
@@ -36,6 +37,7 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
         listener: (context, state) {
           if (state is FetchWalletSuccess) {
             setState(() {
+              walletTapped = false;
               stackHeight = 190;
             });
             if (state.wallets.length > 1) {
@@ -44,8 +46,8 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
               });
             }
             if (walletTapped) {
+              tappedWallets.clear();
               setState(() {
-                tappedWallets.clear();
                 tappedWallets = state.wallets;
               });
             }
@@ -114,6 +116,9 @@ class _WalletCardsStackState extends State<WalletCardsStack> {
                                 random.nextInt(256), // Blue channel
                               ),
                           onTab: () {
+                            log("tapped ${tappedWallets.length}");
+                            log("wallets ${state.wallets.length}");
+
                             final currentWallet = tappedWallets[i];
                             tappedWallets.clear();
                             tappedWallets.add(currentWallet);
