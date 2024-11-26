@@ -55,6 +55,8 @@ import 'data/repository/auth_repository.dart';
 import 'data/services/api/api_service.dart';
 import 'data/services/observer/lifecycle_manager.dart';
 
+import 'notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LifecycleManager().initialize();
@@ -72,6 +74,8 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    await NotificationService.initialize();
 
     // Initialize Firebase Analytics instance to track user interactions and app events.
     FirebaseAnalytics analytics = FirebaseAnalytics.instance;
