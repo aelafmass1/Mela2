@@ -208,7 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           }
                           return null;
                         },
-                        obscurePassword: showPassword,
+                        obscurePassword: !showPassword,
                         controller: passwordController,
                         hintText: 'Password',
                         suffix: Padding(

@@ -1,6 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
@@ -17,27 +16,15 @@ import '../../../widgets/text_widget.dart';
 
 class WalletTransactionTile extends StatefulWidget {
   final WalletTransactionDetailModel walletTransaction;
-  const WalletTransactionTile({super.key, required this.walletTransaction});
+  final List<Contact> contacts;
+  const WalletTransactionTile(
+      {super.key, required this.walletTransaction, required this.contacts});
 
   @override
   State<WalletTransactionTile> createState() => _WalletTransactionTileState();
 }
 
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
-  Future<void> _fetchContacts() async {
-    if (kIsWeb) return;
-
-    // if (await FlutterContacts.requestPermission(readonly: true)) {
-    //   if (contacts.isEmpty) {
-    //     List<Contact> c =
-    //         await FlutterContacts.getContacts(withProperties: true);
-    //     setState(() {
-    //       contacts = c;
-    //     });
-    //   }
-    // }
-  }
-
   ContactEqubMember? getUserContactInfo({
     required MelaUser melaUser,
   }) {
@@ -47,6 +34,19 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
           phoneNumber: '+${melaUser.countryCode}${melaUser.phoneNumber}');
     }
     return null;
+  }
+
+  _getContactName(String phoneNumber) {
+    final contact = widget.contacts.where((c) {
+      if (c.phones == null || c.phones?.isEmpty == true) {
+        return false;
+      }
+      return c.phones?.first.value == phoneNumber;
+    });
+    if (contact.isNotEmpty) {
+      return contact.first.displayName;
+    }
+    return phoneNumber;
   }
 
   @override
@@ -132,7 +132,15 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.walletTransaction.transactionType ==
+            if (widget.walletTransaction.transactionType == 'PENDING_TRANSFER')
+              TextWidget(
+                text: _getContactName(widget.walletTransaction
+                        .pendingTransfer?['recipientPhoneNumber'] ??
+                    'Unregistered User'),
+                fontSize: 16,
+                weight: FontWeight.w500,
+              )
+            else if (widget.walletTransaction.transactionType ==
                     'WALLET_TO_WALLET' ||
                 widget.walletTransaction.transactionType == 'BANK_TO_WALLET')
               if (widget.walletTransaction.transactionType ==

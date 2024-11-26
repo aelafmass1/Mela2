@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
@@ -54,7 +55,6 @@ import 'data/repository/auth_repository.dart';
 import 'data/services/api/api_service.dart';
 import 'data/services/observer/lifecycle_manager.dart';
 
-//main method
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LifecycleManager().initialize();

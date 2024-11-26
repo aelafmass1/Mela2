@@ -46,7 +46,6 @@ class WalletTransactionBloc
             groupedTransactions[formattedDate] = [transaction];
           }
         }
-        log(groupedTransactions.toString());
         emit(
           WalletTransactionSuccess(
             walletTransactions: groupedTransactions,
