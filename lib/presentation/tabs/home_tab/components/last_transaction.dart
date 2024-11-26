@@ -1,6 +1,10 @@
+import 'dart:developer';
+
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
@@ -24,6 +28,35 @@ class _LastTransactionState extends State<LastTransaction> {
   String? selectedDayFilter;
   List<WalletTransactionDetailModel> selectedWallets = [];
   bool showThisPage = true;
+  List<Contact> contacts = [];
+
+  _fetchContacts() async {
+    try {
+      if (await Permission.contacts.isGranted) {
+        contacts = await ContactsService.getContacts();
+        setState(() {
+          contacts = contacts;
+        });
+      } else {
+        await Permission.contacts.request();
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    _fetchContacts();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    contacts.clear();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +236,9 @@ class _LastTransactionState extends State<LastTransaction> {
                           children: [
                             for (var transaction in selectedWallets)
                               WalletTransactionTile(
-                                  walletTransaction: transaction),
+                                contacts: contacts,
+                                walletTransaction: transaction,
+                              ),
                           ],
                         );
                       }

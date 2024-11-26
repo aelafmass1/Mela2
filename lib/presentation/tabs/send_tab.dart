@@ -33,6 +33,7 @@ import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart'
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../bloc/check-details-bloc/check_details_bloc.dart';
 import '../../bloc/currency/currency_bloc.dart';
 import '../../bloc/fee/fee_bloc.dart';
 import '../../bloc/navigation/navigation_bloc.dart';
@@ -64,6 +65,8 @@ class _SentTabState extends State<SentTab> {
   String whoPayFee = 'SENDER';
   String selectedBank = '';
   String selectedPaymentCardId = '';
+  String fromCurrency = 'USD';
+  String toCurrency = 'ETB';
 
   List<PaymentCardModel> paymentCards = [];
   String? selectedPhoneNumber;
@@ -208,9 +211,15 @@ class _SentTabState extends State<SentTab> {
     }
 
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
-    context.read<FeeBloc>().add(FetchFees());
+    context.read<FeeBloc>().add(FetchRemittanceExchangeRate());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
     context.read<BanksBloc>().add(FetchBanks());
+    context.read<CheckDetailsBloc>().add(
+          FetchTransferFeeFromCurrencies(
+            toCurrency: toCurrency,
+            fromCurrency: fromCurrency,
+          ),
+        );
 
     super.initState();
   }
@@ -241,6 +250,23 @@ class _SentTabState extends State<SentTab> {
         curve: Curves.easeInOut,
       );
     });
+  }
+
+  num _getExchangeRate(String fromCurrency, String toCurrency) {
+    final state = context.read<FeeBloc>().state;
+    if (state is RemittanceExchangeRateSuccess) {
+      final exchangeRate = state.walletCurrencies
+          .where((c) =>
+              c.fromCurrency.code == fromCurrency &&
+              c.toCurrency.code == toCurrency)
+          .toList();
+      log('Exchange Rate: $exchangeRate');
+      if (exchangeRate.isNotEmpty) {
+        return exchangeRate.first.rate;
+      }
+    }
+
+    return 1;
   }
 
   @override
@@ -306,9 +332,14 @@ class _SentTabState extends State<SentTab> {
               color: ColorName.primaryColor,
               onRefresh: () async {
                 context.read<CurrencyBloc>().add(FetchAllCurrencies());
-                context.read<FeeBloc>().add(FetchFees());
+                context.read<FeeBloc>().add(FetchRemittanceExchangeRate());
                 context.read<PaymentCardBloc>().add(FetchPaymentCards());
-                context.read<BanksBloc>().add(FetchBanks());
+                context.read<CheckDetailsBloc>().add(
+                      FetchTransferFeeFromCurrencies(
+                        toCurrency: toCurrency,
+                        fromCurrency: fromCurrency,
+                      ),
+                    );
                 await Future.delayed(Durations.extralong1);
               },
               child: SingleChildScrollView(
@@ -608,9 +639,10 @@ class _SentTabState extends State<SentTab> {
                                         )
                                       ],
                                     ),
-                                    BlocBuilder<FeeBloc, FeeState>(
+                                    BlocBuilder<CheckDetailsBloc,
+                                        CheckDetailsState>(
                                       builder: (context, state) {
-                                        if (state is FeeLoading) {
+                                        if (state is CheckDetailsLoading) {
                                           return Column(
                                             children: [
                                               const Divider(
@@ -637,7 +669,7 @@ class _SentTabState extends State<SentTab> {
                                             ],
                                           );
                                         }
-                                        if (state is FeeSuccess) {
+                                        if (state is CheckDetailsLoaded) {
                                           return Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -665,7 +697,8 @@ class _SentTabState extends State<SentTab> {
                                                               children: [
                                                                 TextWidget(
                                                                   text:
-                                                                      fee.label,
+                                                                      fee.label ??
+                                                                          '',
                                                                   color: const Color(
                                                                       0xFF7B7B7B),
                                                                   fontSize: 14,
@@ -682,7 +715,7 @@ class _SentTabState extends State<SentTab> {
                                                                   child:
                                                                       TextWidget(
                                                                     text:
-                                                                        '${fee.amount == fee.amount.toInt() ? fee.amount.toInt() : fee.amount}%',
+                                                                        '${fee.amount == fee.amount?.toInt() ? fee.amount?.toInt() : fee.amount}%',
                                                                     color: Colors
                                                                         .black87,
                                                                     fontSize:
@@ -717,7 +750,7 @@ class _SentTabState extends State<SentTab> {
                                                                         : (fee.label == 'Service Fee' &&
                                                                                 whoPayFee == 'RECEIVER')
                                                                             ? '\$0'
-                                                                            : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)}',
+                                                                            : '\$${((double.tryParse(usdController.text) ?? 0) * ((fee.amount ?? 0) / 100)).toStringAsFixed(2)}',
                                                                     fontSize:
                                                                         14,
                                                                     weight:
@@ -1883,235 +1916,258 @@ class _SentTabState extends State<SentTab> {
   _buildExchangeInputs() {
     return Stack(
       children: [
-        Column(
-          children: [
-            TextFormField(
-              controller: usdController,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Enter amount';
-                }
-                return null;
-              },
-              onTapOutside: (event) {
-                if (Platform.isIOS) {
-                  Focus.of(context).unfocus();
-                }
-              },
-              onChanged: (value) {
-                try {
-                  final money = double.parse(value);
-                  etbController.text =
-                      (money * exchangeRate).toStringAsFixed(3);
-                } catch (error) {
-                  etbController.text = '';
-                }
-                setState(() {});
-              },
-              style: const TextStyle(
-                fontSize: 22,
-              ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^[0-9]*[.,]?[0-9]*$'),
-                ),
-                LengthLimitingTextInputFormatter(10),
-              ],
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                hintText: '0.00',
-                hintStyle: const TextStyle(
-                  fontSize: 24,
-                  color: Color(0xFFD0D0D0),
-                ),
-                suffixIcon: Container(
-                  width: 90,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black45,
+        BlocBuilder<FeeBloc, FeeState>(
+          builder: (context, state) {
+            if (state is RemittanceExchangeRateLoading) {
+              return Column(
+                children: [
+                  CustomShimmer(
+                    borderRadius: BorderRadius.circular(20),
+                    width: 100.sw,
+                    height: 55,
+                  ),
+                  const SizedBox(height: 14),
+                  CustomShimmer(
+                    borderRadius: BorderRadius.circular(20),
+                    width: 100.sw,
+                    height: 55,
+                  ),
+                ],
+              );
+            }
+            if (state is RemittanceExchangeRateSuccess) {
+              return Column(
+                children: [
+                  TextFormField(
+                    controller: usdController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Enter amount';
+                      }
+                      return null;
+                    },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
+                    onChanged: (value) {
+                      try {
+                        final money = double.parse(value);
+                        etbController.text =
+                            (money * _getExchangeRate(fromCurrency, toCurrency))
+                                .toStringAsFixed(3);
+                      } catch (error) {
+                        etbController.text = '';
+                      }
+                      setState(() {});
+                    },
+                    style: const TextStyle(
+                      fontSize: 22,
+                    ),
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^[0-9]*[.,]?[0-9]*$'),
+                      ),
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      hintText: '0.00',
+                      hintStyle: const TextStyle(
+                        fontSize: 24,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      suffixIcon: Container(
+                        width: 90,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.black45,
+                          ),
+                        ),
+                        child: Center(
+                          child: DropdownButton(
+                              value: fromCurrency,
+                              elevation: 0,
+                              underline: const SizedBox.shrink(),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              items: [
+                                for (var currency in state.walletCurrencies
+                                    .map((w) => w.fromCurrency)
+                                    .toSet())
+                                  DropdownMenuItem(
+                                    value: currency.code,
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: Image.asset(
+                                            'icons/currency/${currency.code.toLowerCase()}.png',
+                                            width: 20,
+                                            height: 20,
+                                            package: 'currency_icons',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        TextWidget(
+                                          text: currency.code,
+                                          fontSize: 12,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  fromCurrency = value ?? 'USD';
+                                });
+                                etbController.clear();
+                                etbController.text =
+                                    ((double.tryParse(usdController.text) ??
+                                                0) *
+                                            _getExchangeRate(
+                                                fromCurrency, toCurrency))
+                                        .toStringAsFixed(3);
+                                context.read<CheckDetailsBloc>().add(
+                                      FetchTransferFeeFromCurrencies(
+                                        toCurrency: toCurrency,
+                                        fromCurrency: fromCurrency,
+                                      ),
+                                    );
+                              }),
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      border: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
                     ),
                   ),
-                  child: Center(
-                    child: DropdownButton(
-                        value: 'usd',
-                        elevation: 0,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'usd',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.usaFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'USD',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
-                          // DropdownMenuItem(
-                          //   value: 'etb',
-                          //   child: Row(
-                          //     children: [
-                          //       ClipRRect(
-                          //         borderRadius: BorderRadius.circular(100),
-                          //         child: Assets.images.ethiopianFlag.image(
-                          //           width: 20,
-                          //           height: 20,
-                          //           fit: BoxFit.cover,
-                          //         ),
-                          //       ),
-                          //       const SizedBox(width: 5),
-                          //       const TextWidget(
-                          //         text: 'ETB',
-                          //         fontSize: 12,
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                        ],
-                        onChanged: (value) {
-                          //
-                        }),
-                  ),
-                ),
-                errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextFormField(
-              controller: etbController,
-              // validator: (value) {
-              //   if (value!.isEmpty) {
-              //     return 'Enter amount';
-              //   }
-              //   return null;
-              // },
-              onTapOutside: (event) {
-                if (Platform.isIOS) {
-                  Focus.of(context).unfocus();
-                }
-              },
-              onChanged: (value) {
-                try {
-                  final money = double.parse(value);
-                  usdController.text =
-                      (money / exchangeRate).toStringAsFixed(3);
-                } catch (error) {
-                  usdController.text = '';
-                }
-                setState(() {});
-              },
-              style: const TextStyle(
-                fontSize: 22,
-              ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(
-                    RegExp(r'^[0-9]*[.,]?[0-9]*$')),
-              ],
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                hintText: '0.00',
-                hintStyle: const TextStyle(
-                  fontSize: 24,
-                  color: Color(0xFFD0D0D0),
-                ),
-                suffixIcon: Container(
-                  width: 90,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black45,
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    controller: etbController,
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
+                    onChanged: (value) {
+                      try {
+                        final money = double.parse(value);
+                        usdController.text =
+                            (money / _getExchangeRate(fromCurrency, toCurrency))
+                                .toStringAsFixed(3);
+                      } catch (error) {
+                        usdController.text = '';
+                      }
+                      setState(() {});
+                    },
+                    style: const TextStyle(
+                      fontSize: 22,
                     ),
-                  ),
-                  child: Center(
-                    child: DropdownButton(
-                        value: 'etb',
-                        elevation: 0,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: [
-                          // DropdownMenuItem(
-                          //   value: 'usd',
-                          //   child: Row(
-                          //     children: [
-                          //       ClipRRect(
-                          //         borderRadius: BorderRadius.circular(100),
-                          //         child: Assets.images.usaFlag.image(
-                          //           width: 20,
-                          //           height: 20,
-                          //           fit: BoxFit.cover,
-                          //         ),
-                          //       ),
-                          //       const SizedBox(width: 5),
-                          //       const TextWidget(
-                          //         text: 'USD',
-                          //         fontSize: 12,
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          DropdownMenuItem(
-                            value: 'etb',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.ethiopianFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'ETB',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^[0-9]*[.,]?[0-9]*$')),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      hintText: '0.00',
+                      hintStyle: const TextStyle(
+                        fontSize: 24,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      suffixIcon: Container(
+                        width: 90,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.black45,
                           ),
-                        ],
-                        onChanged: (value) {
-                          //
-                        }),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-              ),
-            )
-          ],
+                        ),
+                        child: Center(
+                          child: DropdownButton(
+                              value: toCurrency,
+                              elevation: 0,
+                              underline: const SizedBox.shrink(),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              items: [
+                                for (var currency in state.walletCurrencies
+                                    .map((w) => w.toCurrency)
+                                    .toSet())
+                                  DropdownMenuItem(
+                                    value: currency.code,
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: Image.asset(
+                                            'icons/currency/${currency.code.toLowerCase()}.png',
+                                            width: 20,
+                                            height: 20,
+                                            package: 'currency_icons',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        TextWidget(
+                                          text: currency.code,
+                                          fontSize: 12,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  toCurrency = value ?? 'ETB';
+                                });
+                                usdController.clear();
+                                usdController.text =
+                                    ((double.tryParse(etbController.text) ??
+                                                0) /
+                                            _getExchangeRate(
+                                                fromCurrency, toCurrency))
+                                        .round()
+                                        .toStringAsFixed(1);
+                                context.read<CheckDetailsBloc>().add(
+                                      FetchTransferFeeFromCurrencies(
+                                        toCurrency: toCurrency,
+                                        fromCurrency: fromCurrency,
+                                      ),
+                                    );
+                              }),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      border: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                    ),
+                  )
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
         Positioned(
           left: 0,

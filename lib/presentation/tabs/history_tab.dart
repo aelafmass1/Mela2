@@ -1,8 +1,12 @@
+import 'dart:developer';
+
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
@@ -25,13 +29,51 @@ class HistoryTab extends StatefulWidget {
 
 class _HistoryTabState extends State<HistoryTab> {
   String selectedFilter = 'all';
+
+  List<Contact> contacts = [];
+
+  _fetchContacts() async {
+    try {
+      if (await Permission.contacts.isGranted) {
+        contacts = await ContactsService.getContacts();
+        setState(() {
+          contacts = contacts;
+        });
+      } else {
+        await Permission.contacts.request();
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  _getContactName(String phoneNumber) {
+    final contact = contacts.where((c) {
+      if (c.phones == null || c.phones?.isEmpty == true) {
+        return false;
+      }
+      return c.phones?.first.value == phoneNumber;
+    });
+    if (contact.isNotEmpty) {
+      return contact.first.displayName;
+    }
+    return phoneNumber;
+  }
+
   @override
   void initState() {
+    _fetchContacts();
     final state = context.read<WalletTransactionBloc>().state;
     if (state is! WalletTransactionSuccess) {
       context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    contacts.clear();
+    super.dispose();
   }
 
   @override
@@ -296,10 +338,14 @@ class _HistoryTabState extends State<HistoryTab> {
         ],
       ),
       title: TextWidget(
-        text: transaction.receiverName ??
-            (transaction.toWallet == null
-                ? 'Unregistered User'
-                : '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}'),
+        text: transaction.transactionType == 'PENDING_TRANSFER'
+            ? (_getContactName(
+                    transaction.pendingTransfer?['recipientPhoneNumber']) ??
+                'Unregistered User')
+            : transaction.receiverName ??
+                (transaction.toWallet == null
+                    ? 'Unregistered User'
+                    : '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}'),
         fontSize: 14,
         weight: FontWeight.w400,
       ),
