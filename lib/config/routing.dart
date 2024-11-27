@@ -31,6 +31,7 @@ import 'package:transaction_mobile_app/presentation/screens/win_screen/win_scree
 
 import '../presentation/screens/forget_password_screen/forget_password_screen.dart';
 import '../presentation/screens/home_screen/home_screen.dart';
+import '../presentation/screens/notification/notificaiton_screen.dart';
 import '../presentation/screens/pincode_screen/pincode_screen_deligate.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
 import '../presentation/screens/receipt_screen/receipt_screen.dart';
@@ -71,6 +72,7 @@ class RouteName {
   static const addMoney = 'add_money_screen';
 
   static const pincodeDeligate = 'pincode_deligate';
+  static const notification = 'notification_screen';
 }
 
 class MyAppRouter {
@@ -183,6 +185,11 @@ class MyAppRouter {
             builder: (context, state) => AddMoneyScreen(
               selectedWallet: state.extra as String,
             ),
+          ),
+          GoRoute(
+            path: 'notification',
+            name: RouteName.notification,
+            builder: (context, state) => const NotificationScreen(),
           ),
         ],
       ),

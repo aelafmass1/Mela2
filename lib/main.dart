@@ -40,15 +40,18 @@ import 'package:transaction_mobile_app/data/repository/currency_repository.dart'
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 import 'package:transaction_mobile_app/data/repository/money_transfer_repository.dart';
+import 'package:transaction_mobile_app/data/repository/notification_repository.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
+import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'bloc/check-details-bloc/check_details_bloc.dart';
+import 'bloc/notification/notification_bloc.dart';
 import 'bloc/transfer-rate/transfer_rate_bloc.dart';
 import 'config/routing.dart';
 import 'data/repository/auth_repository.dart';
@@ -58,6 +61,7 @@ import 'data/services/observer/lifecycle_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LifecycleManager().initialize();
+
   if (kIsWeb == false) {
     await dotenv.load(fileName: ".env");
 
@@ -72,6 +76,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    FCMService().initialize();
 
     // Initialize Firebase Analytics instance to track user interactions and app events.
     FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -134,7 +139,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   late PlaidRepository plaidRepository;
   late TransactionRepository transactionRepository;
   late WalletRepository walletRepository;
-
+  late NotificationRepository notificationRepository;
   @override
   void initState() {
     authRepo = AuthRepository(client: client);
@@ -150,6 +155,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     plaidRepository = PlaidRepository(client: client);
     transactionRepository = TransactionRepository(client: client);
     walletRepository = WalletRepository(client: client);
+    notificationRepository = NotificationRepository(client: client);
     super.initState();
   }
 
@@ -267,6 +273,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         BlocProvider(
           create: (context) => WalletRecentTransactionBloc(
             repository: walletRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => NotificationBloc(
+            notificationRepository: notificationRepository,
           ),
         )
       ],

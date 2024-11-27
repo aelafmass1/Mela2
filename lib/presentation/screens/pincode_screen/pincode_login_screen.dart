@@ -6,7 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 
 import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
@@ -261,6 +263,13 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                       description: state.reason,
                     );
                   } else if (state is LoginWithPincodeSuccess) {
+                    if (FCMService.fcmToken.isNotEmpty) {
+                      context.read<NotificationBloc>().add(
+                            SaveFCMToken(
+                              fcmToken: FCMService.fcmToken,
+                            ),
+                          );
+                    }
                     setIsLoggedIn(true);
                     context.goNamed(RouteName.home);
                   }
