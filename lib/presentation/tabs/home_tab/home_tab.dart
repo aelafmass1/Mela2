@@ -160,7 +160,9 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     IconButton(
                         onPressed: () {
-                          //
+                          context.pushNamed(
+                            RouteName.notification,
+                          );
                         },
                         icon: const Icon(
                           Bootstrap.bell,

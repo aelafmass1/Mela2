@@ -135,7 +135,7 @@ class _SentTabState extends State<SentTab> {
     log("onExit metadata: $metadata, error: $error");
   }
 
-  _calculateTotalFee(BankFeeSuccess fee) {
+  _calculateSecondTotalFee(BankFeeSuccess fee) {
     double totalFee = 0;
     for (final fee in fee.bankFees) {
       if (fee.type.contains("PERCENTAGE")) {
@@ -143,6 +143,19 @@ class _SentTabState extends State<SentTab> {
             (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
       } else {
         totalFee += fee.amount;
+      }
+    }
+    return totalFee;
+  }
+
+  _calculateFirstTotalFee(CheckDetailsLoaded fee) {
+    double totalFee = 0;
+    for (final fee in fee.fees) {
+      if (fee.type!.contains("PERCENTAGE")) {
+        totalFee +=
+            (fee.amount! * (double.tryParse(usdController.text) ?? 0)) / 100;
+      } else {
+        totalFee += fee.amount!;
       }
     }
     return totalFee;
@@ -850,14 +863,16 @@ class _SentTabState extends State<SentTab> {
                                             fontSize: 16,
                                             weight: FontWeight.w400,
                                           ),
-                                          BlocBuilder<FeeBloc, FeeState>(
+                                          BlocBuilder<CheckDetailsBloc,
+                                              CheckDetailsState>(
                                             builder: (context, state) {
                                               return Row(
                                                 children: [
-                                                  if (state is FeeSuccess)
+                                                  if (state
+                                                      is CheckDetailsLoaded)
                                                     TextWidget(
                                                       text:
-                                                          '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
+                                                          '\$${_calculateFirstTotalFee(state)}',
                                                       fontSize: 16,
                                                       weight: FontWeight.w500,
                                                     )
@@ -1493,7 +1508,7 @@ class _SentTabState extends State<SentTab> {
                                                 children: [
                                                   TextWidget(
                                                     text:
-                                                        '\$${NumberFormat('##,###.##').format(_calculateTotalFee(state))}',
+                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w700,
                                                   ),
