@@ -12,6 +12,14 @@ class NotificationService {
     String? token = await _firebaseMessaging.getToken();
     print("FCM Token: $token");
 
+    // Subscribe to the 'all' topic
+    if (token != null) {
+      await _firebaseMessaging.subscribeToTopic("all");
+      print("Subscribed to 'all' topic");
+    } else {
+      print("Unable to subscribe to 'all' topic as token is null");
+    }
+
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("Message received: ${message.notification?.title}");
