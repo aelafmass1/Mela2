@@ -13,6 +13,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -132,6 +133,19 @@ class _SentTabState extends State<SentTab> {
     final metadata = event.metadata.description();
     final error = event.error?.description();
     log("onExit metadata: $metadata, error: $error");
+  }
+
+  _calculateTotalFee(BankFeeSuccess fee) {
+    double totalFee = 0;
+    for (final fee in fee.bankFees) {
+      if (fee.type.contains("PERCENTAGE")) {
+        totalFee +=
+            (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+      } else {
+        totalFee += fee.amount;
+      }
+    }
+    return totalFee;
   }
 
   /// Fetches the user's contacts if permission is granted.
@@ -1409,76 +1423,53 @@ class _SentTabState extends State<SentTab> {
                               } else if (state is BankFeeSuccess) {
                                 return Column(
                                   children: [
-                                    for (var bankFee in state.bankFees)
+                                    for (var fee in state.bankFees)
                                       Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
                                         children: [
-                                          SizedBox(
-                                            height: 34,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    TextWidget(
-                                                      text: bankFee.label,
-                                                      color: const Color(
-                                                          0xFF7B7B7B),
-                                                      fontSize: 14,
-                                                      weight: FontWeight.w400,
-                                                    ),
-                                                    // const Row(
-                                                    //   children: [
-                                                    //     Icon(
-                                                    //       Icons.info_outline,
-                                                    //       color: ColorName.yellow,
-                                                    //       size: 12,
-                                                    //     ),
-                                                    //     SizedBox(width: 3),
-                                                    //     TextWidget(
-                                                    //       text:
-                                                    //           'Included by the bank',
-                                                    //       fontSize: 9,
-                                                    //       weight: FontWeight.w400,
-                                                    //       color: ColorName.yellow,
-                                                    //     ),
-                                                    //   ],
-                                                    // ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    TextWidget(
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  TextWidget(
+                                                    text: fee.label,
+                                                    fontSize: 14,
+                                                  ),
+                                                  Visibility(
+                                                    visible: fee.type ==
+                                                        'PERCENTAGE',
+                                                    child: TextWidget(
                                                       text:
-                                                          '\$${(double.parse(usdController.text) * (bankFee.amount / 100)).toStringAsFixed(2)}',
+                                                          '  ${NumberFormat('##,###.##').format(fee.amount.roundToDouble())}%',
                                                       fontSize: 14,
-                                                      weight: FontWeight.w500,
+                                                      weight: FontWeight.w600,
                                                     ),
-                                                    IconButton(
-                                                      style:
-                                                          IconButton.styleFrom(
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                      ),
-                                                      onPressed: () {
-                                                        //
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons.info_outline,
-                                                        size: 17,
-                                                        color:
-                                                            Color(0xFFD0D0D0),
-                                                      ),
-                                                    )
-                                                  ],
-                                                )
-                                              ],
-                                            ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  TextWidget(
+                                                    text: fee.type ==
+                                                            'PERCENTAGE'
+                                                        ? "\$${((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)}"
+                                                        : "\$${NumberFormat('##,###.##').format((fee.amount))}",
+                                                    weight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Icon(
+                                                    Icons.info_outline,
+                                                    color: ColorName.grey
+                                                        .withOpacity(0.5),
+                                                    size: 20,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                           const Divider(
                                             color: ColorName.borderColor,
@@ -1498,61 +1489,23 @@ class _SentTabState extends State<SentTab> {
                                           ),
                                           BlocBuilder<FeeBloc, FeeState>(
                                             builder: (context, feeState) {
-                                              final creditCardAmount = state
-                                                      .bankFees
-                                                      .where((bf) =>
-                                                          bf.label ==
-                                                          'Credit Card fee')
-                                                      .isEmpty
-                                                  ? 0
-                                                  : state.bankFees
-                                                      .where((bf) =>
-                                                          bf.label ==
-                                                          'Credit Card fee')
-                                                      .first
-                                                      .amount;
-                                              final debitCardAmount = state
-                                                      .bankFees
-                                                      .where((bf) =>
-                                                          bf.label ==
-                                                          'Debit Card fee')
-                                                      .isEmpty
-                                                  ? 0
-                                                  : state.bankFees
-                                                      .where((bf) =>
-                                                          bf.label ==
-                                                          'Debit Card fee')
-                                                      .first
-                                                      .amount;
-
                                               return Row(
                                                 children: [
-                                                  if (feeState is FeeSuccess)
-                                                    TextWidget(
-                                                      text:
-                                                          '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? creditCardAmount : 0)).toStringAsFixed(2)}',
-                                                      fontSize: 16,
-                                                      weight: FontWeight.w500,
-                                                    )
-                                                  else
-                                                    const TextWidget(
-                                                      text: '\$--',
-                                                      fontSize: 16,
-                                                      weight: FontWeight.w500,
-                                                    ),
-                                                  IconButton(
-                                                    style: IconButton.styleFrom(
-                                                      padding: EdgeInsets.zero,
-                                                    ),
-                                                    onPressed: () {
-                                                      //
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons.info_outline,
-                                                      size: 17,
-                                                      color: Color(0xFFD0D0D0),
-                                                    ),
-                                                  )
+                                                  TextWidget(
+                                                    text:
+                                                        '\$${NumberFormat('##,###.##').format(_calculateTotalFee(state))}',
+                                                    fontSize: 16,
+                                                    weight: FontWeight.w700,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Icon(
+                                                    Icons.info_outline,
+                                                    color: ColorName.grey
+                                                        .withOpacity(0.5),
+                                                    size: 20,
+                                                  ),
                                                 ],
                                               );
                                             },

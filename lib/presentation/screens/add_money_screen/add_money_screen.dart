@@ -73,7 +73,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     double totalFee = 0;
     for (final fee in fee.bankFees) {
       if (fee.type.contains("PERCENTAGE")) {
-        totalFee += (fee.amount * double.parse(amountController.text)) / 100;
+        totalFee +=
+            (fee.amount * (double.tryParse(amountController.text) ?? 0)) / 100;
       } else {
         totalFee += fee.amount;
       }

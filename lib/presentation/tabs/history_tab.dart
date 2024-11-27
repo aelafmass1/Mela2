@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -34,8 +34,8 @@ class _HistoryTabState extends State<HistoryTab> {
 
   _fetchContacts() async {
     try {
-      if (await Permission.contacts.isGranted) {
-        contacts = await ContactsService.getContacts();
+      if (await FlutterContacts.requestPermission(readonly: true)) {
+        contacts = await FlutterContacts.getContacts(withProperties: true);
         setState(() {
           contacts = contacts;
         });
@@ -49,10 +49,10 @@ class _HistoryTabState extends State<HistoryTab> {
 
   _getContactName(String phoneNumber) {
     final contact = contacts.where((c) {
-      if (c.phones == null || c.phones?.isEmpty == true) {
+      if (c.phones.isEmpty == true) {
         return false;
       }
-      return c.phones?.first.value == phoneNumber;
+      return c.phones.first.number == phoneNumber;
     });
     if (contact.isNotEmpty) {
       return contact.first.displayName;
