@@ -1,5 +1,5 @@
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
@@ -38,10 +38,10 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
 
   _getContactName(String phoneNumber) {
     final contact = widget.contacts.where((c) {
-      if (c.phones == null || c.phones?.isEmpty == true) {
+      if (c.phones.isEmpty == true) {
         return false;
       }
-      return c.phones?.first.value == phoneNumber;
+      return c.phones.first.number == phoneNumber;
     });
     if (contact.isNotEmpty) {
       return contact.first.displayName;
@@ -92,7 +92,12 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                 transactionType: widget.walletTransaction.transactionType,
                 from:
                     "${widget.walletTransaction.fromWallet?.holder?.firstName} ${widget.walletTransaction.fromWallet?.holder?.lastName}",
-                to: "${widget.walletTransaction.toWallet?.holder?.firstName} ${widget.walletTransaction.toWallet?.holder?.lastName}",
+                to: widget.walletTransaction.transactionType ==
+                        'PENDING_TRANSFER'
+                    ? _getContactName(widget.walletTransaction
+                            .pendingTransfer?['recipientPhoneNumber'] ??
+                        'Unregistered User')
+                    : "${widget.walletTransaction.toWallet?.holder?.firstName} ${widget.walletTransaction.toWallet?.holder?.lastName}",
               ),
             );
           }
