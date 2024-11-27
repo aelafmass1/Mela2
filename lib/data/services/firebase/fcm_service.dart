@@ -37,6 +37,14 @@ class FCMService {
     String? token = await _firebaseMessaging.getToken();
     log('FCM Token: $token');
     fcmToken = token ?? '';
+
+    // Subscribe to the 'all' topic
+    if (token != null) {
+      await _firebaseMessaging.subscribeToTopic("all");
+      print("Subscribed to 'all' topic");
+    } else {
+      print("Unable to subscribe to 'all' topic as token is null");
+    }
   }
 
   Future<void> _requestPermission() async {
