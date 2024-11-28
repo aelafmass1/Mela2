@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
@@ -77,6 +78,7 @@ class _AccountTabState extends State<AccountTab> {
                         ),
                       );
                     } else if (state is DeleteUserSucess) {
+                      context.read<PaymentCardBloc>().add(ResetPaymentCard());
                       deleteToken();
                       deleteDisplayName();
                       deletePhoneNumber();
@@ -105,6 +107,8 @@ class _AccountTabState extends State<AccountTab> {
                     ),
                   );
                 } else if (state is DeleteFcmTokenSuccess) {
+                  context.read<PaymentCardBloc>().add(ResetPaymentCard());
+
                   context.pop();
                   deleteToken();
                   deleteDisplayName();

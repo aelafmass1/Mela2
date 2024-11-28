@@ -20,6 +20,13 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         )) {
     on<AddPaymentCard>(_onPaymentCard);
     on<FetchPaymentCards>(_onFetchPaymentCards);
+    on<ResetPaymentCard>(_onResetPaymentCard);
+  }
+
+  _onResetPaymentCard(ResetPaymentCard event, Emitter emit) {
+    emit(PaymentCardInitial(
+      paymentCards: [],
+    ));
   }
 
   _onFetchPaymentCards(FetchPaymentCards event, Emitter emit) async {

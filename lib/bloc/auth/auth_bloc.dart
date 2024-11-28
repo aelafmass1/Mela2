@@ -255,7 +255,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         final token = res['successResponse']['jwtToken'];
 
-        storeToken(token);
+        await storeToken(token);
         emit(LoginWithPincodeSuccess());
       }
     } on ServerException catch (error, stackTrace) {

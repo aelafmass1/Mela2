@@ -281,6 +281,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/add_money.svg
   String get addMoney => 'assets/images/svgs/add_money.svg';
 
+  /// File path: assets/images/svgs/add_money_fail_icon.svg
+  String get addMoneyFailIcon => 'assets/images/svgs/add_money_fail_icon.svg';
+
   /// File path: assets/images/svgs/admin_icon.svg
   String get adminIcon => 'assets/images/svgs/admin_icon.svg';
 
@@ -323,8 +326,15 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
 
+  /// File path: assets/images/svgs/equb_saving_icon.svg
+  String get equbSavingIcon => 'assets/images/svgs/equb_saving_icon.svg';
+
   /// File path: assets/images/svgs/exchange_icon.svg
   String get exchangeIcon => 'assets/images/svgs/exchange_icon.svg';
+
+  /// File path: assets/images/svgs/exchange_rate_change_icon.svg
+  String get exchangeRateChangeIcon =>
+      'assets/images/svgs/exchange_rate_change_icon.svg';
 
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
@@ -360,6 +370,9 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/request_logo.svg
   String get requestLogo => 'assets/images/svgs/request_logo.svg';
 
+  /// File path: assets/images/svgs/request_money_icon.svg
+  String get requestMoneyIcon => 'assets/images/svgs/request_money_icon.svg';
+
   /// File path: assets/images/svgs/search.svg
   String get search => 'assets/images/svgs/search.svg';
 
@@ -391,12 +404,16 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/wallet_pattern.svg
   String get walletPattern => 'assets/images/svgs/wallet_pattern.svg';
 
+  /// File path: assets/images/svgs/warning_icon.svg
+  String get warningIcon => 'assets/images/svgs/warning_icon.svg';
+
   /// File path: assets/images/svgs/withdraw_logo.svg
   String get withdrawLogo => 'assets/images/svgs/withdraw_logo.svg';
 
   /// List of all assets
   List<String> get values => [
         addMoney,
+        addMoneyFailIcon,
         adminIcon,
         amountIcon,
         backArrow,
@@ -411,7 +428,9 @@ class $AssetsImagesSvgsGen {
         editIcon,
         endTimeIcon,
         equbIcon,
+        equbSavingIcon,
         exchangeIcon,
+        exchangeRateChangeIcon,
         faceId,
         filterIcon,
         frequencyIcon,
@@ -423,6 +442,7 @@ class $AssetsImagesSvgsGen {
         melaLogo,
         qrcodeLogo,
         requestLogo,
+        requestMoneyIcon,
         search,
         sendIcon,
         share,
@@ -433,6 +453,7 @@ class $AssetsImagesSvgsGen {
         wallet02,
         walletLogo,
         walletPattern,
+        warningIcon,
         withdrawLogo
       ];
 }

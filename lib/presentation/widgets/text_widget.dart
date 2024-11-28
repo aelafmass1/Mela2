@@ -36,15 +36,13 @@ class TextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Text(
-        text,
-        textAlign: textAlign,
-        style: TextStyle(
-          fontSize: fontSize ?? _getFontType(type),
-          color: color ?? Colors.black,
-          fontWeight: weight ?? FontWeight.w500,
-        ),
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: TextStyle(
+        fontSize: fontSize ?? _getFontType(type),
+        color: color ?? Colors.black,
+        fontWeight: weight ?? FontWeight.w500,
       ),
     );
   }

@@ -28,3 +28,17 @@ final class DeleteFcmTokenFailure extends NotificationState {
 
   const DeleteFcmTokenFailure({required this.reason});
 }
+
+final class FetchNotificationsLoading extends NotificationState {}
+
+final class FetchNotificationsSuccess extends NotificationState {
+  final List<NotificationModel> notifications;
+
+  const FetchNotificationsSuccess({required this.notifications});
+}
+
+final class FetchNotificationsFailure extends NotificationState {
+  final String reason;
+
+  const FetchNotificationsFailure({required this.reason});
+}
