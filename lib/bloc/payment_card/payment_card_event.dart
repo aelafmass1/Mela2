@@ -7,3 +7,5 @@ final class AddPaymentCard extends PaymentCardEvent {
 }
 
 final class FetchPaymentCards extends PaymentCardEvent {}
+
+final class ResetPaymentCard extends PaymentCardEvent {}
