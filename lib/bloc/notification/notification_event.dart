@@ -18,3 +18,5 @@ final class DeleteFCMToken extends NotificationEvent {
 
   const DeleteFCMToken({required this.fcmToken});
 }
+
+final class FetchNotifications extends NotificationEvent {}

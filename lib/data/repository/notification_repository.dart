@@ -58,7 +58,6 @@ class NotificationRepository {
 
   Future<Map> fetchNotifications({
     required String accessToken,
-    required String fcmToken,
   }) async {
     final res = await client.get(
       Uri.parse(
