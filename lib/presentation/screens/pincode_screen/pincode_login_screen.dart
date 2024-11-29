@@ -10,6 +10,7 @@ import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart'
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 
+import '../../../bloc/payment_card/payment_card_bloc.dart';
 import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
@@ -208,6 +209,8 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                   color: ColorName.primaryColor,
                 ),
                 onPressed: () {
+                  context.read<PaymentCardBloc>().add(ResetPaymentCard());
+
                   deleteToken();
                   deleteDisplayName();
                   deletePhoneNumber();

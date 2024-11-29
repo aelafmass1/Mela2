@@ -319,12 +319,13 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
           } else {
             widget.onSelected(
               ContactStatusModel(
-                  contactId: contact.id,
-                  contactStatus: 'Selected',
-                  userId: -1,
-                  contactName: contact.displayName,
-                  contactPhoneNumber: contact.phones.first.number,
-                  wallets: []),
+                contactId: contact.id,
+                contactStatus: 'Selected',
+                userId: -1,
+                contactName: contact.displayName,
+                contactPhoneNumber: contact.phones.first.number,
+                wallets: [],
+              ),
             );
           }
           if (mounted) {
