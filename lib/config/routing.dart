@@ -12,6 +12,7 @@ import 'package:transaction_mobile_app/presentation/screens/equb_screen/equib_ed
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/dto/complete_page_dto.dart';
 import 'package:transaction_mobile_app/presentation/screens/home_screen/components/contact_permission_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/login_screen/login_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/money_request/money_request_detail_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/new_password_screen/new_password_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/otp_screen/otp_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/pincode_screen/confirm_pincode_screen.dart';
@@ -24,8 +25,8 @@ import 'package:transaction_mobile_app/presentation/screens/send_invitation_scre
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/components/create_account_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/splash_screen/splash_screen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-wallet/transfer_to_wallet_screen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/transfer-to-other-screen/transfer_to_other_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/transfer-to-wallet/transfer_to_wallet_screen.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/transfer-to-other-screen/transfer_to_other_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/welcome_screen/welcome_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/win_screen/win_screen.dart';
 
@@ -73,6 +74,7 @@ class RouteName {
 
   static const pincodeDeligate = 'pincode_deligate';
   static const notification = 'notification_screen';
+  static const moneyRequestDetail = 'money_request_detail_screen';
 }
 
 class MyAppRouter {
@@ -190,6 +192,13 @@ class MyAppRouter {
             path: 'notification',
             name: RouteName.notification,
             builder: (context, state) => const NotificationScreen(),
+          ),
+          GoRoute(
+            path: 'money_request_detail',
+            name: RouteName.moneyRequestDetail,
+            builder: (context, state) => MoneyRequestDetailScreen(
+              requestId: state.extra as int,
+            ),
           ),
         ],
       ),

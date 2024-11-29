@@ -27,7 +27,7 @@ import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/utils/show_money_receiver_selection.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';

@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -35,14 +37,18 @@ class NotificationTile extends StatelessWidget {
   }
 
   String _getTokenValue(String t) {
-    final token = t.replaceAll(RegExp('[{}\$]'), '');
-    final data = notification.data?.firstWhere((t) => t.key == token);
-    if (data != null) {
-      if (token == 'amount') {
-        return '\$${data.value}';
+    final token = t.replaceAll(RegExp('[{}\$.]'), '');
+    final data =
+        notification.data?.where((t) => token.contains(t.key)).toList();
+    if (data?.isNotEmpty == true) {
+      if (data != null) {
+        if (token == 'amount') {
+          return '\$${data.first.value}';
+        }
+        return data.first.value;
       }
-      return data.value;
     }
+
     return token;
   }
 
@@ -154,7 +160,10 @@ class NotificationTile extends StatelessWidget {
             },
           ),
           onTab: () {
-            //
+            context.pushNamed(
+              RouteName.moneyRequestDetail,
+              extra: notification.referenceId,
+            );
           },
         );
       case 'RECEIVED_MONEY':

@@ -10,9 +10,10 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/bloc/money_request/money_request_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_qr_generator.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/utils/show_money_receiver_selection.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../../bloc/check-details-bloc/check_details_bloc.dart';
@@ -206,120 +207,151 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
           )
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSearchButton(),
-                  _buildRecentUsers(),
-                  _buildPreviousSelectedAccount(),
-                  _buildTransferTo(),
-                  _buildEnterAmountSelection(),
-                  _buildNoteSection(),
-                  _buildCheckDetail(),
-                ],
+      body: BlocListener<MoneyRequestBloc, MoneyRequestState>(
+        listener: (context, state) {
+          if (state is MoneyRequestFailure) {
+            showSnackbar(
+              context,
+              description: state.reason,
+            );
+          } else if (state is MoneyRequestSuccess) {
+            context.pop();
+            showQrGenerator(
+              context: context,
+              shareLink: state.id.toString(),
+              amount: double.tryParse(amountController.text) ?? 0,
+            );
+          }
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSearchButton(),
+                    _buildRecentUsers(),
+                    _buildPreviousSelectedAccount(),
+                    _buildTransferTo(),
+                    _buildEnterAmountSelection(),
+                    _buildNoteSection(),
+                    _buildCheckDetail(),
+                  ],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: ButtonWidget(
-              onPressed: selectedContact == null
-                  ? null
-                  : () {
-                      if (_formKey.currentState?.validate() == true) {
-                        if (widget.isFromRequest) {
-                          showQrGenerator(
-                            context: context,
-                            shareLink: 'Mela App Link',
-                            amount: double.tryParse(amountController.text) ?? 0,
-                          );
-                        } else {
-                          if (transferFromWalletModel != null &&
-                              transferToWalletModel != null) {
-                            scrollDown();
-                            context.read<MoneyTransferBloc>().add(
-                                  TransferToOwnWallet(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: ButtonWidget(
+                onPressed: selectedContact == null
+                    ? null
+                    : () {
+                        if (_formKey.currentState?.validate() == true) {
+                          if (widget.isFromRequest) {
+                            context.read<MoneyRequestBloc>().add(
+                                  MoneyRequest(
+                                    requesterWalletId:
+                                        transferFromWalletModel?.walletId ?? -1,
                                     amount: double.tryParse(
                                             amountController.text) ??
                                         0,
                                     note: noteController.text,
-                                    fromWalletId:
-                                        transferFromWalletModel!.walletId,
-                                    toWalletId: transferToWalletModel!.walletId,
+                                    userId: selectedContact?.userId ?? -1,
                                   ),
                                 );
                           } else {
-                            context.read<MoneyTransferBloc>().add(
-                                  TransferToUnregisteredUser(
-                                    phoneNumber:
-                                        selectedContact?.contactPhoneNumber ??
-                                            '',
-                                    amount: double.tryParse(
-                                            amountController.text) ??
-                                        0,
-                                    senderWalletId:
-                                        transferFromWalletModel?.walletId ?? 0,
-                                  ),
-                                );
+                            if (transferFromWalletModel != null &&
+                                transferToWalletModel != null) {
+                              scrollDown();
+                              context.read<MoneyTransferBloc>().add(
+                                    TransferToOwnWallet(
+                                      amount: double.tryParse(
+                                              amountController.text) ??
+                                          0,
+                                      note: noteController.text,
+                                      fromWalletId:
+                                          transferFromWalletModel!.walletId,
+                                      toWalletId:
+                                          transferToWalletModel!.walletId,
+                                    ),
+                                  );
+                            } else {
+                              context.read<MoneyTransferBloc>().add(
+                                    TransferToUnregisteredUser(
+                                      phoneNumber:
+                                          selectedContact?.contactPhoneNumber ??
+                                              '',
+                                      amount: double.tryParse(
+                                              amountController.text) ??
+                                          0,
+                                      senderWalletId:
+                                          transferFromWalletModel?.walletId ??
+                                              0,
+                                    ),
+                                  );
+                            }
                           }
                         }
-                      }
-                    },
-              child: BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
-                listener: (context, state) {
-                  if (state is MoneyTransferOwnWalletSuccess) {
-                    context.pop();
-                    if (mounted) {
-                      context.read<WalletBloc>().add(FetchWallets());
-                      context
-                          .read<WalletTransactionBloc>()
-                          .add(FetchWalletTransaction());
+                      },
+                child: BlocBuilder<MoneyRequestBloc, MoneyRequestState>(
+                  builder: (context, requestState) {
+                    return BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
+                      listener: (context, state) {
+                        if (state is MoneyTransferOwnWalletSuccess) {
+                          context.pop();
+                          if (mounted) {
+                            context.read<WalletBloc>().add(FetchWallets());
+                            context
+                                .read<WalletTransactionBloc>()
+                                .add(FetchWalletTransaction());
 
-                      showWalletReceipt(
-                        context,
-                        state.walletTransactionModel!,
-                      );
-                    }
-                  } else if (state is MoneyTransferUnregisteredUserSuccess) {
-                    context.pop();
+                            showWalletReceipt(
+                              context,
+                              state.walletTransactionModel!,
+                            );
+                          }
+                        } else if (state
+                            is MoneyTransferUnregisteredUserSuccess) {
+                          context.pop();
 
-                    if (mounted) {
-                      context.read<WalletBloc>().add(FetchWallets());
-                      context
-                          .read<WalletTransactionBloc>()
-                          .add(FetchWalletTransaction());
+                          if (mounted) {
+                            context.read<WalletBloc>().add(FetchWallets());
+                            context
+                                .read<WalletTransactionBloc>()
+                                .add(FetchWalletTransaction());
 
-                      showWalletReceipt(
-                        context,
-                        state.walletTransactionModel!,
-                      );
-                    }
-                  } else if (state is MoneyTransferFail) {
-                    showSnackbar(
-                      context,
-                      description: state.reason,
+                            showWalletReceipt(
+                              context,
+                              state.walletTransactionModel!,
+                            );
+                          }
+                        } else if (state is MoneyTransferFail) {
+                          showSnackbar(
+                            context,
+                            description: state.reason,
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        return state is MoneyTransferLoading ||
+                                requestState is MoneyRequestLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Continue',
+                                type: TextType.small,
+                                color: ColorName.white,
+                              );
+                      },
                     );
-                  }
-                },
-                builder: (context, state) {
-                  return state is MoneyTransferLoading
-                      ? const LoadingWidget()
-                      : const TextWidget(
-                          text: 'Continue',
-                          type: TextType.small,
-                          color: ColorName.white,
-                        );
-                },
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 15),
-        ],
+            const SizedBox(height: 15),
+          ],
+        ),
       ),
     );
   }
