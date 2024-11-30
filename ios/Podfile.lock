@@ -1158,6 +1158,8 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
+  - fast_contacts (0.0.1):
+    - Flutter
   - Firebase/Analytics (11.4.0):
     - Firebase/Core
   - Firebase/Core (11.4.0):
@@ -1559,6 +1561,7 @@ PODS:
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
+  - fast_contacts (from `.symlinks/plugins/fast_contacts/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
@@ -1638,6 +1641,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
+  fast_contacts:
+    :path: ".symlinks/plugins/fast_contacts/ios"
   firebase_analytics:
     :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_core:
@@ -1700,6 +1705,7 @@ SPEC CHECKSUMS:
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
   cloud_firestore: bd53c6530c100ba2d59a059a7cfa1ad5c4e033c5
   connectivity_plus: 4c41c08fc6d7c91f63bc7aec70ffe3730b04f563
+  fast_contacts: d5f0da976a40f8fd07a9ff730c2e9bee8c3898dd
   Firebase: cf1b19f21410b029b6786a54e9764a0cacad3c99
   firebase_analytics: fa7e5b20c2b58042e3301f5112a473d365bd490c
   firebase_core: 9efc3ecf689cdbc90f13f4dc58108c83ea46b266
