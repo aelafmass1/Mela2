@@ -1,8 +1,8 @@
 import 'dart:developer';
 
+import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -32,8 +32,8 @@ class _LastTransactionState extends State<LastTransaction> {
 
   _fetchContacts() async {
     try {
-      if (await FlutterContacts.requestPermission(readonly: true)) {
-        contacts = await FlutterContacts.getContacts(withProperties: true);
+      if (await Permission.contacts.isGranted) {
+        contacts = await FastContacts.getAllContacts();
         setState(() {
           contacts = contacts;
         });

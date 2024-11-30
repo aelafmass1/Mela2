@@ -16,7 +16,12 @@ class WalletTransactionBloc
   WalletTransactionBloc({required this.repository})
       : super(WalletTransactionInitial()) {
     on<FetchWalletTransaction>(_onFetchWalletTransaction);
+    on<ResetWalletTransaction>(_onResetWalletTransaction);
   }
+  _onResetWalletTransaction(ResetWalletTransaction event, Emitter emit) {
+    emit(WalletTransactionInitial());
+  }
+
   _onFetchWalletTransaction(FetchWalletTransaction event, Emitter emit) async {
     try {
       if (state is! WalletTransactionLoading) {

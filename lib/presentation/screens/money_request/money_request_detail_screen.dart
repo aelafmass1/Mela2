@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_request/money_request_bloc.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/money_request_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
+import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 
 import '../../../bloc/check-details-bloc/check_details_bloc.dart';
+import '../../../bloc/money_transfer/money_transfer_bloc.dart';
+import '../../../bloc/notification/notification_bloc.dart';
 import '../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../bloc/wallet/wallet_bloc.dart';
+import '../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../core/utils/show_change_wallet_modal.dart';
 import '../../../data/models/transfer_fees_model.dart';
 import '../../../gen/assets.gen.dart';
@@ -32,8 +39,109 @@ class MoneyRequestDetailScreen extends StatefulWidget {
 class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
   final amountController = TextEditingController();
   final noteController = TextEditingController();
+  final rejectReasonController = TextEditingController();
   WalletModel? transferFromWalletModel;
   WalletModel? transferToWalletModel;
+
+  showRejectDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => Align(
+        alignment: const Alignment(0, -0.2),
+        child: StatefulBuilder(builder: (context, setState) {
+          return SizedBox(
+            width: 90.sw,
+            height: 45.sh,
+            child: Material(
+              borderRadius: BorderRadius.circular(44),
+              color: Colors.white,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const TextWidget(
+                          text: 'Rejection Reason (optional)',
+                          type: TextType.small,
+                        ),
+                        SizedBox(
+                          width: 74,
+                          height: 35,
+                          child: ButtonWidget(
+                            color: const Color(0xFFF1F4FF),
+                            elevation: 0,
+                            verticalPadding: 0,
+                            topPadding: 0,
+                            horizontalPadding: 0,
+                            borderRadius: BorderRadius.circular(10),
+                            child: const TextWidget(
+                              text: 'Skip',
+                              fontSize: 12,
+                              color: ColorName.primaryColor,
+                            ),
+                            onPressed: () {
+                              context.pop();
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                    TextFieldWidget(
+                      borderRadius: BorderRadius.circular(8),
+                      hintText: 'Write your reason',
+                      controller: rejectReasonController,
+                      maxLine: 7,
+                    ),
+                    BlocConsumer<MoneyRequestBloc, MoneyRequestState>(
+                      listener: (context, state) {
+                        if (state is RejectMoneyRequestSuccess) {
+                          context
+                              .read<NotificationBloc>()
+                              .add(FetchNotifications());
+                          context.pop();
+                          context.pop();
+                        } else if (state is RejectMoneyRequestFail) {
+                          context.pop();
+                          showSnackbar(
+                            context,
+                            description: state.reason,
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        return ButtonWidget(
+                          child: state is RejectMoneyRequestLoading
+                              ? const LoadingWidget()
+                              : const TextWidget(
+                                  text: 'Reject',
+                                  type: TextType.small,
+                                  color: Colors.white,
+                                ),
+                          onPressed: () {
+                            context.read<MoneyRequestBloc>().add(
+                                  RejectMoneyRequest(
+                                    requestId: widget.requestId,
+                                  ),
+                                );
+                          },
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   void initState() {
     context.read<MoneyRequestBloc>().add(
@@ -95,26 +203,103 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
             );
           }
           if (state is FetchMoneyRequestSuccess) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: TextWidget(
-                      text: 'Requested From',
-                      fontSize: 20,
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          child: TextWidget(
+                            text: 'Requested From',
+                            fontSize: 20,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildContactTile(
+                          state.moneyRequestModel,
+                        ),
+                        _buildEnterAmountSelection(),
+                        _buildNoteSection(),
+                        _buildCheckDetail(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _buildContactTile(
-                    state.moneyRequestModel,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ButtonWidget(
+                          color: Colors.white,
+                          borderSide: const BorderSide(
+                            color: ColorName.red,
+                          ),
+                          child: const TextWidget(
+                            text: 'Reject',
+                            type: TextType.small,
+                            color: ColorName.red,
+                          ),
+                          onPressed: () {
+                            showRejectDialog();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child:
+                            BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
+                          listener: (context, state) {
+                            if (state is MoneyTransferOwnWalletSuccess) {
+                              context
+                                  .read<WalletTransactionBloc>()
+                                  .add(FetchWalletTransaction());
+                              context.pop();
+                              context
+                                  .read<NotificationBloc>()
+                                  .add(FetchNotifications());
+                            } else if (state is MoneyTransferFail) {
+                              showSnackbar(context, description: state.reason);
+                            }
+                          },
+                          builder: (context, state) {
+                            return ButtonWidget(
+                              child: state is MoneyTransferLoading
+                                  ? const LoadingWidget()
+                                  : const TextWidget(
+                                      text: 'Accept',
+                                      type: TextType.small,
+                                      color: Colors.white,
+                                    ),
+                              onPressed: () {
+                                if (transferFromWalletModel != null &&
+                                    transferToWalletModel != null) {
+                                  context.read<MoneyTransferBloc>().add(
+                                        TransferToWallet(
+                                          fromWalletId:
+                                              transferFromWalletModel!.walletId,
+                                          toWalletId:
+                                              transferToWalletModel!.walletId,
+                                          amount: double.tryParse(
+                                                  amountController.text) ??
+                                              0,
+                                          note: noteController.text,
+                                        ),
+                                      );
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  _buildEnterAmountSelection(),
-                  _buildNoteSection(),
-                  _buildCheckDetail(),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+              ],
             );
           }
           return const SizedBox.shrink();

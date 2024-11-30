@@ -36,3 +36,13 @@ final class FetchMoneyRequestSuccess extends MoneyRequestState {
 
   const FetchMoneyRequestSuccess({required this.moneyRequestModel});
 }
+
+final class RejectMoneyRequestLoading extends MoneyRequestState {}
+
+final class RejectMoneyRequestFail extends MoneyRequestState {
+  final String reason;
+
+  const RejectMoneyRequestFail({required this.reason});
+}
+
+final class RejectMoneyRequestSuccess extends MoneyRequestState {}

@@ -1,8 +1,8 @@
 import 'dart:developer';
 
+import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -34,8 +34,8 @@ class _HistoryTabState extends State<HistoryTab> {
 
   _fetchContacts() async {
     try {
-      if (await FlutterContacts.requestPermission(readonly: true)) {
-        contacts = await FlutterContacts.getContacts(withProperties: true);
+      if (await Permission.contacts.isGranted) {
+        contacts = await FastContacts.getAllContacts();
         setState(() {
           contacts = contacts;
         });

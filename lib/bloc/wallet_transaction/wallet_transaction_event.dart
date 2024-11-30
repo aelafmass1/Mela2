@@ -8,3 +8,5 @@ sealed class WalletTransactionEvent extends Equatable {
 }
 
 final class FetchWalletTransaction extends WalletTransactionEvent {}
+
+final class ResetWalletTransaction extends WalletTransactionEvent {}

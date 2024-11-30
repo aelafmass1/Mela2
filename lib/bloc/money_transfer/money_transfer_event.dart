@@ -14,13 +14,13 @@ final class SendMoney extends MoneyTransferEvent {
   });
 }
 
-final class TransferToOwnWallet extends MoneyTransferEvent {
+final class TransferToWallet extends MoneyTransferEvent {
   final int fromWalletId;
   final int toWalletId;
   final double amount;
   final String note;
 
-  TransferToOwnWallet({
+  TransferToWallet({
     required this.fromWalletId,
     required this.toWalletId,
     required this.amount,

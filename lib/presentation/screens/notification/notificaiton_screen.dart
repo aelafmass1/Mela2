@@ -7,8 +7,6 @@ import 'package:transaction_mobile_app/presentation/screens/notification/compone
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../../data/models/notification_model.dart';
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 

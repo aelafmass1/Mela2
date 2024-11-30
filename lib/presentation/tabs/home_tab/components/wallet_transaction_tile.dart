@@ -1,5 +1,5 @@
+import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';

@@ -28,6 +28,7 @@ class TextFieldWidget extends StatelessWidget {
   final InputBorder? border;
   final bool? autoFocus;
   final TextStyle? hintTextStyle;
+  final int? maxLine;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -50,6 +51,7 @@ class TextFieldWidget extends StatelessWidget {
       this.contentPadding,
       this.border,
       this.autoFocus,
+      this.maxLine,
       this.hintTextStyle,
       this.errorText});
 
@@ -65,6 +67,7 @@ class TextFieldWidget extends StatelessWidget {
           FocusScope.of(context).unfocus();
         }
       },
+      maxLines: maxLine ?? 1,
       onChanged: onChanged,
       obscureText: obscurePassword,
       controller: controller,
