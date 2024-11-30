@@ -122,7 +122,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       } else {
                         if (_formKey.currentState?.validate() == true) {
                           context.read<MoneyTransferBloc>().add(
-                                TransferToOwnWallet(
+                                TransferToWallet(
                                   fromWalletId:
                                       transferFromWalletModel?.walletId ?? 0,
                                   toWalletId: transferToWalletId,

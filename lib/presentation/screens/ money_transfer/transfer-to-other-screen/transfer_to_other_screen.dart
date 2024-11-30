@@ -266,7 +266,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                 transferToWalletModel != null) {
                               scrollDown();
                               context.read<MoneyTransferBloc>().add(
-                                    TransferToOwnWallet(
+                                    TransferToWallet(
                                       amount: double.tryParse(
                                               amountController.text) ??
                                           0,

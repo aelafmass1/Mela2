@@ -175,4 +175,24 @@ class MoneyTransferRepository {
     }
     return processErrorResponse(data);
   }
+
+  Future<Map> rejectRequestMoney({
+    required String accessToken,
+    required int requestId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money/reject/$requestId',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
 }

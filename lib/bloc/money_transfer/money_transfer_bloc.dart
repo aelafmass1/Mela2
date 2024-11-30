@@ -18,7 +18,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
   MoneyTransferBloc({required this.repository})
       : super(MoneyTransferInitial()) {
     on<SendMoney>(_onSendMoney);
-    on<TransferToOwnWallet>(_onTransferToOwnWallet);
+    on<TransferToWallet>(_onTransferToOwnWallet);
     on<TransferToUnregisteredUser>(_onTransferToUnregisteredUser);
   }
 
@@ -90,7 +90,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
   }
 
   FutureOr<void> _onTransferToOwnWallet(
-      TransferToOwnWallet event, Emitter<MoneyTransferState> emit) async {
+      TransferToWallet event, Emitter<MoneyTransferState> emit) async {
     try {
       if (state is! MoneyTransferLoading) {
         emit(MoneyTransferLoading());
