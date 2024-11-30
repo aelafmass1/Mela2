@@ -88,7 +88,6 @@ class MoneyTransferRepository {
       // log(res.body);
 
       final data = jsonDecode(res.body);
-      log(res.body);
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         return data;
@@ -119,12 +118,59 @@ class MoneyTransferRepository {
         "amount": amount,
       }),
     );
-    // log(res.body);
 
     final data = jsonDecode(res.body);
-    log(res.body);
 
     if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> requestMoney({
+    required String accessToken,
+    required int requesterWalletId,
+    required double amount,
+    required String note,
+    required int userId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "requesterWalletId": requesterWalletId,
+        "recipientId": userId,
+        "amount": amount,
+        "note": note
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> fetchRequestMoneyDetail({
+    required String accessToken,
+    required int requestId,
+  }) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money/get/$requestId',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
       return data;
     }
     return processErrorResponse(data);

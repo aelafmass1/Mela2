@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:transaction_mobile_app/presentation/screens/transfer/components/search_receiver_page.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/components/search_receiver_page.dart';
 
 import '../../../../data/models/contact_status_model.dart';
 
