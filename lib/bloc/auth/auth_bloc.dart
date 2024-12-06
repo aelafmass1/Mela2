@@ -1,11 +1,16 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:image_picker/image_picker.dart';
+import 'package:jumio_mobile_sdk_flutter/jumio_mobile_sdk_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 
 import '../../data/repository/auth_repository.dart';
 
@@ -14,6 +19,7 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthRepository repository;
+
   AuthBloc({required this.repository}) : super(AuthInitial()) {
     on<SendOTP>(_onSendOTP);
     on<CreateAccount>(_onCreateAccount);
@@ -256,6 +262,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final token = res['successResponse']['jwtToken'];
 
         await storeToken(token);
+
         emit(LoginWithPincodeSuccess());
       }
     } on ServerException catch (error, stackTrace) {
@@ -270,6 +277,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  getJumioKycData() {}
   _onUploadProfilePicture(UploadProfilePicture event, Emitter emit) async {
     //
   }
@@ -358,9 +366,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         final data = res['successResponse'];
         final token = data['jwtToken'];
+
         await storeToken(token);
+
         storeDisplayName('${data['firstName']} ${data['lastName']}');
         storePhoneNumber(event.phoneNumber);
+        // InterceptedClient? client;
+        final client = ApiService().client;
+        try {
+          final resData = await client.get(
+            Uri.parse(
+              '$baseUrl/api/kyc/sdk-token',
+            ),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          );
+          const DATACENTER = 'SG';
+          final authorizationToken = jsonDecode(res['body']);
+          await Jumio.init(authorizationToken, DATACENTER);
+          final result = await Jumio.start({
+            // "background": "#AC3D9A",
+            // "primaryColor": "#FF5722",
+            // "loadingCircleIcon": "#F2F233",
+            // "loadingCirclePlain": "#57ffc7",
+            // "loadingCircleGradientStart": "#EC407A",
+            // "loadingCircleGradientEnd": "#bc2e41",
+            // "loadingErrorCircleGradientStart": "#AC3D9A",
+            // "loadingErrorCircleGradientEnd": "#C31322",
+            // "primaryButtonBackground": {"light": "#D900ff00", "dark": "#9Edd9E"}
+          });
+        } catch (e) {
+          print({'exception ----------------------------------------', e});
+        }
         emit(LoginUserSuccess());
       }
     } on ServerException catch (error, stackTrace) {
