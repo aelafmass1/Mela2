@@ -375,30 +375,56 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final client = ApiService().client;
         try {
           final resData = await client.get(
-            Uri.parse(
-              '$baseUrl/api/kyc/sdk-token',
-            ),
+            Uri.parse('$baseUrl/api/kyc/sdk-token'),
             headers: {
               'Authorization': 'Bearer $token',
               'Content-Type': 'application/json',
             },
           );
-          const DATACENTER = 'SG';
-          final authorizationToken = jsonDecode(res['body']);
-          await Jumio.init(authorizationToken, DATACENTER);
-          final result = await Jumio.start({
-            // "background": "#AC3D9A",
-            // "primaryColor": "#FF5722",
-            // "loadingCircleIcon": "#F2F233",
-            // "loadingCirclePlain": "#57ffc7",
-            // "loadingCircleGradientStart": "#EC407A",
-            // "loadingCircleGradientEnd": "#bc2e41",
-            // "loadingErrorCircleGradientStart": "#AC3D9A",
-            // "loadingErrorCircleGradientEnd": "#C31322",
-            // "primaryButtonBackground": {"light": "#D900ff00", "dark": "#9Edd9E"}
-          });
+
+          // Decode and parse the response
+          final Map<String, dynamic> responseData = jsonDecode(resData.body);
+
+          // Ensure the response is successful and has the required token
+          if (resData.statusCode == 200 &&
+              responseData['successResponse'] != null) {
+            const DATACENTER = 'US';
+            final authorizationToken = responseData['successResponse'];
+
+            // Initialize Jumio
+            final isInitialized =
+                await Jumio.init(authorizationToken, DATACENTER);
+            if (!isInitialized) {
+              print('Jumio initialization failed');
+              return;
+            }
+
+            // Start Jumio
+            final result = await Jumio.start({
+              // Optional: Customize appearance (uncomment and configure as needed)
+              // "background": "#AC3D9A",
+              // "primaryColor": "#FF5722",
+              // "loadingCircleIcon": "#F2F233",
+              // "loadingCirclePlain": "#57ffc7",
+              // "loadingCircleGradientStart": "#EC407A",
+              // "loadingCircleGradientEnd": "#bc2e41",
+              // "loadingErrorCircleGradientStart": "#AC3D9A",
+              // "loadingErrorCircleGradientEnd": "#C31322",
+              // "primaryButtonBackground": {"light": "#D900ff00", "dark": "#9Edd9E"}
+            });
+
+            print('Jumio result: $result');
+          } else {
+            // Handle error responses
+            final errorMessage =
+                responseData['errorResponse'] ?? 'Unknown error occurred.';
+            print('KYC Error: $errorMessage');
+          }
         } catch (e) {
-          print({'exception ----------------------------------------', e});
+          // Log unexpected errors
+          print({
+            'exception ----------------------------------------': e.toString()
+          });
         }
         emit(LoginUserSuccess());
       }
