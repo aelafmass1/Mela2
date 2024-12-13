@@ -1,16 +1,11 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
 import '../../../config/routing.dart';
-import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';

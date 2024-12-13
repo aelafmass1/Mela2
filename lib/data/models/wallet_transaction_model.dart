@@ -42,7 +42,7 @@ class WalletTransactionModel {
       fromWalletBalance: fromWalletBalance ?? this.fromWalletBalance,
       amount: amount ?? this.amount,
       transactionType: transactionType ?? this.transactionType,
-      timestamp: transactionTimestamp ?? this.timestamp,
+      timestamp: transactionTimestamp ?? timestamp,
       note: note ?? this.note,
     );
   }
