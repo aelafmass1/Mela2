@@ -203,8 +203,11 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
               _debounce = Timer(const Duration(milliseconds: 200), () {
                 filteredContacts = contacts.where((contact) {
                   final name = contact.displayName.toLowerCase();
-                  final phoneNumber = contact.phones.first.number.toLowerCase();
+                    final phoneNumber = contact.phones.isNotEmpty ? contact.phones.first.number.toLowerCase() : null;
                   final searchTextLower = text.toLowerCase();
+                  if (phoneNumber == null) {
+                    return name.contains(searchTextLower.replaceAll(" ", ''));
+                  }
                   return name.contains(searchTextLower.replaceAll(" ", '')) ||
                       phoneNumber
                           .replaceAll(" ", "")
@@ -323,7 +326,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                 contactStatus: 'Selected',
                 userId: -1,
                 contactName: contact.displayName,
-                contactPhoneNumber: contact.phones.first.number,
+                contactPhoneNumber: contact.phones.isNotEmpty ? contact.phones.first.number : '',
                 wallets: [],
               ),
             );
