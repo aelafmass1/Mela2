@@ -88,4 +88,22 @@ class ContactRepository {
     }
     return [processErrorResponse(data)];
   }
+
+  Future<Map<String, dynamic>> searchContactsByTag({
+    required String accessToken,
+    required String query,
+  }) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/search/user?userTag=$query'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data["response"];
+    }
+    return processErrorResponse(data);
+  }
 }

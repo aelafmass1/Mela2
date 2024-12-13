@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/contact.dart';
 
 import 'wallet_model.dart';
 
@@ -67,6 +68,17 @@ class ContactStatusModel {
       contactPhoneNumber: map['contactPhoneNumber'] != null
           ? map['contactPhoneNumber'] as String
           : null,
+    );
+  }
+
+  factory ContactStatusModel.fromFlutterContact(Contact contact) {
+    return ContactStatusModel(
+      contactId: contact.id,
+      contactStatus: 'not_registered',
+      userId: 0,
+      contactName: contact.displayName,
+      contactPhoneNumber:
+          contact.phones.isNotEmpty ? contact.phones.first.number : null,
     );
   }
 

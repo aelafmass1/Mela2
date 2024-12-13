@@ -654,13 +654,13 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
   _buildTransferTo() {
     return BlocListener<ContactBloc, ContactState>(
       listener: (context, state) {
-        if (state is ContactSuccess) {
-          if (state.contacts.isNotEmpty) {
+        if (state is ContactFilterSuccess) {
+          if (state.remoteContacts.isNotEmpty) {
             final melaMemberContacts =
-                state.contacts.map((c) => c.contactId).toList();
+                state.filteredContacts.map((c) => c.contactId).toList();
             if (melaMemberContacts.contains(selectedContact?.contactId)) {
               setState(() {
-                selectedContact = state.contacts
+                selectedContact = state.filteredContacts
                     .firstWhere(
                         (c) => c.contactId == selectedContact?.contactId)
                     .copyWith(
