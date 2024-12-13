@@ -1250,7 +1250,7 @@ class _SentTabState extends State<SentTab> {
               const SizedBox(height: 30),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15),
-                child: const TextWidget(
+                child: TextWidget(
                   text: 'Payment Methods',
                   weight: FontWeight.w700,
                   type: TextType.small,

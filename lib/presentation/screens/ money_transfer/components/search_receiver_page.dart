@@ -201,10 +201,14 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
             } else {
               if (_debounce?.isActive ?? false) _debounce!.cancel();
               _debounce = Timer(const Duration(milliseconds: 200), () {
+                
                 filteredContacts = contacts.where((contact) {
                   final name = contact.displayName.toLowerCase();
-                  final phoneNumber = contact.phones.first.number.toLowerCase();
+                  final phoneNumber = contact.phones.isNotEmpty ? contact.phones.first.number.toLowerCase() : null;
                   final searchTextLower = text.toLowerCase();
+                  if (phoneNumber == null) {
+                    return false;
+                  }
                   return name.contains(searchTextLower.replaceAll(" ", '')) ||
                       phoneNumber
                           .replaceAll(" ", "")
@@ -214,6 +218,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                   isSearching = true;
                   filteredContacts = filteredContacts;
                 });
+                
               });
             }
           },
@@ -313,7 +318,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                   state.contacts.firstWhere((c) => c.contactId == contact.id);
               widget.onSelected(selectedContact.copyWith(
                 contactName: contact.displayName,
-                contactPhoneNumber: contact.phones.first.number,
+                contactPhoneNumber: contact.phones.isNotEmpty ? contact.phones.first.number : '',
               ));
             }
           } else {
@@ -323,7 +328,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                 contactStatus: 'Selected',
                 userId: -1,
                 contactName: contact.displayName,
-                contactPhoneNumber: contact.phones.first.number,
+                contactPhoneNumber: contact.phones.isNotEmpty ? contact.phones.first.number : '',
                 wallets: [],
               ),
             );
@@ -364,7 +369,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
         ],
       ),
       subtitle: TextWidget(
-        text: contact.phones.first.number,
+        text: contact.phones.isNotEmpty ? contact.phones.first.number : 'No phone no',
         fontSize: 10,
         color: ColorName.grey.shade500,
         weight: FontWeight.w400,
