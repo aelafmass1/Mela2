@@ -129,7 +129,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final client = ApiService().client;
   late AuthRepository authRepo;
   late BanksRepository banksRepository;
-  late ContactRepository contactRepository;
+  late ContactRepositoryImpl contactRepository;
   late CurrencyRateRepository currencyRateRepository;
   late CurrencyRepository currencyRepository;
   late EqubRepository equbRepository;
@@ -145,7 +145,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   void initState() {
     authRepo = AuthRepository(client: client);
     banksRepository = BanksRepository(client: client);
-    contactRepository = ContactRepository(client: client);
+    contactRepository = ContactRepositoryImpl(client: client);
     currencyRateRepository = CurrencyRateRepository(client: client);
     currencyRepository = CurrencyRepository(client: client);
     equbRepository = EqubRepository(client: client);

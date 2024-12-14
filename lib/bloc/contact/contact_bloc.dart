@@ -1,7 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/contact_status_model.dart';
 import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
 
@@ -12,24 +12,21 @@ part 'contact_state.dart';
 
 class ContactBloc extends Bloc<ContactEvent, ContactState> {
   final ContactRepository repository;
-  ContactBloc({required this.repository}) : super(ContactInitial()) {
+  ContactBloc({required this.repository}) : super(const ContactInitial()) {
     on<FetchContacts>(_onFetchContacts);
     on<SearchContacts>(_onSearchContacts);
   }
 
   /// Handles the logic for checking the user's contacts and retrieving their contact status.
   ///
-  /// This method is called when the [CheckMyContacts] event is dispatched. It first checks if the current state is not [ContactLoading], then emits the [ContactLoading] state. It then retrieves the access token, and uses the [ContactRepository] to check the user's contacts. If the response is empty, it emits a [ContactSuccess] state with an empty list of contacts. If the response contains an error, it emits a [ContactFail] state with the error message. Otherwise, it maps the response to a list of [ContactStatusModel] and emits a [ContactSuccess] state with the list of contacts.
+  /// This method is called when the [CheckMyContacts] event is dispatched. It first checks if the current state is not [ContactLoading], then emits the [ContactLoading] state. It then retrieves the access token, and uses the [ContactRepositoryImpl] to check the user's contacts. If the response is empty, it emits a [ContactSuccess] state with an empty list of contacts. If the response contains an error, it emits a [ContactFail] state with the error message. Otherwise, it maps the response to a list of [ContactStatusModel] and emits a [ContactSuccess] state with the list of contacts.
   ///
   /// If an error occurs during the process, it logs the error and emits a [ContactFail] state with the error message.
   _onFetchContacts(FetchContacts event, Emitter emit) async {
     try {
-      emit(ContactLoading());
-      final contacts = await FlutterContacts.getContacts(withProperties: true);
-
-      final token = await getToken();
+      emit(const ContactLoading());
+      var contacts = await repository.fetchLocalContacts();
       final res = await repository.checkMyContacts(
-        accessToken: token!,
         contacts: contacts,
       );
       var defaultContacts = contacts
@@ -40,10 +37,10 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         return emit(ContactFilterSuccess(
             filteredContacts: defaultContacts,
             localContacs: contacts,
-            remoteContacts: []));
+            remoteContacts: const []));
       }
       if (res.first.containsKey('error')) {
-        return ContactFail(message: res.first['error']);
+        return emit(ContactFail(message: res.first['error']));
       }
 
       final data = res.map((c) => c["contactId"] as String).toList();
@@ -77,10 +74,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
 
       final query = event.query.toLowerCase().replaceAll(' ', '');
       if (query.startsWith('@') && query.length > 3) {
-        final token = await getToken();
-
         final res = await repository.searchContactsByTag(
-          accessToken: token!,
           query: query.substring(1),
         );
 
