@@ -81,7 +81,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
 
         final res = await repository.searchContactsByTag(
           accessToken: token!,
-          query: query,
+          query: query.substring(1),
         );
 
         if (res.containsKey('error')) {

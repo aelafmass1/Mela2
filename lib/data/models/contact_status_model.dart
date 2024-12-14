@@ -53,21 +53,11 @@ class ContactStatusModel {
 
   factory ContactStatusModel.fromMap(Map map) {
     return ContactStatusModel(
-      contactId: map['contactId'] as String,
-      contactStatus: map['contactStatus'] as String,
-      userId: map['userId'] as int,
-      wallets: map['wallets'] != null
-          ? List<WalletModel>.from(
-              (map['wallets'] as List).map<WalletModel?>(
-                (x) => WalletModel.fromMap(x as Map),
-              ),
-            )
-          : null,
-      contactName:
-          map['contactName'] != null ? map['contactName'] as String : null,
-      contactPhoneNumber: map['contactPhoneNumber'] != null
-          ? map['contactPhoneNumber'] as String
-          : null,
+      contactId: "",
+      contactStatus: "registered",
+      userId: map['id'] as int,
+      contactName: "${map['firstName']} ${map['lastName']}",
+      contactPhoneNumber: map['userTag'] as String,
     );
   }
 
