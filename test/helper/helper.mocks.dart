@@ -44,7 +44,7 @@ class MockContactRepository extends _i1.Mock implements _i2.ContactRepository {
       ) as _i3.Future<List<dynamic>>);
 
   @override
-  _i3.Future<Map<String, dynamic>> searchContactsByTag(
+  _i3.Future<List<Map<String, dynamic>>> searchContactsByTag(
           {required String? query}) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -52,9 +52,9 @@ class MockContactRepository extends _i1.Mock implements _i2.ContactRepository {
           [],
           {#query: query},
         ),
-        returnValue:
-            _i3.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
-      ) as _i3.Future<Map<String, dynamic>>);
+        returnValue: _i3.Future<List<Map<String, dynamic>>>.value(
+            <Map<String, dynamic>>[]),
+      ) as _i3.Future<List<Map<String, dynamic>>>);
 
   @override
   _i3.Future<List<_i4.Contact>> fetchLocalContacts() => (super.noSuchMethod(
