@@ -39,6 +39,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
           if (res.containsKey('error')) {
             return emit(MoneyTransferFail(reason: res['error']));
           }
+          res["name"] = event.name;
           final walletTransaction =
               WalletTransactionModel.fromMap(res['successResponse'] as Map);
           emit(MoneyTransferUnregisteredUserSuccess(
