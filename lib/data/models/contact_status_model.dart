@@ -57,7 +57,7 @@ class ContactStatusModel {
       contactStatus: "registered",
       userId: map['id'] as int,
       contactName: "${map['firstName']} ${map['lastName']}",
-      contactPhoneNumber: map['userTag'] as String,
+      contactPhoneNumber: (map['id'] as int).toString(),
     );
   }
 

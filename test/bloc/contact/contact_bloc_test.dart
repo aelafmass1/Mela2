@@ -1,17 +1,12 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
-import 'package:transaction_mobile_app/data/repository/contact_repository.dart';
 
 import '../../helper/helper.mocks.dart';
 
-// Generate mock classes
-
-@GenerateMocks([ContactRepository])
 void main() {
   late ContactBloc contactBloc;
   late MockContactRepository mockRepository;
@@ -39,25 +34,16 @@ void main() {
     {"error": "Something went wrong"}
   ];
 
-  final mockTagSearchResponse = {
-    "id": 0,
-    "firstName": "Tagged",
-    "middleName": "string",
-    "lastName": "User",
-    "emailVerified": true,
-    "phoneVerified": true,
-    "profilePic": "string",
-    "enabled": true,
-    "anonymous": true,
-    "userTag": "user123",
-    "roles": ["string"],
-    "authorities": [
-      {"authority": "string"}
-    ],
-    "credentialsNonExpired": true,
-    "accountNonLocked": true,
-    "accountNonExpired": true
-  };
+  final mockTagSearchResponse = [
+    {
+      "id": 0,
+      "firstName": "Tagged",
+      "lastName": "User",
+      "enabled": true,
+      "createdDate": "2024-12-15T13:51:44.052Z",
+      "userTag": "user123"
+    }
+  ];
 
   setUp(() {
     mockRepository = MockContactRepository();
@@ -172,7 +158,9 @@ void main() {
 
         when(mockRepository.searchContactsByTag(
           query: anyNamed('query'),
-        )).thenAnswer((_) async => {'error': 'Tag not found'});
+        )).thenAnswer((_) async => [
+              {'error': 'Tag not found'}
+            ]);
       },
       build: () => contactBloc,
       act: (bloc) => bloc.add(SearchContacts(query: '@nonexistent')),

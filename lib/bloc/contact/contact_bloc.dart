@@ -77,11 +77,14 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         final res = await repository.searchContactsByTag(
           query: query.substring(1),
         );
-
-        if (res.containsKey('error')) {
+        if (res.isEmpty) {
+          filteredContacts = [];
+        } else if (res.first.containsKey('error')) {
           filteredContacts = [];
         } else {
-          filteredContacts = [ContactStatusModel.fromMap(res)];
+          filteredContacts = res
+              .map((contact) => ContactStatusModel.fromMap(contact))
+              .toList();
         }
       } else {
         filteredContacts = state.localContacs
