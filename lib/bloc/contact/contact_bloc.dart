@@ -88,14 +88,15 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
             .where((contact) {
               final name = contact.displayName.toLowerCase();
               final phoneNumber = contact.phones.isNotEmpty
-                  ? contact.phones.first.number.toLowerCase()
+                  ? contact.phones.first.number
+                      .toLowerCase()
+                      .replaceAll(' ', '')
                   : null;
 
               if (phoneNumber == null) {
                 return name.contains(query);
               }
-              return name.contains(query.toLowerCase()) ||
-                  phoneNumber.replaceAll(" ", "").contains(query.toLowerCase());
+              return name.contains(query) || phoneNumber.contains(query);
             })
             .map((contact) => ContactStatusModel.fromFlutterContact(contact))
             .toList();
