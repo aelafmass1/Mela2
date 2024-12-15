@@ -71,6 +71,7 @@ class WalletTransactionModel {
       transactionType: map['transactionType'] as String?,
       timestamp: DateTime.parse(map['timestamp']),
       note: map['note'] as String?,
+      to: map['name'] as String?,
     );
   }
 
