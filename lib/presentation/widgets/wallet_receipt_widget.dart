@@ -74,7 +74,7 @@ class WalletReceiptWidget extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                     Positioned(
-                        top: 95,
+                        top: 80,
                         left: 0,
                         right: 0,
                         child: Align(
@@ -95,7 +95,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                   weight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 45),
+                              const SizedBox(height: 35),
                               _buildTransactionDetail(
                                   key: 'Transaction ID',
                                   value: walletTransactionModel.transactionId
