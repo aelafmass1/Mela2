@@ -31,7 +31,7 @@ class LifecycleManager extends WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       if (onLogout == null) return;
-      _timer = Timer(const Duration(seconds: 30), () {
+      _timer = Timer(const Duration(hours: 1), () {
         onLogout?.call(); // Trigger logout navigation
       });
     } else if (state == AppLifecycleState.resumed) {
