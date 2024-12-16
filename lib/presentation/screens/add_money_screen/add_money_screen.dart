@@ -61,7 +61,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
   ReceiverInfo? receiverInfo;
 
-  LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
@@ -143,14 +142,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     final metadata = event.metadata.description();
     final error = event.error?.description();
     log("onExit metadata: $metadata, error: $error, event: $event");
-  }
-
-  void _createLinkTokenConfiguration(String linkToken) {
-    setState(() {
-      _configuration = LinkTokenConfiguration(
-        token: linkToken,
-      );
-    });
   }
 
   /// Displays a payment sheet using the Stripe SDK.
@@ -274,7 +265,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       builder: (context, state) {
                         return ButtonWidget(
                             child: paymentState is PaymentIntentLoading ||
-                                    plaidState is PlaidPublicTokenLoading ||
                                     state is AddFundToWalletLoading
                                 ? const LoadingWidget()
                                 : TextWidget(
@@ -418,27 +408,13 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             );
           } else if (state is PlaidLinkTokenSuccess) {
             context.pop();
-
-            _createLinkTokenConfiguration(state.linkToken);
-            await PlaidLink.create(configuration: _configuration!);
-            await PlaidLink.open();
-          } else if (state is PlaidPublicTokenFail) {
-            showSnackbar(
-              context,
-              title: 'Error',
-              description: state.reason,
-            );
-          } else if (state is PlaidPublicTokenSuccess) {
           } else if (state is AddBankAccountFail) {
             showSnackbar(
               context,
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
-            debugPrint("Here is the main issue");
-            context
-                .read<PaymentCardBloc>()
-                .add(AddPaymentCardFromArray(card: state.paymentCard));
+            context.read<PaymentCardBloc>().add(FetchPaymentCards());
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
