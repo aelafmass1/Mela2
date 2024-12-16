@@ -104,10 +104,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         }
 
         emit(PaymentCardSuccess(
-          paymentCards: [
-            ...state.paymentCards,
-            PaymentCardModel.fromMap(res as Map<String, dynamic>)
-          ],
+          paymentCards: state.paymentCards,
         ));
       }
     } on ServerException catch (error, stackTrace) {
