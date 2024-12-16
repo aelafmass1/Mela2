@@ -66,7 +66,7 @@ class ReceiptPage extends StatelessWidget {
                       fit: BoxFit.contain,
                     ),
                     Positioned(
-                        top: 95,
+                        top: 80,
                         left: 0,
                         right: 0,
                         child: Align(
@@ -87,7 +87,7 @@ class ReceiptPage extends StatelessWidget {
                                   weight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 45),
+                              const SizedBox(height: 35),
                               _buildTransactionDetail(
                                   key: 'Date',
                                   value: DateFormat('MMMM dd, yyyy')
@@ -101,8 +101,9 @@ class ReceiptPage extends StatelessWidget {
                               ),
                               _buildTransactionDetail(
                                 key: 'From',
-                                value:
-                                    '**** **** ${receiverInfo.lastDigit ?? ''}',
+                                value: receiverInfo.lastDigit == null
+                                    ? 'You'
+                                    : '**** **** ${receiverInfo.lastDigit ?? ''}',
                               ),
                               _buildTransactionDetail(
                                 key: 'Recipient Amount',

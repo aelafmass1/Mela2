@@ -286,6 +286,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                       amount: double.tryParse(
                                               amountController.text) ??
                                           0,
+                                      name: selectedContact?.contactName ?? '',
                                       senderWalletId:
                                           transferFromWalletModel?.walletId ??
                                               0,

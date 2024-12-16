@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
@@ -9,7 +10,8 @@ import '../../core/constants/url_constants.dart';
 
 abstract class ContactRepository {
   Future<List> checkMyContacts({required List<Contact> contacts});
-  Future<Map<String, dynamic>> searchContactsByTag({required String query});
+  Future<List<Map<String, dynamic>>> searchContactsByTag(
+      {required String query});
   Future<List<Contact>> fetchLocalContacts();
 }
 
@@ -85,12 +87,13 @@ class ContactRepositoryImpl implements ContactRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> searchContactsByTag({
+  Future<List<Map<String, dynamic>>> searchContactsByTag({
     required String query,
   }) async {
     final token = await getToken();
+    debugPrint("token $token");
     final res = await client.get(
-      Uri.parse('$baseUrl/search/user?userTag=$query'),
+      Uri.parse('$baseUrl/search/user?prefix=$query'),
       headers: {
         'Authorization': 'Bearer $token',
       },
@@ -98,9 +101,11 @@ class ContactRepositoryImpl implements ContactRepository {
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return data["response"];
+      return (data["response"] as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList();
     }
-    return processErrorResponse(data);
+    return [processErrorResponse(data)];
   }
 
   @override

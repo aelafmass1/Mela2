@@ -32,9 +32,11 @@ final class TransferToUnregisteredUser extends MoneyTransferEvent {
   final String phoneNumber;
   final double amount;
   final int senderWalletId;
+  final String name;
 
   TransferToUnregisteredUser(
       {required this.phoneNumber,
       required this.amount,
-      required this.senderWalletId});
+      required this.senderWalletId,
+      required this.name});
 }
