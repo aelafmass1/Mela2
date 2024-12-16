@@ -36,4 +36,8 @@ final class AddBankAccountFail extends PlaidState {
   AddBankAccountFail({required this.reason});
 }
 
-final class AddBankAccountSuccess extends PlaidState {}
+final class AddBankAccountSuccess extends PlaidState {
+  final PaymentCardModel paymentCard;
+
+  AddBankAccountSuccess({required this.paymentCard});
+}

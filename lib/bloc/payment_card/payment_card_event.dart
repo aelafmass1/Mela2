@@ -9,3 +9,9 @@ final class AddPaymentCard extends PaymentCardEvent {
 final class FetchPaymentCards extends PaymentCardEvent {}
 
 final class ResetPaymentCard extends PaymentCardEvent {}
+
+final class AddPaymentCardFromArray extends PaymentCardEvent {
+  final PaymentCardModel card;
+
+  AddPaymentCardFromArray({required this.card});
+}

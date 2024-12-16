@@ -125,16 +125,13 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   void _onEvent(LinkEvent event) {
     final name = event.name;
     final metadata = event.metadata.description();
-    debugPrint("onEvent: $name, metadata: $metadata, event: $event");
     log("onEvent: $name, metadata: $metadata, event: $event");
   }
 
   void _onSuccess(LinkSuccess event) {
     final token = event.publicToken;
     final metadata = event.metadata.description();
-    debugPrint("onSuccess: $token, metadata: $metadata,  event: $event");
     log("onSuccess: $token, metadata: $metadata,  event: $event");
-    setState(() => publicToken = event.publicToken);
     context.read<PlaidBloc>().add(
           AddBankAccount(
             publicToken: publicToken ?? '',
@@ -145,7 +142,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   void _onExit(LinkExit event) {
     final metadata = event.metadata.description();
     final error = event.error?.description();
-    debugPrint("onExit metadata: $metadata, error: $error, event: $event");
     log("onExit metadata: $metadata, error: $error, event: $event");
   }
 
@@ -440,7 +436,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             );
           } else if (state is AddBankAccountSuccess) {
             debugPrint("Here is the main issue");
-            context.read<PaymentCardBloc>().add(FetchPaymentCards());
+            context
+                .read<PaymentCardBloc>()
+                .add(AddPaymentCardFromArray(card: state.paymentCard));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
