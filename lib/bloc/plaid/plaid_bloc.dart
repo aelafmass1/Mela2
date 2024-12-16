@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
@@ -24,6 +25,7 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         final token = await getToken();
 
         final res = await repository.addBankAccount(token!, event.publicToken);
+        debugPrint("add payment result: ${res.toString()}");
         if (res.containsKey('error')) {
           return emit(AddBankAccountFail(reason: res['error']));
         }

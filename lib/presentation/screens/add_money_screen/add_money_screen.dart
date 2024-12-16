@@ -125,23 +125,28 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   void _onEvent(LinkEvent event) {
     final name = event.name;
     final metadata = event.metadata.description();
-    log("onEvent: $name, metadata: $metadata");
+    debugPrint("onEvent: $name, metadata: $metadata, event: $event");
+    log("onEvent: $name, metadata: $metadata, event: $event");
   }
 
   void _onSuccess(LinkSuccess event) {
     final token = event.publicToken;
     final metadata = event.metadata.description();
-    log("onSuccess: $token, metadata: $metadata");
+    debugPrint("onSuccess: $token, metadata: $metadata,  event: $event");
+    log("onSuccess: $token, metadata: $metadata,  event: $event");
     setState(() => publicToken = event.publicToken);
-    context
-        .read<PlaidBloc>()
-        .add(ExchangePublicToken(publicToken: publicToken!));
+    context.read<PlaidBloc>().add(
+          AddBankAccount(
+            publicToken: publicToken ?? '',
+          ),
+        );
   }
 
   void _onExit(LinkExit event) {
     final metadata = event.metadata.description();
     final error = event.error?.description();
-    log("onExit metadata: $metadata, error: $error");
+    debugPrint("onExit metadata: $metadata, error: $error, event: $event");
+    log("onExit metadata: $metadata, error: $error, event: $event");
   }
 
   void _createLinkTokenConfiguration(String linkToken) {
@@ -428,17 +433,13 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               description: state.reason,
             );
           } else if (state is PlaidPublicTokenSuccess) {
-            context.read<PlaidBloc>().add(
-                  AddBankAccount(
-                    publicToken: publicToken ?? '',
-                  ),
-                );
           } else if (state is AddBankAccountFail) {
             showSnackbar(
               context,
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
+            debugPrint("Here is the main issue");
             context.read<PaymentCardBloc>().add(FetchPaymentCards());
           }
         }),
