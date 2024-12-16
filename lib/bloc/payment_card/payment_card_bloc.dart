@@ -21,7 +21,6 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     on<AddPaymentCard>(_onPaymentCard);
     on<FetchPaymentCards>(_onFetchPaymentCards);
     on<ResetPaymentCard>(_onResetPaymentCard);
-    on<AddPaymentCardFromArray>(_onAddPaymentCardFromArray);
   }
 
   _onResetPaymentCard(ResetPaymentCard event, Emitter emit) {
@@ -122,34 +121,6 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
               'Failed to process card. Please try again.',
           paymentCards: state.paymentCards,
         ),
-      );
-    } catch (error) {
-      log(error.toString());
-      emit(
-        PaymentCardFail(
-          reason: error.toString(),
-          paymentCards: state.paymentCards,
-        ),
-      );
-    }
-  }
-
-  _onAddPaymentCardFromArray(
-      AddPaymentCardFromArray event, Emitter emit) async {
-    try {
-      if (state is! PaymentCardLoading) {
-        emit(PaymentCardLoading(paymentCards: state.paymentCards));
-
-        emit(PaymentCardSuccess(
-          paymentCards: [...state.paymentCards, event.card],
-        ));
-      }
-    } on ServerException catch (error, stackTrace) {
-      emit(PaymentCardFail(
-          reason: error.message, paymentCards: state.paymentCards));
-      await Sentry.captureException(
-        error,
-        stackTrace: stackTrace,
       );
     } catch (error) {
       log(error.toString());
