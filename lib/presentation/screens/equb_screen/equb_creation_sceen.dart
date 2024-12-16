@@ -77,7 +77,7 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
         _contacts = contacts;
       });
       // ignore: use_build_context_synchronously
-      context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
+      context.read<ContactBloc>().add(FetchContacts());
     } else {
       // context.pushNamed(RouteName.contactPermission, extra: () {
       //   setState(() {
@@ -172,11 +172,12 @@ class _EqubCreationScreenState extends State<EqubCreationScreen> {
             children: [
               BlocListener<ContactBloc, ContactState>(
                 listener: (context, state) {
-                  if (state is ContactSuccess) {
-                    if (state.contacts.isNotEmpty) {
+                  if (state is ContactFilterSuccess) {
+                    if (state.remoteContacts.isNotEmpty) {
                       setState(() {
-                        melaMemberContacts =
-                            state.contacts.map((c) => c.contactId).toList();
+                        melaMemberContacts = state.filteredContacts
+                            .map((c) => c.contactId)
+                            .toList();
                       });
                     }
                   }

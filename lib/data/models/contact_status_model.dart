@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/contact.dart';
 
 import 'wallet_model.dart';
 
@@ -52,21 +53,22 @@ class ContactStatusModel {
 
   factory ContactStatusModel.fromMap(Map map) {
     return ContactStatusModel(
-      contactId: map['contactId'] as String,
-      contactStatus: map['contactStatus'] as String,
-      userId: map['userId'] as int,
-      wallets: map['wallets'] != null
-          ? List<WalletModel>.from(
-              (map['wallets'] as List).map<WalletModel?>(
-                (x) => WalletModel.fromMap(x as Map),
-              ),
-            )
-          : null,
-      contactName:
-          map['contactName'] != null ? map['contactName'] as String : null,
-      contactPhoneNumber: map['contactPhoneNumber'] != null
-          ? map['contactPhoneNumber'] as String
-          : null,
+      contactId: "",
+      contactStatus: "registered",
+      userId: map['id'] as int,
+      contactName: "${map['firstName']} ${map['lastName']}",
+      contactPhoneNumber: map['userTag'] as String,
+    );
+  }
+
+  factory ContactStatusModel.fromFlutterContact(Contact contact) {
+    return ContactStatusModel(
+      contactId: contact.id,
+      contactStatus: 'not_registered',
+      userId: 0,
+      contactName: contact.displayName,
+      contactPhoneNumber:
+          contact.phones.isNotEmpty ? contact.phones.first.number : null,
     );
   }
 

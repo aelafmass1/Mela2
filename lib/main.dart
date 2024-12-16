@@ -92,30 +92,39 @@ void main() async {
   }
 
   /// Initialize Sentry for crash reporting and error tracking.
-  await SentryFlutter.init(
-    (options) {
-      options.dsn =
-          'https://b3a58e9d555b70af3cdc4783b47a74ad@o4508032233308160.ingest.us.sentry.io/4508032245235712';
+  if (kReleaseMode) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn =
+            'https://b3a58e9d555b70af3cdc4783b47a74ad@o4508032233308160.ingest.us.sentry.io/4508032245235712';
 
-      // Set tracesSampleRate to 1.0 to capture 100% of transactions for trWacing.
-      // We recommend adjusting this value in production.
-      options.tracesSampleRate = 1.0;
-      // The sampling rate for profiling is relative to tracesSampleRate
-      // Setting to 1.0 will profile 100% of sampled transactions:
-      options.profilesSampleRate = 1.0;
-    },
-    appRunner: () => SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]).then(
-      (value) => runApp(
-        DevicePreview(
-          enabled: kIsWeb,
-          builder: (_) => const MainApp(),
+        // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
+        // We recommend adjusting this value in production.
+        options.tracesSampleRate = 1.0;
+        // The sampling rate for profiling is relative to tracesSampleRate
+        // Setting to 1.0 will profile 100% of sampled transactions:
+        options.profilesSampleRate = 1.0;
+      },
+      appRunner: () => SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]).then(
+        (value) => runApp(
+          DevicePreview(
+            enabled: kIsWeb,
+            builder: (_) => const MainApp(),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  } else {
+    runApp(
+      DevicePreview(
+        enabled: kIsWeb,
+        builder: (_) => const MainApp(),
+      ),
+    );
+  }
 }
 
 class MainApp extends StatefulWidget {
@@ -129,7 +138,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final client = ApiService().client;
   late AuthRepository authRepo;
   late BanksRepository banksRepository;
-  late ContactRepository contactRepository;
+  late ContactRepositoryImpl contactRepository;
   late CurrencyRateRepository currencyRateRepository;
   late CurrencyRepository currencyRepository;
   late EqubRepository equbRepository;
@@ -145,7 +154,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   void initState() {
     authRepo = AuthRepository(client: client);
     banksRepository = BanksRepository(client: client);
-    contactRepository = ContactRepository(client: client);
+    contactRepository = ContactRepositoryImpl(client: client);
     currencyRateRepository = CurrencyRateRepository(client: client);
     currencyRepository = CurrencyRepository(client: client);
     equbRepository = EqubRepository(client: client);

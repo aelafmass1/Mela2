@@ -35,36 +35,14 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
 
   Timer? _debounce;
 
-  List<Contact> contacts = [];
-  List<Contact> filteredContacts = [];
-
-  List<String> melaMemberContacts = [];
-
   bool isPermissionDenied = false;
-  bool isSearching = false;
 
   Future<void> _fetchContacts() async {
     try {
       if (kIsWeb) return;
 
       if (await FlutterContacts.requestPermission(readonly: true)) {
-        List<Contact> c =
-            await FlutterContacts.getContacts(withProperties: true);
-        setState(() {
-          contacts = c;
-        });
-        // if (searchFocusNode.hasFocus == false) {
-        //   searchFocusNode.requestFocus();
-        // }
-        final contactState = context.read<ContactBloc>().state;
-        if (contactState is! ContactSuccess) {
-          context.read<ContactBloc>().add(CheckMyContacts(contacts: contacts));
-        } else if (contactState.contacts.isNotEmpty) {
-          setState(() {
-            melaMemberContacts =
-                contactState.contacts.map((c) => c.contactId).toList();
-          });
-        }
+        context.read<ContactBloc>().add(FetchContacts());
       } else {
         setState(() {
           isPermissionDenied = true;
@@ -176,14 +154,13 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   _buildSearchField() {
     return BlocListener<ContactBloc, ContactState>(
       listener: (context, state) {
-        if (state is ContactSuccess) {
-          if (state.contacts.isNotEmpty) {
-            setState(() {
-              melaMemberContacts =
-                  state.contacts.map((c) => c.contactId).toList();
-            });
-          }
-        } else if (state is ContactFail) {
+        if (state is ContactFail) {
+          showSnackbar(
+            context,
+            description: state.message,
+          );
+        }
+        if (state is ContactFilterFailed) {
           showSnackbar(
             context,
             description: state.message,
@@ -194,33 +171,10 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
         width: 100.sw,
         child: TextFieldWidget(
           onChanged: (text) {
-            if (text.isEmpty) {
-              setState(() {
-                isSearching = false;
-              });
-            } else {
-              if (_debounce?.isActive ?? false) _debounce!.cancel();
-              _debounce = Timer(const Duration(milliseconds: 200), () {
-                
-                filteredContacts = contacts.where((contact) {
-                  final name = contact.displayName.toLowerCase();
-                  final phoneNumber = contact.phones.isNotEmpty ? contact.phones.first.number.toLowerCase() : null;
-                  final searchTextLower = text.toLowerCase();
-                  if (phoneNumber == null) {
-                    return false;
-                  }
-                  return name.contains(searchTextLower.replaceAll(" ", '')) ||
-                      phoneNumber
-                          .replaceAll(" ", "")
-                          .contains(searchTextLower.replaceAll(" ", ""));
-                }).toList();
-                setState(() {
-                  isSearching = true;
-                  filteredContacts = filteredContacts;
-                });
-                
-              });
-            }
+            if (_debounce?.isActive ?? false) _debounce!.cancel();
+            _debounce = Timer(const Duration(milliseconds: 200), () {
+              context.read<ContactBloc>().add(SearchContacts(query: text));
+            });
           },
           border: InputBorder.none,
           hintText: 'Search by @username, name or phone number',
@@ -272,34 +226,27 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
         padding: const EdgeInsets.only(top: 20),
         child: BlocBuilder<ContactBloc, ContactState>(
           builder: (context, state) {
-            if (isSearching) {
+            if (state is ContactFilterSuccess) {
               return ListView.separated(
                 itemBuilder: (context, index) {
                   return _buildContactTile(
-                    filteredContacts[index],
-                  );
+                      state.filteredContacts[index],
+                      state.filteredContacts[index].contactStatus !=
+                              "not_registered" ||
+                          state.remoteContacts.contains(
+                              state.filteredContacts[index].contactId));
                 },
                 separatorBuilder: (context, index) => Divider(
                   color: ColorName.grey.shade100,
                   height: 0.1,
                   thickness: 0.5,
                 ),
-                itemCount: filteredContacts.length,
+                itemCount: state.filteredContacts.length,
               );
+            } else if (state is ContactLoading) {
+              return const Center(child: CircularProgressIndicator());
             } else {
-              return ListView.separated(
-                itemBuilder: (context, index) {
-                  return _buildContactTile(
-                    contacts[index],
-                  );
-                },
-                separatorBuilder: (context, index) => Divider(
-                  color: ColorName.grey.shade100,
-                  height: 0.1,
-                  thickness: 0.5,
-                ),
-                itemCount: contacts.length,
-              );
+              return Container();
             }
           },
         ),
@@ -307,32 +254,12 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
     );
   }
 
-  _buildContactTile(Contact contact) {
+  _buildContactTile(ContactStatusModel contact, bool isMelaMember) {
     return ListTile(
       onTap: () {
         try {
-          if (melaMemberContacts.contains(contact.id)) {
-            final state = context.read<ContactBloc>().state;
-            if (state is ContactSuccess) {
-              final selectedContact =
-                  state.contacts.firstWhere((c) => c.contactId == contact.id);
-              widget.onSelected(selectedContact.copyWith(
-                contactName: contact.displayName,
-                contactPhoneNumber: contact.phones.isNotEmpty ? contact.phones.first.number : '',
-              ));
-            }
-          } else {
-            widget.onSelected(
-              ContactStatusModel(
-                contactId: contact.id,
-                contactStatus: 'Selected',
-                userId: -1,
-                contactName: contact.displayName,
-                contactPhoneNumber: contact.phones.isNotEmpty ? contact.phones.first.number : '',
-                wallets: [],
-              ),
-            );
-          }
+          widget.onSelected(contact);
+
           if (mounted) {
             context.pop();
           }
@@ -354,12 +281,12 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
       title: Row(
         children: [
           TextWidget(
-            text: contact.displayName,
+            text: contact.contactName ?? '',
             fontSize: 16,
           ),
           const SizedBox(width: 5),
           Visibility(
-            visible: melaMemberContacts.contains(contact.id),
+            visible: isMelaMember,
             child: SvgPicture.asset(
               Assets.images.svgs.checkmarkIcon,
               width: 18,
@@ -369,7 +296,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
         ],
       ),
       subtitle: TextWidget(
-        text: contact.phones.isNotEmpty ? contact.phones.first.number : 'No phone no',
+        text: contact.contactPhoneNumber ?? 'No phone no',
         fontSize: 10,
         color: ColorName.grey.shade500,
         weight: FontWeight.w400,
