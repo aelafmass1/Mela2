@@ -131,9 +131,12 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     final token = event.publicToken;
     final metadata = event.metadata.description();
     log("onSuccess: $token, metadata: $metadata,  event: $event");
+    setState(() {
+      publicToken = token;
+    });
     context.read<PlaidBloc>().add(
           AddBankAccount(
-            publicToken: publicToken ?? '',
+            publicToken: token,
           ),
         );
   }
@@ -346,6 +349,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             }
           },
         ),
+        // TODO Not sure what the whole bloc is doing here
         BlocListener<PaymentIntentBloc, PaymentIntentState>(
             listener: (context, paymentState) async {
           if (paymentState is PaymentIntentFail) {
