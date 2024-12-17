@@ -32,8 +32,7 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
           return emit(AddBankAccountFail(reason: res['error']));
         }
         emit(AddBankAccountSuccess(
-            card: PaymentCardModel.fromMap(
-                res['success'] as Map<String, dynamic>)));
+            card: PaymentCardModel.fromMap(res as Map<String, dynamic>)));
       }
     } on ServerException catch (error, stackTrace) {
       emit(AddBankAccountFail(reason: error.message));

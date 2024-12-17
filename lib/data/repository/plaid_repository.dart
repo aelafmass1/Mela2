@@ -63,7 +63,7 @@ class PlaidRepository {
     );
 
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return {'success': res.body};
+      return jsonDecode(res.body) as Map<String, dynamic>;
     }
     return processErrorResponse(jsonDecode(res.body));
   }
