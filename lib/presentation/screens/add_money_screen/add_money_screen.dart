@@ -340,6 +340,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             if (state is PaymentCardSuccess) {
               setState(() {
                 paymentCards = state.paymentCards;
+                selectedAccountIndex =
+                    state.addedNewCard ? state.paymentCards.length - 1 : -1;
               });
             } else if (state is PaymentCardFail) {
               showSnackbar(
@@ -418,7 +420,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
-            context.read<PaymentCardBloc>().add(FetchPaymentCards());
+            context
+                .read<PaymentCardBloc>()
+                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {

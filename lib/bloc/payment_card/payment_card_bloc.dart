@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -21,6 +22,17 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     on<AddPaymentCard>(_onPaymentCard);
     on<FetchPaymentCards>(_onFetchPaymentCards);
     on<ResetPaymentCard>(_onResetPaymentCard);
+    on<AppendPaymentCard>(_onAppendPaymentCard);
+  }
+
+  _onAppendPaymentCard(AppendPaymentCard event, Emitter emit) {
+    emit(PaymentCardSuccess(
+      paymentCards: [
+        ...state.paymentCards,
+        event.card,
+      ],
+      addedNewCard: true,
+    ));
   }
 
   _onResetPaymentCard(ResetPaymentCard event, Emitter emit) {
@@ -34,7 +46,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
-
+        debugPrint('Token: $token');
         final res = await repository.fetchPaymentCards(
           accessToken: token!,
         );

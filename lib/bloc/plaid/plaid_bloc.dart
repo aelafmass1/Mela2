@@ -1,9 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
@@ -29,7 +31,9 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         if (res.containsKey('error')) {
           return emit(AddBankAccountFail(reason: res['error']));
         }
-        emit(AddBankAccountSuccess());
+        emit(AddBankAccountSuccess(
+            card: PaymentCardModel.fromMap(
+                res['success'] as Map<String, dynamic>)));
       }
     } on ServerException catch (error, stackTrace) {
       emit(AddBankAccountFail(reason: error.message));

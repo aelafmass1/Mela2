@@ -1683,7 +1683,9 @@ class _SentTabState extends State<SentTab> {
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
-            context.read<PaymentCardBloc>().add(FetchPaymentCards());
+            context
+                .read<PaymentCardBloc>()
+                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
