@@ -57,10 +57,10 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
         var linkToken = res['linkToken'];
         emit(PlaidLinkTokenSuccess(linkToken: linkToken));
 
-        LinkTokenConfiguration(
+        var cofiguration = LinkTokenConfiguration(
           token: linkToken,
         );
-        await PlaidLink.create(configuration: linkToken!);
+        await PlaidLink.create(configuration: cofiguration);
         await PlaidLink.open();
       }
     } on ServerException catch (error, stackTrace) {
