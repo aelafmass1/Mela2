@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:transaction_mobile_app/core/utils/get_strip_token.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 
@@ -83,17 +84,16 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final accessToken = await getToken();
-        final token = await Stripe.instance.createToken(
-          const CreateTokenParams.card(
-            params: CardTokenParams(
-              type: TokenType.Card,
-            ),
-          ),
-        );
 
+        if (event.token == null) {
+          return emit(PaymentCardFail(
+            reason: "Missing token",
+            paymentCards: state.paymentCards,
+          ));
+        }
         final res = await repository.addPaymentCard(
           accessToken: accessToken ?? '',
-          token: token.id,
+          token: event.token!,
         );
         if (res.containsKey('error')) {
           return emit(PaymentCardFail(
