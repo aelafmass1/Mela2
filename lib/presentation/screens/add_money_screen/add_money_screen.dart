@@ -404,6 +404,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           } else if (state is PlaidLinkTokenLoading) {
             showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (_) => const SizedBox(
                 child: Center(
                   child: LoadingWidget(
@@ -1012,59 +1013,64 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         padding: const EdgeInsets.symmetric(
           horizontal: 15,
         ),
-        child: BlocBuilder<PaymentCardBloc, PaymentCardState>(
-          builder: (context, state) {
-            if (state is PaymentCardLoading) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 30),
-                  const TextWidget(
-                    text: 'Payment Methods',
-                    weight: FontWeight.w700,
-                    type: TextType.small,
-                  ),
-                  const SizedBox(height: 10),
-                  ...List.generate(4, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 7),
-                      child: CustomShimmer(
-                        width: 100.sw,
-                        height: 55,
+        child: BlocBuilder<PlaidBloc, PlaidState>(
+          builder: (context, plaidState) {
+            return BlocBuilder<PaymentCardBloc, PaymentCardState>(
+              builder: (context, state) {
+                if (state is PaymentCardLoading ||
+                    plaidState is AddBankAccountLoading) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 30),
+                      const TextWidget(
+                        text: 'Payment Methods',
+                        weight: FontWeight.w700,
+                        type: TextType.small,
                       ),
-                    );
-                  }),
-                ],
-              );
-            }
-            return Visibility(
-              visible: paymentCards.isNotEmpty,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 30),
-                  const TextWidget(
-                    text: 'Payment Methods',
-                    weight: FontWeight.w700,
-                    type: TextType.small,
+                      const SizedBox(height: 10),
+                      ...List.generate(4, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 7),
+                          child: CustomShimmer(
+                            width: 100.sw,
+                            height: 55,
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                }
+                return Visibility(
+                  visible: paymentCards.isNotEmpty,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 30),
+                      const TextWidget(
+                        text: 'Payment Methods',
+                        weight: FontWeight.w700,
+                        type: TextType.small,
+                      ),
+                      for (int i = 0; i < paymentCards.length; i++)
+                        _buildPaymentMethodTile(
+                          id: i,
+                          iconPath: paymentCards[i].cardBrand == 'visa'
+                              ? Assets.images.visaCard.path
+                              : paymentCards[i].type == 'us_bank_account'
+                                  ? Assets.images.svgs.bankLogo
+                                  : Assets.images.masteredCard.path,
+                          title: paymentCards[i].cardBrand ??
+                              paymentCards[i].bankName ??
+                              '',
+                          subTitle:
+                              '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
+                        ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  for (int i = 0; i < paymentCards.length; i++)
-                    _buildPaymentMethodTile(
-                      id: i,
-                      iconPath: paymentCards[i].cardBrand == 'visa'
-                          ? Assets.images.visaCard.path
-                          : paymentCards[i].type == 'us_bank_account'
-                              ? Assets.images.svgs.bankLogo
-                              : Assets.images.masteredCard.path,
-                      title: paymentCards[i].cardBrand ??
-                          paymentCards[i].bankName ??
-                          '',
-                      subTitle:
-                          '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
-                    ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                );
+              },
             );
           },
         ),
