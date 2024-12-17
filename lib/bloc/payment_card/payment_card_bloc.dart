@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:transaction_mobile_app/core/utils/get_strip_token.dart';
 import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 
@@ -83,7 +82,6 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     try {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
-        final accessToken = await getToken();
 
         if (event.token == null) {
           return emit(PaymentCardFail(
@@ -92,7 +90,6 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
           ));
         }
         final res = await repository.addPaymentCard(
-          accessToken: accessToken ?? '',
           token: event.token!,
         );
         if (res.containsKey('error')) {
@@ -103,7 +100,11 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         }
 
         emit(PaymentCardSuccess(
-          paymentCards: state.paymentCards,
+          paymentCards: [
+            ...state.paymentCards,
+            PaymentCardModel.fromMap(res as Map<String, dynamic>)
+          ],
+          addedNewCard: true,
         ));
       }
     } on ServerException catch (error, stackTrace) {

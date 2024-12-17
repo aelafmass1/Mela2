@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';

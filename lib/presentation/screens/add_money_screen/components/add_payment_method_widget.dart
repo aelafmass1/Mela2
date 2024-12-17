@@ -104,7 +104,7 @@ class _AddPaymentMethodWidgetState extends State<AddPaymentMethodWidget> {
                     description: state.reason,
                   );
                 } else if (state is PaymentCardSuccess) {
-                  context.read<PaymentCardBloc>().add(FetchPaymentCards());
+                  // context.read<PaymentCardBloc>().add(FetchPaymentCards());
                   context.pop();
                 }
               },

@@ -30,5 +30,6 @@ final class PaymentCardFail extends PaymentCardState {
 }
 
 final class PaymentCardSuccess extends PaymentCardState {
-  PaymentCardSuccess({required super.paymentCards});
+  final bool addedNewCard;
+  PaymentCardSuccess({required super.paymentCards, this.addedNewCard = false});
 }
