@@ -90,7 +90,7 @@ class _SentTabState extends State<SentTab> {
 
   ReceiverInfo? receiverInfo;
 
-  LinkTokenConfiguration? _configuration;
+  // LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
@@ -103,14 +103,6 @@ class _SentTabState extends State<SentTab> {
     _streamSuccess?.cancel();
     scrollController.dispose();
     super.dispose();
-  }
-
-  void _createLinkTokenConfiguration(String linkToken) {
-    setState(() {
-      _configuration = LinkTokenConfiguration(
-        token: linkToken,
-      );
-    });
   }
 
   void _onEvent(LinkEvent event) {
@@ -126,7 +118,7 @@ class _SentTabState extends State<SentTab> {
     setState(() => publicToken = event.publicToken);
     context
         .read<PlaidBloc>()
-        .add(ExchangePublicToken(publicToken: publicToken!));
+        .add(AddBankAccount(publicToken: event.publicToken));
   }
 
   void _onExit(LinkExit event) {
@@ -1576,8 +1568,7 @@ class _SentTabState extends State<SentTab> {
                         horizontal: 15,
                       ),
                       child: ButtonWidget(
-                        child: state is MoneyTransferLoading ||
-                                plaidState is PlaidPublicTokenLoading
+                        child: state is MoneyTransferLoading
                             ? const LoadingWidget()
                             : TextWidget(
                                 text:
@@ -1686,29 +1677,15 @@ class _SentTabState extends State<SentTab> {
             );
           } else if (state is PlaidLinkTokenSuccess) {
             context.pop();
-
-            _createLinkTokenConfiguration(state.linkToken);
-            await PlaidLink.create(configuration: _configuration!);
-            await PlaidLink.open();
-          } else if (state is PlaidPublicTokenFail) {
-            showSnackbar(
-              context,
-              title: 'Error',
-              description: state.reason,
-            );
-          } else if (state is PlaidPublicTokenSuccess) {
-            context.read<PlaidBloc>().add(
-                  AddBankAccount(
-                    publicToken: publicToken ?? '',
-                  ),
-                );
           } else if (state is AddBankAccountFail) {
             showSnackbar(
               context,
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
-            context.read<PaymentCardBloc>().add(FetchPaymentCards());
+            context
+                .read<PaymentCardBloc>()
+                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {

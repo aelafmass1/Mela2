@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/get_strip_token.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -103,7 +104,7 @@ class _AddPaymentMethodWidgetState extends State<AddPaymentMethodWidget> {
                     description: state.reason,
                   );
                 } else if (state is PaymentCardSuccess) {
-                  context.read<PaymentCardBloc>().add(FetchPaymentCards());
+                  // context.read<PaymentCardBloc>().add(FetchPaymentCards());
                   context.pop();
                 }
               },
@@ -118,8 +119,9 @@ class _AddPaymentMethodWidgetState extends State<AddPaymentMethodWidget> {
                         ),
                   onPressed: () async {
                     if (cardFormEditController.details.complete) {
+                      final token = await getStripeToken();
                       context.read<PaymentCardBloc>().add(
-                            AddPaymentCard(),
+                            AddPaymentCard(token: token),
                           );
                     } else {
                       showSnackbar(

@@ -18,16 +18,6 @@ final class PlaidLinkTokenSuccess extends PlaidState {
   PlaidLinkTokenSuccess({required this.linkToken});
 }
 
-final class PlaidPublicTokenLoading extends PlaidState {}
-
-final class PlaidPublicTokenFail extends PlaidState {
-  final String reason;
-
-  PlaidPublicTokenFail({required this.reason});
-}
-
-final class PlaidPublicTokenSuccess extends PlaidState {}
-
 final class AddBankAccountLoading extends PlaidState {}
 
 final class AddBankAccountFail extends PlaidState {
@@ -36,4 +26,7 @@ final class AddBankAccountFail extends PlaidState {
   AddBankAccountFail({required this.reason});
 }
 
-final class AddBankAccountSuccess extends PlaidState {}
+final class AddBankAccountSuccess extends PlaidState {
+  final PaymentCardModel card;
+  AddBankAccountSuccess({required this.card});
+}

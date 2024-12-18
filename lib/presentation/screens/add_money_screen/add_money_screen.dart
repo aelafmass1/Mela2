@@ -61,7 +61,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
   ReceiverInfo? receiverInfo;
 
-  LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
@@ -125,31 +124,27 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   void _onEvent(LinkEvent event) {
     final name = event.name;
     final metadata = event.metadata.description();
-    log("onEvent: $name, metadata: $metadata");
+    log("onEvent: $name, metadata: $metadata, event: $event");
   }
 
   void _onSuccess(LinkSuccess event) {
     final token = event.publicToken;
     final metadata = event.metadata.description();
-    log("onSuccess: $token, metadata: $metadata");
-    setState(() => publicToken = event.publicToken);
-    context
-        .read<PlaidBloc>()
-        .add(ExchangePublicToken(publicToken: publicToken!));
+    log("onSuccess: $token, metadata: $metadata,  event: $event");
+    setState(() {
+      publicToken = token;
+    });
+    context.read<PlaidBloc>().add(
+          AddBankAccount(
+            publicToken: token,
+          ),
+        );
   }
 
   void _onExit(LinkExit event) {
     final metadata = event.metadata.description();
     final error = event.error?.description();
-    log("onExit metadata: $metadata, error: $error");
-  }
-
-  void _createLinkTokenConfiguration(String linkToken) {
-    setState(() {
-      _configuration = LinkTokenConfiguration(
-        token: linkToken,
-      );
-    });
+    log("onExit metadata: $metadata, error: $error, event: $event");
   }
 
   /// Displays a payment sheet using the Stripe SDK.
@@ -273,7 +268,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       builder: (context, state) {
                         return ButtonWidget(
                             child: paymentState is PaymentIntentLoading ||
-                                    plaidState is PlaidPublicTokenLoading ||
                                     state is AddFundToWalletLoading
                                 ? const LoadingWidget()
                                 : TextWidget(
@@ -346,6 +340,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             if (state is PaymentCardSuccess) {
               setState(() {
                 paymentCards = state.paymentCards;
+                selectedAccountIndex =
+                    state.addedNewCard ? state.paymentCards.length - 1 : -1;
               });
             } else if (state is PaymentCardFail) {
               showSnackbar(
@@ -355,6 +351,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             }
           },
         ),
+        // TODO Not sure what the whole bloc is doing here
         BlocListener<PaymentIntentBloc, PaymentIntentState>(
             listener: (context, paymentState) async {
           if (paymentState is PaymentIntentFail) {
@@ -407,6 +404,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           } else if (state is PlaidLinkTokenLoading) {
             showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (_) => const SizedBox(
                 child: Center(
                   child: LoadingWidget(
@@ -417,29 +415,15 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             );
           } else if (state is PlaidLinkTokenSuccess) {
             context.pop();
-
-            _createLinkTokenConfiguration(state.linkToken);
-            await PlaidLink.create(configuration: _configuration!);
-            await PlaidLink.open();
-          } else if (state is PlaidPublicTokenFail) {
-            showSnackbar(
-              context,
-              title: 'Error',
-              description: state.reason,
-            );
-          } else if (state is PlaidPublicTokenSuccess) {
-            context.read<PlaidBloc>().add(
-                  AddBankAccount(
-                    publicToken: publicToken ?? '',
-                  ),
-                );
           } else if (state is AddBankAccountFail) {
             showSnackbar(
               context,
               description: state.reason,
             );
           } else if (state is AddBankAccountSuccess) {
-            context.read<PaymentCardBloc>().add(FetchPaymentCards());
+            context
+                .read<PaymentCardBloc>()
+                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
@@ -1029,59 +1013,64 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         padding: const EdgeInsets.symmetric(
           horizontal: 15,
         ),
-        child: BlocBuilder<PaymentCardBloc, PaymentCardState>(
-          builder: (context, state) {
-            if (state is PaymentCardLoading) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 30),
-                  const TextWidget(
-                    text: 'Payment Methods',
-                    weight: FontWeight.w700,
-                    type: TextType.small,
-                  ),
-                  const SizedBox(height: 10),
-                  ...List.generate(4, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 7),
-                      child: CustomShimmer(
-                        width: 100.sw,
-                        height: 55,
+        child: BlocBuilder<PlaidBloc, PlaidState>(
+          builder: (context, plaidState) {
+            return BlocBuilder<PaymentCardBloc, PaymentCardState>(
+              builder: (context, state) {
+                if (state is PaymentCardLoading ||
+                    plaidState is AddBankAccountLoading) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 30),
+                      const TextWidget(
+                        text: 'Payment Methods',
+                        weight: FontWeight.w700,
+                        type: TextType.small,
                       ),
-                    );
-                  }),
-                ],
-              );
-            }
-            return Visibility(
-              visible: paymentCards.isNotEmpty,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 30),
-                  const TextWidget(
-                    text: 'Payment Methods',
-                    weight: FontWeight.w700,
-                    type: TextType.small,
+                      const SizedBox(height: 10),
+                      ...List.generate(4, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 7),
+                          child: CustomShimmer(
+                            width: 100.sw,
+                            height: 55,
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                }
+                return Visibility(
+                  visible: paymentCards.isNotEmpty,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 30),
+                      const TextWidget(
+                        text: 'Payment Methods',
+                        weight: FontWeight.w700,
+                        type: TextType.small,
+                      ),
+                      for (int i = 0; i < paymentCards.length; i++)
+                        _buildPaymentMethodTile(
+                          id: i,
+                          iconPath: paymentCards[i].cardBrand == 'visa'
+                              ? Assets.images.visaCard.path
+                              : paymentCards[i].type == 'us_bank_account'
+                                  ? Assets.images.svgs.bankLogo
+                                  : Assets.images.masteredCard.path,
+                          title: paymentCards[i].cardBrand ??
+                              paymentCards[i].bankName ??
+                              '',
+                          subTitle:
+                              '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
+                        ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  for (int i = 0; i < paymentCards.length; i++)
-                    _buildPaymentMethodTile(
-                      id: i,
-                      iconPath: paymentCards[i].cardBrand == 'visa'
-                          ? Assets.images.visaCard.path
-                          : paymentCards[i].type == 'us_bank_account'
-                              ? Assets.images.svgs.bankLogo
-                              : Assets.images.masteredCard.path,
-                      title: paymentCards[i].cardBrand ??
-                          paymentCards[i].bankName ??
-                          '',
-                      subTitle:
-                          '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
-                    ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                );
+              },
             );
           },
         ),

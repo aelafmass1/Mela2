@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -21,6 +22,17 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     on<AddPaymentCard>(_onPaymentCard);
     on<FetchPaymentCards>(_onFetchPaymentCards);
     on<ResetPaymentCard>(_onResetPaymentCard);
+    on<AppendPaymentCard>(_onAppendPaymentCard);
+  }
+
+  _onAppendPaymentCard(AppendPaymentCard event, Emitter emit) {
+    emit(PaymentCardSuccess(
+      paymentCards: [
+        ...state.paymentCards,
+        event.card,
+      ],
+      addedNewCard: true,
+    ));
   }
 
   _onResetPaymentCard(ResetPaymentCard event, Emitter emit) {
@@ -34,7 +46,7 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
-
+        debugPrint('Token: $token');
         final res = await repository.fetchPaymentCards(
           accessToken: token!,
         );
@@ -82,18 +94,15 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     try {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
-        final accessToken = await getToken();
-        final token = await Stripe.instance.createToken(
-          const CreateTokenParams.card(
-            params: CardTokenParams(
-              type: TokenType.Card,
-            ),
-          ),
-        );
 
+        if (event.token == null) {
+          return emit(PaymentCardFail(
+            reason: "Missing token",
+            paymentCards: state.paymentCards,
+          ));
+        }
         final res = await repository.addPaymentCard(
-          accessToken: accessToken ?? '',
-          token: token.id,
+          token: event.token!,
         );
         if (res.containsKey('error')) {
           return emit(PaymentCardFail(
@@ -103,7 +112,11 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
         }
 
         emit(PaymentCardSuccess(
-          paymentCards: state.paymentCards,
+          paymentCards: [
+            ...state.paymentCards,
+            PaymentCardModel.fromMap(res as Map<String, dynamic>)
+          ],
+          addedNewCard: true,
         ));
       }
     } on ServerException catch (error, stackTrace) {
