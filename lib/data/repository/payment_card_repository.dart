@@ -1,8 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
+import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 
 class PaymentCardRepository {
   final InterceptedClient client;
@@ -25,9 +28,10 @@ class PaymentCardRepository {
   /// Returns:
   /// A `Future<Map<String, dynamic>>` containing the payment card data or an error response.
   Future<Map> addPaymentCard({
-    required String accessToken,
     required String token,
   }) async {
+    final accessToken = await getToken();
+
     final res = await client.post(
       Uri.parse('$baseUrl/payment-methods/add-card'),
       headers: {
@@ -74,6 +78,7 @@ class PaymentCardRepository {
 
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
+      debugPrint("the datas: $data");
       return data;
     }
     return [processErrorResponse(data)];
