@@ -21,7 +21,6 @@ import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
-import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -1649,13 +1648,6 @@ class _SentTabState extends State<SentTab> {
             }
           },
         ),
-        BlocListener<PaymentIntentBloc, PaymentIntentState>(
-            listener: (context, paymentState) async {
-          if (paymentState is PaymentIntentFail) {
-            showSnackbar(context,
-                title: 'Error', description: paymentState.reason);
-          }
-        }),
         BlocListener<PlaidBloc, PlaidState>(listener: (context, state) async {
           if (state is PlaidLinkTokenFail) {
             context.pop();

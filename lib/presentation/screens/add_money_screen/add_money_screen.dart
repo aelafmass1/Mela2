@@ -30,7 +30,6 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../bloc/bank_fee/bank_fee_bloc.dart';
 import '../../../bloc/fee/fee_bloc.dart';
 import '../../../bloc/payment_card/payment_card_bloc.dart';
-import '../../../bloc/payment_intent/payment_intent_bloc.dart';
 import '../../../bloc/plaid/plaid_bloc.dart';
 import '../../../bloc/wallet/wallet_bloc.dart';
 import '../../../bloc/wallet_currency/wallet_currency_bloc.dart';
@@ -247,66 +246,57 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: BlocBuilder<PlaidBloc, PlaidState>(
               builder: (context, plaidState) {
-                return BlocBuilder<PaymentIntentBloc, PaymentIntentState>(
-                  builder: (context, paymentState) {
-                    return BlocBuilder<WalletBloc, WalletState>(
-                      builder: (context, state) {
-                        return ButtonWidget(
-                            child: paymentState is PaymentIntentLoading ||
-                                    state is AddFundToWalletLoading
-                                ? const LoadingWidget()
-                                : TextWidget(
-                                    text: showFee
-                                        ? 'Confirm Payment'
-                                        : 'Continue',
-                                    color: Colors.white,
-                                    type: TextType.small,
-                                  ),
-                            onPressed: () async {
-                              amonutFocus.unfocus();
-                              if (showFee == false) {
-                                if (_formKey.currentState?.validate() == true) {
-                                  if (selectedAccountIndex == -1) {
-                                    showSnackbar(context,
-                                        description: 'Select Payment Method');
-                                  } else {
-                                    setState(() {
-                                      showFee = true;
-                                    });
-
-                                    // Add scroll animation after a brief delay to allow fee content to render
-                                    Future.delayed(
-                                        const Duration(milliseconds: 100), () {
-                                      scrollController.animateTo(
-                                        scrollController
-                                            .position.maxScrollExtent,
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.easeOut,
-                                      );
-                                    });
-                                  }
-                                }
+                return BlocBuilder<WalletBloc, WalletState>(
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        child: state is AddFundToWalletLoading
+                            ? const LoadingWidget()
+                            : TextWidget(
+                                text: showFee ? 'Confirm Payment' : 'Continue',
+                                color: Colors.white,
+                                type: TextType.small,
+                              ),
+                        onPressed: () async {
+                          amonutFocus.unfocus();
+                          if (showFee == false) {
+                            if (_formKey.currentState?.validate() == true) {
+                              if (selectedAccountIndex == -1) {
+                                showSnackbar(context,
+                                    description: 'Select Payment Method');
                               } else {
-                                if (selectedAccountIndex != -1) {
-                                  final cards = context
-                                      .read<PaymentCardBloc>()
-                                      .state
-                                      .paymentCards;
-                                  setState(() {
-                                    selectedPaymentCardId =
-                                        cards[selectedAccountIndex].id;
-                                  });
-                                  _addFundToWallet(
-                                    intentId: '',
-                                    publicToken: '',
-                                    paymentType: 'SAVED_PAYMENT',
+                                setState(() {
+                                  showFee = true;
+                                });
+
+                                // Add scroll animation after a brief delay to allow fee content to render
+                                Future.delayed(
+                                    const Duration(milliseconds: 100), () {
+                                  scrollController.animateTo(
+                                    scrollController.position.maxScrollExtent,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
                                   );
-                                }
+                                });
                               }
-                            });
-                      },
-                    );
+                            }
+                          } else {
+                            if (selectedAccountIndex != -1) {
+                              final cards = context
+                                  .read<PaymentCardBloc>()
+                                  .state
+                                  .paymentCards;
+                              setState(() {
+                                selectedPaymentCardId =
+                                    cards[selectedAccountIndex].id;
+                              });
+                              _addFundToWallet(
+                                intentId: '',
+                                publicToken: '',
+                                paymentType: 'SAVED_PAYMENT',
+                              );
+                            }
+                          }
+                        });
                   },
                 );
               },
