@@ -70,20 +70,29 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                         SizedBox(
                           width: 74,
                           height: 35,
-                          child: ButtonWidget(
+                          child: 
+                          
+                          ButtonWidget(
                             color: const Color(0xFFF1F4FF),
                             elevation: 0,
                             verticalPadding: 0,
                             topPadding: 0,
                             horizontalPadding: 0,
                             borderRadius: BorderRadius.circular(10),
-                            child: const TextWidget(
-                              text: 'Skip',
-                              fontSize: 12,
-                              color: ColorName.primaryColor,
+                            child:  IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: (){
+                                Navigator.pop(context);
+                              },
                             ),
+                            
+                            // const TextWidget(
+                            //   text: 'Skip',
+                            //   fontSize: 12,
+                            //   color: ColorName.primaryColor,
+                            // ),
                             onPressed: () {
-                              context.pop();
+                              Navigator.pop(context);
                             },
                           ),
                         )
