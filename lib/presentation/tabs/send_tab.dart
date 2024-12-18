@@ -117,7 +117,7 @@ class _SentTabState extends State<SentTab> {
     log("onSuccess: $token, metadata: $metadata");
     setState(() => publicToken = event.publicToken);
     context
-        .read<PlaidBloc>()
+        .read<PaymentCardBloc>()
         .add(AddBankAccount(publicToken: event.publicToken));
   }
 
@@ -1667,6 +1667,7 @@ class _SentTabState extends State<SentTab> {
           } else if (state is PlaidLinkTokenLoading) {
             showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (_) => const SizedBox(
                 child: Center(
                   child: LoadingWidget(
@@ -1677,15 +1678,6 @@ class _SentTabState extends State<SentTab> {
             );
           } else if (state is PlaidLinkTokenSuccess) {
             context.pop();
-          } else if (state is AddBankAccountFail) {
-            showSnackbar(
-              context,
-              description: state.reason,
-            );
-          } else if (state is AddBankAccountSuccess) {
-            context
-                .read<PaymentCardBloc>()
-                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
