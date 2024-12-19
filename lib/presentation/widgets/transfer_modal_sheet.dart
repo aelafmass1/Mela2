@@ -20,7 +20,7 @@ showTransferModalSheet(BuildContext context) {
       ),
     ),
     builder: (context) => TransferModalSheetBody(),
-  );
+  ); 
 }
 
 class TransferModalSheetBody extends StatelessWidget {

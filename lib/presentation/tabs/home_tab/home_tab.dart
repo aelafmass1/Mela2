@@ -192,7 +192,7 @@ class _HomeTabState extends State<HomeTab> {
                     onTopChange: (code) {
                       setState(() {
                         currencyCode = code;
-                      });
+                      }); 
                     },
                   ),
                   WalletOptions(

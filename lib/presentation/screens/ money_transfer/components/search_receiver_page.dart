@@ -21,6 +21,7 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 import '../../../../bloc/contact/contact_bloc.dart';
 import '../../../../data/models/contact_status_model.dart';
+import '../../../../data/models/wallet_model.dart';
 
 class SearchReceiverPage extends StatefulWidget {
   final Function(ContactStatusModel selectedContact) onSelected;
@@ -234,7 +235,10 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                       state.filteredContacts[index].contactStatus !=
                               "not_registered" ||
                           state.remoteContacts.contains(
-                              state.filteredContacts[index].contactId));
+                              state.filteredContacts[index].contactId),
+                              state.filteredContacts[index].wallets
+                              
+                              );
                 },
                 separatorBuilder: (context, index) => Divider(
                   color: ColorName.grey.shade100,
@@ -254,12 +258,11 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
     );
   }
 
-  _buildContactTile(ContactStatusModel contact, bool isMelaMember) {
+  _buildContactTile(ContactStatusModel contact, bool isMelaMember,List<WalletModel>? wallets) {
     return ListTile(
       onTap: () {
         try {
           widget.onSelected(contact);
-
           if (mounted) {
             context.pop();
           }

@@ -33,7 +33,7 @@ class WalletOptions extends StatelessWidget {
             title: 'Transfer',
             onTab: () {
               showTransferModalSheet(context);
-            },
+            }, 
           ),
           _buildOptionButton(
             iconPath: Assets.images.svgs.requestLogo,

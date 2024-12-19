@@ -151,7 +151,7 @@ class MyAppRouter {
             ),
           ),
           GoRoute(
-            path: 'receipt',
+            path: 'receipt', 
             name: RouteName.receipt,
             builder: (context, state) => ReceiptScreen(
               receiverInfo: state.extra as ReceiverInfo,

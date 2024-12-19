@@ -71,6 +71,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
 
   handleContactSelection() async {
     final selecteduser = await showMoneyReceiverSelection(context);
+    print("the selected user once agian is $selecteduser");
     if (selecteduser != null) {
       setState(() {
         selectedContact = selecteduser;
@@ -248,8 +249,9 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 onPressed: selectedContact == null
                     ? null
                     : () {
-                        if (_formKey.currentState?.validate() == true) {
+                        if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
+                          
                             context.read<MoneyRequestBloc>().add(
                                   MoneyRequest(
                                     requesterWalletId:
@@ -278,6 +280,8 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                     ),
                                   );
                             } else {
+                            
+
                               context.read<MoneyTransferBloc>().add(
                                     TransferToUnregisteredUser(
                                       phoneNumber:
