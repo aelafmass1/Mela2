@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -96,6 +97,9 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
       if (state is! MoneyTransferLoading) {
         emit(MoneyTransferLoading());
         final token = await getToken();
+
+        debugPrint("From: ${event.fromWalletId}");
+        debugPrint("To: ${event.toWalletId}");
 
         final res = await repository.transferToOwnWallet(
           accessToken: token ?? '',
