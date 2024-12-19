@@ -843,7 +843,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                             visible: fee.type == 'PERCENTAGE',
                                             child: TextWidget(
                                               text:
-                                                  '  ${NumberFormat('##,###.##').format(fee.amount.roundToDouble())}%',
+                                                  '  ${NumberFormat('##,###.##').format(fee.amount)}%',
                                               fontSize: 14,
                                               weight: FontWeight.w600,
                                             ),
@@ -854,8 +854,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                         children: [
                                           TextWidget(
                                             text: fee.type == 'PERCENTAGE'
-                                                ? "\$${((fee.amount) / 100) * (double.tryParse(amountController.text) ?? 0)}"
-                                                : "\$${NumberFormat('##,###.##').format((fee.amount))}",
+                                                ? "\$${(((fee.amount / 100) * (double.tryParse(amountController.text) ?? 0))).toStringAsFixed(2)}"
+                                                : "\$${NumberFormat('##,###.##').format(fee.amount ?? 0)}",
                                             weight: FontWeight.w600,
                                             fontSize: 14,
                                           ),
