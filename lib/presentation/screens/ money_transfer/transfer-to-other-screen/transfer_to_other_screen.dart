@@ -251,7 +251,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     : () {
                         if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
-                          
                             context.read<MoneyRequestBloc>().add(
                                   MoneyRequest(
                                     requesterWalletId:
@@ -267,21 +266,23 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                             if (transferFromWalletModel != null &&
                                 transferToWalletModel != null) {
                               scrollDown();
+                              selectedContact?.contactName;
                               context.read<MoneyTransferBloc>().add(
                                     TransferToWallet(
-                                      amount: double.tryParse(
-                                              amountController.text) ??
-                                          0,
-                                      note: noteController.text,
-                                      fromWalletId:
-                                          transferFromWalletModel!.walletId,
-                                      toWalletId:
-                                          transferToWalletModel!.walletId,
-                                    ),
+                                        amount: double.tryParse(
+                                                amountController.text) ??
+                                            0,
+                                        note: noteController.text,
+                                        fromWalletId:
+                                            transferFromWalletModel!.walletId,
+                                        toWalletId:
+                                            transferToWalletModel!.walletId,
+                                        reciever:
+                                            selectedContact?.contactName ??
+                                                selectedContact
+                                                    ?.contactPhoneNumber),
                                   );
                             } else {
-                            
-
                               context.read<MoneyTransferBloc>().add(
                                     TransferToUnregisteredUser(
                                       phoneNumber:

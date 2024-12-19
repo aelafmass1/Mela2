@@ -98,9 +98,6 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         emit(MoneyTransferLoading());
         final token = await getToken();
 
-        debugPrint("From: ${event.fromWalletId}");
-        debugPrint("To: ${event.toWalletId}");
-
         final res = await repository.transferToOwnWallet(
           accessToken: token ?? '',
           fromWalletId: event.fromWalletId,
@@ -114,7 +111,8 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         final walletTransaction =
             WalletTransactionModel.fromMap(res['successResponse'] as Map);
         emit(MoneyTransferOwnWalletSuccess(
-          walletTransactionModel: walletTransaction,
+          walletTransactionModel:
+              walletTransaction.copyWith(to: event.reciever),
         ));
       }
     } on ServerException catch (error, stackTrace) {
