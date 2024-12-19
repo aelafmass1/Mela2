@@ -70,9 +70,7 @@ class WalletReceiptWidget extends StatelessWidget {
                 key: globalKey,
                 child: Stack(
                   children: [
-                    Assets.images.receipt.image(
-                      fit: BoxFit.cover,
-                    ),
+                    _getStatusDetails()['bgImage'],
                     Positioned(
                         top: 80,
                         left: 0,
@@ -81,8 +79,11 @@ class WalletReceiptWidget extends StatelessWidget {
                           child: Column(
                             children: [
                               TextWidget(
-                                text: '\$${walletTransactionModel.amount}',
-                                color: ColorName.primaryColor,
+                                text: '-\$${walletTransactionModel.amount}',
+                                color:
+                                    walletTransactionModel.status == "SUCCESS"
+                                        ? ColorName.primaryColor
+                                        : ColorName.yellow,
                                 weight: FontWeight.w600,
                               ),
                               SizedBox(
@@ -97,36 +98,33 @@ class WalletReceiptWidget extends StatelessWidget {
                               ),
                               const SizedBox(height: 30),
                               _buildTransactionDetail(
-                                  key: 'Transaction ID',
-                                  value: walletTransactionModel.transactionId
-                                      .toString()),
-                              _buildTransactionDetail(
-                                key: 'Date',
-                                value: DateFormat('MMMM dd, yyyy')
-                                    .format(DateTime.now()),
-                              ),
-                              _buildTransactionDetail(
-                                key: 'Recipient Amount',
-                                value: '${walletTransactionModel.amount}',
-                              ),
-                              _buildTransactionDetail(
                                 key: 'To',
                                 value: walletTransactionModel.to == 'null null'
                                     ? 'Unregistered User'
                                     : walletTransactionModel.to ?? '',
                               ),
                               _buildTransactionDetail(
-                                key: 'From',
-                                value:
-                                    walletTransactionModel.from == 'null null'
-                                        ? 'You'
-                                        : walletTransactionModel.from ?? '',
+                                key: 'Amount',
+                                value: '${walletTransactionModel.amount}',
                               ),
                               _buildTransactionDetail(
-                                key: 'Type',
+                                key: 'Date',
+                                value: DateFormat('MMMM dd, yyyy')
+                                    .format(DateTime.now()),
+                              ),
+                              _buildTransactionDetail(
+                                  key: 'Transaction ID',
+                                  value: walletTransactionModel.transactionId
+                                      .toString()),
+                              _buildTransactionDetail(
+                                key: 'Details',
                                 value:
                                     '${walletTransactionModel.transactionType}',
                               ),
+                              _buildTransactionDetail(
+                                  key: 'Transaction Status',
+                                  value: _getStatusDetails()['normalizedText'],
+                                  color: _getStatusDetails()['textColor']),
                               _buildTransactionDetail(
                                 key: 'Remark ',
                                 value: (walletTransactionModel.note?.length ??
@@ -189,7 +187,44 @@ class WalletReceiptWidget extends StatelessWidget {
     );
   }
 
-  _buildTransactionDetail({required String key, required String value}) {
+  Map<String, dynamic> _getStatusDetails() {
+    Color textColor;
+    AssetGenImage bgImage;
+    String normalizedText;
+
+    switch (walletTransactionModel.status) {
+      case "SUCCESS":
+        textColor = ColorName.primaryColor;
+        bgImage = Assets.images.receipt;
+        normalizedText = "Completed";
+        break;
+      case "PENDING":
+        textColor = ColorName.yellow;
+        bgImage = Assets.images.receipt;
+        normalizedText = "Pending";
+        break;
+      case "FAILED":
+        textColor = ColorName.red;
+        bgImage = Assets.images.receipt;
+        normalizedText = "Failed";
+        break;
+      default:
+        textColor = ColorName.grey;
+        bgImage = Assets.images.receipt;
+        normalizedText = "_";
+    }
+
+    return {
+      'textColor': textColor,
+      'bgImage': bgImage,
+      'normalizedText': normalizedText,
+    };
+  }
+
+  _buildTransactionDetail(
+      {required String key,
+      required String value,
+      Color color = const Color(0xFF7B7B7B)}) {
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: Column(
@@ -207,7 +242,7 @@ class WalletReceiptWidget extends StatelessWidget {
                 ),
                 TextWidget(
                   text: value,
-                  color: const Color(0xFF7B7B7B),
+                  color: color,
                   fontSize: 16,
                   weight: FontWeight.w400,
                 )
