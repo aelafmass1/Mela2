@@ -11,7 +11,7 @@ final class FetchPaymentCards extends PaymentCardEvent {}
 
 final class ResetPaymentCard extends PaymentCardEvent {}
 
-final class AppendPaymentCard extends PaymentCardEvent {
-  final PaymentCardModel card;
-  AppendPaymentCard({required this.card});
+final class AddBankAccount extends PaymentCardEvent {
+  final String publicToken;
+  AddBankAccount({required this.publicToken});
 }

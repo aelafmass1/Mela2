@@ -30,7 +30,6 @@ import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 import '../../../bloc/bank_fee/bank_fee_bloc.dart';
 import '../../../bloc/fee/fee_bloc.dart';
 import '../../../bloc/payment_card/payment_card_bloc.dart';
-import '../../../bloc/payment_intent/payment_intent_bloc.dart';
 import '../../../bloc/plaid/plaid_bloc.dart';
 import '../../../bloc/wallet/wallet_bloc.dart';
 import '../../../bloc/wallet_currency/wallet_currency_bloc.dart';
@@ -89,21 +88,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     final wallets = context.read<WalletBloc>().state.wallets;
     double totalFee = 0;
     if (bankState is BankFeeSuccess) {
-      // final creditCardAmount = bankState.bankFees
-      //         .where((bf) => bf.label == 'Credit Card fee')
-      //         .isEmpty
-      //     ? 0
-      //     : bankState.bankFees
-      //         .where((bf) => bf.label == 'Credit Card fee')
-      //         .first
-      //         .amount;
-      // final debitCardAmount =
-      //     bankState.bankFees.where((bf) => bf.label == 'Debit Card fee').isEmpty
-      //         ? 0
-      //         : bankState.bankFees
-      //             .where((bf) => bf.label == 'Debit Card fee')
-      //             .first
-      //             .amount;
       totalFee = 0;
 
       context.read<WalletBloc>().add(
@@ -134,7 +118,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     setState(() {
       publicToken = token;
     });
-    context.read<PlaidBloc>().add(
+    context.read<PaymentCardBloc>().add(
           AddBankAccount(
             publicToken: token,
           ),
@@ -262,66 +246,57 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: BlocBuilder<PlaidBloc, PlaidState>(
               builder: (context, plaidState) {
-                return BlocBuilder<PaymentIntentBloc, PaymentIntentState>(
-                  builder: (context, paymentState) {
-                    return BlocBuilder<WalletBloc, WalletState>(
-                      builder: (context, state) {
-                        return ButtonWidget(
-                            child: paymentState is PaymentIntentLoading ||
-                                    state is AddFundToWalletLoading
-                                ? const LoadingWidget()
-                                : TextWidget(
-                                    text: showFee
-                                        ? 'Confirm Payment'
-                                        : 'Continue',
-                                    color: Colors.white,
-                                    type: TextType.small,
-                                  ),
-                            onPressed: () async {
-                              amonutFocus.unfocus();
-                              if (showFee == false) {
-                                if (_formKey.currentState?.validate() == true) {
-                                  if (selectedAccountIndex == -1) {
-                                    showSnackbar(context,
-                                        description: 'Select Payment Method');
-                                  } else {
-                                    setState(() {
-                                      showFee = true;
-                                    });
-
-                                    // Add scroll animation after a brief delay to allow fee content to render
-                                    Future.delayed(
-                                        const Duration(milliseconds: 100), () {
-                                      scrollController.animateTo(
-                                        scrollController
-                                            .position.maxScrollExtent,
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.easeOut,
-                                      );
-                                    });
-                                  }
-                                }
+                return BlocBuilder<WalletBloc, WalletState>(
+                  builder: (context, state) {
+                    return ButtonWidget(
+                        child: state is AddFundToWalletLoading
+                            ? const LoadingWidget()
+                            : TextWidget(
+                                text: showFee ? 'Confirm Payment' : 'Continue',
+                                color: Colors.white,
+                                type: TextType.small,
+                              ),
+                        onPressed: () async {
+                          amonutFocus.unfocus();
+                          if (showFee == false) {
+                            if (_formKey.currentState?.validate() == true) {
+                              if (selectedAccountIndex == -1) {
+                                showSnackbar(context,
+                                    description: 'Select Payment Method');
                               } else {
-                                if (selectedAccountIndex != -1) {
-                                  final cards = context
-                                      .read<PaymentCardBloc>()
-                                      .state
-                                      .paymentCards;
-                                  setState(() {
-                                    selectedPaymentCardId =
-                                        cards[selectedAccountIndex].id;
-                                  });
-                                  _addFundToWallet(
-                                    intentId: '',
-                                    publicToken: '',
-                                    paymentType: 'SAVED_PAYMENT',
+                                setState(() {
+                                  showFee = true;
+                                });
+
+                                // Add scroll animation after a brief delay to allow fee content to render
+                                Future.delayed(
+                                    const Duration(milliseconds: 100), () {
+                                  scrollController.animateTo(
+                                    scrollController.position.maxScrollExtent,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
                                   );
-                                }
+                                });
                               }
-                            });
-                      },
-                    );
+                            }
+                          } else {
+                            if (selectedAccountIndex != -1) {
+                              final cards = context
+                                  .read<PaymentCardBloc>()
+                                  .state
+                                  .paymentCards;
+                              setState(() {
+                                selectedPaymentCardId =
+                                    cards[selectedAccountIndex].id;
+                              });
+                              _addFundToWallet(
+                                intentId: '',
+                                publicToken: '',
+                                paymentType: 'SAVED_PAYMENT',
+                              );
+                            }
+                          }
+                        });
                   },
                 );
               },
@@ -351,48 +326,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             }
           },
         ),
-        // TODO Not sure what the whole bloc is doing here
-        BlocListener<PaymentIntentBloc, PaymentIntentState>(
-            listener: (context, paymentState) async {
-          if (paymentState is PaymentIntentFail) {
-            showSnackbar(context,
-                title: 'Error', description: paymentState.reason);
-          } else if (paymentState is PaymentIntentSuccess) {
-            /// Initializes and presents a Stripe payment sheet for processing a payment.
-            ///
-            /// Retrieves the `clientSecret` and `customerId` from the `paymentState`.
-            /// Initializes the Stripe payment sheet with the retrieved information and merchant display name.
-            /// Calls `displayPaymentSheet()` to present the payment sheet to the user.
-            /// Logs any errors encountered during the process.
-            try {
-              final clientSecret = paymentState.clientSecret;
-
-              if (selectedPaymentCardId.isEmpty) {
-                await Stripe.instance.initPaymentSheet(
-                  paymentSheetParameters: SetupPaymentSheetParameters(
-                      paymentIntentClientSecret: clientSecret,
-                      customerId: paymentState.customerId,
-                      merchantDisplayName: 'Mela Fi',
-                      customFlow: false,
-                      appearance: const PaymentSheetAppearance(
-                        colors: PaymentSheetAppearanceColors(
-                          primary: ColorName.primaryColor,
-                        ),
-                      )),
-                );
-
-                displayPaymentSheet(clientSecret);
-              } else {
-                _addFundToWallet(
-                    intentId: '',
-                    publicToken: '',
-                    paymentType: 'SAVED_PAYMENT');
-              }
-            } catch (error) {
-              log(error.toString());
-            }
-          }
-        }),
         BlocListener<PlaidBloc, PlaidState>(listener: (context, state) async {
           if (state is PlaidLinkTokenFail) {
             context.pop();
@@ -415,15 +348,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
             );
           } else if (state is PlaidLinkTokenSuccess) {
             context.pop();
-          } else if (state is AddBankAccountFail) {
-            showSnackbar(
-              context,
-              description: state.reason,
-            );
-          } else if (state is AddBankAccountSuccess) {
-            context
-                .read<PaymentCardBloc>()
-                .add(AppendPaymentCard(card: state.card));
           }
         }),
         BlocListener<WalletBloc, WalletState>(listener: (context, state) {
@@ -1017,8 +941,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           builder: (context, plaidState) {
             return BlocBuilder<PaymentCardBloc, PaymentCardState>(
               builder: (context, state) {
-                if (state is PaymentCardLoading ||
-                    plaidState is AddBankAccountLoading) {
+                if (state is PaymentCardLoading) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

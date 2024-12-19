@@ -22,17 +22,39 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     on<AddPaymentCard>(_onPaymentCard);
     on<FetchPaymentCards>(_onFetchPaymentCards);
     on<ResetPaymentCard>(_onResetPaymentCard);
-    on<AppendPaymentCard>(_onAppendPaymentCard);
+    on<AddBankAccount>(_onAddBankAccount);
   }
 
-  _onAppendPaymentCard(AppendPaymentCard event, Emitter emit) {
-    emit(PaymentCardSuccess(
-      paymentCards: [
-        ...state.paymentCards,
-        event.card,
-      ],
-      addedNewCard: true,
-    ));
+  _onAddBankAccount(AddBankAccount event, Emitter emit) async {
+    try {
+      if (state is! PaymentCardLoading) {
+        emit(PaymentCardLoading(paymentCards: state.paymentCards));
+        final res = await repository.addBankAccount(event.publicToken);
+
+        if (res.containsKey('error')) {
+          return emit(PaymentCardFail(
+              paymentCards: state.paymentCards, reason: res['error']));
+        }
+        emit(PaymentCardSuccess(
+          paymentCards: [
+            ...state.paymentCards,
+            PaymentCardModel.fromMap(res as Map<String, dynamic>)
+          ],
+          addedNewCard: true,
+        ));
+      }
+    } on ServerException catch (error, stackTrace) {
+      emit(PaymentCardFail(
+          paymentCards: state.paymentCards, reason: error.message));
+      await Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+      );
+    } catch (error) {
+      log(error.toString());
+      emit(PaymentCardFail(
+          paymentCards: state.paymentCards, reason: error.toString()));
+    }
   }
 
   _onResetPaymentCard(ResetPaymentCard event, Emitter emit) {

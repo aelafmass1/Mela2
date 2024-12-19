@@ -24,7 +24,6 @@ import 'package:transaction_mobile_app/bloc/fee/fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/navigation/navigation_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
-import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/bloc/pincode/pincode_bloc.dart';
 import 'package:transaction_mobile_app/bloc/plaid/plaid_bloc.dart';
 import 'package:transaction_mobile_app/bloc/user/user_bloc.dart';
@@ -42,7 +41,6 @@ import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
 import 'package:transaction_mobile_app/data/repository/money_transfer_repository.dart';
 import 'package:transaction_mobile_app/data/repository/notification_repository.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
-import 'package:transaction_mobile_app/data/repository/payment_intent_repository.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
@@ -145,7 +143,6 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   late FeeRepository feeRepository;
   late MoneyTransferRepository moneyTransferRepository;
   late PaymentCardRepository paymentCardRepository;
-  late PaymentIntentRepository paymentIntentRepository;
   late PlaidRepository plaidRepository;
   late TransactionRepository transactionRepository;
   late WalletRepository walletRepository;
@@ -161,7 +158,6 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     feeRepository = FeeRepository(client: client);
     moneyTransferRepository = MoneyTransferRepository(client: client);
     paymentCardRepository = PaymentCardRepository(client: client);
-    paymentIntentRepository = PaymentIntentRepository(client: client);
     plaidRepository = PlaidRepository(client: client);
     transactionRepository = TransactionRepository(client: client);
     walletRepository = WalletRepository(client: client);
@@ -195,11 +191,6 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         BlocProvider(
           create: (context) => NavigationBloc(
             tabController: TabController(length: 5, vsync: this),
-          ),
-        ),
-        BlocProvider(
-          create: (context) => PaymentIntentBloc(
-            repository: paymentIntentRepository,
           ),
         ),
         BlocProvider(
