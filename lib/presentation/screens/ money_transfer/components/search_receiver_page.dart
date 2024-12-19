@@ -263,10 +263,6 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
       onTap: () {
         try {
           widget.onSelected(contact);
-          print("Test 32123144 yoyo");
-          print(contact);
-          print(wallets);
-
           if (mounted) {
             context.pop();
           }
