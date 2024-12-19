@@ -64,7 +64,7 @@ class WalletReceiptWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             Expanded(
               child: RepaintBoundary(
                 key: globalKey,
@@ -95,7 +95,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                   weight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 35),
+                              const SizedBox(height: 30),
                               _buildTransactionDetail(
                                   key: 'Transaction ID',
                                   value: walletTransactionModel.transactionId
