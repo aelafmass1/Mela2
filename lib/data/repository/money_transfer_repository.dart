@@ -84,7 +84,7 @@ class MoneyTransferRepository {
           "note": note,
         }),
       );
-      // log(res.body);
+      print("Transfer to walllet from today is ${res.statusCode} $fromWalletId $toWalletId $amount $note");
 
       final data = jsonDecode(res.body);
 
@@ -119,6 +119,8 @@ class MoneyTransferRepository {
     );
 
     final data = jsonDecode(res.body);
+          print("Transfer unregisterd to walllet from today is $accessToken ${res.statusCode} $senderWalletId $recipientPhoneNumber $amount");
+
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

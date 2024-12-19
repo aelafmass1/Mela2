@@ -71,6 +71,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
 
   handleContactSelection() async {
     final selecteduser = await showMoneyReceiverSelection(context);
+    print("the selected user once agian is $selecteduser");
     if (selecteduser != null) {
       setState(() {
         selectedContact = selecteduser;
@@ -248,8 +249,10 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                 onPressed: selectedContact == null
                     ? null
                     : () {
-                        if (_formKey.currentState?.validate() == true) {
+                        if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
+                            print(
+                                "the requested user is ${selectedContact ?? -1}");
                             context.read<MoneyRequestBloc>().add(
                                   MoneyRequest(
                                     requesterWalletId:
@@ -264,6 +267,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                           } else {
                             if (transferFromWalletModel != null &&
                                 transferToWalletModel != null) {
+                              print("test one two three++++++ sent sent sent");
                               scrollDown();
                               context.read<MoneyTransferBloc>().add(
                                     TransferToWallet(
@@ -278,6 +282,9 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                     ),
                                   );
                             } else {
+                              print(
+                                  "test three two one++++++ pending pending pending $transferToWalletModel");
+
                               context.read<MoneyTransferBloc>().add(
                                     TransferToUnregisteredUser(
                                       phoneNumber:
@@ -660,6 +667,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
             final melaMemberContacts =
                 state.filteredContacts.map((c) => c.contactId).toList();
             if (melaMemberContacts.contains(selectedContact?.contactId)) {
+              print("the contact id is si sis ${selectedContact}");
               setState(() {
                 selectedContact = state.filteredContacts
                     .firstWhere(

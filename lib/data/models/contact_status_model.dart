@@ -13,6 +13,7 @@ class ContactStatusModel {
   final List<WalletModel>? wallets;
   final String? contactName;
   final String? contactPhoneNumber;
+
   ContactStatusModel({
     required this.contactId,
     required this.contactStatus,
@@ -53,22 +54,24 @@ class ContactStatusModel {
 
   factory ContactStatusModel.fromMap(Map map) {
     return ContactStatusModel(
-      contactId: "",
+      contactId: map['contactId'] ?? "",
       contactStatus: "registered",
       userId: map['id'] as int,
       contactName: "${map['firstName']} ${map['lastName']}",
       contactPhoneNumber: (map['id'] as int).toString(),
+      wallets: (map['wallets'] as List<dynamic>?)?.map((x) => WalletModel.fromMap(x)).toList(),
     );
   }
 
-  factory ContactStatusModel.fromFlutterContact(Contact contact) {
+  factory ContactStatusModel.fromFlutterContact(Contact contact,{List<WalletModel>? wallets}) {
     return ContactStatusModel(
       contactId: contact.id,
       contactStatus: 'not_registered',
       userId: 0,
       contactName: contact.displayName,
       contactPhoneNumber:
-          contact.phones.isNotEmpty ? contact.phones.first.number : null,
+      contact.phones.isNotEmpty ? contact.phones.first.number : null,
+      wallets: wallets
     );
   }
 
