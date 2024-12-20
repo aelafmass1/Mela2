@@ -3,11 +3,19 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo Using Amazon Corretto 11 and Node.js
-      - git clone https://github.com/flutter/flutter.git -b stable
-      - export PATH="$PATH:`pwd`/flutter/bin"
+      - echo Installing Android SDK...
+      - mkdir -p /android-sdk && cd /android-sdk
+      - curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+      - unzip commandlinetools.zip -d cmdline-tools
+      - mkdir -p cmdline-tools/latest
+      - mv cmdline-tools/* cmdline-tools/latest/
+      - export ANDROID_HOME=/android-sdk
+      - export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+      - echo Installing required Android SDK components...
+      - yes | sdkmanager --licenses
+      - sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+      - flutter doctor --android-licenses
       - flutter doctor
-      - flutter precache
   build:
     commands:
       - echo Building Flutter APK...
@@ -19,5 +27,4 @@ phases:
 
 artifacts:
   files:
-    - build/app/outputs/flutter-apk/app-release.apk
-  discard-paths: no
+    - '**/app-release.apk'
