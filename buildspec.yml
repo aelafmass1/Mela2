@@ -24,8 +24,9 @@ phases:
   build:
     commands:
       - echo Building Flutter APK...
-      - pwd
-      - ls
+      - cd $CODEBUILD_SRC_DIR # Navigate to the source directory
+      - pwd                   # Confirm the current directory
+      - ls                    # List files in the project directory
       - flutter clean
       - flutter build apk --release
   post_build:
