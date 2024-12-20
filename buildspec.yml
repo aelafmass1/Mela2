@@ -1,9 +1,8 @@
-version: 0.2
-
 phases:
   install:
     commands:
-      - echo Installing Android SDK...
+      - echo Installing Android SDK and Flutter...
+      # Install Android SDK
       - mkdir -p /android-sdk && cd /android-sdk
       - curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
       - unzip commandlinetools.zip -d cmdline-tools
@@ -14,8 +13,12 @@ phases:
       - echo Installing required Android SDK components...
       - yes | sdkmanager --licenses
       - sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-      - flutter doctor --android-licenses
+      # Install Flutter
+      - cd / && git clone https://github.com/flutter/flutter.git -b stable
+      - export PATH=$PATH:/flutter/bin
       - flutter doctor
+      - flutter precache
+      - flutter doctor --android-licenses
   build:
     commands:
       - echo Building Flutter APK...
