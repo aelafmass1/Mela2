@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
@@ -79,7 +78,6 @@ class ContactRepositoryImpl implements ContactRepository {
       ),
     );
 
-
     final data = jsonDecode(res.body);
 
     if (res.statusCode == 200 || res.statusCode == 201) {
@@ -93,7 +91,6 @@ class ContactRepositoryImpl implements ContactRepository {
     required String query,
   }) async {
     final token = await getToken();
-    debugPrint("token $token");
     final res = await client.get(
       Uri.parse('$baseUrl/search/user?prefix=$query'),
       headers: {
