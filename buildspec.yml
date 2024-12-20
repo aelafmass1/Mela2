@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: openjdk11
+      nodejs: 16
+    commands:
+      - echo Installing Flutter...
+      - git clone https://github.com/flutter/flutter.git -b stable
+      - export PATH="$PATH:`pwd`/flutter/bin"
+      - flutter doctor
+      - flutter precache
+  build:
+    commands:
+      - echo Building Flutter APK...
+      - flutter clean
+      - flutter build apk --release
+  post_build:
+    commands:
+      - echo Build complete. APK is ready for deployment.
+
+artifacts:
+  files:
+    - build/app/outputs/flutter-apk/app-release.apk
+  discard-paths: no
