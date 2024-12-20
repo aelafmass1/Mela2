@@ -970,7 +970,7 @@ class _SentTabState extends State<SentTab> {
                     child: TextFormField(
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'receiver is selected';
+                          return 'Receiver not selected';
                         }
                         return null;
                       },
