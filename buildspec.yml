@@ -3,6 +3,12 @@ version: 0.2
 phases:
   install:
     commands:
+      - echo Installing Amazon Corretto 17...
+      - yum remove -y java-11-amazon-corretto  # Remove Java 11 if installed
+      - yum install -y java-17-amazon-corretto
+      - export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+      - export PATH=$JAVA_HOME/bin:$PATH
+      - java -version  # Confirm Java 17 installation
       - echo Installing Android SDK and Flutter...
       # Install Android SDK
       - mkdir -p /android-sdk && cd /android-sdk
