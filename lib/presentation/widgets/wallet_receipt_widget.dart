@@ -27,7 +27,7 @@ class WalletReceiptWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final globalKey = GlobalKey();
-
+    debugPrint('WalletReceiptWidget: ${walletTransactionModel.status}');
     //
     Future<void> captureAndConvertToPdf(BuildContext context) async {
       final boundary =
@@ -80,17 +80,14 @@ class WalletReceiptWidget extends StatelessWidget {
                             children: [
                               TextWidget(
                                 text: '-\$${walletTransactionModel.amount}',
-                                color:
-                                    walletTransactionModel.status == "SUCCESS"
-                                        ? ColorName.primaryColor
-                                        : ColorName.yellow,
+                                color: _getStatusDetails()['textColor'],
                                 weight: FontWeight.w600,
                               ),
                               SizedBox(
                                 width: 60.sw,
-                                child: const TextWidget(
+                                child: TextWidget(
                                   text:
-                                      'Money has been successfully added to the wallet.',
+                                      'Money has been successfully transfered from ${walletTransactionModel.fromWalletCode ?? 'your'} wallet.',
                                   textAlign: TextAlign.center,
                                   fontSize: 14,
                                   weight: FontWeight.w400,
@@ -189,28 +186,28 @@ class WalletReceiptWidget extends StatelessWidget {
 
   Map<String, dynamic> _getStatusDetails() {
     Color textColor;
-    AssetGenImage bgImage;
+    Image bgImage;
     String normalizedText;
 
     switch (walletTransactionModel.status) {
       case "SUCCESS":
         textColor = ColorName.primaryColor;
-        bgImage = Assets.images.receipt;
+        bgImage = Assets.images.receipt.image(fit: BoxFit.cover);
         normalizedText = "Completed";
         break;
       case "PENDING":
         textColor = ColorName.yellow;
-        bgImage = Assets.images.receipt;
+        bgImage = Assets.images.receiptPending.image(fit: BoxFit.cover);
         normalizedText = "Pending";
         break;
       case "FAILED":
         textColor = ColorName.red;
-        bgImage = Assets.images.receipt;
+        bgImage = Assets.images.receiptFailed.image(fit: BoxFit.cover);
         normalizedText = "Failed";
         break;
       default:
         textColor = ColorName.grey;
-        bgImage = Assets.images.receipt;
+        bgImage = Assets.images.receipt.image(fit: BoxFit.cover);
         normalizedText = "_";
     }
 
