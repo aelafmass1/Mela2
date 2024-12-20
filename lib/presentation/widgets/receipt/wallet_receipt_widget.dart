@@ -15,10 +15,10 @@ import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
+import 'package:transaction_mobile_app/presentation/widgets/receipt/utils.dart';
 
-import '../../gen/assets.gen.dart';
-import '../../gen/colors.gen.dart';
-import 'text_widget.dart';
+import '../../../gen/colors.gen.dart';
+import '../text_widget.dart';
 
 class WalletReceiptWidget extends StatelessWidget {
   final WalletTransactionModel walletTransactionModel;
@@ -27,7 +27,6 @@ class WalletReceiptWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final globalKey = GlobalKey();
-    debugPrint('WalletReceiptWidget: ${walletTransactionModel.status}');
     //
     Future<void> captureAndConvertToPdf(BuildContext context) async {
       final boundary =
@@ -55,7 +54,7 @@ class WalletReceiptWidget extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 25),
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(40),
@@ -70,9 +69,9 @@ class WalletReceiptWidget extends StatelessWidget {
                 key: globalKey,
                 child: Stack(
                   children: [
-                    _getStatusDetails()['bgImage'],
+                    getStatusDetails(walletTransactionModel.status)['bgImage'],
                     Positioned(
-                        top: 80,
+                        top: 87,
                         left: 0,
                         right: 0,
                         child: Align(
@@ -80,7 +79,8 @@ class WalletReceiptWidget extends StatelessWidget {
                             children: [
                               TextWidget(
                                 text: '-\$${walletTransactionModel.amount}',
-                                color: _getStatusDetails()['textColor'],
+                                color: getStatusDetails(
+                                    walletTransactionModel.status)['textColor'],
                                 weight: FontWeight.w600,
                               ),
                               SizedBox(
@@ -93,7 +93,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                   weight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 40),
                               _buildTransactionDetail(
                                 key: 'To',
                                 value: walletTransactionModel.to(),
@@ -117,8 +117,10 @@ class WalletReceiptWidget extends StatelessWidget {
                               ),
                               _buildTransactionDetail(
                                   key: 'Transaction Status',
-                                  value: _getStatusDetails()['normalizedText'],
-                                  color: _getStatusDetails()['textColor']),
+                                  value: getStatusDetails(walletTransactionModel
+                                      .status)['normalizedText'],
+                                  color: getStatusDetails(walletTransactionModel
+                                      .status)['textColor']),
                               _buildTransactionDetail(
                                 key: 'Remark ',
                                 value: (walletTransactionModel.note?.length ??
@@ -134,7 +136,7 @@ class WalletReceiptWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
             ButtonWidget(
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -174,45 +176,11 @@ class WalletReceiptWidget extends StatelessWidget {
                     context.pop();
                   }),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
           ],
         ),
       ),
     );
-  }
-
-  Map<String, dynamic> _getStatusDetails() {
-    Color textColor;
-    Image bgImage;
-    String normalizedText;
-
-    switch (walletTransactionModel.status) {
-      case "SUCCESS":
-        textColor = ColorName.primaryColor;
-        bgImage = Assets.images.receipt.image(fit: BoxFit.cover);
-        normalizedText = "Completed";
-        break;
-      case "PENDING":
-        textColor = ColorName.yellow;
-        bgImage = Assets.images.receiptPending.image(fit: BoxFit.cover);
-        normalizedText = "Pending";
-        break;
-      case "FAILED":
-        textColor = ColorName.red;
-        bgImage = Assets.images.receiptFailed.image(fit: BoxFit.cover);
-        normalizedText = "Failed";
-        break;
-      default:
-        textColor = ColorName.grey;
-        bgImage = Assets.images.receipt.image(fit: BoxFit.cover);
-        normalizedText = "_";
-    }
-
-    return {
-      'textColor': textColor,
-      'bgImage': bgImage,
-      'normalizedText': normalizedText,
-    };
   }
 
   _buildTransactionDetail(

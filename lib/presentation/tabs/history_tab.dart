@@ -14,7 +14,7 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
-import '../../core/utils/show_wallet_receipt.dart';
+import '../widgets/receipt/show_wallet_receipt.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});

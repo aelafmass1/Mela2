@@ -109,11 +109,16 @@ class WalletTransactionModel {
   }
 
   String to({String? defaultValue}) {
-    return receiverName ??
-        receiverPhoneNumber ??
-        receiverAccountNumber ??
-        defaultValue ??
-        'U';
+    if (receiverName != null) {
+      return receiverName!;
+    } else if (transactionType == 'BANK_TO_WALLET') {
+      return "You";
+    } else if (toWallet != null && toWallet!.holder != null) {
+      return "${toWallet!.holder?.firstName} ${toWallet!.holder?.lastName}";
+    } else if (pendingTransfer?['recipientPhoneNumber'] != null) {
+      return pendingTransfer?['recipientPhoneNumber'];
+    }
+    return '_';
   }
 
   String get from {

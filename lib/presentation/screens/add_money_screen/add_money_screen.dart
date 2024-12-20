@@ -15,7 +15,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/extensions/color_extension.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
+import 'package:transaction_mobile_app/presentation/widgets/receipt/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';

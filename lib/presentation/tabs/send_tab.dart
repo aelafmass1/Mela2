@@ -1549,13 +1549,11 @@ class _SentTabState extends State<SentTab> {
 
                     lastDigit = card.last4Digits;
                   }
-                  context.pushNamed(
-                    RouteName.receipt,
-                    extra: receiverInfo?.copyWith(
-                      lastDigit: lastDigit,
-                    ),
-                  );
-
+                  context.pushNamed(RouteName.receipt,
+                      extra: receiverInfo?.copyWith(
+                        lastDigit: lastDigit,
+                      ));
+                  // showWalletReceipt(context, WalletTransactionModel(transactionId: transactionId, transactionType: transactionType, status: status, timestamp:))
                   clearSendInfo();
                 }
               },
