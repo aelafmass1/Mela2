@@ -24,6 +24,8 @@ phases:
   build:
     commands:
       - echo Building Flutter APK...
+      - pwd
+      - ls
       - flutter clean
       - flutter build apk --release
   post_build:
