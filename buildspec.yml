@@ -3,13 +3,13 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo Installing Amazon Corretto 17...
-      - yum remove -y java-11-amazon-corretto  # Remove Java 11 if installed
-      - yum install -y java-17-amazon-corretto
-      - export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
-      - export PATH=$JAVA_HOME/bin:$PATH
-      - java -version  # Confirm Java 17 installation
-      - echo Installing Android SDK and Flutter...
+      # - echo Installing Amazon Corretto 17...
+      # - yum remove -y java-11-amazon-corretto  # Remove Java 11 if installed
+      # - yum install -y java-17-amazon-corretto
+      # - export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+      # - export PATH=$JAVA_HOME/bin:$PATH
+      # - java -version  # Confirm Java 17 installation
+      # - echo Installing Android SDK and Flutter...
       # Install Android SDK
       - mkdir -p /android-sdk && cd /android-sdk
       - curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
@@ -31,8 +31,6 @@ phases:
     commands:
       - cd $CODEBUILD_SRC_DIR # Navigate to the source directory
       - echo Building Flutter APK...
-      - echo "org.gradle.daemon=true" >> android/gradle.properties
-      - echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> android/gradle.properties
       - pwd                   # Confirm the current directory
       - ls                    # List files in the project directory
       - flutter clean
