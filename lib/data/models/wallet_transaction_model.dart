@@ -1,114 +1,130 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
+import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 
 class WalletTransactionModel {
-  final int fromWalletId;
-  final int? toWalletId;
-  final int transactionId;
-  final num? fromWalletBalance;
-  final num amount;
-  final String? transactionType;
+  final int? transactionId;
+  final num? amount;
+  final String? currency;
+  final String transactionType;
+  final String? status;
   final DateTime timestamp;
+  final num? convertedAmount;
   final String? note;
-  final String? from;
-  final String? to;
+  final WalletModel? fromWallet;
+  final WalletModel? toWallet;
+  final String? receiverName;
+  final String? receiverPhoneNumber;
+  final String? receiverBank;
+  final String? receiverAccountNumber;
+  final Map? pendingTransfer;
+  final String? bankLastDigits;
   WalletTransactionModel({
-    required this.fromWalletId,
-    required this.toWalletId,
     required this.transactionId,
-    required this.fromWalletBalance,
-    required this.amount,
+    this.amount,
+    this.currency,
     required this.transactionType,
+    required this.status,
     required this.timestamp,
-    required this.note,
-    this.from,
-    this.to,
+    this.convertedAmount,
+    this.note,
+    this.fromWallet,
+    this.toWallet,
+    this.receiverName,
+    this.receiverPhoneNumber,
+    this.receiverBank,
+    this.receiverAccountNumber,
+    this.pendingTransfer,
+    this.bankLastDigits,
   });
 
   WalletTransactionModel copyWith({
-    int? fromWalletId,
-    int? toWalletId,
     int? transactionId,
-    num? fromWalletBalance,
     num? amount,
+    String? currency,
     String? transactionType,
-    DateTime? transactionTimestamp,
+    String? status,
+    DateTime? timestamp,
+    num? convertedAmount,
     String? note,
+    WalletModel? fromCurrency,
+    WalletModel? toCurrency,
+    String? receiverName,
+    String? receiverPhoneNumber,
+    String? receiverBank,
+    String? receiverAccountNumber,
+    Map? pendingTransfer,
+    String? bankLastDigits,
   }) {
     return WalletTransactionModel(
-      fromWalletId: fromWalletId ?? this.fromWalletId,
-      toWalletId: toWalletId ?? this.toWalletId,
       transactionId: transactionId ?? this.transactionId,
-      fromWalletBalance: fromWalletBalance ?? this.fromWalletBalance,
       amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
       transactionType: transactionType ?? this.transactionType,
-      timestamp: transactionTimestamp ?? timestamp,
+      status: status ?? this.status,
+      timestamp: timestamp ?? this.timestamp,
+      convertedAmount: convertedAmount ?? this.convertedAmount,
       note: note ?? this.note,
+      fromWallet: fromCurrency ?? fromWallet,
+      toWallet: toCurrency ?? toWallet,
+      receiverName: receiverName ?? this.receiverName,
+      receiverPhoneNumber: receiverPhoneNumber ?? this.receiverPhoneNumber,
+      receiverBank: receiverBank ?? this.receiverBank,
+      receiverAccountNumber:
+          receiverAccountNumber ?? this.receiverAccountNumber,
+      pendingTransfer: pendingTransfer ?? this.pendingTransfer,
+      bankLastDigits: bankLastDigits,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'fromWalletId': fromWalletId,
-      'toWalletId': toWalletId,
-      'transactionId': transactionId,
-      'fromWalletBalance': fromWalletBalance,
-      'amount': amount,
-      'transactionType': transactionType,
-      'transactionTimestamp': timestamp.millisecondsSinceEpoch,
-      'note': note,
-    };
   }
 
   factory WalletTransactionModel.fromMap(Map map) {
     return WalletTransactionModel(
-      fromWalletId: map['fromWallet']['walletId'] as int,
-      toWalletId:
-          map['toWallet'] != null ? (map['toWallet']['walletId'] as int) : null,
-      transactionId: map['transactionId'] as int,
-      fromWalletBalance: map['fromWalletBalance'] as num?,
-      amount: map['amount'] as num,
-      transactionType: map['transactionType'] as String?,
+      transactionId: map['transactionId'] as int?,
+      amount: map['amount'] != null ? map['amount'] as num : null,
+      currency: map['currency'] != null ? map['currency'] as String : null,
+      transactionType: map['transactionType'] as String,
+      status: map['status'] as String?,
       timestamp: DateTime.parse(map['timestamp']),
-      note: map['note'] as String?,
-      to: map['name'] as String?,
+      convertedAmount:
+          map['convertedAmount'] != null ? map['convertedAmount'] as num : null,
+      note: map['note'] != null ? map['note'] as String : null,
+      fromWallet: map['fromWallet'] != null
+          ? WalletModel.fromMap(map['fromWallet'] as Map)
+          : null,
+      toWallet: map['toWallet'] != null
+          ? WalletModel.fromMap(map['toWallet'] as Map)
+          : null,
+      receiverName:
+          map['receiverName'] != null ? map['receiverName'] as String : null,
+      receiverPhoneNumber: map['receiverPhoneNumber'] != null
+          ? map['receiverPhoneNumber'] as String
+          : null,
+      receiverBank: map['receiverBank'] != null
+          ? map['receiverBank']['name'] as String
+          : null,
+      receiverAccountNumber: map['receiverAccountNumber'] != null
+          ? map['receiverAccountNumber'] as String
+          : null,
+      pendingTransfer:
+          map['pendingTransfer'] != null ? map['pendingTransfer'] as Map : null,
     );
   }
 
-  String toJson() => json.encode(toMap());
+  String to({String? defaultValue}) {
+    return receiverName ??
+        receiverPhoneNumber ??
+        receiverAccountNumber ??
+        defaultValue ??
+        'U';
+  }
 
-  factory WalletTransactionModel.fromJson(String source) =>
-      WalletTransactionModel.fromMap(
-          json.decode(source) as Map<String, dynamic>);
+  String get from {
+    if (bankLastDigits != null) {
+      return '**** **** **** $bankLastDigits';
+    }
+    return "_";
+  }
 
   @override
   String toString() {
-    return 'WalletTransactionModel(fromWalletId: $fromWalletId, toWalletId: $toWalletId, transactionId: $transactionId, fromWalletBalance: $fromWalletBalance, amount: $amount, transactionType: $transactionType, transactionTimestamp: $timestamp, note: $note)';
-  }
-
-  @override
-  bool operator ==(covariant WalletTransactionModel other) {
-    if (identical(this, other)) return true;
-
-    return other.fromWalletId == fromWalletId &&
-        other.toWalletId == toWalletId &&
-        other.transactionId == transactionId &&
-        other.fromWalletBalance == fromWalletBalance &&
-        other.amount == amount &&
-        other.transactionType == transactionType &&
-        other.timestamp == timestamp &&
-        other.note == note;
-  }
-
-  @override
-  int get hashCode {
-    return fromWalletId.hashCode ^
-        toWalletId.hashCode ^
-        transactionId.hashCode ^
-        fromWalletBalance.hashCode ^
-        amount.hashCode ^
-        transactionType.hashCode ^
-        timestamp.hashCode ^
-        note.hashCode;
+    return 'WalletTransactionModel(fromWalletId: ${fromWallet?.walletId}, toWalletId: ${toWallet?.walletId}, transactionId: $transactionId, amount: $amount, transactionType: $transactionType, transactionTimestamp: $timestamp, note: $note)';
   }
 }

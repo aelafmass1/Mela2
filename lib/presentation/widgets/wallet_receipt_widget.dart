@@ -87,7 +87,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                 width: 60.sw,
                                 child: TextWidget(
                                   text:
-                                      'Money has been successfully transfered from ${walletTransactionModel.fromWalletCode ?? 'your'} wallet.',
+                                      'Money has been successfully transfered from ${walletTransactionModel.fromWallet?.currency.code ?? 'your'} wallet.',
                                   textAlign: TextAlign.center,
                                   fontSize: 14,
                                   weight: FontWeight.w400,
@@ -96,9 +96,7 @@ class WalletReceiptWidget extends StatelessWidget {
                               const SizedBox(height: 30),
                               _buildTransactionDetail(
                                 key: 'To',
-                                value: walletTransactionModel.to == 'null null'
-                                    ? 'Unregistered User'
-                                    : walletTransactionModel.to ?? '',
+                                value: walletTransactionModel.to(),
                               ),
                               _buildTransactionDetail(
                                 key: 'Amount',
@@ -115,8 +113,7 @@ class WalletReceiptWidget extends StatelessWidget {
                                       .toString()),
                               _buildTransactionDetail(
                                 key: 'Details',
-                                value:
-                                    '${walletTransactionModel.transactionType}',
+                                value: walletTransactionModel.transactionType,
                               ),
                               _buildTransactionDetail(
                                   key: 'Transaction Status',

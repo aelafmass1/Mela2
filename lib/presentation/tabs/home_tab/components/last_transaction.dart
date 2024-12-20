@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
+import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/home_tab/components/wallet_transaction_tile.dart';
 import 'package:transaction_mobile_app/presentation/widgets/custom_shimmer.dart';
@@ -26,7 +26,7 @@ class LastTransaction extends StatefulWidget {
 
 class _LastTransactionState extends State<LastTransaction> {
   String? selectedDayFilter;
-  List<WalletTransactionDetailModel> selectedWallets = [];
+  List<WalletTransactionModel> selectedWallets = [];
   bool showThisPage = true;
   List<Contact> contacts = [];
 

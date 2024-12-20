@@ -169,6 +169,14 @@ class $AssetsImagesGen {
   /// File path: assets/images/receipt.png
   AssetGenImage get receipt => const AssetGenImage('assets/images/receipt.png');
 
+  /// File path: assets/images/receipt_failed.png
+  AssetGenImage get receiptFailed =>
+      const AssetGenImage('assets/images/receipt_failed.png');
+
+  /// File path: assets/images/receipt_pending.png
+  AssetGenImage get receiptPending =>
+      const AssetGenImage('assets/images/receipt_pending.png');
+
   /// File path: assets/images/reward.png
   AssetGenImage get reward => const AssetGenImage('assets/images/reward.png');
 
@@ -184,6 +192,7 @@ class $AssetsImagesGen {
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
 
+  /// Directory path: assets/images/svgs
   $AssetsImagesSvgsGen get svgs => const $AssetsImagesSvgsGen();
 
   /// File path: assets/images/transaction_icon.png
@@ -260,6 +269,8 @@ class $AssetsImagesGen {
         paypalLogo,
         profileImage,
         receipt,
+        receiptFailed,
+        receiptPending,
         reward,
         sendIcon,
         sinqeBankLogo,
@@ -461,13 +472,24 @@ class $AssetsImagesSvgsGen {
 class Assets {
   Assets._();
 
+  static const String aEnv = '.env';
   static const $AssetsImagesGen images = $AssetsImagesGen();
+
+  /// List of all assets
+  static List<String> get values => [aEnv];
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName);
+  const AssetGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  });
 
   final String _assetName;
+
+  final Size? size;
+  final Set<String> flavors;
 
   Image image({
     Key? key,
@@ -487,7 +509,7 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
     FilterQuality filterQuality = FilterQuality.low,

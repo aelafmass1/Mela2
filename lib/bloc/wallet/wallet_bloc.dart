@@ -42,13 +42,12 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
           );
         }
         final data = res['successResponse'];
+        // TODO: Add Status from backend
         final walletTransaction = WalletTransactionModel(
-          fromWalletId: data['walletId'],
-          toWalletId: data['walletId'],
           transactionId: data['transactionId'],
-          fromWalletBalance: null,
+          status: 'SUCCESS',
           amount: data['amount'],
-          from: "**** **** ${event.bankLastDigits}",
+          bankLastDigits: event.bankLastDigits,
           transactionType: data['transactionType'],
           timestamp: DateTime.parse(data['transactionTimestamp']),
           note: '',

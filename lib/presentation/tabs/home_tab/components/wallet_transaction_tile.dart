@@ -6,7 +6,6 @@ import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
 import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
-import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 
 import '../../../../config/routing.dart';
 import '../../../../data/models/wallet_transaction_model.dart';
@@ -15,7 +14,7 @@ import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
 
 class WalletTransactionTile extends StatefulWidget {
-  final WalletTransactionDetailModel walletTransaction;
+  final WalletTransactionModel walletTransaction;
   final List<Contact> contacts;
   const WalletTransactionTile(
       {super.key, required this.walletTransaction, required this.contacts});
@@ -78,28 +77,7 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
               extra: receiverInfo,
             );
           } else {
-            showWalletReceipt(
-              context,
-              WalletTransactionModel(
-                amount: widget.walletTransaction.amount ?? 0,
-                note: widget.walletTransaction.note,
-                fromWalletBalance: widget.walletTransaction.convertedAmount,
-                fromWalletId:
-                    widget.walletTransaction.fromWallet?.walletId ?? 0,
-                timestamp: widget.walletTransaction.timestamp,
-                toWalletId: widget.walletTransaction.toWallet?.walletId,
-                transactionId: widget.walletTransaction.transactionId ?? 0,
-                transactionType: widget.walletTransaction.transactionType,
-                from:
-                    "${widget.walletTransaction.fromWallet?.holder?.firstName} ${widget.walletTransaction.fromWallet?.holder?.lastName}",
-                to: widget.walletTransaction.transactionType ==
-                        'PENDING_TRANSFER'
-                    ? _getContactName(widget.walletTransaction
-                            .pendingTransfer?['recipientPhoneNumber'] ??
-                        'Unregistered User')
-                    : "${widget.walletTransaction.toWallet?.holder?.firstName} ${widget.walletTransaction.toWallet?.holder?.lastName}",
-              ),
-            );
+            showWalletReceipt(context, widget.walletTransaction);
           }
         },
         leading: Container(
