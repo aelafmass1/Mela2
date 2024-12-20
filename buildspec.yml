@@ -29,10 +29,10 @@ phases:
       - flutter doctor --android-licenses
   build:
     commands:
+      - cd $CODEBUILD_SRC_DIR # Navigate to the source directory
       - echo Building Flutter APK...
       - echo "org.gradle.daemon=true" >> android/gradle.properties
       - echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> android/gradle.properties
-      - cd $CODEBUILD_SRC_DIR # Navigate to the source directory
       - pwd                   # Confirm the current directory
       - ls                    # List files in the project directory
       - flutter clean
