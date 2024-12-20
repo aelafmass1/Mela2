@@ -6,19 +6,19 @@ phases:
       java: openjdk11
       nodejs: 16
     commands:
-      - echo Installing Flutter...
+      - echo Using pre-installed OpenJDK 11 and Node.js 16
+  build:
+    commands:
+      - echo Building Flutter APK...
       - git clone https://github.com/flutter/flutter.git -b stable
       - export PATH="$PATH:`pwd`/flutter/bin"
       - flutter doctor
       - flutter precache
-  build:
-    commands:
-      - echo Building Flutter APK...
       - flutter clean
       - flutter build apk --release
   post_build:
     commands:
-      - echo Build complete. APK is ready for deployment.
+      - echo Build complete.
 
 artifacts:
   files:
