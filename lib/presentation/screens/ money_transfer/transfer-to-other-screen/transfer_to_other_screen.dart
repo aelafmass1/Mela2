@@ -71,7 +71,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
 
   handleContactSelection() async {
     final selecteduser = await showMoneyReceiverSelection(context);
-    print("the selected user once agian is $selecteduser");
     if (selecteduser != null) {
       setState(() {
         selectedContact = selecteduser;

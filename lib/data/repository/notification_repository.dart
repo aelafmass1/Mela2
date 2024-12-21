@@ -16,7 +16,7 @@ class NotificationRepository {
   }) async {
     final res = await client.post(
         Uri.parse(
-          '$baseUrl/user/me/devices',
+          saveFcmTokenUrl,
         ),
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -25,7 +25,6 @@ class NotificationRepository {
         body: jsonEncode([
           fcmToken,
         ]));
-
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -39,7 +38,7 @@ class NotificationRepository {
   }) async {
     final res = await client.delete(
         Uri.parse(
-          '$baseUrl/user/me/devices',
+          deleteFcmTokenUrl,
         ),
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -61,14 +60,13 @@ class NotificationRepository {
   }) async {
     final res = await client.get(
       Uri.parse(
-        '$baseUrl/api/notifications/all',
+        fetchNotificationsUrl,
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       },
     );
-
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;

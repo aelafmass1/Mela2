@@ -65,21 +65,16 @@ class _HomeScreenState extends State<HomeScreen>
             UpdateAvailability.updateAvailable) {
           ///Update available
           if (appUpdateInfo.immediateAllowed) {
-            debugPrint('Start an immediate update');
             String? message =
                 await manager.startAnUpdate(type: AppUpdateType.immediate);
 
             ///message return null when run update success
           } else if (appUpdateInfo.flexibleAllowed) {
-            debugPrint('Start an flexible update');
             String? message =
                 await manager.startAnUpdate(type: AppUpdateType.flexible);
 
             ///message return null when run update success
-          } else {
-            debugPrint(
-                'Update available. Immediate & Flexible Update Flow not allow');
-          }
+          } else {}
         }
       } else if (Platform.isIOS) {
         VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(
@@ -90,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen>
         }
       }
     } catch (e) {
-      print('Failed to check for update: $e');
     }
   }
 
