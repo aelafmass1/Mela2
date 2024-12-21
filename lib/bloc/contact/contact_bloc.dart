@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -64,11 +65,11 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         return emit(ContactFail(message: res.first['error']));
       }
 
-      Map<String, String> idToNameMap = {};
+      Map<int, String> idToNameMap = {};
       for (var remoteContact in res) {
-        for (var localContact in contacts) {
-          if (localContact.id == remoteContact["contactId"]) {
-            idToNameMap[remoteContact["userId"]] = localContact.displayName;
+        for (Contact localContact in contacts) {
+          if (remoteContact['contactId'] == localContact.id) {
+            idToNameMap[remoteContact['userId']] = localContact.displayName;
           }
         }
       }

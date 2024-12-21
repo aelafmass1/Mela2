@@ -7,7 +7,7 @@
 part of 'contact_bloc.dart';
 
 sealed class ContactState extends Equatable {
-  final Map<String, String> remoteContacts;
+  final Map<int, String> remoteContacts;
   final List<Contact> localContacs;
 
   const ContactState(
