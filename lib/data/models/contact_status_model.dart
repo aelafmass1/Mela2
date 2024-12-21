@@ -9,7 +9,7 @@ import 'wallet_model.dart';
 class ContactStatusModel {
   final String contactId;
   final String contactStatus;
-  final int userId;
+   final int userId;
   final List<WalletModel>? wallets;
   final String? contactName;
   final String? contactPhoneNumber;
@@ -63,11 +63,11 @@ class ContactStatusModel {
     );
   }
 
-  factory ContactStatusModel.fromFlutterContact(Contact contact,{List<WalletModel>? wallets}) {
+  factory ContactStatusModel.fromFlutterContact(Contact contact,{int? userId,List<WalletModel>? wallets}) {
     return ContactStatusModel(
       contactId: contact.id,
       contactStatus: 'not_registered',
-      userId: 0,
+      userId: userId ?? 0,
       contactName: contact.displayName,
       contactPhoneNumber:
       contact.phones.isNotEmpty ? contact.phones.first.number : null,
