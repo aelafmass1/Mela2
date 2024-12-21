@@ -96,12 +96,14 @@ class MelaUser {
   final String? firstName;
   final String? lastName;
   final int phoneNumber;
+  final int id;
   final int countryCode;
   MelaUser({
     this.firstName,
     this.lastName,
     required this.phoneNumber,
     required this.countryCode,
+    this.id = 0,
   });
 
   MelaUser copyWith({
@@ -133,6 +135,7 @@ class MelaUser {
       lastName: map['lastName'] != null ? map['lastName'] as String : null,
       phoneNumber: map['phoneNumber'] as int,
       countryCode: map['countryCode'] as int,
+      id: map['id'] as int,
     );
   }
 
