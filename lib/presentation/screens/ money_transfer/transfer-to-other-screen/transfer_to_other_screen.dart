@@ -251,7 +251,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     : () {
                         if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
-                          
                             context.read<MoneyRequestBloc>().add(
                                   MoneyRequest(
                                     requesterWalletId:
