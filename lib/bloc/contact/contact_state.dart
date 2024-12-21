@@ -7,11 +7,11 @@
 part of 'contact_bloc.dart';
 
 sealed class ContactState extends Equatable {
-  final List<String> remoteContacts;
+  final Map<String, String> remoteContacts;
   final List<Contact> localContacs;
 
   const ContactState(
-      {this.remoteContacts = const [], this.localContacs = const []});
+      {this.remoteContacts = const {}, this.localContacs = const []});
 
   @override
   List<Object> get props => [remoteContacts, localContacs];

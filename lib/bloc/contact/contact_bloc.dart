@@ -64,12 +64,19 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         return emit(ContactFail(message: res.first['error']));
       }
 
-      final data = res.map((c) => c["contactId"] as String).toList();
+      Map<String, String> idToNameMap = {};
+      for (var remoteContact in res) {
+        for (var localContact in contacts) {
+          if (localContact.id == remoteContact["contactId"]) {
+            idToNameMap[remoteContact["userId"]] = localContact.displayName;
+          }
+        }
+      }
 
       emit(ContactFilterSuccess(
         filteredContacts: defaultContacts,
         localContacs: contacts,
-        remoteContacts: data,
+        remoteContacts: idToNameMap,
       ));
     } on ServerException catch (error, stackTrace) {
       emit(ContactFail(message: error.message));
@@ -100,8 +107,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
               .toList();
         }
       } else {
-        filteredContacts = state.localContacs
-        .where((contact) {          
+        filteredContacts = state.localContacs.where((contact) {
           final name = contact.displayName.toLowerCase();
           final phoneNumber = contact.phones.isNotEmpty
               ? contact.phones.first.number.toLowerCase().replaceAll(' ', '')
@@ -111,33 +117,35 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
             return name.contains(query);
           }
           return name.contains(query) || phoneNumber.contains(query);
-        })
-        .map((contact) {
+        }).map((contact) {
           List<WalletModel>? wallets = contactWallets[contact.id];
           int? userId = contactUserIds[contact.id];
-          return ContactStatusModel.fromFlutterContact(contact,userId: userId,wallets: wallets,);
-        })
-        .toList();
+          return ContactStatusModel.fromFlutterContact(
+            contact,
+            userId: userId,
+            wallets: wallets,
+          );
+        }).toList();
       }
 
       emit(
         ContactFilterSuccess(
-        filteredContacts: filteredContacts,
-        localContacs: state.localContacs,
-        remoteContacts: state.remoteContacts),
-        );
+            filteredContacts: filteredContacts,
+            localContacs: state.localContacs,
+            remoteContacts: state.remoteContacts),
+      );
     } on ServerException catch (error, stackTrace) {
       emit(ContactFail(message: error.message));
       await Sentry.captureException(
         error,
-         stackTrace: stackTrace,
-         );
+        stackTrace: stackTrace,
+      );
     } catch (error, stackTrace) {
       emit(ContactFail(message: error.toString()));
       await Sentry.captureException(
-        error, 
+        error,
         stackTrace: stackTrace,
-        );
+      );
     }
   }
 }

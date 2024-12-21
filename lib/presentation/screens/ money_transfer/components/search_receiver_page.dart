@@ -233,12 +233,8 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                   return _buildContactTile(
                       state.filteredContacts[index],
                       state.filteredContacts[index].contactStatus !=
-                              "not_registered" ||
-                          state.remoteContacts.contains(
-                              state.filteredContacts[index].contactId),
-                              state.filteredContacts[index].wallets
-                              
-                              );
+                          "not_registered",
+                      state.filteredContacts[index].wallets);
                 },
                 separatorBuilder: (context, index) => Divider(
                   color: ColorName.grey.shade100,
@@ -258,7 +254,8 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
     );
   }
 
-  _buildContactTile(ContactStatusModel contact, bool isMelaMember,List<WalletModel>? wallets) {
+  _buildContactTile(ContactStatusModel contact, bool isMelaMember,
+      List<WalletModel>? wallets) {
     return ListTile(
       onTap: () {
         try {
