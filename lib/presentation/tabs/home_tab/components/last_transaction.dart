@@ -31,21 +31,8 @@ class _LastTransactionState extends State<LastTransaction> {
   bool showThisPage = true;
   List<Contact> contacts = [];
 
-  _fetchContacts() async {
-    try {
-      if (await Permission.contacts.isGranted) {
-        if (mounted) context.read<ContactBloc>().add(FetchContacts());
-      } else {
-        await Permission.contacts.request();
-      }
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   @override
   void initState() {
-    if (context.read<ContactBloc>().state is ContactInitial) _fetchContacts();
     super.initState();
   }
 

@@ -44,7 +44,6 @@ class _HistoryTabState extends State<HistoryTab> {
 
   _getContactName(
       WalletTransactionDetailModel transaction, Map<int, String> contacts) {
-    debugPrint("contacts: ${transaction.toWallet?.holder!.id}");
     if (transaction.transactionType == 'BANK_TO_WALLET') {
       return "You";
     } else if (transaction.transactionType == 'REMITTANCE') {

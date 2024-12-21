@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -27,7 +30,6 @@ class WalletTransactionTile extends StatefulWidget {
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
   _getContactName(
       WalletTransactionDetailModel transaction, Map<int, String> contacts) {
-    debugPrint("contacts: ${transaction.toWallet?.holder!.id}");
     if (transaction.transactionType == 'BANK_TO_WALLET') {
       return "You";
     } else if (transaction.transactionType == 'REMITTANCE') {
@@ -37,6 +39,24 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
         ? 'Unregistered User'
         : contacts[transaction.toWallet!.holder!.id] ??
             '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}';
+  }
+
+  _fetchContacts() async {
+    try {
+      if (await Permission.contacts.isGranted) {
+        if (mounted) context.read<ContactBloc>().add(FetchContacts());
+      } else {
+        await Permission.contacts.request();
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  @override
+  initState() {
+    if (context.read<ContactBloc>().state is ContactInitial) _fetchContacts();
+    super.initState();
   }
 
   @override
