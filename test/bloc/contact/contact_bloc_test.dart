@@ -107,7 +107,7 @@ void main() {
         contactBloc.emit(ContactFilterSuccess(
           filteredContacts: const [],
           localContacs: mockContacts,
-          remoteContacts: const ['1', '2'],
+          remoteContacts: const {},
         ));
       },
       build: () => contactBloc,
@@ -128,7 +128,7 @@ void main() {
         contactBloc.emit(ContactFilterSuccess(
           filteredContacts: const [],
           localContacs: mockContacts,
-          remoteContacts: const ['1', '2'],
+          remoteContacts: const {},
         ));
 
         when(mockRepository.searchContactsByTag(
@@ -153,7 +153,7 @@ void main() {
         contactBloc.emit(ContactFilterSuccess(
           filteredContacts: const [],
           localContacs: mockContacts,
-          remoteContacts: const ['1', '2'],
+          remoteContacts: const {},
         ));
 
         when(mockRepository.searchContactsByTag(
