@@ -81,8 +81,7 @@ class ContactRepositoryImpl implements ContactRepository {
 
 
     final data = jsonDecode(res.body);
- print("token is $token");
-    if (res.statusCode == 200 || res.statusCode == 201) {
+        if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
     return [processErrorResponse(data)];
@@ -102,7 +101,6 @@ class ContactRepositoryImpl implements ContactRepository {
     );
 
     final data = jsonDecode(res.body);
-    print("token is $token");
     if (res.statusCode == 200 || res.statusCode == 201) {
       return (data["response"] as List)
           .map((item) => item as Map<String, dynamic>)

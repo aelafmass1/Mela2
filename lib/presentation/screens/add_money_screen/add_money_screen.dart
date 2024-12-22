@@ -67,14 +67,17 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
   WalletModel? selectedWalletModel;
   List<PaymentCardModel> paymentCards = [];
 
-  _calculateTotalFee(BankFeeSuccess fee) {
+  double _calculateTotalFee(PaymentCardSuccess state) {
     double totalFee = 0;
-    for (final fee in fee.bankFees) {
-      if (fee.type.contains("PERCENTAGE")) {
-        totalFee +=
-            (fee.amount * (double.tryParse(amountController.text) ?? 0)) / 100;
-      } else {
-        totalFee += fee.amount;
+    for (final card in state.paymentCards) {
+      for (final fee in card.fees) {
+        if (fee.type == "PERCENTAGE") {
+          totalFee +=
+              (fee.amount * (double.tryParse(amountController.text) ?? 0)) /
+                  100;
+        } else {
+          totalFee += fee.amount;
+        }
       }
     }
     return totalFee;
@@ -798,9 +801,9 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                       color: ColorName.borderColor,
                     ),
                   ),
-                  child: BlocBuilder<BankFeeBloc, BankFeeState>(
+                  child: BlocBuilder<PaymentCardBloc, PaymentCardState>(
                     builder: (context, state) {
-                      if (state is BankFeeLoading) {
+                      if (state is PaymentCardLoading) {
                         return Column(
                           children: [
                             CustomShimmer(
@@ -823,10 +826,11 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                             ),
                           ],
                         );
-                      } else if (state is BankFeeSuccess) {
+                      } else if (state is PaymentCardSuccess) {
                         return Column(
                           children: [
-                            for (var fee in state.bankFees)
+                            for (var fee in state.paymentCards
+                                .expand((card) => card.fees))
                               Column(
                                 children: [
                                   Row(
@@ -853,15 +857,14 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                       Row(
                                         children: [
                                           TextWidget(
-                                            text: fee.type == 'PERCENTAGE'
-                                                ? "\$${(((fee.amount / 100) * (double.tryParse(amountController.text) ?? 0))).toStringAsFixed(2)}"
-                                                : "\$${NumberFormat('##,###.##').format(fee.amount ?? 0)}",
-                                            weight: FontWeight.w600,
-                                            fontSize: 14,
+                                            text:
+                                                '\$${_calculateTotalFee(state).toStringAsFixed(2)}',
+                                            fontSize: 16,
+                                            weight: FontWeight.w700,
                                           ),
                                           const SizedBox(
                                             width: 5,
-                                          ),
+                                            ),
                                           Icon(
                                             Icons.info_outline,
                                             color:
@@ -874,7 +877,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                   ),
                                   const Divider(
                                     color: ColorName.borderColor,
-                                  ),
+                                    ),
                                 ],
                               ),
                             SizedBox(
@@ -900,7 +903,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                           ),
                                           const SizedBox(
                                             width: 5,
-                                          ),
+                                            ),
                                           Icon(
                                             Icons.info_outline,
                                             color:

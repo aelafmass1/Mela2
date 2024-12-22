@@ -42,15 +42,15 @@ class TransferModalSheetBody extends StatelessWidget {
               extra: false,
             );
           }),
-      // TransferToModel(
-      //     title: "To Wallet",
-      //     subtitle: "Withdraw the balance of money to my local bank.",
-      //     iconPath: Assets.images.svgs.wallet02,
-      //     onTap: () {
-      //       context.pop();
+      TransferToModel(
+          title: "To Wallet",
+          subtitle: "Withdraw the balance of money to my local bank.",
+          iconPath: Assets.images.svgs.wallet02,
+          onTap: () {
+            context.pop();
 
-      //       context.pushNamed(RouteName.transferToWallet);
-      //     })
+            context.pushNamed(RouteName.transferToWallet);
+          })
     ];
     return ValueListenableBuilder(
         valueListenable: selectedTransferToModel,
