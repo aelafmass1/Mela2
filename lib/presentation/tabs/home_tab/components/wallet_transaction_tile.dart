@@ -27,19 +27,6 @@ class WalletTransactionTile extends StatefulWidget {
 }
 
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
-  _getContactName(
-      WalletTransactionModel transaction, Map<int, String> contacts) {
-    if (transaction.transactionType == 'BANK_TO_WALLET') {
-      return "You";
-    } else if (transaction.transactionType == 'REMITTANCE') {
-      return transaction.receiverName ?? transaction.receiverPhoneNumber ?? "_";
-    }
-    return transaction.toWallet == null
-        ? 'Unregistered User'
-        : contacts[transaction.toWallet!.holder!.id] ??
-            '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}';
-  }
-
   _fetchContacts() async {
     try {
       if (await Permission.contacts.isGranted) {
@@ -89,7 +76,8 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                   extra: receiverInfo,
                 );
               } else {
-                showWalletReceipt(context, widget.walletTransaction);
+                showWalletReceipt(context, widget.walletTransaction,
+                    contacts: state.remoteContacts);
               }
             },
             leading: Container(
@@ -130,8 +118,7 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                 if (widget.walletTransaction.transactionType ==
                     'PENDING_TRANSFER')
                   TextWidget(
-                    text: _getContactName(
-                        widget.walletTransaction, state.remoteContacts),
+                    text: widget.walletTransaction.to(state.remoteContacts),
                     fontSize: 16,
                     weight: FontWeight.w500,
                   )
@@ -143,8 +130,7 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                           'WALLET_TO_WALLET' &&
                       widget.walletTransaction.toWallet?.holder != null)
                     TextWidget(
-                      text: _getContactName(
-                          widget.walletTransaction, state.remoteContacts),
+                      text: widget.walletTransaction.to(state.remoteContacts),
                       fontSize: 16,
                       weight: FontWeight.w500,
                     )
@@ -156,8 +142,7 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                     )
                 else
                   TextWidget(
-                    text: _getContactName(
-                        widget.walletTransaction, state.remoteContacts),
+                    text: widget.walletTransaction.to(state.remoteContacts),
                     fontSize: 16,
                     weight: FontWeight.w500,
                   ),

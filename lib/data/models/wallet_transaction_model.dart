@@ -108,22 +108,21 @@ class WalletTransactionModel {
     );
   }
 
-  String to({String? defaultValue}) {
-    if (receiverName != null) {
-      return receiverName!;
-    } else if (transactionType == 'BANK_TO_WALLET') {
+  String to(Map<int, String> contacts) {
+    if (transactionType == 'BANK_TO_WALLET') {
       return "You";
-    } else if (toWallet != null && toWallet!.holder != null) {
-      return "${toWallet!.holder?.firstName} ${toWallet!.holder?.lastName}";
-    } else if (pendingTransfer?['recipientPhoneNumber'] != null) {
-      return pendingTransfer?['recipientPhoneNumber'];
+    } else if (transactionType == 'REMITTANCE') {
+      return receiverName ?? receiverPhoneNumber ?? "_";
     }
-    return '_';
+    return toWallet == null
+        ? 'Unregistered User'
+        : contacts[toWallet!.holder!.id] ??
+            '${toWallet?.holder?.firstName ?? ''} ${toWallet?.holder?.lastName ?? ''}';
   }
 
   String get from {
     if (bankLastDigits != null) {
-      return '**** **** **** $bankLastDigits';
+      return '**** **** $bankLastDigits';
     }
     return "_";
   }

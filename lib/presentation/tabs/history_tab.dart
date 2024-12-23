@@ -38,19 +38,6 @@ class _HistoryTabState extends State<HistoryTab> {
     }
   }
 
-  _getContactName(
-      WalletTransactionModel transaction, Map<int, String> contacts) {
-    if (transaction.transactionType == 'BANK_TO_WALLET') {
-      return "You";
-    } else if (transaction.transactionType == 'REMITTANCE') {
-      return transaction.receiverName ?? transaction.receiverPhoneNumber ?? "_";
-    }
-    return transaction.toWallet == null
-        ? 'Unregistered User'
-        : contacts[transaction.toWallet!.holder!.id] ??
-            '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}';
-  }
-
   @override
   void initState() {
     final state = context.read<WalletTransactionBloc>().state;
@@ -270,10 +257,8 @@ class _HistoryTabState extends State<HistoryTab> {
       builder: (context, state) {
         return ListTile(
           onTap: () {
-            showWalletReceipt(
-              context,
-              transaction,
-            );
+            showWalletReceipt(context, transaction,
+                contacts: state.remoteContacts);
           },
           leading: Container(
             width: 34,
@@ -308,7 +293,7 @@ class _HistoryTabState extends State<HistoryTab> {
             ],
           ),
           title: TextWidget(
-            text: _getContactName(transaction, state.remoteContacts),
+            text: transaction.to(state.remoteContacts),
             fontSize: 14,
             weight: FontWeight.w400,
           ),

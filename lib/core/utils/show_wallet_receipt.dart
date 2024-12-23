@@ -5,9 +5,8 @@ import 'package:transaction_mobile_app/core/utils/get_status_details.dart';
 import 'package:transaction_mobile_app/presentation/widgets/wallet_receipt_widget.dart';
 
 showWalletReceipt(
-  BuildContext context,
-  WalletTransactionModel walletTransactionModel,
-) {
+    BuildContext context, WalletTransactionModel walletTransactionModel,
+    {Map<int, String>? contacts}) {
   List<List<String>> contents = [];
 
   String amount = '\$${walletTransactionModel.amount}';
@@ -19,7 +18,10 @@ showWalletReceipt(
       ["Transaction Type", walletTransactionModel.transactionType],
       ["From", walletTransactionModel.from],
       ["Amount", walletTransactionModel.amount.toString()],
-      ["Date", DateFormat('MMMM dd, yyyy').format(DateTime.now())],
+      [
+        "Date",
+        DateFormat('MMMM dd, yyyy').format(walletTransactionModel.timestamp)
+      ],
       ["Transaction ID", walletTransactionModel.transactionId.toString()],
       [
         "Transaction Status",
@@ -38,9 +40,12 @@ showWalletReceipt(
         'Money has been successfully added to ${walletTransactionModel.fromWallet?.currency.code ?? 'your'} wallet.';
   } else {
     contents = [
-      ["To", walletTransactionModel.to()],
+      ["To", walletTransactionModel.to(contacts ?? {})],
       ["Amount", walletTransactionModel.amount.toString()],
-      ["Date", DateFormat('MMMM dd, yyyy').format(DateTime.now())],
+      [
+        "Date",
+        DateFormat('MMMM dd, yyyy').format(walletTransactionModel.timestamp)
+      ],
       ["Transaction ID", walletTransactionModel.transactionId.toString()],
       ["Details", walletTransactionModel.transactionType],
       [
