@@ -8,6 +8,7 @@ const double veryTinySize = 2.0;
 const double tinySize = 5.0;
 const double smallSize = 10.0;
 const double middleSize = 15.0;
+const double mediume20 = 20.0;
 const double mediumSize = 25.0;
 const double largeSize = 50.0;
 const double largeMedium = 72.0;

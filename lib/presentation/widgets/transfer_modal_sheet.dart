@@ -62,7 +62,8 @@ class TransferModalSheetBody extends StatelessWidget {
         valueListenable: selectedTransferToModel,
         builder: (context, _, child) {
           return Container(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, tinySize),
+            padding: const EdgeInsets.fromLTRB(
+                mediume20, mediume20, mediume20, tinySize),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
