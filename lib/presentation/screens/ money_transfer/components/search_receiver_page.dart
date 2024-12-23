@@ -238,8 +238,12 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                       ),
                       const SizedBox(height: 20),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          const Icon(Icons.info_outline_rounded),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                          ),
                           horizontalSpaceSmall,
                           Expanded(
                             child: TextWidget(
@@ -255,7 +259,10 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                       verticalSpaceSmall,
                       Row(
                         children: [
-                          const Icon(Icons.info_outline_rounded),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                          ),
                           horizontalSpaceSmall,
                           Expanded(
                             child: TextWidget(
