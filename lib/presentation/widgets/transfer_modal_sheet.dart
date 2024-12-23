@@ -31,7 +31,8 @@ showTransferModalSheet(BuildContext context) {
 class TransferModalSheetBody extends StatelessWidget {
   TransferModalSheetBody({super.key});
 
-  ValueNotifier<TransferToModel?> selectedTransferToModel = ValueNotifier(null);
+  final ValueNotifier<TransferToModel?> selectedTransferToModel =
+      ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +104,7 @@ class TransferModalSheetBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Gap(16),
+                const Gap(mediumSize),
                 ...transferToItems.map(
                   (e) {
                     final isSelected = selectedTransferToModel.value == e;

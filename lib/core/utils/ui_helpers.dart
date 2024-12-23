@@ -10,6 +10,7 @@ const double smallSize = 10.0;
 const double middleSize = 15.0;
 const double mediumSize = 25.0;
 const double largeSize = 50.0;
+const double largeMedium = 72.0;
 const double massiveSize = 120.0;
 const double customButtonWidth = 0.85;
 

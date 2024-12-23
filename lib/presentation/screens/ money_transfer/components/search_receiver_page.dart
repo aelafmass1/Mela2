@@ -193,7 +193,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
           borderRadius: BorderRadius.circular(24),
           controller: searchController,
           suffix: SizedBox(
-            width: 72,
+            width: largeMedium,
             child: ButtonWidget(
                 elevation: 0,
                 color: ColorName.white,
