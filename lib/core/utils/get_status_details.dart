@@ -1,29 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/widgets/image_builder.dart';
 
 Map<String, dynamic> getStatusDetails(String? status) {
   Color textColor;
   Widget bgImage;
   String normalizedText;
-  debugPrint("status: $status");
+
   switch (status) {
     case "SUCCESS":
       textColor = ColorName.primaryColor;
-      bgImage = Assets.images.receipt.image(fit: BoxFit.fill, height: 550);
+      bgImage = ImageBuilder(
+        image: Assets.images.receipt.path,
+        height: 540,
+        fit: BoxFit.fill,
+      );
       normalizedText = "Completed";
       break;
     case "PENDING":
       textColor = ColorName.yellow;
-      bgImage =
-          Assets.images.receiptPending.image(fit: BoxFit.fill, height: 540);
+      bgImage = ImageBuilder(
+        image: Assets.images.receiptPending.path,
+        height: 540,
+        fit: BoxFit.fill,
+      );
       normalizedText = "Pending";
       break;
     case "FAILED":
       textColor = ColorName.red;
-      bgImage = Assets.images.receiptFailed.image(
+      bgImage = ImageBuilder(
+        image: Assets.images.receiptFailed.path,
+        height: 540,
         fit: BoxFit.fill,
-        height: 550,
       );
       normalizedText = "Failed";
       break;

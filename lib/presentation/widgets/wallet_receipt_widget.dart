@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:printing/printing.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 
 import 'package:pdf/widgets.dart' as pw;
@@ -101,8 +102,8 @@ class WalletReceiptWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 45),
                           for (var content in contents)
-                            _buildTransactionDetail(
-                              key: content[0],
+                            TransactionDetail(
+                              keyText: content[0],
                               value: content[1],
                             ),
                         ],
@@ -165,11 +166,22 @@ class WalletReceiptWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  _buildTransactionDetail(
-      {required String key,
-      required String value,
-      Color color = const Color(0xFF7B7B7B)}) {
+class TransactionDetail extends StatelessWidget {
+  final String keyText;
+  final String value;
+  final Color color;
+
+  const TransactionDetail({
+    super.key,
+    required this.keyText,
+    required this.value,
+    this.color = const Color(0xFF7B7B7B),
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: Column(
@@ -180,7 +192,7 @@ class WalletReceiptWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextWidget(
-                  text: key,
+                  text: keyText,
                   color: const Color(0xFF7B7B7B),
                   fontSize: 16,
                   weight: FontWeight.w400,
@@ -194,11 +206,11 @@ class WalletReceiptWidget extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: tinySize),
           const Divider(
             color: ColorName.borderColor,
-            endIndent: 15,
-            indent: 15,
+            endIndent: middleSize,
+            indent: middleSize,
           )
         ],
       ),
