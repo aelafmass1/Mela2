@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/get_member_contact_info.dart';
-import 'package:transaction_mobile_app/presentation/widgets/receipt/show_wallet_receipt.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/equb_member_model.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 

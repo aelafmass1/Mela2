@@ -4,36 +4,33 @@ import 'package:transaction_mobile_app/gen/colors.gen.dart';
 
 Map<String, dynamic> getStatusDetails(String? status) {
   Color textColor;
-  Image bgImage;
+  Widget bgImage;
   String normalizedText;
   debugPrint("status: $status");
   switch (status) {
     case "SUCCESS":
       textColor = ColorName.primaryColor;
-      bgImage = Assets.images.receipt
-          .image(fit: BoxFit.cover, height: double.infinity);
+      bgImage = Assets.images.receipt.image(fit: BoxFit.fill, height: 550);
       normalizedText = "Completed";
       break;
     case "PENDING":
       textColor = ColorName.yellow;
-      bgImage = Assets.images.receiptPending
-          .image(fit: BoxFit.cover, height: double.infinity);
-
+      bgImage =
+          Assets.images.receiptPending.image(fit: BoxFit.fill, height: 540);
       normalizedText = "Pending";
       break;
     case "FAILED":
       textColor = ColorName.red;
-      bgImage = Image.asset(
-        "assets/images/receipt_failed.png",
-        fit: BoxFit.cover,
-        height: double.infinity,
+      bgImage = Assets.images.receiptFailed.image(
+        fit: BoxFit.fill,
+        height: 550,
       );
       normalizedText = "Failed";
       break;
     default:
       textColor = ColorName.grey;
       bgImage = Assets.images.receipt
-          .image(fit: BoxFit.cover, height: double.infinity);
+          .image(fit: BoxFit.fill, height: double.infinity);
       normalizedText = "_";
   }
 

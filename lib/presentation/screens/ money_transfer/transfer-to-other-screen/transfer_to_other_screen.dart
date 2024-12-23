@@ -24,7 +24,7 @@ import '../../../../bloc/wallet_recent_transaction/wallet_recent_transaction_blo
 import '../../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import '../../../../core/utils/show_change_wallet_modal.dart';
 import '../../../../core/utils/show_snackbar.dart';
-import '../../../widgets/receipt/show_wallet_receipt.dart';
+import '../../../../core/utils/show_wallet_receipt.dart';
 import '../../../../data/models/contact_status_model.dart';
 import '../../../../data/models/transfer_fees_model.dart';
 import '../../../../data/models/wallet_model.dart';

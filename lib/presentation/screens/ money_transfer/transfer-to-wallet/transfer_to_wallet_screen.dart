@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/presentation/widgets/receipt/show_wallet_receipt.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/transfer_fees_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
