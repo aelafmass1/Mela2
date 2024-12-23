@@ -19,14 +19,17 @@ showTransferModalSheet(BuildContext context) {
         top: Radius.circular(20),
       ),
     ),
-    builder: (context) => TransferModalSheetBody(),
-  ); 
+    isScrollControlled: true,
+    builder: (context) => FractionallySizedBox(
+        heightFactor: 0.6, child: TransferModalSheetBody()),
+  );
 }
 
 class TransferModalSheetBody extends StatelessWidget {
   TransferModalSheetBody({super.key});
 
-  ValueNotifier<TransferToModel?> selectedTransferToModel = ValueNotifier(null);
+  final ValueNotifier<TransferToModel?> selectedTransferToModel =
+      ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +59,7 @@ class TransferModalSheetBody extends StatelessWidget {
         valueListenable: selectedTransferToModel,
         builder: (context, _, child) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -147,7 +150,7 @@ class TransferModalSheetBody extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 30),
+                const Spacer(),
                 AbsorbPointer(
                   absorbing: selectedTransferToModel.value == null,
                   child: ButtonWidget(
