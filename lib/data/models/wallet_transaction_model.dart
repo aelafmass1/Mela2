@@ -108,11 +108,22 @@ class WalletTransactionModel {
     );
   }
 
-  String to(Map<int, String> contacts) {
+  // TODO: Update this when the localcontacts type change is merged
+  String to(Map<int, String> contacts, {List<dynamic>? localContacts}) {
     if (transactionType == 'BANK_TO_WALLET') {
       return "You";
     } else if (transactionType == 'REMITTANCE') {
       return receiverName ?? receiverPhoneNumber ?? "_";
+    } else if (transactionType == 'PENDING_TRANSFER') {
+      localContacts ??= [];
+      final contact = localContacts.where(
+        (element) =>
+            element.contactPhoneNumber ==
+            pendingTransfer?["recipientPhoneNumber"],
+      );
+      return contact.isNotEmpty
+          ? contact.first.contactName
+          : pendingTransfer?["recipientPhoneNumber"] ?? "_";
     }
     return toWallet == null
         ? 'Unregistered User'
