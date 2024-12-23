@@ -12,6 +12,7 @@ abstract class ContactRepository {
   Future<List<Map<String, dynamic>>> searchContactsByTag(
       {required String query});
   Future<List<Contact>> fetchLocalContacts();
+  Future<List<Map<String, dynamic>>> searchByPhone({required String phone});
 }
 
 class ContactRepositoryImpl implements ContactRepository {
@@ -79,7 +80,7 @@ class ContactRepositoryImpl implements ContactRepository {
     );
 
     final data = jsonDecode(res.body);
-      if (res.statusCode == 200 || res.statusCode == 201) {
+    if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
     return [processErrorResponse(data)];
@@ -109,5 +110,25 @@ class ContactRepositoryImpl implements ContactRepository {
   @override
   Future<List<Contact>> fetchLocalContacts() async {
     return await FlutterContacts.getContacts(withProperties: true);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> searchByPhone(
+      {required String phone}) async {
+    final token = await getToken();
+    final res = await client.get(
+      Uri.parse('$baseUrl/search/phone?phoneNumber=$phone'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return (data["response"] as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList();
+    }
+    return [processErrorResponse(data)];
   }
 }
