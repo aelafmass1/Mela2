@@ -49,7 +49,8 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         }
       }
 
-      List<ContactStatusModel> defaultContacts = contacts.map((contact) {
+      List<ContactStatusModel> defaultContacts =
+          contacts.where((contact) => contact.phones.isNotEmpty).map((contact) {
         List<WalletModel>? wallets = contactWallets[contact.id];
         int? userId = contactUserIds[contact.id];
 
