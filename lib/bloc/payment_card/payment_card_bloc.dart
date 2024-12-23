@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -68,7 +67,6 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
         final token = await getToken();
-        debugPrint('Token: $token');
         final res = await repository.fetchPaymentCards(
           accessToken: token!,
         );

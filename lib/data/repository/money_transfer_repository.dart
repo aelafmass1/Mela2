@@ -84,6 +84,8 @@ class MoneyTransferRepository {
           "note": note,
         }),
       );
+
+
       final data = jsonDecode(res.body);
 
       if (res.statusCode == 200 || res.statusCode == 201) {
@@ -118,7 +120,6 @@ class MoneyTransferRepository {
 
     final data = jsonDecode(res.body);
 
-
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
@@ -148,7 +149,6 @@ class MoneyTransferRepository {
       }),
     );
     final data = jsonDecode(res.body);
-    print("the token to request money is $accessToken");
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }

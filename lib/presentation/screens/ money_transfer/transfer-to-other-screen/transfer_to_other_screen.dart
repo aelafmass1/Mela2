@@ -71,7 +71,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
 
   handleContactSelection() async {
     final selecteduser = await showMoneyReceiverSelection(context);
-    print("the selected user once agian is $selecteduser");
     if (selecteduser != null) {
       setState(() {
         selectedContact = selecteduser;
@@ -251,7 +250,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     : () {
                         if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
-                          
                             context.read<MoneyRequestBloc>().add(
                                   MoneyRequest(
                                     requesterWalletId:
@@ -280,8 +278,6 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                                     ),
                                   );
                             } else {
-                            
-
                               context.read<MoneyTransferBloc>().add(
                                     TransferToUnregisteredUser(
                                       phoneNumber:
@@ -839,8 +835,10 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                               0) ==
                           0) {
                         return 'Invalid Amount';
-                      } else if ((double.tryParse(text ?? '0') ?? 0) >
-                          (transferFromWalletModel?.balance?.toDouble() ?? 0)) {
+                      } else if (!widget.isFromRequest &&
+                          (double.tryParse(text ?? '0') ?? 0) >
+                              (transferFromWalletModel?.balance?.toDouble() ??
+                                  0)) {
                         return 'Insfficient balance';
                       }
                       return null;
