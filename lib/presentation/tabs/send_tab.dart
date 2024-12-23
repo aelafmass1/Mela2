@@ -1460,7 +1460,7 @@ class _SentTabState extends State<SentTab> {
                                                   TextWidget(
                                                     text: fee.type ==
                                                             'PERCENTAGE'
-                                                        ? "\$${((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)}"
+                                                        ? "\$${(((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)).toStringAsFixed(2)}"
                                                         : "\$${NumberFormat('##,###.##').format((fee.amount))}",
                                                     weight: FontWeight.w600,
                                                     fontSize: 14,
@@ -1500,7 +1500,7 @@ class _SentTabState extends State<SentTab> {
                                                 children: [
                                                   TextWidget(
                                                     text:
-                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
+                                                        '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w700,
                                                   ),
