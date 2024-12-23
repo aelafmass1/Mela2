@@ -115,37 +115,11 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.walletTransaction.transactionType ==
-                    'PENDING_TRANSFER')
-                  TextWidget(
-                    text: widget.walletTransaction.to(state.remoteContacts),
-                    fontSize: 16,
-                    weight: FontWeight.w500,
-                  )
-                else if (widget.walletTransaction.transactionType ==
-                        'WALLET_TO_WALLET' ||
-                    widget.walletTransaction.transactionType ==
-                        'BANK_TO_WALLET')
-                  if (widget.walletTransaction.transactionType ==
-                          'WALLET_TO_WALLET' &&
-                      widget.walletTransaction.toWallet?.holder != null)
-                    TextWidget(
-                      text: widget.walletTransaction.to(state.remoteContacts),
-                      fontSize: 16,
-                      weight: FontWeight.w500,
-                    )
-                  else
-                    const TextWidget(
-                      text: "You",
-                      fontSize: 16,
-                      weight: FontWeight.w500,
-                    )
-                else
-                  TextWidget(
-                    text: widget.walletTransaction.to(state.remoteContacts),
-                    fontSize: 16,
-                    weight: FontWeight.w500,
-                  ),
+                TextWidget(
+                  text: widget.walletTransaction.to(state.remoteContacts),
+                  fontSize: 16,
+                  weight: FontWeight.w500,
+                ),
               ],
             ),
             subtitle: TextWidget(
