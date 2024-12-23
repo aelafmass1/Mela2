@@ -14,6 +14,8 @@ part 'contact_state.dart';
 class ContactBloc extends Bloc<ContactEvent, ContactState> {
   final ContactRepository repository;
   Map<String, List<WalletModel>?> contactWallets = {};
+  Map<String, int?> contactUserIds = {};
+
   ContactBloc({required this.repository}) : super(const ContactInitial()) {
     on<FetchContacts>(_onFetchContacts);
     on<SearchContacts>(_onSearchContacts);
@@ -24,42 +26,57 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
       emit(const ContactLoading());
       var contacts = await repository.fetchLocalContacts();
       final res = await repository.checkMyContacts(contacts: contacts);
+
       contactWallets.clear();
+      contactUserIds.clear();
+
       for (var contactInfo in res) {
         if (contactInfo.containsKey('contactId')) {
           String contactId = contactInfo['contactId'];
-                 if (contactInfo.containsKey('wallets')) {
-            List<WalletModel> wallets = (contactInfo['wallets'] as List<dynamic>?)
-                ?.map((x) => WalletModel.fromMap(x))
-                .toList() ?? [];
+          int? userId = contactInfo['userId'];
+
+          contactUserIds[contactId] = userId;
+          if (contactInfo.containsKey('wallets')) {
+            List<WalletModel> wallets =
+                (contactInfo['wallets'] as List<dynamic>?)
+                        ?.map((x) => WalletModel.fromMap(x))
+                        .toList() ??
+                    [];
             contactWallets[contactId] = wallets;
           } else {
-            contactWallets[contactId] = null; 
+            contactWallets[contactId] = null;
           }
         }
       }
+
       List<ContactStatusModel> defaultContacts = contacts.map((contact) {
         List<WalletModel>? wallets = contactWallets[contact.id];
-        return ContactStatusModel.fromFlutterContact(contact, wallets: wallets);
-      }).toList();
-      if (res.isEmpty) {
-        return emit(ContactFilterSuccess(
-          filteredContacts: defaultContacts,
-          localContacs: contacts,
-          remoteContacts: const [],
-        ));
-      }
+        int? userId = contactUserIds[contact.id];
 
-      if (res.first.containsKey('error')) {
+        return ContactStatusModel.fromFlutterContact(
+          contact,
+          userId: userId,
+          wallets: wallets,
+        );
+      }).toList();
+
+      if (res.isNotEmpty && res.first.containsKey('error')) {
         return emit(ContactFail(message: res.first['error']));
       }
 
-      final data = res.map((c) => c["contactId"] as String).toList();
+      Map<int, String> idToNameMap = {};
+      for (var remoteContact in res) {
+        for (Contact localContact in contacts) {
+          if (remoteContact['contactId'] == localContact.id) {
+            idToNameMap[remoteContact['userId']] = localContact.displayName;
+          }
+        }
+      }
 
       emit(ContactFilterSuccess(
         filteredContacts: defaultContacts,
         localContacs: contacts,
-        remoteContacts: data,
+        remoteContacts: idToNameMap,
       ));
     } on ServerException catch (error, stackTrace) {
       emit(ContactFail(message: error.message));
@@ -90,23 +107,25 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
               .toList();
         }
       } else {
-        filteredContacts = state.localContacs
-            .where((contact) {
-              final name = contact.displayName.toLowerCase();
-              final phoneNumber = contact.phones.isNotEmpty
-                  ? contact.phones.first.number.toLowerCase().replaceAll(' ', '')
-                  : null;
+        filteredContacts = state.localContacs.where((contact) {
+          final name = contact.displayName.toLowerCase();
+          final phoneNumber = contact.phones.isNotEmpty
+              ? contact.phones.first.number.toLowerCase().replaceAll(' ', '')
+              : null;
 
-              if (phoneNumber == null) {
-                return name.contains(query);
-              }
-              return name.contains(query) || phoneNumber.contains(query);
-            })
-            .map((contact) {
-              List<WalletModel>? wallets = contactWallets[contact.id]; 
-              return ContactStatusModel.fromFlutterContact(contact, wallets: wallets);
-            })
-            .toList();
+          if (phoneNumber == null) {
+            return name.contains(query);
+          }
+          return name.contains(query) || phoneNumber.contains(query);
+        }).map((contact) {
+          List<WalletModel>? wallets = contactWallets[contact.id];
+          int? userId = contactUserIds[contact.id];
+          return ContactStatusModel.fromFlutterContact(
+            contact,
+            userId: userId,
+            wallets: wallets,
+          );
+        }).toList();
       }
 
       emit(

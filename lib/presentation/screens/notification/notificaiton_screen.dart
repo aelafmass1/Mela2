@@ -7,6 +7,8 @@ import 'package:transaction_mobile_app/presentation/screens/notification/compone
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../widgets/card_widget.dart';
+
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -84,8 +86,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
               return ListView.builder(
                   itemCount: state.notifications.length,
                   itemBuilder: (context, index) {
-                    return NotificationTile(
-                      notification: state.notifications[index],
+                    return CardWidget(
+                      child: NotificationTile(
+                        notification: state.notifications[index],
+                      ),
                     );
                   });
             }

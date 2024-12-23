@@ -84,7 +84,6 @@ class MoneyTransferRepository {
           "note": note,
         }),
       );
-      print("Transfer to walllet from today is ${res.statusCode} $fromWalletId $toWalletId $amount $note");
 
       final data = jsonDecode(res.body);
 
@@ -119,7 +118,6 @@ class MoneyTransferRepository {
     );
 
     final data = jsonDecode(res.body);
-
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

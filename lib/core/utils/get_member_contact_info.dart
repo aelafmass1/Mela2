@@ -64,7 +64,6 @@ Future<String?> removeCountryCode(String phoneNumber) async {
 
     return nationalNumber;
   } catch (e) {
-    print('Error processing phone number: $e');
     return null;
   }
 }

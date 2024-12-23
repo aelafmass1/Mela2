@@ -3,6 +3,12 @@ version: 0.2
 phases:
   install:
     commands:
+      - echo Installing Amazon Corretto 17...
+      - yum remove -y java-11-amazon-corretto  # Remove Java 11 if installed
+      - yum install -y java-17-amazon-corretto
+      - export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+      - export PATH=$JAVA_HOME/bin:$PATH
+      - java -version  # Confirm Java 17 installation
       - echo Installing Android SDK and Flutter...
       # Install Android SDK
       - mkdir -p /android-sdk && cd /android-sdk
@@ -23,12 +29,12 @@ phases:
       - flutter doctor --android-licenses
   build:
     commands:
-      - echo Building Flutter APK...
       - cd $CODEBUILD_SRC_DIR # Navigate to the source directory
+      - echo Building Flutter APK...
       - pwd                   # Confirm the current directory
       - ls                    # List files in the project directory
       - flutter clean
-      - flutter build apk --release
+      - flutter build apk --release  --verbose
   post_build:
     commands:
       - echo Build complete.

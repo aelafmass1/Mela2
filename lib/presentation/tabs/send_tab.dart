@@ -21,6 +21,7 @@ import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
+import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -1549,11 +1550,17 @@ class _SentTabState extends State<SentTab> {
 
                     lastDigit = card.last4Digits;
                   }
-                  context.pushNamed(RouteName.receipt,
-                      extra: receiverInfo?.copyWith(
-                        lastDigit: lastDigit,
-                      ));
-                  // showWalletReceipt(context, WalletTransactionModel(transactionId: transactionId, transactionType: transactionType, status: status, timestamp:))
+                  context.read<WalletBloc>().add(FetchWallets());
+                  context
+                      .read<WalletTransactionBloc>()
+                      .add(FetchWalletTransaction());
+                  context.pushNamed(
+                    RouteName.receipt,
+                    extra: receiverInfo?.copyWith(
+                      lastDigit: lastDigit,
+                    ),
+                  );
+
                   clearSendInfo();
                 }
               },

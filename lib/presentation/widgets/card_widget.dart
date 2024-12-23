@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/ui_helpers.dart';
+
 class CardWidget extends StatelessWidget {
   final Widget child;
-  final double width;
+  final double? width;
   final double? height;
   final EdgeInsets? padding;
+  final EdgeInsets? margin;
   final BorderRadius? borderRadius;
   final BoxBorder? boxBorder;
   final Alignment? alignment;
   const CardWidget({
     super.key,
     required this.child,
-    required this.width,
+    this.width,
     this.height,
     this.padding,
+    this.margin,
     this.borderRadius,
     this.boxBorder,
     this.alignment,
@@ -25,7 +29,10 @@ class CardWidget extends StatelessWidget {
       alignment: alignment,
       height: height,
       width: width,
-      padding: padding,
+      padding: padding ?? const EdgeInsets.symmetric(vertical: smallSize),
+      margin: margin ??
+          const EdgeInsets.symmetric(
+              vertical: tinySize, horizontal: middleSize),
       decoration: BoxDecoration(
         color: Colors.white,
         border: boxBorder,

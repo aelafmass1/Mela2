@@ -1,11 +1,11 @@
 import 'dart:developer';
 
-import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
@@ -26,15 +26,10 @@ class HistoryTab extends StatefulWidget {
 class _HistoryTabState extends State<HistoryTab> {
   String selectedFilter = 'all';
 
-  List<Contact> contacts = [];
-
   _fetchContacts() async {
     try {
       if (await Permission.contacts.isGranted) {
-        contacts = await FastContacts.getAllContacts();
-        setState(() {
-          contacts = contacts;
-        });
+        if (mounted) context.read<ContactBloc>().add(FetchContacts());
       } else {
         await Permission.contacts.request();
       }
@@ -43,19 +38,34 @@ class _HistoryTabState extends State<HistoryTab> {
     }
   }
 
+  _getContactName(
+      WalletTransactionModel transaction, Map<int, String> contacts) {
+    if (transaction.transactionType == 'BANK_TO_WALLET') {
+      return "You";
+    } else if (transaction.transactionType == 'REMITTANCE') {
+      return transaction.receiverName ?? transaction.receiverPhoneNumber ?? "_";
+    }
+    return transaction.toWallet == null
+        ? 'Unregistered User'
+        : contacts[transaction.toWallet!.holder!.id] ??
+            '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}';
+  }
+
   @override
   void initState() {
-    _fetchContacts();
     final state = context.read<WalletTransactionBloc>().state;
+
     if (state is! WalletTransactionSuccess) {
-      context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
+      _fetchContacts();
     }
+
+    final contactState = context.read<ContactBloc>().state;
+    if (contactState is ContactInitial) {}
     super.initState();
   }
 
   @override
   void dispose() {
-    contacts.clear();
     super.dispose();
   }
 
@@ -256,54 +266,62 @@ class _HistoryTabState extends State<HistoryTab> {
   }
 
   _buildTrasactionTile(WalletTransactionModel transaction) {
-    return ListTile(
-      onTap: () {
-        showWalletReceipt(context, transaction);
-      },
-      leading: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: const Color(0xFFA000C8).withOpacity(0.1),
-        ),
-        child: Center(
-          child: SvgPicture.asset(
-            Assets.images.svgs.transactionIcon,
-            width: 24,
-            height: 24,
+    return BlocBuilder<ContactBloc, ContactState>(
+      builder: (context, state) {
+        return ListTile(
+          onTap: () {
+            showWalletReceipt(
+              context,
+              transaction,
+            );
+          },
+          leading: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(100),
+              color: const Color(0xFFA000C8).withOpacity(0.1),
+            ),
+            child: Center(
+              child: SvgPicture.asset(
+                Assets.images.svgs.transactionIcon,
+                width: 24,
+                height: 24,
+              ),
+            ),
           ),
-        ),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          TextWidget(
-            text: '\$${transaction.amount}',
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              TextWidget(
+                text: '\$${transaction.amount}',
+                fontSize: 14,
+                weight: FontWeight.w600,
+              ),
+              TextWidget(
+                text: DateFormat('hh:mm a')
+                    .format(transaction.timestamp.toLocal()),
+                fontSize: 10,
+                weight: FontWeight.w400,
+              )
+            ],
+          ),
+          title: TextWidget(
+            text: _getContactName(transaction, state.remoteContacts),
             fontSize: 14,
-            weight: FontWeight.w600,
+            weight: FontWeight.w400,
           ),
-          TextWidget(
-            text: DateFormat('hh:mm a').format(transaction.timestamp.toLocal()),
+          subtitle: TextWidget(
+            text: transaction.receiverPhoneNumber ??
+                (transaction.toWallet == null
+                    ? '${transaction.pendingTransfer?['recipientPhoneNumber'] ?? ''}'
+                    : ("+${transaction.toWallet?.holder?.countryCode ?? ''} ${transaction.toWallet?.holder?.phoneNumber ?? ''}")),
             fontSize: 10,
             weight: FontWeight.w400,
-          )
-        ],
-      ),
-      title: TextWidget(
-        text: transaction.to(),
-        fontSize: 14,
-        weight: FontWeight.w400,
-      ),
-      subtitle: TextWidget(
-        text: transaction.receiverPhoneNumber ??
-            (transaction.toWallet == null
-                ? '${transaction.pendingTransfer?['recipientPhoneNumber'] ?? ''}'
-                : ("+${transaction.toWallet?.holder?.countryCode ?? ''} ${transaction.toWallet?.holder?.phoneNumber ?? ''}")),
-        fontSize: 10,
-        weight: FontWeight.w400,
-      ),
+          ),
+        );
+      },
     );
   }
 }
