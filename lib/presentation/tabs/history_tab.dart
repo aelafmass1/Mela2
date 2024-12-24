@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/contact_utils.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -26,24 +24,12 @@ class HistoryTab extends StatefulWidget {
 class _HistoryTabState extends State<HistoryTab> {
   String selectedFilter = 'all';
 
-  _fetchContacts() async {
-    try {
-      if (await Permission.contacts.isGranted) {
-        if (mounted) context.read<ContactBloc>().add(FetchContacts());
-      } else {
-        await Permission.contacts.request();
-      }
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   @override
   void initState() {
     final state = context.read<WalletTransactionBloc>().state;
 
     if (state is! WalletTransactionSuccess) {
-      _fetchContacts();
+      fetchContacts(context);
     }
 
     final contactState = context.read<ContactBloc>().state;
