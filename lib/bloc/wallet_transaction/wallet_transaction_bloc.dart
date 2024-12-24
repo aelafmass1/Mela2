@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
-import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
+import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 
 part 'wallet_transaction_event.dart';
@@ -33,10 +33,9 @@ class WalletTransactionBloc
             WalletTransactionFail(reason: res['error']),
           );
         }
-        Map<String, List<WalletTransactionDetailModel>> groupedTransactions =
-            {};
+        Map<String, List<WalletTransactionModel>> groupedTransactions = {};
         final walletTransactions = (res['data']['successResponse'] as List)
-            .map((w) => WalletTransactionDetailModel.fromMap(w))
+            .map((w) => WalletTransactionModel.fromMap(w))
             .toList();
 
         for (var transaction in walletTransactions) {

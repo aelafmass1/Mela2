@@ -69,7 +69,6 @@ class WalletRepository {
     required String paymentType,
     required String publicToken,
     required String savedPaymentId,
-    required String paymentIntentId,
     required int walletId,
   }) async {
     final res = await client.post(
@@ -83,8 +82,6 @@ class WalletRepository {
         body: jsonEncode({
           "amount": amount.toInt(),
           "paymentType": paymentType,
-          "publicToken": publicToken,
-          "paymentIntentId": paymentIntentId,
           "savedPaymentId": savedPaymentId,
           "walletId": walletId,
         }));

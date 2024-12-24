@@ -13,6 +13,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_request/money_request_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_qr_generator.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
@@ -265,17 +266,21 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                             if (transferFromWalletModel != null &&
                                 transferToWalletModel != null) {
                               scrollDown();
+                              selectedContact?.contactName;
                               context.read<MoneyTransferBloc>().add(
                                     TransferToWallet(
-                                      amount: double.tryParse(
-                                              amountController.text) ??
-                                          0,
-                                      note: noteController.text,
-                                      fromWalletId:
-                                          transferFromWalletModel!.walletId,
-                                      toWalletId:
-                                          transferToWalletModel!.walletId,
-                                    ),
+                                        amount: double.tryParse(
+                                                amountController.text) ??
+                                            0,
+                                        note: noteController.text,
+                                        fromWalletId:
+                                            transferFromWalletModel!.walletId,
+                                        toWalletId:
+                                            transferToWalletModel!.walletId,
+                                        reciever:
+                                            selectedContact?.contactName ??
+                                                selectedContact
+                                                    ?.contactPhoneNumber),
                                   );
                             } else {
                               context.read<MoneyTransferBloc>().add(
@@ -463,7 +468,7 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                   child: Row(
                     children: [
                       SvgPicture.asset(Assets.images.svgs.search),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: smallSize),
                       const TextWidget(
                         text: 'Search by @username , name or phone number',
                         fontSize: 12,

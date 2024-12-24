@@ -31,7 +31,6 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         final res = await repository.addFundToWallet(
           accessToken: accessToken ?? '',
           amount: event.amount,
-          paymentIntentId: event.paymentIntentId,
           paymentType: event.paymentType,
           publicToken: event.publicToken,
           savedPaymentId: event.savedPaymentId,
@@ -44,11 +43,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         }
         final data = res['successResponse'];
         final walletTransaction = WalletTransactionModel(
-          fromWalletId: data['walletId'],
-          toWalletId: data['walletId'],
           transactionId: data['transactionId'],
-          fromWalletBalance: null,
-          amount: data['balance'],
+          status: data['status'],
+          amount: data['amount'],
+          bankLastDigits: event.bankLastDigits,
           transactionType: data['transactionType'],
           timestamp: DateTime.parse(data['transactionTimestamp']),
           note: '',

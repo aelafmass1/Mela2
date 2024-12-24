@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -59,9 +60,10 @@ class TransferModalSheetBody extends StatelessWidget {
         valueListenable: selectedTransferToModel,
         builder: (context, _, child) {
           return Container(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
+            padding: const EdgeInsets.fromLTRB(
+                mediume20, mediume20, mediume20, tinySize),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Column(
@@ -101,7 +103,7 @@ class TransferModalSheetBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Gap(16),
+                const Gap(mediumSize),
                 ...transferToItems.map(
                   (e) {
                     final isSelected = selectedTransferToModel.value == e;
@@ -118,6 +120,7 @@ class TransferModalSheetBody extends StatelessWidget {
                                 ? ColorName.primaryColor
                                 : Colors.transparent,
                           ),
+                          margin: const EdgeInsets.all(0),
                           width: double.infinity,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
