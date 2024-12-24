@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/money_request/money_request_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/data/models/money_request_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -40,111 +41,85 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
   final rejectReasonController = TextEditingController();
   WalletModel? transferFromWalletModel;
   WalletModel? transferToWalletModel;
-
   showRejectDialog() {
     showDialog(
       context: context,
       builder: (_) => Align(
         alignment: const Alignment(0, -0.2),
-        child: StatefulBuilder(builder: (context, setState) {
-          return SizedBox(
-            width: 90.sw,
-            height: 45.sh,
-            child: Material(
-              borderRadius: BorderRadius.circular(44),
-              color: Colors.white,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const TextWidget(
-                          text: 'Rejection Reason (optional)',
-                          type: TextType.small,
-                        ),
-                        SizedBox(
-                          width: 74,
-                          height: 35,
-                          child: 
-                          
-                          ButtonWidget(
-                            color: const Color(0xFFF1F4FF),
-                            elevation: 0,
-                            verticalPadding: 0,
-                            topPadding: 0,
-                            horizontalPadding: 0,
-                            borderRadius: BorderRadius.circular(10),
-                            child:  IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: (){
-                                Navigator.pop(context);
-                              },
-                            ),
-                            
-                            // const TextWidget(
-                            //   text: 'Skip',
-                            //   fontSize: 12,
-                            //   color: ColorName.primaryColor,
-                            // ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        )
-                      ],
-                    ),
-                    TextFieldWidget(
-                      borderRadius: BorderRadius.circular(8),
-                      hintText: 'Write your reason',
-                      controller: rejectReasonController,
-                      maxLine: 7,
-                    ),
-                    BlocConsumer<MoneyRequestBloc, MoneyRequestState>(
-                      listener: (context, state) {
-                        if (state is RejectMoneyRequestSuccess) {
-                          context
-                              .read<NotificationBloc>()
-                              .add(FetchNotifications());
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Material(
+            borderRadius: BorderRadius.circular(largeSize),
+            color: ColorName.white,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: middleSize, horizontal: smallSize),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const TextWidget(
+                        text: 'Rejection Reason (optional)',
+                        type: TextType.small,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: ColorName.red),
+                        onPressed: () {
                           context.pop();
-                          context.pop();
-                        } else if (state is RejectMoneyRequestFail) {
-                          context.pop();
-                          showSnackbar(
-                            context,
-                            description: state.reason,
-                          );
-                        }
-                      },
-                      builder: (context, state) {
-                        return ButtonWidget(
-                          child: state is RejectMoneyRequestLoading
-                              ? const LoadingWidget()
-                              : const TextWidget(
-                                  text: 'Reject',
-                                  type: TextType.small,
-                                  color: Colors.white,
-                                ),
-                          onPressed: () {
-                            context.read<MoneyRequestBloc>().add(
-                                  RejectMoneyRequest(
-                                    requestId: widget.requestId,
-                                  ),
-                                );
-                          },
+                        },
+                      ),
+                    ],
+                  ),
+                  TextFieldWidget(
+                    borderRadius: BorderRadius.circular(8),
+                    hintText: 'Write your reason',
+                    controller: rejectReasonController,
+                    maxLine: tinySize.toInt(),
+                  ),
+                  const SizedBox(height: middleSize),
+                  BlocConsumer<MoneyRequestBloc, MoneyRequestState>(
+                    listener: (context, state) {
+                      if (state is RejectMoneyRequestSuccess) {
+                        context
+                            .read<NotificationBloc>()
+                            .add(FetchNotifications());
+                        context.pop();
+                        context.pop();
+                      } else if (state is RejectMoneyRequestFail) {
+                        context.pop();
+                        showSnackbar(
+                          context,
+                          description: state.reason,
                         );
-                      },
-                    )
-                  ],
-                ),
+                      }
+                    },
+                    builder: (context, state) {
+                      return ButtonWidget(
+                        child: state is RejectMoneyRequestLoading
+                            ? const LoadingWidget()
+                            : const TextWidget(
+                                text: 'Reject',
+                                type: TextType.small,
+                                color: ColorName.white,
+                              ),
+                        onPressed: () {
+                          context.read<MoneyRequestBloc>().add(
+                                RejectMoneyRequest(
+                                  requestId: widget.requestId,
+                                ),
+                              );
+                        },
+                      );
+                    },
+                  )
+                ],
               ),
             ),
-          );
-        }),
+          ),
+        ),
       ),
     );
   }

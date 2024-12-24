@@ -1,6 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/components/search_receiver_page.dart';
 
 import '../../../../data/models/notification_model.dart';
 import '../../../../gen/assets.gen.dart';
@@ -62,6 +65,8 @@ class NotificationTile extends StatelessWidget {
           cardTitle: 'Money Requested',
           buttonTitle: 'Confirm',
           cardIcon: Assets.images.svgs.requestMoneyIcon,
+          onCardTap: () => context.goNamed(RouteName.moneyRequestDetail,
+              extra: notification.referenceId),
         );
 
       // Render a received money card
