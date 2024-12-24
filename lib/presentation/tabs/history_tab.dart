@@ -258,7 +258,8 @@ class _HistoryTabState extends State<HistoryTab> {
         return ListTile(
           onTap: () {
             showWalletReceipt(context, transaction,
-                contacts: state.remoteContacts);
+                contacts: state.remoteContacts,
+                localContacs: state.localContacs);
           },
           leading: Container(
             width: 34,
@@ -293,7 +294,8 @@ class _HistoryTabState extends State<HistoryTab> {
             ],
           ),
           title: TextWidget(
-            text: transaction.to(state.remoteContacts),
+            text: transaction.to(state.remoteContacts,
+                localContacts: state.localContacs),
             fontSize: 14,
             weight: FontWeight.w400,
           ),

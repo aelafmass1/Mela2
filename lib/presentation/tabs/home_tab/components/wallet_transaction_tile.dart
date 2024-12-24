@@ -77,7 +77,8 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                 );
               } else {
                 showWalletReceipt(context, widget.walletTransaction,
-                    contacts: state.remoteContacts);
+                    contacts: state.remoteContacts,
+                    localContacs: state.localContacs);
               }
             },
             leading: Container(
@@ -116,7 +117,8 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextWidget(
-                  text: widget.walletTransaction.to(state.remoteContacts),
+                  text: widget.walletTransaction.to(state.remoteContacts,
+                      localContacts: state.localContacs),
                   fontSize: 16,
                   weight: FontWeight.w500,
                 ),
