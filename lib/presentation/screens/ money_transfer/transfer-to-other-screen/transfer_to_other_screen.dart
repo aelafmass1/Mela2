@@ -250,17 +250,32 @@ class _TransferToOtherScreenState extends State<TransferToOtherScreen> {
                     : () {
                         if (_formKey.currentState!.validate()) {
                           if (widget.isFromRequest) {
-                            context.read<MoneyRequestBloc>().add(
-                                  MoneyRequest(
-                                    requesterWalletId:
-                                        transferFromWalletModel?.walletId ?? -1,
-                                    amount: double.tryParse(
-                                            amountController.text) ??
-                                        0,
-                                    note: noteController.text,
-                                    userId: selectedContact?.userId ?? -1,
-                                  ),
-                                );
+                            if (selectedContact?.userId == 0) {
+                               context.read<MoneyRequestBloc>().add(
+                                    MoneyRequestToUnregisteredUser(
+                                      requesterWalletId:
+                                          transferFromWalletModel?.walletId ??
+                                              -1,
+                                      amount: double.tryParse(
+                                              amountController.text) ??
+                                          0,
+                                      note: noteController.text,
+                                      recipientPhoneNumber: selectedContact?.contactPhoneNumber ?? "",
+                                    ),
+                                  );
+                            } else {
+                              context.read<MoneyRequestBloc>().add(
+                                    MoneyRequest(
+                                      requesterWalletId:
+                                          transferFromWalletModel?.walletId ?? -1,
+                                      amount: double.tryParse(
+                                              amountController.text) ??
+                                          0,
+                                      note: noteController.text,
+                                      userId: selectedContact?.userId ?? -1,
+                                    ),
+                                  );
+                            }
                           } else {
                             if (transferFromWalletModel != null &&
                                 transferToWalletModel != null) {
