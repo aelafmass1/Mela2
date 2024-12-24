@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -192,29 +193,26 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
           borderRadius: BorderRadius.circular(24),
           controller: searchController,
           suffix: SizedBox(
-            width: 68,
-            child: CardWidget(
-              width: 68,
-              child: ButtonWidget(
-                  elevation: 0,
-                  color: ColorName.white,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                    topLeft: Radius.zero,
-                    bottomLeft: Radius.zero,
-                  ),
-                  onPressed: () {
-                    if (mounted) {
-                      context.pop();
-                    }
-                  },
-                  child: const TextWidget(
-                    text: 'Cancel',
-                    fontSize: 14,
-                    color: ColorName.primaryColor,
-                  )),
-            ),
+            width: largeMedium,
+            child: ButtonWidget(
+                elevation: 0,
+                color: ColorName.white,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                  topLeft: Radius.zero,
+                  bottomLeft: Radius.zero,
+                ),
+                onPressed: () {
+                  if (mounted) {
+                    context.pop();
+                  }
+                },
+                child: const TextWidget(
+                  text: 'Cancel',
+                  fontSize: 14,
+                  color: ColorName.primaryColor,
+                )),
           ),
         ),
       ),
@@ -228,6 +226,59 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
         child: BlocBuilder<ContactBloc, ContactState>(
           builder: (context, state) {
             if (state is ContactFilterSuccess) {
+              if (state.filteredContacts.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const TextWidget(
+                        text: "No results found",
+                        fontSize: 18,
+                        weight: FontWeight.bold,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                          ),
+                          horizontalSpaceSmall,
+                          Expanded(
+                            child: TextWidget(
+                              text:
+                                  "User tag must start with @ symbol and be at least 4 characters.",
+                              fontSize: 14,
+                              color: ColorName.grey.shade500,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceSmall,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                          ),
+                          horizontalSpaceSmall,
+                          Expanded(
+                            child: TextWidget(
+                              text:
+                                  "If the phone number is not in your contacts, it must be at least 8 digits (excluding country code).",
+                              fontSize: 14,
+                              color: ColorName.grey.shade500,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }
               return ListView.separated(
                 itemBuilder: (context, index) {
                   return _buildContactTile(
@@ -243,7 +294,8 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
                 ),
                 itemCount: state.filteredContacts.length,
               );
-            } else if (state is ContactLoading) {
+            } else if (state is ContactLoading ||
+                state is ContactFilterLoading) {
               return const Center(child: CircularProgressIndicator());
             } else {
               return Container();

@@ -49,7 +49,8 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         }
       }
 
-      List<ContactStatusModel> defaultContacts = contacts.map((contact) {
+      List<ContactStatusModel> defaultContacts =
+          contacts.where((contact) => contact.phones.isNotEmpty).map((contact) {
         List<WalletModel>? wallets = contactWallets[contact.id];
         int? userId = contactUserIds[contact.id];
 
@@ -75,7 +76,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
 
       emit(ContactFilterSuccess(
         filteredContacts: defaultContacts,
-        localContacs: contacts,
+        localContacs: defaultContacts,
         remoteContacts: idToNameMap,
       ));
     } on ServerException catch (error, stackTrace) {
@@ -108,26 +109,29 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         }
       } else {
         filteredContacts = state.localContacs.where((contact) {
-          final name = contact.displayName.toLowerCase();
-          final phoneNumber = contact.phones.isNotEmpty
-              ? contact.phones.first.number.toLowerCase().replaceAll(' ', '')
-              : null;
-
+          final name = contact.contactName?.toLowerCase().replaceAll(" ", "");
+          final phoneNumber = contact.contactPhoneNumber?.replaceAll(" ", "");
           if (phoneNumber == null) {
-            return name.contains(query);
+            return name!.contains(query);
           }
-          return name.contains(query) || phoneNumber.contains(query);
-        }).map((contact) {
-          List<WalletModel>? wallets = contactWallets[contact.id];
-          int? userId = contactUserIds[contact.id];
-          return ContactStatusModel.fromFlutterContact(
-            contact,
-            userId: userId,
-            wallets: wallets,
-          );
+          return name!.contains(query) || phoneNumber.contains(query);
         }).toList();
       }
 
+      final phoneRegex = RegExp(r'^\d+$');
+      if (filteredContacts.isEmpty &&
+          query.length > 8 &&
+          phoneRegex.hasMatch(query)) {
+        final res = await repository.searchByPhone(phone: query);
+
+        if (res.isEmpty || res.first.containsKey('error')) {
+          filteredContacts = [];
+        } else {
+          filteredContacts = res
+              .map((contact) => ContactStatusModel.fromMap(contact))
+              .toList();
+        }
+      }
       emit(
         ContactFilterSuccess(
             filteredContacts: filteredContacts,
