@@ -9,7 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
-import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 
 import '../../../../config/routing.dart';
 import '../../../../data/models/wallet_transaction_model.dart';
@@ -18,7 +17,7 @@ import '../../../../gen/colors.gen.dart';
 import '../../../widgets/text_widget.dart';
 
 class WalletTransactionTile extends StatefulWidget {
-  final WalletTransactionDetailModel walletTransaction;
+  final WalletTransactionModel walletTransaction;
   final List<Contact> contacts;
   const WalletTransactionTile(
       {super.key, required this.walletTransaction, required this.contacts});
@@ -28,19 +27,6 @@ class WalletTransactionTile extends StatefulWidget {
 }
 
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
-  _getContactName(
-      WalletTransactionDetailModel transaction, Map<int, String> contacts) {
-    if (transaction.transactionType == 'BANK_TO_WALLET') {
-      return "You";
-    } else if (transaction.transactionType == 'REMITTANCE') {
-      return transaction.receiverName ?? transaction.receiverPhoneNumber ?? "_";
-    }
-    return transaction.toWallet == null
-        ? 'Unregistered User'
-        : contacts[transaction.toWallet!.holder!.id] ??
-            '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}';
-  }
-
   _fetchContacts() async {
     try {
       if (await Permission.contacts.isGranted) {
@@ -90,30 +76,8 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
                   extra: receiverInfo,
                 );
               } else {
-                showWalletReceipt(
-                  context,
-                  WalletTransactionModel(
-                    amount: widget.walletTransaction.amount ?? 0,
-                    note: widget.walletTransaction.note,
-                    fromWalletBalance: widget.walletTransaction.convertedAmount,
-                    fromWalletId:
-                        widget.walletTransaction.fromWallet?.walletId ?? 0,
-                    timestamp: widget.walletTransaction.timestamp,
-                    toWalletId: widget.walletTransaction.toWallet?.walletId,
-                    transactionId: widget.walletTransaction.transactionId ?? 0,
-                    transactionType: widget.walletTransaction.transactionType,
-                    from:
-                        "${widget.walletTransaction.fromWallet?.holder?.firstName} ${widget.walletTransaction.fromWallet?.holder?.lastName}",
-                    to: widget.walletTransaction.transactionType ==
-                            'PENDING_TRANSFER'
-                        ? _getContactName(
-                            widget.walletTransaction
-                                    .pendingTransfer?['recipientPhoneNumber'] ??
-                                'Unregistered User',
-                            state.remoteContacts)
-                        : "${widget.walletTransaction.toWallet?.holder?.firstName} ${widget.walletTransaction.toWallet?.holder?.lastName}",
-                  ),
-                );
+                showWalletReceipt(context, widget.walletTransaction,
+                    contacts: state.remoteContacts);
               }
             },
             leading: Container(
@@ -151,40 +115,11 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.walletTransaction.transactionType ==
-                    'PENDING_TRANSFER')
-                  TextWidget(
-                    text: _getContactName(
-                        widget.walletTransaction, state.remoteContacts),
-                    fontSize: 16,
-                    weight: FontWeight.w500,
-                  )
-                else if (widget.walletTransaction.transactionType ==
-                        'WALLET_TO_WALLET' ||
-                    widget.walletTransaction.transactionType ==
-                        'BANK_TO_WALLET')
-                  if (widget.walletTransaction.transactionType ==
-                          'WALLET_TO_WALLET' &&
-                      widget.walletTransaction.toWallet?.holder != null)
-                    TextWidget(
-                      text: _getContactName(
-                          widget.walletTransaction, state.remoteContacts),
-                      fontSize: 16,
-                      weight: FontWeight.w500,
-                    )
-                  else
-                    const TextWidget(
-                      text: "You",
-                      fontSize: 16,
-                      weight: FontWeight.w500,
-                    )
-                else
-                  TextWidget(
-                    text: _getContactName(
-                        widget.walletTransaction, state.remoteContacts),
-                    fontSize: 16,
-                    weight: FontWeight.w500,
-                  ),
+                TextWidget(
+                  text: widget.walletTransaction.to(state.remoteContacts),
+                  fontSize: 16,
+                  weight: FontWeight.w500,
+                ),
               ],
             ),
             subtitle: TextWidget(

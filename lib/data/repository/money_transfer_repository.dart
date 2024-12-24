@@ -136,7 +136,7 @@ class MoneyTransferRepository {
   }) async {
     final res = await client.post(
       Uri.parse(
-        '$baseUrl/api/wallet/request-money',
+        requestMoneyUrl,
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -191,7 +191,7 @@ class MoneyTransferRepository {
   }) async {
     final res = await client.get(
       Uri.parse(
-        '$baseUrl/api/wallet/request-money/get/$requestId',
+        '$fetchRequestMoneyDetailUrl$requestId',
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',
@@ -211,7 +211,7 @@ class MoneyTransferRepository {
   }) async {
     final res = await client.post(
       Uri.parse(
-        '$baseUrl/api/wallet/request-money/reject/$requestId',
+        '$rejectRequestMoneyUrl$requestId',
       ),
       headers: {
         'Authorization': 'Bearer $accessToken',

@@ -15,14 +15,14 @@ final class AddFundToWallet extends WalletEvent {
   final String paymentType;
   final String publicToken;
   final String savedPaymentId;
-  final String paymentIntentId;
   final int walletId;
+  final String bankLastDigits;
 
   AddFundToWallet(
       {required this.amount,
       required this.paymentType,
       required this.publicToken,
       required this.savedPaymentId,
-      required this.paymentIntentId,
-      required this.walletId});
+      required this.walletId,
+      this.bankLastDigits = ""});
 }

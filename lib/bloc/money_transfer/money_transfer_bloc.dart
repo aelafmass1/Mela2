@@ -110,7 +110,8 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         final walletTransaction =
             WalletTransactionModel.fromMap(res['successResponse'] as Map);
         emit(MoneyTransferOwnWalletSuccess(
-          walletTransactionModel: walletTransaction,
+          walletTransactionModel:
+              walletTransaction.copyWith(receiverName: event.reciever),
         ));
       }
     } on ServerException catch (error, stackTrace) {

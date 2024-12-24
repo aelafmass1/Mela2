@@ -58,7 +58,7 @@ class ContactStatusModel {
       contactStatus: "registered",
       userId: map['id'] as int,
       contactName: "${map['firstName']} ${map['lastName']}",
-      contactPhoneNumber: (map['id'] as int).toString(),
+      contactPhoneNumber: "@${map['userTag']}",
       wallets: (map['wallets'] as List<dynamic>?)
           ?.map((x) => WalletModel.fromMap(x))
           .toList(),

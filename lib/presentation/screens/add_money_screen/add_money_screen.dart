@@ -90,6 +90,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     final bankState = context.read<BankFeeBloc>().state;
     final wallets = context.read<WalletBloc>().state.wallets;
     double totalFee = 0;
+    final bankLastDigits = paymentCards[selectedAccountIndex].last4Digits;
     if (bankState is BankFeeSuccess) {
       totalFee = 0;
 
@@ -99,7 +100,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               paymentType: paymentType ?? '',
               publicToken: publicToken,
               savedPaymentId: selectedPaymentCardId,
-              paymentIntentId: selectedPaymentCardId.isEmpty ? intentId : '',
+              bankLastDigits: bankLastDigits ?? '',
               walletId: selectedWalletModel != null
                   ? selectedWalletModel!.walletId
                   : wallets.first.walletId,
