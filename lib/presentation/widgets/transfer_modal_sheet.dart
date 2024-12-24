@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -19,14 +20,19 @@ showTransferModalSheet(BuildContext context) {
         top: Radius.circular(20),
       ),
     ),
-    builder: (context) => TransferModalSheetBody(),
-  ); 
+    isScrollControlled: true,
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.6,
+      child: TransferModalSheetBody(),
+    ),
+  );
 }
 
 class TransferModalSheetBody extends StatelessWidget {
   TransferModalSheetBody({super.key});
 
-  ValueNotifier<TransferToModel?> selectedTransferToModel = ValueNotifier(null);
+  final ValueNotifier<TransferToModel?> selectedTransferToModel =
+      ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +62,10 @@ class TransferModalSheetBody extends StatelessWidget {
         valueListenable: selectedTransferToModel,
         builder: (context, _, child) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(
+                mediume20, mediume20, mediume20, tinySize),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Column(
@@ -98,7 +105,7 @@ class TransferModalSheetBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Gap(16),
+                const Gap(mediumSize),
                 ...transferToItems.map(
                   (e) {
                     final isSelected = selectedTransferToModel.value == e;
@@ -115,6 +122,7 @@ class TransferModalSheetBody extends StatelessWidget {
                                 ? ColorName.primaryColor
                                 : Colors.transparent,
                           ),
+                          margin: const EdgeInsets.all(0),
                           width: double.infinity,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -147,7 +155,7 @@ class TransferModalSheetBody extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 30),
+                const Spacer(),
                 AbsorbPointer(
                   absorbing: selectedTransferToModel.value == null,
                   child: ButtonWidget(

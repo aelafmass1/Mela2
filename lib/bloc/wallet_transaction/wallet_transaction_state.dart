@@ -13,7 +13,7 @@ final class WalletTransactionFail extends WalletTransactionState {
 }
 
 final class WalletTransactionSuccess extends WalletTransactionState {
-  Map<String, List<WalletTransactionDetailModel>> walletTransactions;
+  Map<String, List<WalletTransactionModel>> walletTransactions;
 
   WalletTransactionSuccess({required this.walletTransactions});
 }

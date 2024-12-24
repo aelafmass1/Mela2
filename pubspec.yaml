@@ -1,10 +1,10 @@
 name: transaction_mobile_app
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 3.1.0+2
 
 environment:
-  sdk: '>=3.4.4 <4.0.0'
+  sdk: ">=3.4.4 <4.0.0"
 
 dependencies:
   bloc_test: ^9.1.7
@@ -64,6 +64,7 @@ dependencies:
   firebase_messaging: ^15.1.5
   flutter_local_notifications: ^18.0.1
   fast_contacts: ^4.0.0
+  flutter_gen_runner:
 
 dev_dependencies:
   flutter_test:
@@ -72,9 +73,9 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   build_runner: ^2.4.12
 
-dependency_overrides: 
+dependency_overrides:
   js: ^0.7.1
-  
+
 flutter:
   uses-material-design: true
 
@@ -82,7 +83,6 @@ flutter:
     - assets/images/
     - assets/images/svgs/
     - .env
-
 
   fonts:
     - family: OpenSans

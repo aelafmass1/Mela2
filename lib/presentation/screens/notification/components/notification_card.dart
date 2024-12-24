@@ -18,11 +18,14 @@ class NotificationCard extends StatelessWidget {
   final cardTitle;
   final buttonTitle;
   final cardIcon;
+  final VoidCallback? onCardTap;
+
   const NotificationCard({
     required this.notification,
     required this.cardTitle,
     required this.buttonTitle,
     required this.cardIcon,
+    this.onCardTap,
     super.key,
   });
 
@@ -82,9 +85,7 @@ class NotificationCard extends StatelessWidget {
               BuildTitleButton(
                 color: ColorName.yellow,
                 text: buttonTitle,
-                onPressed: () {
-                  //
-                },
+                onPressed: onCardTap ?? () {},
               )
             ],
           )
