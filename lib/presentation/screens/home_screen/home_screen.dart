@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:transaction_mobile_app/core/utils/contact_utils.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -84,8 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
           _showUpdateBottomSheet(versionInfo.appStoreLink);
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   // Method to show the BottomSheet
@@ -175,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen>
     getImageUrl().then((value) {
       imageUrl = value;
     });
+    fetchContacts(context);
     reviewTheApp();
     context.read<NavigationBloc>().add(NavigateTo(index: 0));
     // getPackageData().then((value) {
