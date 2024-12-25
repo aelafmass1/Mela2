@@ -1,3 +1,4 @@
+import 'package:transaction_mobile_app/data/models/contact_status_model.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 
 class WalletTransactionModel {
@@ -108,8 +109,8 @@ class WalletTransactionModel {
     );
   }
 
-  // TODO: Update this when the localcontacts type change is merged
-  String to(Map<int, String> contacts, {List<dynamic>? localContacts}) {
+  String to(Map<int, String> contacts,
+      {List<ContactStatusModel>? localContacts}) {
     if (transactionType == 'BANK_TO_WALLET') {
       return "You";
     } else if (transactionType == 'REMITTANCE') {

@@ -46,83 +46,85 @@ class _ConfirmPincodeScreenState extends State<ConfirmPincodeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextWidget(
-              text: 'Confirm your PIN',
-              color: ColorName.primaryColor,
-              fontSize: 20,
-              weight: FontWeight.w700,
-            ),
-            const SizedBox(height: 5),
-            const TextWidget(
-              text: 'Please remember to keep it secure.',
-              fontSize: 14,
-              color: ColorName.grey,
-              weight: FontWeight.w400,
-            ),
-            CustomKeyboard(
-                onComplete: (p) {
-                  if (p.length == 6) {
-                    setState(() {
-                      pins = p;
-                      isValid = true;
-                    });
-                  } else {
-                    setState(() {
-                      pins = p;
-                      isValid = false;
-                    });
-                  }
-                },
-                buttonWidget: BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is RegisterUserFail) {
-                      showSnackbar(
-                        context,
-                        title: 'Error',
-                        description: state.reason,
-                      );
-                    } else if (state is RegisterUserSuccess) {
-                      setIsLoggedIn(true);
-                      setFirstTime(false);
-                      context.goNamed(RouteName.home);
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TextWidget(
+                text: 'Confirm your PIN',
+                color: ColorName.primaryColor,
+                fontSize: 20,
+                weight: FontWeight.w700,
+              ),
+              const SizedBox(height: 5),
+              const TextWidget(
+                text: 'Please remember to keep it secure.',
+                fontSize: 14,
+                color: ColorName.grey,
+                weight: FontWeight.w400,
+              ),
+              CustomKeyboard(
+                  onComplete: (p) {
+                    if (p.length == 6) {
+                      setState(() {
+                        pins = p;
+                        isValid = true;
+                      });
+                    } else {
+                      setState(() {
+                        pins = p;
+                        isValid = false;
+                      });
                     }
                   },
-                  builder: (context, state) {
-                    return ButtonWidget(
-                        color: isValid
-                            ? ColorName.primaryColor
-                            : ColorName.grey.shade200,
-                        child: state is RegisterUserLoaing
-                            ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Set up PIN',
-                                type: TextType.small,
-                                color: Colors.white,
-                              ),
-                        onPressed: () {
-                          if (isValid) {
-                            if (pins == widget.pincode) {
-                              context.read<AuthBloc>().add(
-                                    CreateAccount(
-                                      userModel: widget.user.copyWith(
-                                        pinCode: pins,
+                  buttonWidget: BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      if (state is RegisterUserFail) {
+                        showSnackbar(
+                          context,
+                          title: 'Error',
+                          description: state.reason,
+                        );
+                      } else if (state is RegisterUserSuccess) {
+                        setIsLoggedIn(true);
+                        setFirstTime(false);
+                        context.goNamed(RouteName.home);
+                      }
+                    },
+                    builder: (context, state) {
+                      return ButtonWidget(
+                          color: isValid
+                              ? ColorName.primaryColor
+                              : ColorName.grey.shade200,
+                          child: state is RegisterUserLoaing
+                              ? const LoadingWidget()
+                              : const TextWidget(
+                                  text: 'Set up PIN',
+                                  type: TextType.small,
+                                  color: Colors.white,
+                                ),
+                          onPressed: () {
+                            if (isValid) {
+                              if (pins == widget.pincode) {
+                                context.read<AuthBloc>().add(
+                                      CreateAccount(
+                                        userModel: widget.user.copyWith(
+                                          pinCode: pins,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                            } else {
-                              showSnackbar(context,
-                                  title: 'Error',
-                                  description: 'PIN is not the same');
+                                    );
+                              } else {
+                                showSnackbar(context,
+                                    title: 'Error',
+                                    description: 'PIN is not the same');
+                              }
                             }
-                          }
-                          //
-                        });
-                  },
-                )),
-          ],
+                            //
+                          });
+                    },
+                  )),
+            ],
+          ),
         ),
       ),
     );

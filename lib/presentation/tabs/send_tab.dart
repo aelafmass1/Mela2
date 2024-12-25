@@ -1430,78 +1430,80 @@ class _SentTabState extends State<SentTab> {
                                     ),
                                   ],
                                 );
-                              } else if (state is PaymentCardSuccess) {
-                        return Column(
-                          children: [
-                            for (var fee in state.paymentCards
-                                .expand((card) => card.fees))
-                              Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
+                              } else if (state is BankFeeSuccess) {
+                                return Column(
+                                  children: [
+                                    for (var fee in state.bankFees)
+                                      Column(
                                         children: [
-                                          TextWidget(
-                                            text: fee.label,
-                                            fontSize: 14,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  TextWidget(
+                                                    text: fee.label,
+                                                    fontSize: 14,
+                                                  ),
+                                                  Visibility(
+                                                    visible: fee.type ==
+                                                        'PERCENTAGE',
+                                                    child: TextWidget(
+                                                      text:
+                                                          '  ${NumberFormat('##,###.##').format(fee.amount.roundToDouble())}%',
+                                                      fontSize: 14,
+                                                      weight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  TextWidget(
+                                                    text: fee.type ==
+                                                            'PERCENTAGE'
+                                                        ? "\$${(((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)).toStringAsFixed(2)}"
+                                                        : "\$${NumberFormat('##,###.##').format((fee.amount))}",
+                                                    weight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Icon(
+                                                    Icons.info_outline,
+                                                    color: ColorName.grey
+                                                        .withOpacity(0.5),
+                                                    size: 20,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                          Visibility(
-                                            visible: fee.type == 'PERCENTAGE',
-                                            child: TextWidget(
-                                              text:
-                                                  '  ${NumberFormat('##,###.##').format(fee.amount)}%',
-                                              fontSize: 14,
-                                              weight: FontWeight.w600,
-                                            ),
+                                          const Divider(
+                                            color: ColorName.borderColor,
                                           ),
                                         ],
                                       ),
-                                      Row(
+                                    SizedBox(
+                                      height: 34,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          TextWidget(
-                                            text:
-                                                '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
+                                          const TextWidget(
+                                            text: 'Total Fee',
                                             fontSize: 16,
-                                            weight: FontWeight.w700,
+                                            weight: FontWeight.w500,
                                           ),
-                                          const SizedBox(
-                                            width: 5,
-                                            ),
-                                          Icon(
-                                            Icons.info_outline,
-                                            color:
-                                                ColorName.grey.withOpacity(0.5),
-                                            size: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(
-                                    color: ColorName.borderColor,
-                                    ),
-                                ],
-                              ),
-                            SizedBox(
-                              height: 34,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const TextWidget(
-                                    text: 'Total Fee',
-                                    fontSize: 16,
-                                    weight: FontWeight.w500,
-                                  ),
-                                  BlocBuilder<FeeBloc, FeeState>(
+                                          BlocBuilder<FeeBloc, FeeState>(
                                             builder: (context, feeState) {
                                               return Row(
                                                 children: [
                                                   TextWidget(
                                                     text:
-                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
+                                                        '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w700,
                                                   ),
