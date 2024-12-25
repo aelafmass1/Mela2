@@ -46,26 +46,9 @@ class _WalletTransactionTileState extends State<WalletTransactionTile> {
             contentPadding: const EdgeInsets.symmetric(vertical: 0),
             minVerticalPadding: 0,
             onTap: () {
-              if (widget.walletTransaction.transactionType == 'REMITTANCE') {
-                final receiverInfo = ReceiverInfo(
-                  receiverName: widget.walletTransaction.receiverName ?? '',
-                  receiverPhoneNumber:
-                      widget.walletTransaction.receiverPhoneNumber ?? '',
-                  receiverBankName: widget.walletTransaction.receiverBank ?? '',
-                  receiverAccountNumber:
-                      widget.walletTransaction.receiverAccountNumber ?? '',
-                  amount: widget.walletTransaction.amount?.toDouble() ?? 0,
-                  paymentType: widget.walletTransaction.transactionType,
-                );
-                context.pushNamed(
-                  RouteName.receipt,
-                  extra: receiverInfo,
-                );
-              } else {
-                showWalletReceipt(context, widget.walletTransaction,
-                    contacts: state.remoteContacts,
-                    localContacs: state.localContacs);
-              }
+              showWalletReceipt(context, widget.walletTransaction,
+                  contacts: state.remoteContacts,
+                  localContacs: state.localContacs);
             },
             leading: Container(
               width: 34,
