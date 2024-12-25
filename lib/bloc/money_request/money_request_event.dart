@@ -15,7 +15,19 @@ class MoneyRequest extends MoneyRequestEvent {
     required this.userId,
   });
 }
+class MoneyRequestToUnregisteredUser extends MoneyRequestEvent {
+  final int requesterWalletId;
+  final double amount;
+  final String note;
+  final String  recipientPhoneNumber;
 
+  MoneyRequestToUnregisteredUser({
+    required this.requesterWalletId,
+    required this.amount,
+    required this.note,
+    required this.recipientPhoneNumber,
+  });
+}
 class FetchMoneyRequestDetail extends MoneyRequestEvent {
   final int requestId;
 

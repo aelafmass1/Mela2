@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+import 'package:transaction_mobile_app/data/models/bank_fee_model.dart';
 
 class PaymentCardModel {
   final String id;
@@ -12,6 +13,8 @@ class PaymentCardModel {
   final String? bankName;
   final String? accountHolderName;
   final String? accountHolderType;
+  final List<BankFeeModel> fees; 
+
   PaymentCardModel({
     required this.id,
     required this.type,
@@ -23,6 +26,7 @@ class PaymentCardModel {
     this.bankName,
     this.accountHolderName,
     this.accountHolderType,
+    required this.fees, 
   });
 
   PaymentCardModel copyWith({
@@ -36,6 +40,7 @@ class PaymentCardModel {
     String? bankName,
     String? accountHolderName,
     String? accountHolderType,
+    List<BankFeeModel>? fees, 
   }) {
     return PaymentCardModel(
       id: id ?? this.id,
@@ -48,6 +53,7 @@ class PaymentCardModel {
       bankName: bankName ?? this.bankName,
       accountHolderName: accountHolderName ?? this.accountHolderName,
       accountHolderType: accountHolderType ?? this.accountHolderType,
+      fees: fees ?? this.fees, 
     );
   }
 
@@ -63,6 +69,7 @@ class PaymentCardModel {
       'bankName': bankName,
       'accountHolderName': accountHolderName,
       'accountHolderType': accountHolderType,
+      'fees': fees.map((fee) => fee.toMap()).toList(),
     };
   }
 
@@ -70,21 +77,17 @@ class PaymentCardModel {
     return PaymentCardModel(
       id: map['id'] as String,
       type: map['type'] as String,
-      cardBrand: map['cardBrand'] != null ? map['cardBrand'] as String : null,
-      last4Digits:
-          map['last4Digits'] != null ? map['last4Digits'] as String : null,
-      expirationMonth:
-          map['expirationMonth'] != null ? map['expirationMonth'] as int : null,
-      expirationYear:
-          map['expirationYear'] != null ? map['expirationYear'] as int : null,
-      isDefault: map['isDefault'] != null ? map['isDefault'] as bool : null,
-      bankName: map['bankName'] != null ? map['bankName'] as String : null,
-      accountHolderName: map['accountHolderName'] != null
-          ? map['accountHolderName'] as String
-          : null,
-      accountHolderType: map['accountHolderType'] != null
-          ? map['accountHolderType'] as String
-          : null,
+      cardBrand:map['cardBrand'] as String?,
+      last4Digits: map['last4Digits'] as String?,
+      expirationMonth: map['expirationMonth'] as int?,
+      expirationYear: map['expirationYear'] as int?,
+      isDefault: map['isDefault'] as bool?,
+      bankName: map['bankName'] as String?,
+      accountHolderName: map['accountHolderName'] as String?,
+      accountHolderType: map['accountHolderType'] as String?,
+      fees: (map['fees'] as List<dynamic>)
+          .map((fee) => BankFeeModel.fromMap(fee as Map<String, dynamic>))
+          .toList(), 
     );
   }
 
@@ -95,7 +98,7 @@ class PaymentCardModel {
 
   @override
   String toString() {
-    return 'PaymentCardModel(id: $id, type: $type, cardBrand: $cardBrand, last4Digits: $last4Digits, expirationMonth: $expirationMonth, expirationYear: $expirationYear, isDefault: $isDefault, bankName: $bankName, accountHolderName: $accountHolderName, accountHolderType: $accountHolderType)';
+    return 'PaymentCardModel(id: $id, type: $type, cardBrand: $cardBrand, last4Digits: $last4Digits, expirationMonth: $expirationMonth, expirationYear: $expirationYear, isDefault: $isDefault, bankName: $bankName, accountHolderName: $accountHolderName, accountHolderType: $accountHolderType, fees: $fees)'; // Updated toString
   }
 
   @override
@@ -111,7 +114,16 @@ class PaymentCardModel {
         other.isDefault == isDefault &&
         other.bankName == bankName &&
         other.accountHolderName == accountHolderName &&
-        other.accountHolderType == accountHolderType;
+        other.accountHolderType == accountHolderType &&
+        _areFeesEqual(other.fees); 
+  }
+
+  bool _areFeesEqual(List<BankFeeModel> otherFees) {
+    if (fees.length != otherFees.length) return false;
+    for (var i = 0; i < fees.length; i++) {
+      if (fees[i] != otherFees[i]) return false;
+    }
+    return true;
   }
 
   @override
@@ -125,6 +137,7 @@ class PaymentCardModel {
         isDefault.hashCode ^
         bankName.hashCode ^
         accountHolderName.hashCode ^
-        accountHolderType.hashCode;
+        accountHolderType.hashCode ^
+        fees.hashCode;
   }
 }

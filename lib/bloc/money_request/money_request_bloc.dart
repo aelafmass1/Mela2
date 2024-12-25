@@ -13,6 +13,8 @@ class MoneyRequestBloc extends Bloc<MoneyRequestEvent, MoneyRequestState> {
     on<MoneyRequest>(_onMoneyRequest);
     on<FetchMoneyRequestDetail>(_onFetchMoneyRequestDetail);
     on<RejectMoneyRequest>(_onRejectMoneyRequest);
+    on<MoneyRequestToUnregisteredUser>(_onMoneyRequestToUnregisteredUser);
+
   }
 
   _onRejectMoneyRequest(RejectMoneyRequest event, Emitter emit) async {
@@ -74,6 +76,29 @@ class MoneyRequestBloc extends Bloc<MoneyRequestEvent, MoneyRequestState> {
           amount: event.amount,
           note: event.note,
           userId: event.userId,
+        );
+        if (res.containsKey("error")) {
+          return emit(
+            MoneyRequestFailure(reason: res['error']),
+          );
+        }
+        emit(MoneyRequestSuccess(id: res['successResponse']['id']));
+      }
+    } catch (e) {
+      emit(
+        MoneyRequestFailure(reason: e.toString()),
+      );
+    }
+  }
+  _onMoneyRequestToUnregisteredUser(MoneyRequestToUnregisteredUser event, Emitter emit) async {
+    try {
+      if (state is! MoneyRequestLoading) {
+        emit(MoneyRequestLoading());
+        final res = await repository.requestMoneyToUnregisteredUser(
+          requesterWalletId: event.requesterWalletId,
+          amount: event.amount,
+          note: event.note,
+          recipientPhoneNumber: event.recipientPhoneNumber,
         );
         if (res.containsKey("error")) {
           return emit(
