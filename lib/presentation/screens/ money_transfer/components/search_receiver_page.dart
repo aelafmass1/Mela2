@@ -1,16 +1,14 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:transaction_mobile_app/core/utils/contact_utils.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -39,26 +37,18 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
 
   bool isPermissionDenied = false;
 
-  Future<void> _fetchContacts() async {
-    try {
-      if (kIsWeb) return;
-
-      if (await FlutterContacts.requestPermission(readonly: true)) {
-        context.read<ContactBloc>().add(FetchContacts());
-      } else {
-        setState(() {
-          isPermissionDenied = true;
-        });
-      }
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
+  @override
   @override
   void initState() {
-    _fetchContacts();
     super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    isPermissionDenied = await fetchContacts(context, isWeb: kIsWeb);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

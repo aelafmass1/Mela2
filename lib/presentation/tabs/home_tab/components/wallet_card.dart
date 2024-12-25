@@ -75,8 +75,7 @@ class WalletCard extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        SizedBox(
-                          width: 80.sw,
+                        Expanded(
                           child: TextWidget(
                             text:
                                 '\$${NumberFormat('#,###.##').format(amount)}',

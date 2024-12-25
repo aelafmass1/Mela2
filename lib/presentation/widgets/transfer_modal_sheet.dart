@@ -22,9 +22,7 @@ showTransferModalSheet(BuildContext context) {
     ),
     isScrollControlled: true,
     builder: (context) => FractionallySizedBox(
-      heightFactor: 0.6,
-      child: TransferModalSheetBody(),
-    ),
+        heightFactor: 0.6, child: TransferModalSheetBody()),
   );
 }
 

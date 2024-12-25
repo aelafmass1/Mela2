@@ -30,9 +30,7 @@ class CardWidget extends StatelessWidget {
       height: height,
       width: width,
       padding: padding ?? const EdgeInsets.symmetric(vertical: smallSize),
-      margin: margin ??
-          const EdgeInsets.symmetric(
-              vertical: tinySize, horizontal: middleSize),
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
       decoration: BoxDecoration(
         color: Colors.white,
         border: boxBorder,

@@ -42,57 +42,59 @@ class _SetPincodeScreenState extends State<SetPincodeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextWidget(
-              text: 'Set a PIN',
-              color: ColorName.primaryColor,
-              fontSize: 20,
-              weight: FontWeight.w700,
-            ),
-            const SizedBox(height: 5),
-            const TextWidget(
-              text: 'Please remember to keep it secure.',
-              fontSize: 14,
-              color: ColorName.grey,
-              weight: FontWeight.w400,
-            ),
-            CustomKeyboard(
-              onComplete: (p) {
-                log(p);
-                if (p.length == 6) {
-                  setState(() {
-                    pins = p;
-                    isValid = true;
-                  });
-                } else {
-                  setState(() {
-                    pins = p;
-                    isValid = false;
-                  });
-                }
-              },
-              buttonWidget: ButtonWidget(
-                  color: isValid
-                      ? ColorName.primaryColor
-                      : ColorName.grey.shade200,
-                  child: const TextWidget(
-                    text: 'Continue',
-                    type: TextType.small,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    if (isValid) {
-                      context.pushNamed(RouteName.confirmPinCode, extra: [
-                        widget.user,
-                        pins.trim(),
-                      ]);
-                    }
-                    //
-                  }),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TextWidget(
+                text: 'Set a PIN',
+                color: ColorName.primaryColor,
+                fontSize: 20,
+                weight: FontWeight.w700,
+              ),
+              const SizedBox(height: 5),
+              const TextWidget(
+                text: 'Please remember to keep it secure.',
+                fontSize: 14,
+                color: ColorName.grey,
+                weight: FontWeight.w400,
+              ),
+              CustomKeyboard(
+                onComplete: (p) {
+                  log(p);
+                  if (p.length == 6) {
+                    setState(() {
+                      pins = p;
+                      isValid = true;
+                    });
+                  } else {
+                    setState(() {
+                      pins = p;
+                      isValid = false;
+                    });
+                  }
+                },
+                buttonWidget: ButtonWidget(
+                    color: isValid
+                        ? ColorName.primaryColor
+                        : ColorName.grey.shade200,
+                    child: const TextWidget(
+                      text: 'Continue',
+                      type: TextType.small,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (isValid) {
+                        context.pushNamed(RouteName.confirmPinCode, extra: [
+                          widget.user,
+                          pins.trim(),
+                        ]);
+                      }
+                      //
+                    }),
+              ),
+            ],
+          ),
         ),
       ),
     );
