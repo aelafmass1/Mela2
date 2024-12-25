@@ -175,9 +175,9 @@ class _HomeScreenState extends State<HomeScreen>
     getImageUrl().then((value) {
       imageUrl = value;
     });
-    fetchContacts(context);
     reviewTheApp();
     context.read<NavigationBloc>().add(NavigateTo(index: 0));
+    fetchContacts(context);
     // getPackageData().then((value) {
     //   _checkForUpdate();
     // });
