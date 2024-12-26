@@ -1,5 +1,6 @@
 part of 'money_transfer_bloc.dart';
 
+@immutable
 sealed class MoneyTransferState {}
 
 final class MoneyTransferInitial extends MoneyTransferState {}

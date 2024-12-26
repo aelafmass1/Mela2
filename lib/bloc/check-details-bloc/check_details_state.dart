@@ -1,5 +1,6 @@
 part of 'check_details_bloc.dart';
 
+@immutable
 sealed class CheckDetailsState extends Equatable {
   const CheckDetailsState();
 

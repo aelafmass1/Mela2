@@ -6,6 +6,7 @@
 /// [ContactSuccess] is the state when the contact data is successfully loaded.
 part of 'contact_bloc.dart';
 
+@immutable
 sealed class ContactState extends Equatable {
   final Map<int, String> remoteContacts;
   final List<ContactStatusModel> localContacs;

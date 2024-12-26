@@ -1,10 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'equb_bloc.dart';
 
+@immutable
 class EqubState {
   final List<EqubDetailModel> equbList;
 
-  EqubState({required this.equbList});
+  const EqubState({required this.equbList});
 
   EqubState copyWith({
     List<EqubDetailModel>? equbList,
@@ -16,14 +17,14 @@ class EqubState {
 }
 
 final class EqubLoading extends EqubState {
-  EqubLoading({required super.equbList});
+  const EqubLoading({required super.equbList});
 }
 
 final class EqubSuccess extends EqubState {
   final List<EqubInviteeModel>? invitees;
   final EqubDetailModel? selectedEqub;
   final int? addedEqubId;
-  EqubSuccess({
+  const EqubSuccess({
     required super.equbList,
     this.invitees,
     this.selectedEqub,
@@ -33,5 +34,5 @@ final class EqubSuccess extends EqubState {
 
 final class EqubFail extends EqubState {
   final String reason;
-  EqubFail({required super.equbList, required this.reason});
+  const EqubFail({required super.equbList, required this.reason});
 }
