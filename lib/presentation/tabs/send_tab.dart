@@ -993,6 +993,7 @@ class _SentTabState extends State<SentTab> {
                           selectedPhoneNumber = selectedContact
                               ?.contactPhoneNumber
                               ?.replaceAll(" ", "");
+                          _recipientSelectionFormKey.currentState!.validate();
                         });
                       },
                       readOnly: true,
@@ -1104,6 +1105,7 @@ class _SentTabState extends State<SentTab> {
                               selectedBank = value;
                             });
                           }
+                          _recipientSelectionFormKey.currentState!.validate();
                         },
                       );
                     },
@@ -1126,6 +1128,9 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
+                    },
+                    onChanged: (_) {
+                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
@@ -1163,6 +1168,9 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
+                    },
+                    onChanged: (_) {
+                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
