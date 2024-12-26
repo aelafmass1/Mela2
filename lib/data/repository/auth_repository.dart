@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 
@@ -152,34 +153,49 @@ class AuthRepository {
   /// A `Future<Map>` containing the response data or an error message.
   Future<Map> sendOtp(
       int phoneNumber, int countryCode, String signature) async {
-    final res = await client.post(
-      '/auth/phone/start-verification',
-      data: {
-        "phoneNumber": phoneNumber,
-        "countryCode": countryCode,
-        "signature": signature,
-      },
-    );
+    try {
+      final res = await client.post(
+        '/auth/phone/start-verification',
+        data: {
+          "phoneNumber": phoneNumber,
+          "countryCode": countryCode,
+          "signature": signature,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data.containsKey('status')) {
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data.containsKey('status')) {
+          if (data['message'] == 'Failed to send SMS.') {
+            return {
+              'error': 'Failed to send SMS',
+              'userId': data['errorResponse']
+            };
+          }
+          if (data['status'] == 'error') {
+            return processErrorResponse(data);
+          }
+        }
+        return data;
+      }
+
+      return processErrorResponse(data);
+    } on DioException catch (e, _) {
+      if (e.response != null) {
+        final statusCode = e.response?.statusCode;
+        final data = e.response?.data;
+
         if (data['message'] == 'Failed to send SMS.') {
           return {
             'error': 'Failed to send SMS',
             'userId': data['errorResponse']
           };
         }
-        if (data['status'] == 'error') {
-          return processErrorResponse(data);
-        }
+        final error = processErrorResponse(data);
+        throw ServerException(error['error'], statusCode ?? 0);
       }
-      return data;
+      throw ServerException('Unexpected error', 400);
     }
-    if (data['message'] == 'Failed to send SMS.') {
-      return {'error': 'Failed to send SMS', 'userId': data['errorResponse']};
-    }
-    return processErrorResponse(data);
   }
 
   /// Verifies an OTP (One-Time Password) for a given phone number and country code.

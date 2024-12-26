@@ -7,7 +7,7 @@ class WalletRepository {
 
   WalletRepository({required this.client});
 
-  Future<Map> fetchWallets({required String accessToken}) async {
+  Future<Map> fetchWallets() async {
     final res = await client.get(
       '/api/wallet/all',
     );
@@ -18,8 +18,7 @@ class WalletRepository {
     return processErrorResponse(data);
   }
 
-  Future<Map> createWallet(
-      {required String accessToken, required String currency}) async {
+  Future<Map> createWallet({required String currency}) async {
     final res = await client.post(
       '/api/wallet/create/$currency',
     );
@@ -31,7 +30,7 @@ class WalletRepository {
     return processErrorResponse(data);
   }
 
-  Future<Map> fetchWalletCurrencies({required String accessToken}) async {
+  Future<Map> fetchWalletCurrencies() async {
     final res = await client.get('/api/wallet/currency/all');
     final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -41,7 +40,6 @@ class WalletRepository {
   }
 
   Future<Map> addFundToWallet({
-    required String accessToken,
     required num amount,
     required String paymentType,
     required String publicToken,
@@ -62,7 +60,6 @@ class WalletRepository {
   }
 
   Future<TransferRateModel> fetchTransferRate({
-    required String accessToken,
     required int fromWalletId,
     required int toWalletId,
     required num amount,
@@ -87,7 +84,6 @@ class WalletRepository {
   }
 
   Future<Map> fetchTransferFeesForUnregisteredUser({
-    required String accessToken,
     required String fromCurrency,
     required String toCurrency,
   }) async {
@@ -107,7 +103,6 @@ class WalletRepository {
   }
 
   Future<Map> fetchTransferFees({
-    required String accessToken,
     required int fromWalletId,
     required int toWalletId,
   }) async {
@@ -126,7 +121,7 @@ class WalletRepository {
     return processErrorResponse(data);
   }
 
-  Future<Map> fetchWalletTransaction({required String accessToken}) async {
+  Future<Map> fetchWalletTransaction() async {
     final res = await client.get('/api/wallet/transactions');
     final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
@@ -135,8 +130,7 @@ class WalletRepository {
     return processErrorResponse(data);
   }
 
-  Future<Map> fetchRecentWalletTransactions(
-      {required String accessToken}) async {
+  Future<Map> fetchRecentWalletTransactions() async {
     final res = await client.get('/api/wallet/recent-recipients');
     final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {

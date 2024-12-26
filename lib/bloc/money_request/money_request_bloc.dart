@@ -20,9 +20,7 @@ class MoneyRequestBloc extends Bloc<MoneyRequestEvent, MoneyRequestState> {
     try {
       if (state is! RejectMoneyRequestLoading) {
         emit(RejectMoneyRequestLoading());
-        final accessToken = await getToken();
         final res = await repository.rejectRequestMoney(
-          accessToken: accessToken ?? '',
           requestId: event.requestId,
         );
         if (res.containsKey("error")) {
@@ -42,9 +40,7 @@ class MoneyRequestBloc extends Bloc<MoneyRequestEvent, MoneyRequestState> {
     try {
       if (state is! FetchMoneyRequestLoading) {
         emit(FetchMoneyRequestLoading());
-        final accessToken = await getToken();
         final res = await repository.fetchRequestMoneyDetail(
-          accessToken: accessToken ?? '',
           requestId: event.requestId,
         );
         if (res.containsKey("error")) {

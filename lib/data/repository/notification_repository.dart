@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import '../../core/constants/url_constants.dart';
 import '../../core/utils/process_error_response_.dart';
@@ -25,7 +27,7 @@ class NotificationRepository {
   }) async {
     final res = await client.delete(
       deleteFcmTokenUrl,
-      data: fcmToken,
+      data: jsonEncode(fcmToken),
     );
 
     final data = res.data;

@@ -2,13 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/data/services/api/interceptors.dart';
+import 'package:transaction_mobile_app/data/services/tokenHandler/token_handler.dart';
 
 class ApiService {
   late final Dio _dio;
-
-  ApiService() {
+  final ITokenHandler tokenHandler;
+  ApiService(this.tokenHandler) {
     final dioInterceptor =
-        DioInterceptor(); // Pass SecureStorage to Interceptor
+        DioInterceptor(tokenHandler); // Pass SecureStorage to Interceptor
 
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,

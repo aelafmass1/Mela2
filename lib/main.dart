@@ -1,4 +1,5 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -45,6 +47,7 @@ import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
+import 'package:transaction_mobile_app/data/services/tokenHandler/token_handler.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
 
 import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
@@ -133,7 +136,10 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
-  final client = ApiService().client;
+  // TODO: Use dependency injection to provide the client instance.
+
+  late ITokenHandler tokenHandler;
+  late Dio client;
 
   late AuthRepository authRepo;
   late BanksRepository banksRepository;
@@ -150,6 +156,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   late NotificationRepository notificationRepository;
   @override
   void initState() {
+    tokenHandler = TokenHandler(storage: const FlutterSecureStorage());
+    client = ApiService(tokenHandler).client;
+
     authRepo = AuthRepository(client: client);
     banksRepository = BanksRepository(client: client);
     contactRepository = ContactRepositoryImpl(client: client);

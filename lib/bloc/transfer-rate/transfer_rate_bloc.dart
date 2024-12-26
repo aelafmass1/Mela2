@@ -27,9 +27,7 @@ class TransferRateBloc extends Bloc<TransferRateEvent, TransferRateState> {
     emit(TransferRateLoading());
 
     try {
-      final accessToken = await getToken();
       final transferRate = await walletRepository.fetchTransferRate(
-        accessToken: accessToken ?? '',
         fromWalletId: event.fromWalletId,
         toWalletId: event.toWalletId,
         amount: 0.0,

@@ -27,9 +27,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
             wallets: state.wallets,
           ),
         );
-        final accessToken = await getToken();
         final res = await repository.addFundToWallet(
-          accessToken: accessToken ?? '',
           amount: event.amount,
           paymentType: event.paymentType,
           publicToken: event.publicToken,
@@ -78,9 +76,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
             wallets: state.wallets,
           ),
         );
-        final accessToken = await getToken();
         final res = await repository.createWallet(
-          accessToken: accessToken ?? '',
           currency: event.currency,
         );
         if (res.containsKey('error')) {
@@ -114,10 +110,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
             wallets: state.wallets,
           ),
         );
-        final accessToken = await getToken();
-        final res = await repository.fetchWallets(
-          accessToken: accessToken ?? '',
-        );
+        final res = await repository.fetchWallets();
         if (res.containsKey('error')) {
           return emit(
             FetchWalletsFail(wallets: state.wallets, reason: res['error']),

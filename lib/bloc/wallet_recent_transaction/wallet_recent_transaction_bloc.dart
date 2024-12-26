@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/wallet_model.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 
@@ -21,10 +20,7 @@ class WalletRecentTransactionBloc
     try {
       if (state is! WalletRecentTransactionLoading) {
         emit(WalletRecentTransactionLoading());
-        final accessToken = await getToken();
-        final res = await repository.fetchRecentWalletTransactions(
-          accessToken: accessToken ?? '',
-        );
+        final res = await repository.fetchRecentWalletTransactions();
         if (res.containsKey('error')) {
           return emit(WalletRecentTransactionFail(reason: res['error']));
         }

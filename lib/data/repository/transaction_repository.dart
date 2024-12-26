@@ -5,7 +5,7 @@ class TransactionRepository {
   final Dio client;
 
   TransactionRepository({required this.client});
-  Future<Map<String, dynamic>> fetchTransaction(String accessToken) async {
+  Future<Map<String, dynamic>> fetchTransaction() async {
     final res = await client.get(
       '/api/v1/money-transfer/transactions',
     );

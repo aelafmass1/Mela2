@@ -37,7 +37,7 @@ class MoneyTransferRepository {
 
     final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return data;
+      return data['successResponse'];
     }
     return processErrorResponse(data);
   }
@@ -140,7 +140,6 @@ class MoneyTransferRepository {
   }
 
   Future<Map> fetchRequestMoneyDetail({
-    required String accessToken,
     required int requestId,
   }) async {
     final res = await client.get(
@@ -154,7 +153,6 @@ class MoneyTransferRepository {
   }
 
   Future<Map> rejectRequestMoney({
-    required String accessToken,
     required int requestId,
   }) async {
     final res = await client.post('$rejectRequestMoneyUrl$requestId');

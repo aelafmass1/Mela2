@@ -27,9 +27,7 @@ class CheckDetailsBloc extends Bloc<CheckDetailsEvent, CheckDetailsState> {
     try {
       if (state is! CheckDetailsLoading) {
         emit(CheckDetailsLoading());
-        final accessToken = await getToken();
         final res = await walletRepository.fetchTransferFeesForUnregisteredUser(
-          accessToken: accessToken ?? '',
           fromCurrency: event.fromCurrency,
           toCurrency: event.toCurrency,
         );
@@ -51,9 +49,7 @@ class CheckDetailsBloc extends Bloc<CheckDetailsEvent, CheckDetailsState> {
     try {
       if (state is! CheckDetailsLoading) {
         emit(CheckDetailsLoading());
-        final accessToken = await getToken();
         final res = await walletRepository.fetchTransferFees(
-          accessToken: accessToken ?? '',
           fromWalletId: event.fromWalletId,
           toWalletId: event.toWalletId,
         );

@@ -1,16 +1,17 @@
 import 'package:dio/dio.dart';
 
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 import 'package:transaction_mobile_app/data/services/api/retry_helper.dart';
+import 'package:transaction_mobile_app/data/services/tokenHandler/token_handler.dart';
 
 class DioInterceptor extends Interceptor {
-  DioInterceptor();
+  final ITokenHandler tokenHandler;
+  DioInterceptor(this.tokenHandler);
 
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    final authToken = await getToken();
+    final authToken = await tokenHandler.getToken();
     if (authToken != null) {
       options.headers['Authorization'] = 'Bearer $authToken';
     }
@@ -52,9 +53,10 @@ class DioInterceptor extends Interceptor {
   }
 
   Future<Response> _retryRequest(RequestOptions requestOptions) async {
-    final dio = ApiService().client; // Reuse the existing Dio instance
+    final dio =
+        ApiService(tokenHandler).client; // Reuse the existing Dio instance
 
-    final authToken = await getToken();
+    final authToken = tokenHandler.getToken();
     if (authToken != null) {
       requestOptions.headers['Authorization'] = 'Bearer $authToken';
     }
