@@ -7,7 +7,6 @@ import 'package:transaction_mobile_app/data/models/payment_card_model.dart';
 import 'package:transaction_mobile_app/data/repository/payment_card_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 
 part 'payment_card_event.dart';
 part 'payment_card_state.dart';
@@ -66,10 +65,8 @@ class PaymentCardBloc extends Bloc<PaymentCardEvent, PaymentCardState> {
     try {
       if (state is! PaymentCardLoading) {
         emit(PaymentCardLoading(paymentCards: state.paymentCards));
-        final token = await getToken();
-        final res = await repository.fetchPaymentCards(
-          accessToken: token!,
-        );
+
+        final res = await repository.fetchPaymentCards();
         if (res.isNotEmpty) {
           if (res.first.containsKey('error')) {
             return emit(PaymentCardFail(

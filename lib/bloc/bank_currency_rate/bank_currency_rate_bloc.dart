@@ -6,8 +6,6 @@ import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/data/models/bank_rate.dart';
 import 'package:transaction_mobile_app/data/repository/currency_rate_repository.dart';
 
-import '../../core/utils/settings.dart';
-
 part 'bank_currency_rate_event.dart';
 part 'bank_currency_rate_state.dart';
 
@@ -24,8 +22,7 @@ class BankCurrencyRateBloc
       if (state is! BankCurrencyRateLoading) {
         emit(BankCurrencyRateLoading());
 
-        final token = await getToken();
-        final res = await repository.fetchCurrencyRate(token!);
+        final res = await repository.fetchCurrencyRate();
         final rates = res.map((rate) => BankRate.fromMap(rate)).toList();
         emit(BankCurrencyRateSuccess(rates: rates));
       }

@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/notification_model.dart';
 import 'package:transaction_mobile_app/data/repository/notification_repository.dart';
 
@@ -20,10 +19,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
       if (state is! FetchNotificationsLoading) {
         emit(FetchNotificationsLoading());
-        final accessToken = await getToken();
-        final res = await notificationRepository.fetchNotifications(
-          accessToken: accessToken ?? '',
-        );
+        final res = await notificationRepository.fetchNotifications();
         if (res.containsKey('error')) {
           return emit(FetchNotificationsFailure(reason: res['error']));
         }
@@ -45,9 +41,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
       if (state is! DeleteFcmTokenLoading) {
         emit(DeleteFcmTokenLoading());
-        final accessToken = await getToken();
         final res = await notificationRepository.deleteFcmToken(
-          accessToken: accessToken ?? '',
           fcmToken: event.fcmToken,
         );
         if (res.containsKey('error')) {
@@ -64,9 +58,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
       if (state is! SaveFcmTokenLoading) {
         emit(SaveFcmTokenLoading());
-        final accessToken = await getToken();
         final res = await notificationRepository.saveFcmToken(
-          accessToken: accessToken ?? '',
           fcmToken: event.fcmToken,
         );
         if (res.containsKey('error')) {

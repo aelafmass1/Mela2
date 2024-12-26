@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 import 'package:transaction_mobile_app/data/models/invitee_model.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
@@ -45,10 +44,8 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
-        final token = await getToken();
 
         final res = await repository.fetchEqubMembers(
-          accessToken: token!,
           equbId: event.equbId,
         );
         log(res.toString());
@@ -78,10 +75,8 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
-        final token = await getToken();
 
         final res = await repository.fetchEqubDetail(
-          accessToken: token!,
           equbId: event.equbId,
         );
         if (res.containsKey('error')) {
@@ -120,11 +115,8 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
     try {
       if (state is! EqubLoading) {
         emit(EqubLoading(equbList: state.equbList));
-        final token = await getToken();
 
-        final res = await repository.fetchEqubs(
-          accessToken: token!,
-        );
+        final res = await repository.fetchEqubs();
         if (res.isEmpty) {
           return emit(
             EqubSuccess(equbList: []),
@@ -166,11 +158,9 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         emit(EqubLoading(equbList: state.equbList));
         List<EqubDetailModel> equbs = state.equbList;
 
-        final token = await getToken();
         final res = await repository.createEqub(
           event.equbModel,
           event.currencyCode,
-          token!,
         );
         if (res.containsKey('error')) {
           return emit(EqubFail(equbList: state.equbList, reason: res['error']));
@@ -178,7 +168,6 @@ class EqubBloc extends Bloc<EqubEvent, EqubState> {
         int equbId = res['successResponse']['id'];
 
         final inviteRes = await repository.inviteMembers(
-          accessToken: token,
           equbId: equbId,
           members: event.equbModel.members,
         );

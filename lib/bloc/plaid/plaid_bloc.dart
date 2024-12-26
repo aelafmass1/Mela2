@@ -6,7 +6,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 
 part 'plaid_event.dart';
 part 'plaid_state.dart';
@@ -21,9 +20,8 @@ class PlaidBloc extends Bloc<PlaidEvent, PlaidState> {
     try {
       if (state is! PlaidLinkTokenLoading) {
         emit(PlaidLinkTokenLoading());
-        final token = await getToken();
 
-        final res = await repository.createLinkToken(token!);
+        final res = await repository.createLinkToken();
         if (res.containsKey('error')) {
           return emit(PlaidLinkTokenFail(reason: res['error']));
         }

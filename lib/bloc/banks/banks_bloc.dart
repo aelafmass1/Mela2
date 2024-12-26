@@ -6,7 +6,6 @@ import 'package:transaction_mobile_app/data/models/bank_model.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 
 part 'banks_event.dart';
 part 'banks_state.dart';
@@ -21,9 +20,8 @@ class BanksBloc extends Bloc<BanksEvent, BanksState> {
     try {
       if (state is! BanksLoading) {
         emit(BanksLoading());
-        final token = await getToken();
 
-        final res = await repository.fetchBanks(token!);
+        final res = await repository.fetchBanks();
         if (res.first.containsKey('error')) {
           return emit(BanksFail(reason: res.first['error']));
         }

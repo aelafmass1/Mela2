@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 import '../../data/models/contact_model.dart';
 import '../../data/repository/equb_repository.dart';
 
@@ -30,9 +29,8 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
     try {
       if (state is! EqubManualWinnerLoading) {
         emit(EqubManualWinnerLoading());
-        final token = await getToken();
+
         final res = await repository.manualAssignWinner(
-          accessToken: token!,
           cycleId: event.cycleId,
           memberId: event.memberId,
         );
@@ -63,9 +61,8 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
     try {
       if (state is! EqubAutoWinnerLoading) {
         emit(EqubAutoWinnerLoading());
-        final token = await getToken();
+
         final res = await repository.autoPickWinner(
-          accessToken: token!,
           cycleId: event.cycleId,
         );
         if (res.containsKey('error')) {
@@ -95,10 +92,7 @@ class EqubMemberBloc extends Bloc<EqubMemberEvent, EqubMemberState> {
       if (state is! EqubMemberInviteLoading) {
         emit(EqubMemberInviteLoading());
 
-        final token = await getToken();
-
         final res = await repository.inviteMembers(
-          accessToken: token!,
           equbId: event.equbId,
           members: event.contacts,
         );

@@ -5,7 +5,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/repository/equb_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 
 part 'equb_currencies_event.dart';
 part 'equb_currencies_state.dart';
@@ -23,9 +22,7 @@ class EqubCurrenciesBloc
     try {
       if (state is! EqubCurrenciesLoading) {
         emit(EqubCurrenciesLoading());
-        final res = await repository.fetchEqubCurrencies(
-          accessToken: await getToken() ?? '',
-        );
+        final res = await repository.fetchEqubCurrencies();
         if (res.containsKey('error')) {
           return emit(EqubCurrenciesFail(reason: res['error']));
         } else if (res.containsKey('successResponse')) {

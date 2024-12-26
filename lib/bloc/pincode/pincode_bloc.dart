@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
@@ -20,10 +19,8 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
     try {
       if (state is! PinLoading) {
         emit(PinLoading());
-        final token = await getToken();
 
         final res = await repository.verfiyPincode(
-          token ?? '',
           event.pincode,
         );
         if (res.containsKey('error')) {
@@ -47,8 +44,8 @@ class PincodeBloc extends Bloc<PincodeEvent, PincodeState> {
     try {
       if (state is! PinLoading) {
         emit(PinLoading());
-        final token = await getToken();
-        final res = await repository.setPincode(token ?? '', event.pincode);
+
+        final res = await repository.setPincode(event.pincode);
         if (res.containsKey('error')) {
           return emit(PinFail(reason: res['error']));
         }

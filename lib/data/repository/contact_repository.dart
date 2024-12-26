@@ -1,11 +1,8 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
-
-import '../../core/constants/url_constants.dart';
 
 abstract class ContactRepository {
   Future<List> checkMyContacts({required List<Contact> contacts});
@@ -16,7 +13,7 @@ abstract class ContactRepository {
 }
 
 class ContactRepositoryImpl implements ContactRepository {
-  final InterceptedClient client;
+  final Dio client;
 
   ContactRepositoryImpl({required this.client});
 
@@ -24,7 +21,6 @@ class ContactRepositoryImpl implements ContactRepository {
   Future<List> checkMyContacts({
     required List<Contact> contacts,
   }) async {
-    final token = await getToken();
     final body = [
       for (var contact in contacts)
         {
@@ -69,17 +65,11 @@ class ContactRepositoryImpl implements ContactRepository {
         }
     ];
     final res = await client.post(
-      Uri.parse('$baseUrl/contact/check'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(
-        body,
-      ),
+      '/contact/check',
+      data: body,
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
@@ -90,15 +80,11 @@ class ContactRepositoryImpl implements ContactRepository {
   Future<List<Map<String, dynamic>>> searchContactsByTag({
     required String query,
   }) async {
-    final token = await getToken();
     final res = await client.get(
-      Uri.parse('$baseUrl/search/user?prefix=$query'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      '/search/user?prefix=$query',
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return (data["response"] as List)
           .map((item) => item as Map<String, dynamic>)
@@ -115,15 +101,11 @@ class ContactRepositoryImpl implements ContactRepository {
   @override
   Future<List<Map<String, dynamic>>> searchByPhone(
       {required String phone}) async {
-    final token = await getToken();
     final res = await client.get(
-      Uri.parse('$baseUrl/search/phone?phoneNumber=$phone'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      '/search/phone?phoneNumber=$phone',
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return (data["response"] as List)
           .map((item) => item as Map<String, dynamic>)

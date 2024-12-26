@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:http_interceptor/http/intercepted_client.dart';
-import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:dio/dio.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 
 /// A repository class for fetching fee data from an API.
 class FeeRepository {
-  final InterceptedClient client;
+  final Dio client;
 
   FeeRepository({required this.client});
 
@@ -16,33 +15,23 @@ class FeeRepository {
   /// Returns a [Future] that completes with a [List] of fee data.
   /// If the API call is successful, it returns the parsed fee data.
   /// If there's an error, it returns a list containing an error map.
-  Future<List<dynamic>> fetchFees(String accessToken) async {
+  Future<List<dynamic>> fetchFees() async {
     final response = await client.get(
-      Uri.parse('$baseUrl/api/fees/all'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '/api/fees/all',
     );
 
-    final data = jsonDecode(response.body) as List<dynamic>;
+    final data = jsonDecode(response.data) as List<dynamic>;
     if (response.statusCode == 200) {
       return data;
     }
-    return [processErrorResponse(jsonDecode(response.body))];
+    return [processErrorResponse(jsonDecode(response.data))];
   }
 
-  Future<List> fetchRemittanceExchangeRate(
-    String accessToken,
-  ) async {
+  Future<List> fetchRemittanceExchangeRate() async {
     final res = await client.get(
-      Uri.parse('$baseUrl/api/exchange-rates/remittance/active'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '/api/exchange-rates/remittance/active',
     );
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200) {
       return data;
     }

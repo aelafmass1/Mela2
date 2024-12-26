@@ -4,8 +4,6 @@ import 'package:transaction_mobile_app/data/models/curruncy_model.dart';
 import 'package:transaction_mobile_app/data/repository/currency_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
-
 part 'currency_event.dart';
 part 'currency_state.dart';
 
@@ -19,19 +17,16 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
     try {
       if (state is! CurrencyLoading) {
         emit(CurrencyLoading());
-        final token = await getToken();
 
-        if (token != null) {
-          final res = await repository.fetchCurrencies(token);
-          if (res.first.containsKey('error')) {
-            return emit(CurrencyFail(reason: res.first['error']));
-          }
-          emit(
-            CurrencySuccess(
-              currencies: res.map((c) => CurrencyModel.fromMap(c)).toList(),
-            ),
-          );
+        final res = await repository.fetchCurrencies();
+        if (res.first.containsKey('error')) {
+          return emit(CurrencyFail(reason: res.first['error']));
         }
+        emit(
+          CurrencySuccess(
+            currencies: res.map((c) => CurrencyModel.fromMap(c)).toList(),
+          ),
+        );
       }
     } on ServerException catch (error, stackTrace) {
       emit(CurrencyFail(reason: error.message));
@@ -49,21 +44,18 @@ class CurrencyBloc extends Bloc<CurrencyEvent, CurrencyState> {
     try {
       if (state is! CurrencyLoading) {
         emit(CurrencyLoading());
-        final token = await getToken();
 
-        if (token != null) {
-          final res = await repository.fetchPromotionalCurrency(token);
-          if (res.containsKey('error')) {
-            return emit(CurrencyFail(reason: res['error']));
-          }
-          emit(
-            CurrencySuccess(
-              currencies: [
-                CurrencyModel.fromMap(res),
-              ],
-            ),
-          );
+        final res = await repository.fetchPromotionalCurrency();
+        if (res.containsKey('error')) {
+          return emit(CurrencyFail(reason: res['error']));
         }
+        emit(
+          CurrencySuccess(
+            currencies: [
+              CurrencyModel.fromMap(res),
+            ],
+          ),
+        );
       }
     } on ServerException catch (error, stackTrace) {
       emit(CurrencyFail(reason: error.message));

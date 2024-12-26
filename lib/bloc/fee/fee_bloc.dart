@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/fee_models.dart';
 import 'package:transaction_mobile_app/data/models/remittance_exchange_rate_model.dart';
 import 'package:transaction_mobile_app/data/repository/fee_repository.dart';
@@ -17,8 +16,8 @@ class FeeBloc extends Bloc<FeeEvent, FeeState> {
       FetchRemittanceExchangeRate event, Emitter emit) async {
     try {
       emit(RemittanceExchangeRateLoading());
-      final token = await getToken();
-      final res = await feeRepository.fetchRemittanceExchangeRate(token ?? '');
+
+      final res = await feeRepository.fetchRemittanceExchangeRate();
       if (res.isEmpty) {
         return emit(
           RemittanceExchangeRateFailed(

@@ -11,13 +11,11 @@ const requestTimeOut = 5; // in seconds
 const responseTimeOut = 3; // in seconds
 
 // Notifications related urls
-const String fetchNotificationsUrl = "$baseUrl/api/notifications/all";
-const String deleteFcmTokenUrl = "$baseUrl/user/me/devices";
-const String saveFcmTokenUrl = "$baseUrl/user/me/devices";
+const String fetchNotificationsUrl = "/api/notifications/all";
+const String deleteFcmTokenUrl = "/user/me/devices";
+const String saveFcmTokenUrl = "/user/me/devices";
 
 // money request related urls
-const String rejectRequestMoneyUrl =
-    "$baseUrl/api/wallet/request-money/reject/";
-const String fetchRequestMoneyDetailUrl =
-    "$baseUrl/api/wallet/request-money/get/";
-const String requestMoneyUrl = "$baseUrl/api/wallet/request-money";
+const String rejectRequestMoneyUrl = "/api/wallet/request-money/reject/";
+const String fetchRequestMoneyDetailUrl = "/api/wallet/request-money/get/";
+const String requestMoneyUrl = "/api/wallet/request-money";

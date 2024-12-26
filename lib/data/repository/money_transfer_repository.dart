@@ -1,14 +1,10 @@
-import 'dart:convert';
-
-import 'package:http_interceptor/http/intercepted_client.dart';
+import 'package:dio/dio.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 
-import '../../core/utils/settings.dart';
-
 class MoneyTransferRepository {
-  final InterceptedClient client;
+  final Dio client;
 
   MoneyTransferRepository({required this.client});
 
@@ -21,20 +17,13 @@ class MoneyTransferRepository {
   ///
   /// Returns a map with either a 'success' key containing the response data, or an 'error' key containing an error message.
   Future<Map> sendMoney({
-    required String accessToken,
     required ReceiverInfo receiverInfo,
     required String paymentId,
     required String savedPaymentId,
   }) async {
     final res = await client.post(
-      Uri.parse(
-        '$baseUrl/api/v1/money-transfer/send',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+      '/api/v1/money-transfer/send',
+      data: {
         "receiverName": receiverInfo.receiverName,
         "receiverPhoneNumber": receiverInfo.receiverPhoneNumber,
         "receiverBankName": receiverInfo.receiverBankName,
@@ -43,10 +32,10 @@ class MoneyTransferRepository {
         "serviceChargePayer": receiverInfo.serviceChargePayer,
         "paymentType": receiverInfo.paymentType,
         "savedPaymentId": savedPaymentId,
-      }),
+      },
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
@@ -62,7 +51,6 @@ class MoneyTransferRepository {
   ///
   /// Returns a map with either a 'success' key containing the response data, or an 'error' key containing an error message.
   Future<Map> transferToOwnWallet({
-    required String accessToken,
     required int fromWalletId,
     required int toWalletId,
     required double amount,
@@ -70,22 +58,16 @@ class MoneyTransferRepository {
   }) async {
     try {
       final res = await client.post(
-        Uri.parse(
-          '$baseUrl/api/wallet/transfer',
-        ),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        '/api/wallet/transfer',
+        data: {
           "fromWalletId": fromWalletId,
           "toWalletId": toWalletId,
           "amount": amount,
           "note": note,
-        }),
+        },
       );
 
-      final data = jsonDecode(res.body);
+      final data = res.data;
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         return data;
@@ -97,27 +79,20 @@ class MoneyTransferRepository {
   }
 
   Future<Map> transferToUnregisteredUser({
-    required String accessToken,
     required int senderWalletId,
     required String recipientPhoneNumber,
     required double amount,
   }) async {
     final res = await client.post(
-      Uri.parse(
-        '$baseUrl/api/wallet/transfer/unregistered',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+      '/api/wallet/transfer/unregistered',
+      data: {
         "senderWalletId": senderWalletId,
         "recipientPhoneNumber": recipientPhoneNumber,
         "amount": amount,
-      }),
+      },
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
@@ -126,28 +101,18 @@ class MoneyTransferRepository {
   }
 
   Future<Map> requestMoney({
-    required String accessToken,
     required int requesterWalletId,
     required double amount,
     required String note,
     required int userId,
   }) async {
-    final res = await client.post(
-      Uri.parse(
-        requestMoneyUrl,
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "requesterWalletId": requesterWalletId,
-        "recipientId": userId,
-        "amount": amount,
-        "note": note
-      }),
-    );
-    final data = jsonDecode(res.body);
+    final res = await client.post(requestMoneyUrl, data: {
+      "requesterWalletId": requesterWalletId,
+      "recipientId": userId,
+      "amount": amount,
+      "note": note
+    });
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
@@ -160,23 +125,14 @@ class MoneyTransferRepository {
     required String note,
     required String recipientPhoneNumber,
   }) async {
-    final token = await getToken();
-    final res = await client.post(
-      Uri.parse(
-        '$baseUrl/api/wallet/request-money/unregistered',
-      ),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "requesterWalletId": requesterWalletId,
-        "recipientPhoneNumber": recipientPhoneNumber,
-        "amount": amount,
-        "note": note
-      }),
-    );
-    final data = jsonDecode(res.body);
+    final res =
+        await client.post('/api/wallet/request-money/unregistered', data: {
+      "requesterWalletId": requesterWalletId,
+      "recipientPhoneNumber": recipientPhoneNumber,
+      "amount": amount,
+      "note": note
+    });
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
@@ -188,15 +144,9 @@ class MoneyTransferRepository {
     required int requestId,
   }) async {
     final res = await client.get(
-      Uri.parse(
-        '$fetchRequestMoneyDetailUrl$requestId',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '$fetchRequestMoneyDetailUrl$requestId',
     );
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200) {
       return data;
     }
@@ -207,16 +157,8 @@ class MoneyTransferRepository {
     required String accessToken,
     required int requestId,
   }) async {
-    final res = await client.post(
-      Uri.parse(
-        '$rejectRequestMoneyUrl$requestId',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
-    final data = jsonDecode(res.body);
+    final res = await client.post('$rejectRequestMoneyUrl$requestId');
+    final data = res.data;
     if (res.statusCode == 200) {
       return data;
     }

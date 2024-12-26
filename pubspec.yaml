@@ -55,7 +55,6 @@ dependencies:
   sms_autofill: ^2.4.0
   currency_picker: ^2.0.21
   connectivity_plus: ^6.0.5
-  http_interceptor: ^2.0.0
   card_stack_widget: ^0.1.6
   currency_icons: ^0.3.0
   gap: ^3.0.1
@@ -65,6 +64,9 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   fast_contacts: ^4.0.0
   flutter_gen_runner:
+  dio: ^5.7.0
+  pretty_dio_logger: ^1.4.0
+  http_interceptor: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/repository/auth_repository.dart';
 
 part 'user_event.dart';
@@ -15,10 +14,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       if (state is! UserLoading) {
         emit(UserLoading());
-        final token = await getToken();
-        final res = await authRepository.fetchMe(
-          accessToken: token ?? '',
-        );
+
+        final res = await authRepository.fetchMe();
         if (res.containsKey('error')) {
           return emit(UserFail(reason: res['error']));
         }

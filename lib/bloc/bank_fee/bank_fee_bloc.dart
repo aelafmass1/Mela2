@@ -6,7 +6,6 @@ import 'package:transaction_mobile_app/data/models/bank_fee_model.dart';
 import 'package:transaction_mobile_app/data/repository/banks_repository.dart';
 
 import '../../core/exceptions/server_exception.dart';
-import '../../core/utils/settings.dart';
 
 part 'bank_fee_event.dart';
 part 'bank_fee_state.dart';
@@ -20,9 +19,8 @@ class BankFeeBloc extends Bloc<BankFeeEvent, BankFeeState> {
     try {
       if (state is! BankFeeLoading) {
         emit(BankFeeLoading());
-        final token = await getToken();
 
-        final res = await repository.fetchBankFee(token!);
+        final res = await repository.fetchBankFee();
         if (res.first.containsKey('error')) {
           return emit(BankFeeFail(reason: res.first['error']));
         }

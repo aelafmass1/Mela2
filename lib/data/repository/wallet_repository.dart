@@ -1,27 +1,17 @@
-import 'dart:convert';
-
-import 'package:http_interceptor/http_interceptor.dart';
-
-import '../../core/constants/url_constants.dart';
+import 'package:dio/dio.dart';
 import '../../core/utils/process_error_response_.dart';
 import '../models/transfer_rate_model.dart';
 
 class WalletRepository {
-  final InterceptedClient client;
+  final Dio client;
 
   WalletRepository({required this.client});
 
   Future<Map> fetchWallets({required String accessToken}) async {
     final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/all',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '/api/wallet/all',
     );
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
@@ -31,15 +21,10 @@ class WalletRepository {
   Future<Map> createWallet(
       {required String accessToken, required String currency}) async {
     final res = await client.post(
-      Uri.parse(
-        '$baseUrl/api/wallet/create/$currency',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '/api/wallet/create/$currency',
     );
-    final data = jsonDecode(res.body);
+
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
@@ -47,16 +32,8 @@ class WalletRepository {
   }
 
   Future<Map> fetchWalletCurrencies({required String accessToken}) async {
-    final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/currency/all',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
-    final data = jsonDecode(res.body);
+    final res = await client.get('/api/wallet/currency/all');
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return {'data': data};
     }
@@ -71,21 +48,13 @@ class WalletRepository {
     required String savedPaymentId,
     required int walletId,
   }) async {
-    final res = await client.post(
-        Uri.parse(
-          '$baseUrl/api/wallet/top-up',
-        ),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "amount": amount.toInt(),
-          "paymentType": paymentType,
-          "savedPaymentId": savedPaymentId,
-          "walletId": walletId,
-        }));
-    final data = jsonDecode(res.body);
+    final res = await client.post('/api/wallet/top-up', data: {
+      "amount": amount.toInt(),
+      "paymentType": paymentType,
+      "savedPaymentId": savedPaymentId,
+      "walletId": walletId,
+    });
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
@@ -100,19 +69,13 @@ class WalletRepository {
   }) async {
     try {
       final res = await client.get(
-        Uri.parse(
-          '$baseUrl/api/wallet/transfer/rate',
-        ),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        params: {
+        '/api/wallet/transfer/rate',
+        queryParameters: {
           "fromWalletId": fromWalletId.toString(),
           "toWalletId": toWalletId.toString(),
         },
       );
-      final data = jsonDecode(res.body);
+      final data = res.data;
       if (res.statusCode == 200 || res.statusCode == 204) {
         final successResponse = data['successResponse'];
         return TransferRateModel.fromJson(successResponse);
@@ -129,19 +92,13 @@ class WalletRepository {
     required String toCurrency,
   }) async {
     final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/transfer/fees/by-currency',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      params: {
+      '/api/wallet/transfer/fees/by-currency',
+      queryParameters: {
         "fromCurrency": fromCurrency,
         "toCurrency": toCurrency,
       },
     );
-    final data = jsonDecode(res.body);
+    final data = res.data;
 
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -155,19 +112,13 @@ class WalletRepository {
     required int toWalletId,
   }) async {
     final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/transfer/fees',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      params: {
+      '/api/wallet/transfer/fees',
+      queryParameters: {
         "fromWalletId": fromWalletId.toString(),
         "toWalletId": toWalletId.toString(),
       },
     );
-    final data = jsonDecode(res.body);
+    final data = res.data;
 
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
@@ -176,16 +127,8 @@ class WalletRepository {
   }
 
   Future<Map> fetchWalletTransaction({required String accessToken}) async {
-    final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/transactions',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
-    final data = jsonDecode(res.body);
+    final res = await client.get('/api/wallet/transactions');
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return {'data': data};
     }
@@ -194,16 +137,8 @@ class WalletRepository {
 
   Future<Map> fetchRecentWalletTransactions(
       {required String accessToken}) async {
-    final res = await client.get(
-      Uri.parse(
-        '$baseUrl/api/wallet/recent-recipients',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
-    final data = jsonDecode(res.body);
+    final res = await client.get('/api/wallet/recent-recipients');
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return {'data': data};
     }

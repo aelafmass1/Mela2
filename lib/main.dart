@@ -134,6 +134,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final client = ApiService().client;
+
   late AuthRepository authRepo;
   late BanksRepository banksRepository;
   late ContactRepositoryImpl contactRepository;

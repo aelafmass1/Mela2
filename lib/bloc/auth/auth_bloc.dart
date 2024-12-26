@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -324,8 +325,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       if (state is! DeleteUserLoading) {
         emit(DeleteUserLoading());
-        final token = await getToken();
-        final res = await repository.deleteUser(accessToken: token ?? '');
+
+        final res = await repository.deleteUser();
         if (res.containsKey('error')) {
           return emit(DeleteUserFail(reason: res['error']));
         }
@@ -370,6 +371,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         stackTrace: stackTrace,
       );
     } catch (error) {
+      debugPrint("$error");
       emit(LoginUserFail(reason: error.toString()));
     }
   }

@@ -1,19 +1,15 @@
-import 'dart:convert';
-
-import 'package:http_interceptor/http/intercepted_client.dart';
-import 'package:transaction_mobile_app/core/constants/url_constants.dart';
+import 'package:dio/dio.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/equb_model.dart';
 
 import '../models/contact_model.dart';
 
 class EqubRepository {
-  final InterceptedClient client;
+  final Dio client;
 
   EqubRepository({required this.client});
 
-  Future<Map> createEqub(
-      EqubModel equb, String currencyCode, String accessToken) async {
+  Future<Map> createEqub(EqubModel equb, String currencyCode) async {
     final body = {
       "name": equb.name,
       "numberOfMembers": equb.numberOfMembers,
@@ -24,15 +20,11 @@ class EqubRepository {
           "${equb.startDate.year}-${equb.startDate.month.toString().padLeft(2, '0')}-${equb.startDate.day.toString().padLeft(2, '0')}"
     };
     final res = await client.post(
-      Uri.parse('$baseUrl/ekub/create'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(body),
+      '/ekub/create',
+      data: body,
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
@@ -40,38 +32,24 @@ class EqubRepository {
   }
 
   Future<List> inviteMembers(
-      {required int equbId,
-      required String accessToken,
-      required List<ContactModel> members}) async {
+      {required int equbId, required List<ContactModel> members}) async {
     final body = members.map((m) => m.toMap()).toList();
     final res = await client.post(
-      Uri.parse('$baseUrl/ekub/$equbId/invite'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(body),
+      '/ekub/$equbId/invite',
+      data: body,
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data['successResponse'];
     }
     return [processErrorResponse(data)];
   }
 
-  Future<List> fetchEqubs({
-    required String accessToken,
-  }) async {
-    final res = await client.get(
-      Uri.parse('$baseUrl/ekub/all'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+  Future<List> fetchEqubs() async {
+    final res = await client.get('/ekub/all');
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data['successResponse'];
     }
@@ -89,18 +67,11 @@ class EqubRepository {
   }
 
   Future<Map> fetchEqubDetail({
-    required String accessToken,
     required int equbId,
   }) async {
-    final res = await client.get(
-      Uri.parse('$baseUrl/ekub/$equbId/get'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    final res = await client.get('/ekub/$equbId/get');
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data['successResponse'];
     }
@@ -109,18 +80,11 @@ class EqubRepository {
   }
 
   Future<List> fetchEqubMembers({
-    required String accessToken,
     required int equbId,
   }) async {
-    final res = await client.get(
-      Uri.parse('$baseUrl/ekub/$equbId/members/get'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    final res = await client.get('/ekub/$equbId/members/get');
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
     }
@@ -128,20 +92,13 @@ class EqubRepository {
   }
 
   Future<Map> manualAssignWinner({
-    required String accessToken,
     required int cycleId,
     required int memberId,
   }) async {
-    final res = await client.post(
-      Uri.parse(
-          '$baseUrl/ekub/cycles/$cycleId/assign-winner?memberId=$memberId'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    final res = await client
+        .post('/ekub/cycles/$cycleId/assign-winner?memberId=$memberId');
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data['successResponse'];
     }
@@ -149,35 +106,22 @@ class EqubRepository {
   }
 
   Future<Map> autoPickWinner({
-    required String accessToken,
     required int cycleId,
   }) async {
     final res = await client.post(
-      Uri.parse('$baseUrl/ekub/winner/autoPicker?cycleId=$cycleId'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      '/ekub/winner/autoPicker?cycleId=$cycleId',
     );
 
-    final data = jsonDecode(res.body);
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data['successResponse'];
     }
     return processErrorResponse(data);
   }
 
-  Future<Map> fetchEqubCurrencies({
-    required String accessToken,
-  }) async {
-    final res = await client.get(
-      Uri.parse('$baseUrl/ekub/currency/all'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
-    final data = jsonDecode(res.body);
+  Future<Map> fetchEqubCurrencies() async {
+    final res = await client.get('/ekub/currency/all');
+    final data = res.data;
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
