@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
@@ -67,14 +66,12 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
         final token = await getToken();
 
         if (token != null) {
-          debugPrint("event: $event");
           final res = await repository.sendMoney(
             accessToken: token,
             receiverInfo: event.receiverInfo,
             paymentId: event.paymentId,
             savedPaymentId: event.savedPaymentId,
           );
-          debugPrint("res: $res");
           if (res.containsKey('error')) {
             return emit(MoneyTransferFail(reason: res['error']));
           }
