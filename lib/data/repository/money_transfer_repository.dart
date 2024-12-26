@@ -5,6 +5,8 @@ import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 
+import '../../core/utils/settings.dart';
+
 class MoneyTransferRepository {
   final InterceptedClient client;
 
@@ -40,15 +42,13 @@ class MoneyTransferRepository {
         "amount": receiverInfo.amount,
         "serviceChargePayer": receiverInfo.serviceChargePayer,
         "paymentType": receiverInfo.paymentType,
-        "publicToken": receiverInfo.publicToken ?? '',
-        "paymentIntentId": paymentId,
         "savedPaymentId": savedPaymentId,
       }),
     );
 
-    String data = res.body;
+    final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return {'success': data};
+      return data;
     }
     return processErrorResponse(data);
   }
@@ -143,6 +143,35 @@ class MoneyTransferRepository {
       body: jsonEncode({
         "requesterWalletId": requesterWalletId,
         "recipientId": userId,
+        "amount": amount,
+        "note": note
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> requestMoneyToUnregisteredUser({
+    required int requesterWalletId,
+    required double amount,
+    required String note,
+    required String recipientPhoneNumber,
+  }) async {
+    final token = await getToken();
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money/unregistered',
+      ),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "requesterWalletId": requesterWalletId,
+        "recipientPhoneNumber": recipientPhoneNumber,
         "amount": amount,
         "note": note
       }),

@@ -24,6 +24,7 @@ import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart'
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -127,14 +128,16 @@ class _SentTabState extends State<SentTab> {
     log("onExit metadata: $metadata, error: $error");
   }
 
-  _calculateSecondTotalFee(BankFeeSuccess fee) {
+  double _calculateSecondTotalFee(PaymentCardSuccess state) {
     double totalFee = 0;
-    for (final fee in fee.bankFees) {
-      if (fee.type.contains("PERCENTAGE")) {
-        totalFee +=
-            (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
-      } else {
-        totalFee += fee.amount;
+    for (final card in state.paymentCards) {
+      for (final fee in card.fees) {
+        if (fee.type == "PERCENTAGE") {
+          totalFee +=
+              (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+        } else {
+          totalFee += fee.amount;
+        }
       }
     }
     return totalFee;
@@ -864,7 +867,7 @@ class _SentTabState extends State<SentTab> {
                                                       is CheckDetailsLoaded)
                                                     TextWidget(
                                                       text:
-                                                          '\$${_calculateFirstTotalFee(state)}',
+                                                          '\$${_calculateFirstTotalFee(state).toStringAsFixed(2)}',
                                                       fontSize: 16,
                                                       weight: FontWeight.w500,
                                                     )
@@ -990,6 +993,7 @@ class _SentTabState extends State<SentTab> {
                           selectedPhoneNumber = selectedContact
                               ?.contactPhoneNumber
                               ?.replaceAll(" ", "");
+                          _recipientSelectionFormKey.currentState!.validate();
                         });
                       },
                       readOnly: true,
@@ -1101,6 +1105,7 @@ class _SentTabState extends State<SentTab> {
                               selectedBank = value;
                             });
                           }
+                          _recipientSelectionFormKey.currentState!.validate();
                         },
                       );
                     },
@@ -1123,6 +1128,9 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
+                    },
+                    onChanged: (_) {
+                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
@@ -1160,6 +1168,9 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
+                    },
+                    onChanged: (_) {
+                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
@@ -1402,9 +1413,9 @@ class _SentTabState extends State<SentTab> {
                               color: ColorName.borderColor,
                             ),
                           ),
-                          child: BlocBuilder<BankFeeBloc, BankFeeState>(
+                          child: BlocBuilder<PaymentCardBloc, PaymentCardState>(
                             builder: (context, state) {
-                              if (state is BankFeeLoading) {
+                              if (state is PaymentCardLoading) {
                                 return Column(
                                   children: [
                                     CustomShimmer(
@@ -1427,10 +1438,11 @@ class _SentTabState extends State<SentTab> {
                                     ),
                                   ],
                                 );
-                              } else if (state is BankFeeSuccess) {
+                              } else if (state is PaymentCardSuccess) {
                                 return Column(
                                   children: [
-                                    for (var fee in state.bankFees)
+                                    for (var fee in state.paymentCards
+                                        .expand((card) => card.fees))
                                       Column(
                                         children: [
                                           Row(
@@ -1448,7 +1460,7 @@ class _SentTabState extends State<SentTab> {
                                                         'PERCENTAGE',
                                                     child: TextWidget(
                                                       text:
-                                                          '  ${NumberFormat('##,###.##').format(fee.amount.roundToDouble())}%',
+                                                          '  ${NumberFormat('##,###.##').format(fee.amount)}%',
                                                       fontSize: 14,
                                                       weight: FontWeight.w600,
                                                     ),
@@ -1458,12 +1470,10 @@ class _SentTabState extends State<SentTab> {
                                               Row(
                                                 children: [
                                                   TextWidget(
-                                                    text: fee.type ==
-                                                            'PERCENTAGE'
-                                                        ? "\$${(((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)).toStringAsFixed(2)}"
-                                                        : "\$${NumberFormat('##,###.##').format((fee.amount))}",
-                                                    weight: FontWeight.w600,
-                                                    fontSize: 14,
+                                                    text:
+                                                        '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
+                                                    fontSize: 16,
+                                                    weight: FontWeight.w700,
                                                   ),
                                                   const SizedBox(
                                                     width: 5,
@@ -1500,7 +1510,7 @@ class _SentTabState extends State<SentTab> {
                                                 children: [
                                                   TextWidget(
                                                     text:
-                                                        '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
+                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
                                                     fontSize: 16,
                                                     weight: FontWeight.w700,
                                                   ),
@@ -1544,9 +1554,10 @@ class _SentTabState extends State<SentTab> {
                   );
                 } else if (state is MoneyTransferSuccess) {
                   String? lastDigit;
-                  final state = context.read<PaymentCardBloc>().state;
-                  if (state is PaymentCardSuccess) {
-                    final card = state.paymentCards[selectedPaymentMethodIndex];
+                  final cardWallet = context.read<PaymentCardBloc>().state;
+                  if (cardWallet is PaymentCardSuccess) {
+                    final card =
+                        cardWallet.paymentCards[selectedPaymentMethodIndex];
 
                     lastDigit = card.last4Digits;
                   }
@@ -1554,12 +1565,10 @@ class _SentTabState extends State<SentTab> {
                   context
                       .read<WalletTransactionBloc>()
                       .add(FetchWalletTransaction());
-                  context.pushNamed(
-                    RouteName.receipt,
-                    extra: receiverInfo?.copyWith(
-                      lastDigit: lastDigit,
-                    ),
-                  );
+                  showWalletReceipt(
+                      context,
+                      state.walletTransactionModel!
+                          .copyWith(bankLastDigits: lastDigit));
 
                   clearSendInfo();
                 }

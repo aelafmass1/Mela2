@@ -639,7 +639,7 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
             children: [
               TextWidget(
                 text:
-                    "${request.recipientId.firstName ?? ''} ${request.recipientId.lastName ?? ''}",
+                    "${request.requesterWalletId.holder!.firstName ?? ''} ${request.requesterWalletId.holder!.lastName ?? ''}",
                 fontSize: 16,
               ),
               const SizedBox(width: 5),

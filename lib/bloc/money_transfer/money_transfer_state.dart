@@ -13,7 +13,11 @@ final class MoneyTransferFail extends MoneyTransferState {
   MoneyTransferFail({required this.reason});
 }
 
-final class MoneyTransferSuccess extends MoneyTransferState {}
+final class MoneyTransferSuccess extends MoneyTransferState {
+  final WalletTransactionModel? walletTransactionModel;
+
+  MoneyTransferSuccess({this.walletTransactionModel});
+}
 
 final class MoneyTransferOwnWalletSuccess extends MoneyTransferState {
   final WalletTransactionModel? walletTransactionModel;

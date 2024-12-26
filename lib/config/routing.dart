@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:transaction_mobile_app/data/models/equb_detail_model.dart';
-import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
 import 'package:transaction_mobile_app/presentation/screens/add_money_screen/add_money_screen.dart';
 import 'package:transaction_mobile_app/presentation/screens/equb_screen/components/complete_page.dart';
@@ -35,7 +34,6 @@ import '../presentation/screens/home_screen/home_screen.dart';
 import '../presentation/screens/notification/notificaiton_screen.dart';
 import '../presentation/screens/pincode_screen/pincode_screen_deligate.dart';
 import '../presentation/screens/profile_upload_screen/profile_upload_screen.dart';
-import '../presentation/screens/receipt_screen/receipt_screen.dart';
 
 class RouteName {
   static const splash = 'splash_screen';
@@ -52,7 +50,6 @@ class RouteName {
   static const welcome = 'welcome_screen';
   static const otp = 'otp_screen';
   static const createAccount = 'create_account_screen';
-  static const receipt = 'receipt_screen';
   static const profileUpload = 'profile_upload_screen';
   static const contactPermission = 'contact_permission_screen';
   static const profileEdit = 'profile_edit_screen';
@@ -148,13 +145,6 @@ class MyAppRouter {
             name: RouteName.equbActionCompleted,
             builder: (context, state) => CompletePageDynamic(
               completePageArgs: state.extra as CompletePageDto,
-            ),
-          ),
-          GoRoute(
-            path: 'receipt', 
-            name: RouteName.receipt,
-            builder: (context, state) => ReceiptScreen(
-              receiverInfo: state.extra as ReceiverInfo,
             ),
           ),
           GoRoute(
