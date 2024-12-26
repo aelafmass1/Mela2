@@ -64,8 +64,13 @@ class NotificationTile extends StatelessWidget {
           cardTitle: 'Money Requested',
           buttonTitle: 'Confirm',
           cardIcon: Assets.images.svgs.requestMoneyIcon,
-          onCardTap: () => context.pushNamed(RouteName.moneyRequestDetail,
-              extra: notification.referenceId),
+          onCardTap: () => context.pushNamed(
+            RouteName.moneyRequestDetail,
+            extra: {
+              'requestId': notification.referenceId,
+              'notificationId': notification.id,
+            },
+          ),
         );
 
       // Render a received money card

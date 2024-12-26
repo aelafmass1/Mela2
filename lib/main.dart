@@ -51,6 +51,7 @@ import 'bloc/bank_currency_rate/bank_currency_rate_bloc.dart';
 import 'bloc/check-details-bloc/check_details_bloc.dart';
 import 'bloc/money_request/money_request_bloc.dart';
 import 'bloc/notification/notification_bloc.dart';
+import 'bloc/reject_money_request/reject_money_request_bloc.dart';
 import 'bloc/transfer-rate/transfer_rate_bloc.dart';
 import 'config/routing.dart';
 import 'data/repository/auth_repository.dart';
@@ -283,6 +284,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
         ),
         BlocProvider(
           create: (context) => MoneyRequestBloc(
+            repository: moneyTransferRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => RejectMoneyReuestBloc(
             repository: moneyTransferRepository,
           ),
         )

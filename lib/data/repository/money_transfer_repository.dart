@@ -67,9 +67,19 @@ class MoneyTransferRepository {
     required int toWalletId,
     required double amount,
     required String? requestId,
+    required int? notificationId,
     required String note,
   }) async {
     try {
+      print('----------------------response transfer----------------------');
+      print('fromWalletId: $fromWalletId');
+      print('toWalletId: $toWalletId');
+      print('amount: $amount');
+      print('requestId: $requestId');
+      print('notificationId: $notificationId');
+      print('note: $note');
+      print('accessToken: $accessToken');
+
       final res = await client.post(
         Uri.parse(
           '$baseUrl/api/wallet/transfer',
@@ -83,6 +93,7 @@ class MoneyTransferRepository {
           "toWalletId": toWalletId,
           "amount": amount,
           "requestId": requestId,
+          "notificationId": notificationId,
           "note": note,
         }),
       );
@@ -170,6 +181,9 @@ class MoneyTransferRepository {
         'Content-Type': 'application/json',
       },
     );
+    print(
+        '---------------------------response money request detail--------------');
+    print(res.body);
     final data = jsonDecode(res.body);
     if (res.statusCode == 200) {
       return data;

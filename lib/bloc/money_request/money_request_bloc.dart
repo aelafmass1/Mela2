@@ -12,29 +12,29 @@ class MoneyRequestBloc extends Bloc<MoneyRequestEvent, MoneyRequestState> {
   MoneyRequestBloc({required this.repository}) : super(MoneyRequestInitial()) {
     on<MoneyRequest>(_onMoneyRequest);
     on<FetchMoneyRequestDetail>(_onFetchMoneyRequestDetail);
-    on<RejectMoneyRequest>(_onRejectMoneyRequest);
+    // on<RejectMoneyRequest>(_onRejectMoneyRequest);
   }
 
-  _onRejectMoneyRequest(RejectMoneyRequest event, Emitter emit) async {
-    try {
-      if (state is! RejectMoneyRequestLoading) {
-        emit(RejectMoneyRequestLoading());
-        final accessToken = await getToken();
-        final res = await repository.rejectRequestMoney(
-          accessToken: accessToken ?? '',
-          requestId: event.requestId,
-        );
-        if (res.containsKey("error")) {
-          return emit(
-            RejectMoneyRequestFail(reason: res['error']),
-          );
-        }
-        emit(RejectMoneyRequestSuccess());
-      }
-    } catch (e) {
-      emit(RejectMoneyRequestFail(reason: e.toString()));
-    }
-  }
+  // _onRejectMoneyRequest(RejectMoneyRequest event, Emitter emit) async {
+  //   try {
+  //     if (state is! RejectMoneyRequestLoading) {
+  //       emit(RejectMoneyRequestLoading());
+  //       final accessToken = await getToken();
+  //       final res = await repository.rejectRequestMoney(
+  //         accessToken: accessToken ?? '',
+  //         requestId: event.requestId,
+  //       );
+  //       if (res.containsKey("error")) {
+  //         return emit(
+  //           RejectMoneyRequestFail(reason: res['error']),
+  //         );
+  //       }
+  //       emit(RejectMoneyRequestSuccess());
+  //     }
+  //   } catch (e) {
+  //     emit(RejectMoneyRequestFail(reason: e.toString()));
+  //   }
+  // }
 
   _onFetchMoneyRequestDetail(
       FetchMoneyRequestDetail event, Emitter emit) async {

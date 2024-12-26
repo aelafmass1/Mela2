@@ -22,8 +22,8 @@ class FetchMoneyRequestDetail extends MoneyRequestEvent {
   FetchMoneyRequestDetail({required this.requestId});
 }
 
-class RejectMoneyRequest extends MoneyRequestEvent {
-  final int requestId;
+// class RejectMoneyRequest extends MoneyRequestEvent {
+//   final int requestId;
 
-  RejectMoneyRequest({required this.requestId});
-}
+//   RejectMoneyRequest({required this.requestId});
+// }

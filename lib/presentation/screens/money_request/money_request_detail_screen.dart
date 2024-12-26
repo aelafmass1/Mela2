@@ -1,9 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+
 import 'package:transaction_mobile_app/bloc/money_request/money_request_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
@@ -15,6 +17,7 @@ import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart'
 import '../../../bloc/check-details-bloc/check_details_bloc.dart';
 import '../../../bloc/money_transfer/money_transfer_bloc.dart';
 import '../../../bloc/notification/notification_bloc.dart';
+import '../../../bloc/reject_money_request/reject_money_request_bloc.dart';
 import '../../../bloc/transfer-rate/transfer_rate_bloc.dart';
 import '../../../bloc/wallet/wallet_bloc.dart';
 import '../../../bloc/wallet_transaction/wallet_transaction_bloc.dart';
@@ -28,7 +31,12 @@ import '../../widgets/text_widget.dart';
 
 class MoneyRequestDetailScreen extends StatefulWidget {
   final int requestId;
-  const MoneyRequestDetailScreen({super.key, required this.requestId});
+  final int notificationId;
+  const MoneyRequestDetailScreen({
+    super.key,
+    required this.requestId,
+    required this.notificationId,
+  });
 
   @override
   State<MoneyRequestDetailScreen> createState() =>
@@ -80,7 +88,7 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                     maxLine: tinySize.toInt(),
                   ),
                   const SizedBox(height: middleSize),
-                  BlocConsumer<MoneyRequestBloc, MoneyRequestState>(
+                  BlocConsumer<RejectMoneyReuestBloc, RejectMoneyRequestState>(
                     listener: (context, state) {
                       if (state is RejectMoneyRequestSuccess) {
                         context
@@ -102,6 +110,15 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                     },
                     builder: (context, state) {
                       return ButtonWidget(
+                        onPressed: state is RejectMoneyRequestLoading
+                            ? null
+                            : () {
+                                context.read<RejectMoneyReuestBloc>().add(
+                                      RejectMoneyRequest(
+                                        requestId: widget.requestId,
+                                      ),
+                                    );
+                              },
                         child: state is RejectMoneyRequestLoading
                             ? const LoadingWidget()
                             : const TextWidget(
@@ -109,13 +126,6 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                                 type: TextType.small,
                                 color: ColorName.white,
                               ),
-                        onPressed: () {
-                          context.read<MoneyRequestBloc>().add(
-                                RejectMoneyRequest(
-                                  requestId: widget.requestId,
-                                ),
-                              );
-                        },
                       );
                     },
                   )
@@ -136,6 +146,9 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
           ),
         );
     final wallets = context.read<WalletBloc>().state.wallets;
+    print('-------------------wallets------------------');
+    print(wallets[0].toMap());
+    print(wallets[1].toMap());
     if (wallets.isNotEmpty) {
       final w = wallets.where((w) => w.currency.code == "USD");
       if (w.isEmpty) {
@@ -257,6 +270,32 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                           },
                           builder: (context, state) {
                             return ButtonWidget(
+                              onPressed: state is MoneyTransferLoading
+                                  ? null
+                                  : () {
+                                      if (transferFromWalletModel != null &&
+                                          transferToWalletModel != null) {
+                                        context.read<MoneyTransferBloc>().add(
+                                              TransferToWallet(
+                                                fromWalletId:
+                                                    transferFromWalletModel!
+                                                        .walletId,
+                                                toWalletId:
+                                                    transferToWalletModel!
+                                                        .walletId,
+                                                amount: double.tryParse(
+                                                        amountController
+                                                            .text) ??
+                                                    0,
+                                                note: noteController.text,
+                                                reciever:
+                                                    widget.requestId.toString(),
+                                                notificationId:
+                                                    widget.notificationId,
+                                              ),
+                                            );
+                                      }
+                                    },
                               child: state is MoneyTransferLoading
                                   ? const LoadingWidget()
                                   : const TextWidget(
@@ -264,24 +303,6 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                                       type: TextType.small,
                                       color: Colors.white,
                                     ),
-                              onPressed: () {
-                                if (transferFromWalletModel != null &&
-                                    transferToWalletModel != null) {
-                                  context.read<MoneyTransferBloc>().add(
-                                        TransferToWallet(
-                                          fromWalletId:
-                                              transferFromWalletModel!.walletId,
-                                          toWalletId:
-                                              transferToWalletModel!.walletId,
-                                          amount: double.tryParse(
-                                                  amountController.text) ??
-                                              0,
-                                          note: noteController.text,
-                                          reciever: widget.requestId.toString(),
-                                        ),
-                                      );
-                                }
-                              },
                             );
                           },
                         ),

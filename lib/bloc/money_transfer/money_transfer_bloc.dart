@@ -103,6 +103,7 @@ class MoneyTransferBloc extends Bloc<MoneyTransferEvent, MoneyTransferState> {
           toWalletId: event.toWalletId,
           amount: event.amount,
           requestId: event.reciever,
+          notificationId: event.notificationId,
           note: event.note,
         );
         if (res.containsKey('error')) {

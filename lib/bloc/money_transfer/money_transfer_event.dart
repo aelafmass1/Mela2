@@ -20,13 +20,16 @@ final class TransferToWallet extends MoneyTransferEvent {
   final double amount;
   final String note;
   final String? reciever;
+  final int? notificationId;
 
-  TransferToWallet(
-      {required this.fromWalletId,
-      required this.toWalletId,
-      required this.amount,
-      required this.note,
-      this.reciever});
+  TransferToWallet({
+    required this.fromWalletId,
+    required this.toWalletId,
+    required this.amount,
+    required this.note,
+    this.reciever,
+    this.notificationId,
+  });
 }
 
 final class TransferToUnregisteredUser extends MoneyTransferEvent {

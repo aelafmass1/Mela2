@@ -151,7 +151,7 @@ class MyAppRouter {
             ),
           ),
           GoRoute(
-            path: 'receipt', 
+            path: 'receipt',
             name: RouteName.receipt,
             builder: (context, state) => ReceiptScreen(
               receiverInfo: state.extra as ReceiverInfo,
@@ -194,12 +194,17 @@ class MyAppRouter {
             builder: (context, state) => const NotificationScreen(),
           ),
           GoRoute(
-            path: 'money_request_detail',
-            name: RouteName.moneyRequestDetail,
-            builder: (context, state) => MoneyRequestDetailScreen(
-              requestId: state.extra as int,
-            ),
-          ),
+              path: 'money_request_detail',
+              name: RouteName.moneyRequestDetail,
+              builder: (context, state) {
+                final extra = state.extra as Map<String, int>;
+                final requestId = extra['requestId']!;
+                final notificationId = extra['notificationId']!;
+                return MoneyRequestDetailScreen(
+                  requestId: requestId,
+                  notificationId: notificationId,
+                );
+              }),
         ],
       ),
       GoRoute(

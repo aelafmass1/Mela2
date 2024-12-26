@@ -67,6 +67,8 @@ class NotificationRepository {
         'Content-Type': 'application/json',
       },
     );
+    print('----------------------res notification---------------');
+    print(res.body);
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 204) {
       return data;
