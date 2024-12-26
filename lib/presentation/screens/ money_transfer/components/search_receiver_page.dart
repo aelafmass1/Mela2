@@ -47,6 +47,7 @@ class _SearchReceiverPageState extends State<SearchReceiverPage> {
   Future<void> _checkPermissions() async {
     isPermissionDenied = await fetchContacts(context, isWeb: kIsWeb);
     if (mounted) {
+      context.read<ContactBloc>().add(RefreshContacts());
       setState(() {});
     }
   }

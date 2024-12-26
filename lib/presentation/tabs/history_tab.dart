@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:transaction_mobile_app/bloc/contact/contact_bloc.dart';
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
-import 'package:transaction_mobile_app/core/utils/contact_utils.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/wallet_transaction_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
@@ -26,12 +25,6 @@ class _HistoryTabState extends State<HistoryTab> {
 
   @override
   void initState() {
-    final state = context.read<WalletTransactionBloc>().state;
-
-    if (state is! WalletTransactionSuccess) {
-      fetchContacts(context);
-    }
-
     final contactState = context.read<ContactBloc>().state;
     if (contactState is ContactInitial) {}
     super.initState();
