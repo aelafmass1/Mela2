@@ -5,8 +5,9 @@ String formatTime(DateTime date) {
     // Format the DateTime object into a string
     final DateFormat formatter =
         DateFormat.jm(); // 'jm' gives us the "hh:mm AM/PM" format
+    final DateTime localDate = date.toLocal();
 
-    return formatter.format(date);
+    return formatter.format(localDate);
   } catch (e) {
     return '';
   }

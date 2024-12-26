@@ -16,9 +16,11 @@ import 'parse_title.dart';
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
   final cardTitle;
+  final cardTitleColor;
   final buttonTitle;
   final cardIcon;
   final VoidCallback? onCardTap;
+  final buttonColor;
 
   const NotificationCard({
     required this.notification,
@@ -26,6 +28,8 @@ class NotificationCard extends StatelessWidget {
     required this.buttonTitle,
     required this.cardIcon,
     this.onCardTap,
+    this.buttonColor = ColorName.yellow,
+    this.cardTitleColor,
     super.key,
   });
 
@@ -83,7 +87,7 @@ class NotificationCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               BuildTitleButton(
-                color: ColorName.yellow,
+                color: buttonColor,
                 text: buttonTitle,
                 onPressed: onCardTap ?? () {},
               )

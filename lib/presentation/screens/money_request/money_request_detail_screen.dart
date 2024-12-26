@@ -86,10 +86,14 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                         context
                             .read<NotificationBloc>()
                             .add(FetchNotifications());
+                        showSnackbar(
+                          context,
+                          description: 'Money request rejected successfully',
+                        );
                         context.pop();
                         context.pop();
                       } else if (state is RejectMoneyRequestFail) {
-                        context.pop();
+                        // context.pop();
                         showSnackbar(
                           context,
                           description: state.reason,
@@ -243,6 +247,10 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                               context
                                   .read<NotificationBloc>()
                                   .add(FetchNotifications());
+                              showSnackbar(
+                                context,
+                                description: 'Money transfered successfully',
+                              );
                             } else if (state is MoneyTransferFail) {
                               showSnackbar(context, description: state.reason);
                             }
@@ -269,6 +277,7 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
                                                   amountController.text) ??
                                               0,
                                           note: noteController.text,
+                                          reciever: widget.requestId.toString(),
                                         ),
                                       );
                                 }
@@ -639,7 +648,7 @@ class _MoneyRequestDetailScreenState extends State<MoneyRequestDetailScreen> {
             children: [
               TextWidget(
                 text:
-                    "${request.recipientId.firstName ?? ''} ${request.recipientId.lastName ?? ''}",
+                    "${request.requesterWalletId.holder?.firstName ?? ''} ${request.requesterWalletId.holder?.lastName ?? ''}",
                 fontSize: 16,
               ),
               const SizedBox(width: 5),

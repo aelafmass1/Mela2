@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/screens/notification/components/notification_tile.dart';
@@ -65,7 +66,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
           } else if (state is FetchNotificationsSuccess) {
             if (state.notifications.isEmpty) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: middleSize,
+                  vertical: middleSize,
+                ),
                 child: Column(
                   children: [
                     Padding(
@@ -87,6 +91,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   itemCount: state.notifications.length,
                   itemBuilder: (context, index) {
                     return CardWidget(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: middleSize, vertical: middleSize),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: middleSize, vertical: tinySize),
                       child: NotificationTile(
                         notification: state.notifications[index],
                       ),

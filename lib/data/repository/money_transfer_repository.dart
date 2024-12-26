@@ -66,6 +66,7 @@ class MoneyTransferRepository {
     required int fromWalletId,
     required int toWalletId,
     required double amount,
+    required String? requestId,
     required String note,
   }) async {
     try {
@@ -81,10 +82,12 @@ class MoneyTransferRepository {
           "fromWalletId": fromWalletId,
           "toWalletId": toWalletId,
           "amount": amount,
+          "requestId": requestId,
           "note": note,
         }),
       );
-
+      print('----------------------reseponse transfer----------------------');
+      print(res.body);
       final data = jsonDecode(res.body);
 
       if (res.statusCode == 200 || res.statusCode == 201) {

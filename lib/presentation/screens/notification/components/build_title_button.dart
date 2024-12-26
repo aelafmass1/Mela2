@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transaction_mobile_app/core/utils/ui_helpers.dart';
 
 import '../../../../gen/colors.gen.dart';
 import '../../../widgets/button_widget.dart';
@@ -19,8 +20,8 @@ class BuildTitleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 64,
-      height: 25,
+      width: largeMedium,
+      height: mediumSize,
       child: ButtonWidget(
         topPadding: 0,
         verticalPadding: 0,
@@ -31,7 +32,7 @@ class BuildTitleButton extends StatelessWidget {
         child: TextWidget(
           text: text,
           color: ColorName.white,
-          fontSize: 10,
+          fontSize: smallSize,
         ),
       ),
     );
