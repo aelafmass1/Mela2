@@ -24,7 +24,6 @@ class WalletTransactionTile extends StatefulWidget {
 class _WalletTransactionTileState extends State<WalletTransactionTile> {
   @override
   initState() {
-    fetchContacts(context);
     super.initState();
   }
 

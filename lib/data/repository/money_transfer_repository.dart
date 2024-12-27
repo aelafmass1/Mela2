@@ -42,15 +42,13 @@ class MoneyTransferRepository {
         "amount": receiverInfo.amount,
         "serviceChargePayer": receiverInfo.serviceChargePayer,
         "paymentType": receiverInfo.paymentType,
-        "publicToken": receiverInfo.publicToken ?? '',
-        "paymentIntentId": paymentId,
         "savedPaymentId": savedPaymentId,
       }),
     );
 
-    String data = res.body;
+    final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
-      return {'success': data};
+      return data;
     }
     return processErrorResponse(data);
   }
@@ -99,10 +97,10 @@ class MoneyTransferRepository {
 
   Future<Map> transferToUnregisteredUser({
     required String accessToken,
-      required int senderWalletId,
-      required String recipientPhoneNumber,
-      required double amount,
-     }) async {
+    required int senderWalletId,
+    required String recipientPhoneNumber,
+    required double amount,
+  }) async {
     final res = await client.post(
       Uri.parse(
         '$baseUrl/api/wallet/transfer/unregistered',
@@ -147,21 +145,21 @@ class MoneyTransferRepository {
         "amount": amount,
         "note": note
       }),
-    ); 
+    );
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
     return processErrorResponse(data);
   }
-  
+
   Future<Map> requestMoneyToUnregisteredUser({
     required int requesterWalletId,
     required double amount,
     required String note,
     required String recipientPhoneNumber,
   }) async {
-     final token = await getToken();
+    final token = await getToken();
     final res = await client.post(
       Uri.parse(
         '$baseUrl/api/wallet/request-money/unregistered',
@@ -176,7 +174,7 @@ class MoneyTransferRepository {
         "amount": amount,
         "note": note
       }),
-    ); 
+    );
     final data = jsonDecode(res.body);
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;

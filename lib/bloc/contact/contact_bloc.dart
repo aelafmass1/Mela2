@@ -19,6 +19,7 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
   ContactBloc({required this.repository}) : super(const ContactInitial()) {
     on<FetchContacts>(_onFetchContacts);
     on<SearchContacts>(_onSearchContacts);
+    on<RefreshContacts>(_onRefreshContacts);
   }
 
   _onFetchContacts(FetchContacts event, Emitter emit) async {
@@ -151,5 +152,14 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  _onRefreshContacts(RefreshContacts event, Emitter emit) {
+    emit(
+      ContactFilterSuccess(
+          filteredContacts: state.localContacs,
+          localContacs: state.localContacs,
+          remoteContacts: state.remoteContacts),
+    );
   }
 }

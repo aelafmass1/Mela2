@@ -45,6 +45,8 @@ final class ContactFilterSuccess extends ContactState {
       {required this.filteredContacts,
       super.remoteContacts,
       super.localContacs});
+  @override
+  List<Object> get props => [filteredContacts];
 }
 
 final class ContactFilterFailed extends ContactState {

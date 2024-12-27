@@ -9,3 +9,5 @@ final class SearchContacts extends ContactEvent {
 }
 
 final class FetchContacts extends ContactEvent {}
+
+final class RefreshContacts extends ContactEvent {}
