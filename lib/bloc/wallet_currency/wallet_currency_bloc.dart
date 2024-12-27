@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
 
-import '../../core/utils/settings.dart';
-
 part 'wallet_currency_event.dart';
 part 'wallet_currency_state.dart';
 
@@ -19,10 +17,7 @@ class WalletCurrencyBloc
         emit(
           FetchWalletCurrencyLoading(),
         );
-        final accessToken = await getToken();
-        final res = await repository.fetchWalletCurrencies(
-          accessToken: accessToken ?? '',
-        );
+        final res = await repository.fetchWalletCurrencies();
         if (res.containsKey('error')) {
           return emit(
             FetchWalletCurrencyFail(reason: res['error']),

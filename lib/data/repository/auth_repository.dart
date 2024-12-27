@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
+import 'package:transaction_mobile_app/data/services/error_helper.dart';
 
 class AuthRepository {
   Dio client;
-  AuthRepository({required this.client});
+  IErrorHandler errorHandler;
+  AuthRepository({required this.client, required this.errorHandler});
 
   /// Registers a new user with the provided [UserModel] data.
   ///
@@ -22,14 +24,12 @@ class AuthRepository {
   /// Returns:
   /// A [Map] containing the response data or an error message.
   Future<Map> registerUser(UserModel user) async {
-    final res = await client.post('/auth/register', data: user.toJson());
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post('/auth/register', data: user.toJson());
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data;
       return data;
-    }
-
-    return processErrorResponse(data);
+    });
   }
 
   /// Logs in a user with the provided phone number, country code, and password.
@@ -53,22 +53,20 @@ class AuthRepository {
     required int countryCode,
     required String password,
   }) async {
-    final res = await client.post(
-      "/auth/login",
-      data: {
-        "countryCode": countryCode,
-        "phoneNumber": phoneNumber,
-        "password": password,
-        "phoneNumberLogin": true,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        "/auth/login",
+        data: {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "password": password,
+          "phoneNumberLogin": true,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data;
       return data;
-    }
-
-    return processErrorResponse(data);
+    });
   }
 
   /// Logs in a user with the provided pin code, phone number, and country code.
@@ -92,50 +90,47 @@ class AuthRepository {
     required int phoneNumber,
     required int countryCode,
   }) async {
-    final res = await client.post(
-      '/auth/login-by-pin',
-      data: {
-        "countryCode": countryCode,
-        "phoneNumber": phoneNumber,
-        "pin": pincode,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/login-by-pin',
+        data: {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "pin": pincode,
+        },
+      );
 
-    final data = res.data as Map;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data as Map;
       return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   Future<Map> setPincode(String pincode) async {
-    final res = await client.post(
-      '/auth/set-pin',
-      data: {
-        "pin": pincode,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/set-pin',
+        data: {
+          "pin": pincode,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data;
       return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   Future<Map> verfiyPincode(String pincode) async {
-    final res = await client.post(
-      '/auth/confirm-pin',
-      data: {
-        "pin": pincode,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/confirm-pin',
+        data: {
+          "pin": pincode,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data;
       return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   /// Sends an OTP (One-Time Password) to the specified phone number and country code.
@@ -217,24 +212,25 @@ class AuthRepository {
     required String code,
     required int countryCode,
   }) async {
-    final res = await client.post(
-      '/auth/phone/verify-otp',
-      data: {
-        "countryCode": countryCode,
-        "phoneNumber": phoneNumber,
-        "code": code,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/phone/verify-otp',
+        data: {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "code": code,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data['status'] == 'error') {
-        return {'error': data['message']};
-      } else {
-        return data;
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data['status'] == 'error') {
+          return {'error': data['message']};
+        } else {
+          return data;
+        }
       }
-    }
-    return processErrorResponse(data);
+    });
   }
 
   /// Sends an OTP (One-Time Password) to the provided phone number for password reset.
@@ -252,28 +248,29 @@ class AuthRepository {
   /// A `Future<Map>` containing the response data or an error message.
   Future<Map> sendOtpForPasswordReset(
       int phoneNumber, int countryCode, String signature) async {
-    final res = await client.post(
-      '/auth/password/forgot/request-otp',
-      data: {
-        "countryCode": countryCode,
-        "phoneNumber": phoneNumber,
-        "signature": signature,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/password/forgot/request-otp',
+        data: {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "signature": signature,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data.containsKey('status')) {
-        if (data['message'] == 'Failed to send SMS.') {
-          return {'error': 'Failed to send SMS'};
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data.containsKey('status')) {
+          if (data['message'] == 'Failed to send SMS.') {
+            return {'error': 'Failed to send SMS'};
+          }
+          if (data['status'] == 'error') {
+            return processErrorResponse(data);
+          }
         }
-        if (data['status'] == 'error') {
-          return processErrorResponse(data);
-        }
+        return data;
       }
-      return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   /// Sends an OTP (One-Time Password) to the provided phone number for pincode reset.
@@ -295,28 +292,30 @@ class AuthRepository {
     String signature,
     String accessToken,
   ) async {
-    final res = await client.post(
-      '/auth/pin/forgot/request-otp',
-      data: {
-        "countryCode": countryCode,
-        "phoneNumber": phoneNumber,
-        "signature": signature,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/pin/forgot/request-otp',
+        data: {
+          "countryCode": countryCode,
+          "phoneNumber": phoneNumber,
+          "signature": signature,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data.containsKey('status')) {
-        if (data['message'] == 'Failed to send SMS.') {
-          return {'error': 'Failed to send SMS'};
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data.containsKey('status')) {
+          if (data['message'] == 'Failed to send SMS.') {
+            return {'error': 'Failed to send SMS'};
+          }
+          if (data['status'] == 'error') {
+            return processErrorResponse(data);
+          }
         }
-        if (data['status'] == 'error') {
-          return processErrorResponse(data);
-        }
+        return data;
       }
-      return data;
-    }
-    return processErrorResponse(data);
+      return processErrorResponse(data);
+    });
   }
 
   /// Resets the user's password by sending an OTP and allowing the user to set a new password.
@@ -336,22 +335,23 @@ class AuthRepository {
     required int countryCode,
     required String newPassword,
   }) async {
-    final res = await client.post('/auth/password/forgot/reset', data: {
-      "countryCode": countryCode,
-      "phoneNumber": phoneNumber,
-      "otpCode": otp,
-      "newPassword": newPassword,
-    });
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post('/auth/password/forgot/reset', data: {
+        "countryCode": countryCode,
+        "phoneNumber": phoneNumber,
+        "otpCode": otp,
+        "newPassword": newPassword,
+      });
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data['status'] == 'error') {
-        return {'error': data['message']};
-      } else {
-        return data;
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data['status'] == 'error') {
+          return {'error': data['message']};
+        } else {
+          return data;
+        }
       }
-    }
-    return processErrorResponse(data);
+    });
   }
 
   /// Resets the user's pincode by sending an OTP and allowing the user to set a new pincode.
@@ -371,22 +371,23 @@ class AuthRepository {
     required int countryCode,
     required String newPincode,
   }) async {
-    final res = await client.post('/auth/pin/forgot/reset', data: {
-      "countryCode": countryCode,
-      "phoneNumber": phoneNumber,
-      "otpCode": otp,
-      "newPin": newPincode
-    });
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post('/auth/pin/forgot/reset', data: {
+        "countryCode": countryCode,
+        "phoneNumber": phoneNumber,
+        "otpCode": otp,
+        "newPin": newPincode
+      });
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      if (data['status'] == 'error') {
-        return {'error': data['message']};
-      } else {
-        return data;
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (data['status'] == 'error') {
+          return {'error': data['message']};
+        } else {
+          return data;
+        }
       }
-    }
-    return processErrorResponse(data);
+    });
   }
 
   /// Deletes the current user's account.
@@ -397,43 +398,41 @@ class AuthRepository {
   ///
   /// The method uses the `http` package to make the DELETE request and the `jsonDecode` function to parse the response body.
   Future<Map> deleteUser() async {
-    final res = await client.delete(
-      '/user/me/delete',
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.delete(
+        '/user/me/delete',
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200) {
+      final data = res.data;
       return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   Future<Map> checkEmailExists(String email) async {
-    final res = await client.post(
-      '/auth/email/exists?email=$email',
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/auth/email/exists?email=$email',
+      );
 
-    final data = res.data;
+      final data = res.data;
 
-    if (res.statusCode == 200) {
-      if (data['message'] == 'Email already exists.') {
-        return processErrorResponse(data);
+      if (res.statusCode == 200) {
+        if (data['message'] == 'Email already exists.') {
+          return processErrorResponse(data);
+        }
+        return data;
       }
-      return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   Future<Map> fetchMe() async {
-    final res = await client.get(
-      '/user/me',
-    );
-    final data = res.data;
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.get(
+        '/user/me',
+      );
+      final data = res.data;
 
-    if (res.statusCode == 200) {
       return data;
-    }
-
-    return processErrorResponse(data);
+    });
   }
 }

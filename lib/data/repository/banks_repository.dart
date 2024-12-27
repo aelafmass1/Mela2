@@ -1,27 +1,26 @@
 import 'package:dio/dio.dart';
-import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+import 'package:transaction_mobile_app/data/services/error_helper.dart';
 
 class BanksRepository {
   final Dio client;
-  BanksRepository({required this.client});
+  final IErrorHandler errorHandler;
+  BanksRepository({required this.client, required this.errorHandler});
 
   Future<List> fetchBanks() async {
-    final res = await client.get('/api/v1/banks');
+    return await errorHandler.withErrorHandler<List>(() async {
+      final res = await client.get('/api/v1/banks');
 
-    final data = res.data as List;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data as List;
       return data;
-    }
-    return [processErrorResponse(data)];
+    });
   }
 
   Future<List> fetchBankFee() async {
-    final res = await client.get('/api/fees/payment-method/all');
+    return await errorHandler.withErrorHandler<List>(() async {
+      final res = await client.get('/api/fees/payment-method/all');
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = res.data;
       return data;
-    }
-    return [processErrorResponse(data)];
+    });
   }
 }

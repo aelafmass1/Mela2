@@ -2,11 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
+import 'package:transaction_mobile_app/data/services/error_helper.dart';
 
 class MoneyTransferRepository {
   final Dio client;
+  final IErrorHandler errorHandler;
 
-  MoneyTransferRepository({required this.client});
+  MoneyTransferRepository({required this.client, required this.errorHandler});
 
   /// Sends money to a receiver using the provided information.
   ///
@@ -21,25 +23,28 @@ class MoneyTransferRepository {
     required String paymentId,
     required String savedPaymentId,
   }) async {
-    final res = await client.post(
-      '/api/v1/money-transfer/send',
-      data: {
-        "receiverName": receiverInfo.receiverName,
-        "receiverPhoneNumber": receiverInfo.receiverPhoneNumber,
-        "receiverBankName": receiverInfo.receiverBankName,
-        "receiverAccountNumber": receiverInfo.receiverAccountNumber,
-        "amount": receiverInfo.amount,
-        "serviceChargePayer": receiverInfo.serviceChargePayer,
-        "paymentType": receiverInfo.paymentType,
-        "savedPaymentId": savedPaymentId,
-      },
-    );
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(
+        '/api/v1/money-transfer/send',
+        data: {
+          "receiverName": receiverInfo.receiverName,
+          "receiverPhoneNumber": receiverInfo.receiverPhoneNumber,
+          "receiverBankName": receiverInfo.receiverBankName,
+          "receiverAccountNumber": receiverInfo.receiverAccountNumber,
+          "amount": receiverInfo.amount,
+          "serviceChargePayer": receiverInfo.serviceChargePayer,
+          "paymentType": receiverInfo.paymentType,
+          "paymentId": paymentId,
+          "savedPaymentId": savedPaymentId,
+        },
+      );
 
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      return data['successResponse'];
-    }
-    return processErrorResponse(data);
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return data['successResponse'];
+      }
+      return processErrorResponse(data);
+    });
   }
 
   /// Transfers money between own wallets
@@ -56,14 +61,42 @@ class MoneyTransferRepository {
     required double amount,
     required String note,
   }) async {
-    try {
+    return await errorHandler.withErrorHandler<Map>(() async {
+      try {
+        final res = await client.post(
+          '/api/wallet/transfer',
+          data: {
+            "fromWalletId": fromWalletId,
+            "toWalletId": toWalletId,
+            "amount": amount,
+            "note": note,
+          },
+        );
+
+        final data = res.data;
+
+        if (res.statusCode == 200 || res.statusCode == 201) {
+          return data;
+        }
+        return processErrorResponse(data);
+      } catch (error) {
+        throw Exception(error);
+      }
+    });
+  }
+
+  Future<Map> transferToUnregisteredUser({
+    required int senderWalletId,
+    required String recipientPhoneNumber,
+    required double amount,
+  }) async {
+    return await errorHandler.withErrorHandler<Map>(() async {
       final res = await client.post(
-        '/api/wallet/transfer',
+        '/api/wallet/transfer/unregistered',
         data: {
-          "fromWalletId": fromWalletId,
-          "toWalletId": toWalletId,
+          "senderWalletId": senderWalletId,
+          "recipientPhoneNumber": recipientPhoneNumber,
           "amount": amount,
-          "note": note,
         },
       );
 
@@ -73,31 +106,7 @@ class MoneyTransferRepository {
         return data;
       }
       return processErrorResponse(data);
-    } catch (error) {
-      throw Exception(error);
-    }
-  }
-
-  Future<Map> transferToUnregisteredUser({
-    required int senderWalletId,
-    required String recipientPhoneNumber,
-    required double amount,
-  }) async {
-    final res = await client.post(
-      '/api/wallet/transfer/unregistered',
-      data: {
-        "senderWalletId": senderWalletId,
-        "recipientPhoneNumber": recipientPhoneNumber,
-        "amount": amount,
-      },
-    );
-
-    final data = res.data;
-
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      return data;
-    }
-    return processErrorResponse(data);
+    });
   }
 
   Future<Map> requestMoney({
@@ -106,17 +115,19 @@ class MoneyTransferRepository {
     required String note,
     required int userId,
   }) async {
-    final res = await client.post(requestMoneyUrl, data: {
-      "requesterWalletId": requesterWalletId,
-      "recipientId": userId,
-      "amount": amount,
-      "note": note
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post(requestMoneyUrl, data: {
+        "requesterWalletId": requesterWalletId,
+        "recipientId": userId,
+        "amount": amount,
+        "note": note
+      });
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return data;
+      }
+      return processErrorResponse(data);
     });
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      return data;
-    }
-    return processErrorResponse(data);
   }
 
   Future<Map> requestMoneyToUnregisteredUser({
@@ -125,41 +136,47 @@ class MoneyTransferRepository {
     required String note,
     required String recipientPhoneNumber,
   }) async {
-    final res =
-        await client.post('/api/wallet/request-money/unregistered', data: {
-      "requesterWalletId": requesterWalletId,
-      "recipientPhoneNumber": recipientPhoneNumber,
-      "amount": amount,
-      "note": note
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res =
+          await client.post('/api/wallet/request-money/unregistered', data: {
+        "requesterWalletId": requesterWalletId,
+        "recipientPhoneNumber": recipientPhoneNumber,
+        "amount": amount,
+        "note": note
+      });
+      final data = res.data;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return data;
+      }
+      return processErrorResponse(data);
     });
-    final data = res.data;
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      return data;
-    }
-    return processErrorResponse(data);
   }
 
   Future<Map> fetchRequestMoneyDetail({
     required int requestId,
   }) async {
-    final res = await client.get(
-      '$fetchRequestMoneyDetailUrl$requestId',
-    );
-    final data = res.data;
-    if (res.statusCode == 200) {
-      return data;
-    }
-    return processErrorResponse(data);
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.get(
+        '$fetchRequestMoneyDetailUrl$requestId',
+      );
+      final data = res.data;
+      if (res.statusCode == 200) {
+        return data;
+      }
+      return processErrorResponse(data);
+    });
   }
 
   Future<Map> rejectRequestMoney({
     required int requestId,
   }) async {
-    final res = await client.post('$rejectRequestMoneyUrl$requestId');
-    final data = res.data;
-    if (res.statusCode == 200) {
-      return data;
-    }
-    return processErrorResponse(data);
+    return await errorHandler.withErrorHandler<Map>(() async {
+      final res = await client.post('$rejectRequestMoneyUrl$requestId');
+      final data = res.data;
+      if (res.statusCode == 200) {
+        return data;
+      }
+      return processErrorResponse(data);
+    });
   }
 }

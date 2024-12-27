@@ -46,6 +46,7 @@ import 'package:transaction_mobile_app/data/repository/payment_card_repository.d
 import 'package:transaction_mobile_app/data/repository/plaid_repository.dart';
 import 'package:transaction_mobile_app/data/repository/transaction_repository.dart';
 import 'package:transaction_mobile_app/data/repository/wallet_repository.dart';
+import 'package:transaction_mobile_app/data/services/error_helper.dart';
 import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 import 'package:transaction_mobile_app/data/services/tokenHandler/token_handler.dart';
 import 'package:transaction_mobile_app/firebase_options.dart';
@@ -140,6 +141,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   late ITokenHandler tokenHandler;
   late Dio client;
+  late IErrorHandler errorHandler;
 
   late AuthRepository authRepo;
   late BanksRepository banksRepository;
@@ -158,20 +160,31 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   void initState() {
     tokenHandler = TokenHandler(storage: const FlutterSecureStorage());
     client = ApiService(tokenHandler).client;
+    errorHandler = ErrorHandler();
 
-    authRepo = AuthRepository(client: client);
-    banksRepository = BanksRepository(client: client);
-    contactRepository = ContactRepositoryImpl(client: client);
-    currencyRateRepository = CurrencyRateRepository(client: client);
-    currencyRepository = CurrencyRepository(client: client);
-    equbRepository = EqubRepository(client: client);
-    feeRepository = FeeRepository(client: client);
-    moneyTransferRepository = MoneyTransferRepository(client: client);
-    paymentCardRepository = PaymentCardRepository(client: client);
-    plaidRepository = PlaidRepository(client: client);
-    transactionRepository = TransactionRepository(client: client);
-    walletRepository = WalletRepository(client: client);
-    notificationRepository = NotificationRepository(client: client);
+    authRepo = AuthRepository(client: client, errorHandler: errorHandler);
+    banksRepository =
+        BanksRepository(client: client, errorHandler: errorHandler);
+    contactRepository =
+        ContactRepositoryImpl(client: client, errorHandler: errorHandler);
+    currencyRateRepository =
+        CurrencyRateRepository(client: client, errorHandler: errorHandler);
+    currencyRepository =
+        CurrencyRepository(client: client, errorHandler: errorHandler);
+    equbRepository = EqubRepository(client: client, errorHandler: errorHandler);
+    feeRepository = FeeRepository(client: client, errorHandler: errorHandler);
+    moneyTransferRepository =
+        MoneyTransferRepository(client: client, errorHandler: errorHandler);
+    paymentCardRepository =
+        PaymentCardRepository(client: client, errorHandler: errorHandler);
+    plaidRepository =
+        PlaidRepository(client: client, errorHandler: errorHandler);
+    transactionRepository =
+        TransactionRepository(client: client, errorHandler: errorHandler);
+    walletRepository =
+        WalletRepository(client: client, errorHandler: errorHandler);
+    notificationRepository =
+        NotificationRepository(client: client, errorHandler: errorHandler);
     super.initState();
   }
 
