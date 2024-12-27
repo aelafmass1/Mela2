@@ -300,7 +300,6 @@ class _LoginBottomSheetPageState extends State<LoginBottomSheetPage> {
                         if (state is LoginUserFail) {
                           showSnackbar(
                             context,
-                            title: 'Error',
                             description: state.reason,
                           );
                         } else if (state is LoginUserSuccess) {

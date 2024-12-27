@@ -1,13 +1,1 @@
-{
-  "hosting": {
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-central1"
-    }
-  }
-}
+{"hosting":{"source":".","ignore":["firebase.json","**/.*","**/node_modules/**"],"frameworksBackend":{"region":"us-central1"}},"flutter":{"platforms":{"android":{"default":{"projectId":"mela-finance","appId":"1:997344617329:android:77f3ece5eb42ad2866ccd0","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"mela-finance","appId":"1:997344617329:ios:4e93d18099cf31d166ccd0","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"mela-finance","appId":"1:997344617329:ios:83e03f847df184a966ccd0","uploadDebugSymbols":true,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"mela-finance","configurations":{"android":"1:997344617329:android:77f3ece5eb42ad2866ccd0","ios":"1:997344617329:ios:4e93d18099cf31d166ccd0","macos":"1:997344617329:ios:83e03f847df184a966ccd0","web":"1:997344617329:web:1afdad80defe2ade66ccd0","windows":"1:997344617329:web:3bcb81a36424837f66ccd0"}}}}}}

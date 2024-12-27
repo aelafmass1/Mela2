@@ -63,6 +63,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       formKey.currentState?.validate();
     });
   }
+  bool showPassword = false;
+  bool showConfirmPassword = false;
 
   @override
   void dispose() {
@@ -288,6 +290,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           debounceValidation(password1Key);
                         },
                         globalKey: password1Key,
+                        obscurePassword: !showPassword,
+                        suffix: IconButton(
+                          icon: Icon(
+                            showPassword
+                                ? Icons.remove_red_eye
+                                : Icons.remove_red_eye_outlined,
+                            color: ColorName.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              showPassword = !showPassword;
+                            });
+                          },
+                        ),
                         validator: (password) {
                           if (password!.isEmpty) {
                             return 'password is empty';
@@ -305,6 +321,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         text: 'Confirm Password',
                         fontSize: 12,
                         weight: FontWeight.w400,
+                      
                       ),
                       const SizedBox(height: 5),
                       TextFieldWidget(
@@ -325,7 +342,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           return null;
                         },
                         controller: password2Controller,
+                        obscurePassword: !showConfirmPassword,
                         hintText: 'Confirm your password',
+                         suffix: IconButton(
+                           icon: Icon(
+                             showConfirmPassword
+                                 ? Icons.remove_red_eye
+                                 : Icons.remove_red_eye_outlined,
+                             color: ColorName.grey,
+                           ),
+                           onPressed: () {
+                             setState(() {
+                               showConfirmPassword = !showConfirmPassword;
+                             });
+                           },
+                         ),
                       ),
 
                       const SizedBox(height: 20),

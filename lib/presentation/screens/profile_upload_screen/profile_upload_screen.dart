@@ -150,7 +150,7 @@ class _ProfileUploadScreenState extends State<ProfileUploadScreen> {
                     },
                     builder: (context, state) {
                       return state is UploadProfileLoading
-                          ? LoadingWidget()
+                          ? const LoadingWidget()
                           : TextWidget(
                               text: profilePicture == null
                                   ? 'Upload profile'

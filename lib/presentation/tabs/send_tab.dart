@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -9,10 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -20,24 +21,27 @@ import 'package:transaction_mobile_app/bloc/bank_fee/bank_fee_bloc.dart';
 import 'package:transaction_mobile_app/bloc/banks/banks_bloc.dart';
 import 'package:transaction_mobile_app/bloc/money_transfer/money_transfer_bloc.dart';
 import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
-import 'package:transaction_mobile_app/bloc/payment_intent/payment_intent_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
+import 'package:transaction_mobile_app/presentation/screens/%20money_transfer/utils/show_money_receiver_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
-import 'package:transaction_mobile_app/presentation/widgets/payment_card_selection.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_field_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
+import '../../bloc/check-details-bloc/check_details_bloc.dart';
 import '../../bloc/currency/currency_bloc.dart';
 import '../../bloc/fee/fee_bloc.dart';
 import '../../bloc/navigation/navigation_bloc.dart';
 import '../../bloc/plaid/plaid_bloc.dart';
+import '../../bloc/wallet/wallet_bloc.dart';
 import '../../config/routing.dart';
+import '../../data/models/payment_card_model.dart';
+import '../screens/add_money_screen/components/add_payment_method_widget.dart';
 import '../widgets/custom_shimmer.dart';
 
 class SentTab extends StatefulWidget {
@@ -52,26 +56,27 @@ class _SentTabState extends State<SentTab> {
   String selectedBanks = '';
 
   double sliderWidth = 0;
-  double contactListHeight = 250;
 
-  bool isSearching = false;
-  bool showBorder = true;
   bool isPermissionDenied = false;
+  bool isScrolledDown = false;
 
-  int selectedPaymentMethodIndex = 0;
+  int selectedPaymentMethodIndex = -1;
 
   String whoPayFee = 'SENDER';
   String selectedBank = '';
+  String selectedPaymentCardId = '';
+  String fromCurrency = 'USD';
+  String toCurrency = 'ETB';
 
-  List<Contact> contacts = [];
-  List<Contact> filteredContacts = [];
+  List<PaymentCardModel> paymentCards = [];
+  String? selectedPhoneNumber;
+
+  final scrollController = ScrollController();
 
   double exchangeRate = 0;
 
   final _exchangeRateFormKey = GlobalKey<FormState>();
   final _recipientSelectionFormKey = GlobalKey<FormState>();
-
-  Contact? selectedContact;
 
   double percentageFee = 0;
 
@@ -84,7 +89,7 @@ class _SentTabState extends State<SentTab> {
 
   ReceiverInfo? receiverInfo;
 
-  LinkTokenConfiguration? _configuration;
+  // LinkTokenConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
@@ -95,15 +100,8 @@ class _SentTabState extends State<SentTab> {
     _streamEvent?.cancel();
     _streamExit?.cancel();
     _streamSuccess?.cancel();
+    scrollController.dispose();
     super.dispose();
-  }
-
-  void _createLinkTokenConfiguration(String linkToken) {
-    setState(() {
-      _configuration = LinkTokenConfiguration(
-        token: linkToken,
-      );
-    });
   }
 
   void _onEvent(LinkEvent event) {
@@ -118,14 +116,40 @@ class _SentTabState extends State<SentTab> {
     log("onSuccess: $token, metadata: $metadata");
     setState(() => publicToken = event.publicToken);
     context
-        .read<PlaidBloc>()
-        .add(ExchangePublicToken(publicToken: publicToken!));
+        .read<PaymentCardBloc>()
+        .add(AddBankAccount(publicToken: event.publicToken));
   }
 
   void _onExit(LinkExit event) {
     final metadata = event.metadata.description();
     final error = event.error?.description();
     log("onExit metadata: $metadata, error: $error");
+  }
+
+  _calculateSecondTotalFee(BankFeeSuccess fee) {
+    double totalFee = 0;
+    for (final fee in fee.bankFees) {
+      if (fee.type.contains("PERCENTAGE")) {
+        totalFee +=
+            (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+      } else {
+        totalFee += fee.amount;
+      }
+    }
+    return totalFee;
+  }
+
+  _calculateFirstTotalFee(CheckDetailsLoaded fee) {
+    double totalFee = 0;
+    for (final fee in fee.fees) {
+      if (fee.type!.contains("PERCENTAGE")) {
+        totalFee +=
+            (fee.amount! * (double.tryParse(usdController.text) ?? 0)) / 100;
+      } else {
+        totalFee += fee.amount!;
+      }
+    }
+    return totalFee;
   }
 
   /// Fetches the user's contacts if permission is granted.
@@ -135,31 +159,24 @@ class _SentTabState extends State<SentTab> {
   /// If permission has been asked before and denied, it sets [isPermissionDenied] to true.
   /// If permission has been granted, it fetches contacts and updates the [contacts] list.
   Future<void> _fetchContacts() async {
-    if (kIsWeb) return;
-    if (await isPermissionAsked() == false) {
-      // Permission has not been asked before
-      if (await FlutterContacts.requestPermission(readonly: true)) {
-        List<Contact> c =
-            await FlutterContacts.getContacts(withProperties: true);
-        setState(() {
-          contacts = c;
-        });
-      }
-      checkContactPermission();
+    // if (await isPermissionAsked() == false) {
+    // Permission has not been asked before
+    if (await FlutterContacts.requestPermission(readonly: true)) {
+      setState(() {
+        isPermissionDenied = false;
+      });
     } else {
       // Permission has been asked before
-      if (contacts.isEmpty) {
-        // Permission was denied
-        setState(() {
-          isPermissionDenied = true;
-        });
-      }
+      // Permission was denied
+      setState(() {
+        isPermissionDenied = true;
+      });
+      checkContactPermission();
     }
   }
 
   /// Checks the status of the contact permission and handles different scenarios.
   ///
-  /// If permission is granted, logs a message.
   /// If permission is denied and it's the first time asking, navigates to a permission request screen.
   /// If permission is denied and it's not the first time asking, sets [isPermissionDenied] to true.
   /// If permission is permanently denied, sets [isPermissionDenied] to true and logs a message.
@@ -167,9 +184,7 @@ class _SentTabState extends State<SentTab> {
     // Check if the contact permission is already granted
     PermissionStatus status = await Permission.contacts.status;
 
-    if (status.isGranted) {
-      log("Contact permission granted.");
-    } else if (status.isDenied) {
+    if (status.isDenied) {
       if (await isPermissionAsked() == false) {
         // Permission denied for the first time, navigate to permission request screen
         changePermissionAskedState(true);
@@ -189,120 +204,6 @@ class _SentTabState extends State<SentTab> {
         isPermissionDenied = true;
       });
       log("Contact permission permanently denied.");
-    }
-  }
-
-  /// Displays a payment sheet using the Stripe SDK.
-  ///
-  /// If the payment is successful, it creates a [ReceiverInfo] object and adds a [SendMoney] event to the [MoneyTransferBloc].
-  /// If an error occurs during the payment process, it displays an error message using [showSnackbar].
-  displayPaymentSheet(String clientSecret) async {
-    try {
-      // Display the Stripe payment sheet
-      await Stripe.instance.presentPaymentSheet();
-      final paymentIntent =
-          await Stripe.instance.retrievePaymentIntent(clientSecret);
-
-      // Show a success message if the payment is successful
-      // showSnackbar(
-      //   context,
-      //   title: 'Success',
-      //   description: 'Payment Successful!',
-      // );
-
-      // Get the current user
-      // Create a ReceiverInfo object with the recipient's information
-      // if (await showPincode(context)) {
-      final feeState = context.read<FeeBloc>().state;
-      final bankState = context.read<BankFeeBloc>().state;
-      double totalFee = 0;
-      if (feeState is FeeSuccess && bankState is BankFeeSuccess) {
-        final creditCardAmount = bankState.bankFees
-                .where((bf) => bf.label == 'Credit Card fee')
-                .isEmpty
-            ? 0
-            : bankState.bankFees
-                .where((bf) => bf.label == 'Credit Card fee')
-                .first
-                .amount;
-        final debitCardAmount = bankState.bankFees
-                .where((bf) => bf.label == 'Debit Card fee')
-                .isEmpty
-            ? 0
-            : bankState.bankFees
-                .where((bf) => bf.label == 'Debit Card fee')
-                .first
-                .amount;
-        totalFee = (feeState.fees
-                .where((f) => f.type == 'FIXED')
-                .map((f) => f.amount)
-                .reduce((value, element) => value + element)) +
-            (feeState.fees
-                .where((f) => f.type == 'PERCENTAGE')
-                .map((f) =>
-                    (f.label == 'Service Fee' && whoPayFee == 'RECEIVER')
-                        ? 0
-                        : (((double.tryParse(usdController.text) ?? 0) *
-                            (f.amount / 100))))
-                .reduce((value, element) => value + element)) +
-            (selectedPaymentMethodIndex == 1
-                ? ((double.tryParse(usdController.text) ?? 0) *
-                    (debitCardAmount / 100))
-                : selectedPaymentMethodIndex == 2
-                    ? creditCardAmount
-                    : 0);
-      }
-      receiverInfo = ReceiverInfo(
-        receiverName: receiverName.text,
-        receiverPhoneNumber: isPermissionDenied
-            ? phoneNumberController.text
-            : selectedContact!.phones.first.number,
-        receiverBankName: selectedBank,
-        receiverAccountNumber: bankAcocuntController.text,
-        amount: double.parse(usdController.text) + totalFee,
-        serviceChargePayer: whoPayFee,
-        paymentType:
-            selectedPaymentMethodIndex == 1 ? 'STRIPE_DEBIT' : 'STRIPE_CREDIT',
-      );
-      // Add a SendMoney event to the MoneyTransferBloc to initiate the money transfer
-      context.read<MoneyTransferBloc>().add(
-            SendMoney(
-                receiverInfo: receiverInfo!,
-                paymentId: paymentIntent.id,
-                savedPaymentId: ''),
-          );
-      log(paymentIntent.id);
-      log(receiverInfo.toString());
-      // }
-    } catch (error) {
-      if (error is StripeException) {
-        // Handle StripeException specifically
-        if (error.error.code == FailureCode.Failed &&
-            error.error.stripeErrorCode == 'resource_missing') {
-          // Handle the specific case of a missing payment intent
-          showSnackbar(
-            context,
-            title: 'Error',
-            description: 'Payment intent not found. Please try again.',
-          );
-        } else {
-          // Handle when payment process cancelled
-          showSnackbar(
-            context,
-            title: 'Error',
-            description: 'Payment not proccessed',
-          );
-        }
-      } else {
-        // Handle other errors
-        log(error.toString());
-        showSnackbar(
-          context,
-          title: 'Error',
-          description: '$error',
-        );
-      }
-      log(error.toString());
     }
   }
 
@@ -328,9 +229,15 @@ class _SentTabState extends State<SentTab> {
     }
 
     context.read<CurrencyBloc>().add(FetchAllCurrencies());
-    context.read<FeeBloc>().add(FetchFees());
+    context.read<FeeBloc>().add(FetchRemittanceExchangeRate());
     context.read<PaymentCardBloc>().add(FetchPaymentCards());
     context.read<BanksBloc>().add(FetchBanks());
+    context.read<CheckDetailsBloc>().add(
+          FetchTransferFeeFromCurrencies(
+            toCurrency: toCurrency,
+            fromCurrency: fromCurrency,
+          ),
+        );
 
     super.initState();
   }
@@ -340,14 +247,9 @@ class _SentTabState extends State<SentTab> {
       index = 0;
       selectedBanks = '';
       sliderWidth = 0;
-      contactListHeight = 250;
-      isSearching = false;
-      showBorder = true;
       selectedPaymentMethodIndex = 1;
       whoPayFee = 'SENDER';
       selectedBank = '';
-      contacts = [];
-      filteredContacts = [];
       searchContactController.text = '';
       receiverName.text = '';
       usdController.text = '';
@@ -356,6 +258,33 @@ class _SentTabState extends State<SentTab> {
       receiverInfo = null;
       exchangeRate = 101.98;
     });
+  }
+
+  scrollDown() {
+    Future.delayed(const Duration(milliseconds: 300)).then((v) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  num _getExchangeRate(String fromCurrency, String toCurrency) {
+    final state = context.read<FeeBloc>().state;
+    if (state is RemittanceExchangeRateSuccess) {
+      final exchangeRate = state.walletCurrencies
+          .where((c) =>
+              c.fromCurrency.code == fromCurrency &&
+              c.toCurrency.code == toCurrency)
+          .toList();
+      log('Exchange Rate: $exchangeRate');
+      if (exchangeRate.isNotEmpty) {
+        return exchangeRate.first.rate;
+      }
+    }
+
+    return 1;
   }
 
   @override
@@ -421,9 +350,14 @@ class _SentTabState extends State<SentTab> {
               color: ColorName.primaryColor,
               onRefresh: () async {
                 context.read<CurrencyBloc>().add(FetchAllCurrencies());
-                context.read<FeeBloc>().add(FetchFees());
+                context.read<FeeBloc>().add(FetchRemittanceExchangeRate());
                 context.read<PaymentCardBloc>().add(FetchPaymentCards());
-                context.read<BanksBloc>().add(FetchBanks());
+                context.read<CheckDetailsBloc>().add(
+                      FetchTransferFeeFromCurrencies(
+                        toCurrency: toCurrency,
+                        fromCurrency: fromCurrency,
+                      ),
+                    );
                 await Future.delayed(Durations.extralong1);
               },
               child: SingleChildScrollView(
@@ -723,9 +657,10 @@ class _SentTabState extends State<SentTab> {
                                         )
                                       ],
                                     ),
-                                    BlocBuilder<FeeBloc, FeeState>(
+                                    BlocBuilder<CheckDetailsBloc,
+                                        CheckDetailsState>(
                                       builder: (context, state) {
-                                        if (state is FeeLoading) {
+                                        if (state is CheckDetailsLoading) {
                                           return Column(
                                             children: [
                                               const Divider(
@@ -752,7 +687,7 @@ class _SentTabState extends State<SentTab> {
                                             ],
                                           );
                                         }
-                                        if (state is FeeSuccess) {
+                                        if (state is CheckDetailsLoaded) {
                                           return Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -780,7 +715,8 @@ class _SentTabState extends State<SentTab> {
                                                               children: [
                                                                 TextWidget(
                                                                   text:
-                                                                      fee.label,
+                                                                      fee.label ??
+                                                                          '',
                                                                   color: const Color(
                                                                       0xFF7B7B7B),
                                                                   fontSize: 14,
@@ -797,7 +733,7 @@ class _SentTabState extends State<SentTab> {
                                                                   child:
                                                                       TextWidget(
                                                                     text:
-                                                                        '${fee.amount == fee.amount.toInt() ? fee.amount.toInt() : fee.amount}%',
+                                                                        '${fee.amount == fee.amount?.toInt() ? fee.amount?.toInt() : fee.amount}%',
                                                                     color: Colors
                                                                         .black87,
                                                                     fontSize:
@@ -832,7 +768,7 @@ class _SentTabState extends State<SentTab> {
                                                                         : (fee.label == 'Service Fee' &&
                                                                                 whoPayFee == 'RECEIVER')
                                                                             ? '\$0'
-                                                                            : '\$${((double.tryParse(usdController.text) ?? 0) * (fee.amount / 100)).toStringAsFixed(2)}',
+                                                                            : '\$${((double.tryParse(usdController.text) ?? 0) * ((fee.amount ?? 0) / 100)).toStringAsFixed(2)}',
                                                                     fontSize:
                                                                         14,
                                                                     weight:
@@ -918,14 +854,16 @@ class _SentTabState extends State<SentTab> {
                                             fontSize: 16,
                                             weight: FontWeight.w400,
                                           ),
-                                          BlocBuilder<FeeBloc, FeeState>(
+                                          BlocBuilder<CheckDetailsBloc,
+                                              CheckDetailsState>(
                                             builder: (context, state) {
                                               return Row(
                                                 children: [
-                                                  if (state is FeeSuccess)
+                                                  if (state
+                                                      is CheckDetailsLoaded)
                                                     TextWidget(
                                                       text:
-                                                          '\$${((state.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (state.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element))).toStringAsFixed(2)}',
+                                                          '\$${_calculateFirstTotalFee(state)}',
                                                       fontSize: 16,
                                                       weight: FontWeight.w500,
                                                     )
@@ -1029,204 +967,57 @@ class _SentTabState extends State<SentTab> {
                       hintText: 'Enter phone number',
                       controller: phoneNumberController,
                     ),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      onEnd: () {
-                        if (contactListHeight != 250) {
-                          setState(() {
-                            showBorder = false;
-                          });
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Receiver not selected';
+                        }
+                        return null;
+                      },
+                      onTapOutside: (event) {
+                        if (Platform.isIOS) {
+                          Focus.of(context).unfocus();
                         }
                       },
-                      height: contactListHeight,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          border: showBorder
-                              ? Border.all(
-                                  color: ColorName.borderColor,
-                                )
-                              : null),
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'receiver is selected';
-                              }
-                              return null;
-                            },
-                            onChanged: (text) {
-                              if (text.isEmpty) {
-                                setState(() {
-                                  isSearching = false;
-                                });
-                              } else {
-                                setState(() {
-                                  isSearching = true;
-                                  filteredContacts = contacts
-                                      .where((contact) => contact.displayName
-                                          .toLowerCase()
-                                          .contains(searchContactController.text
-                                              .toLowerCase()))
-                                      .toList();
-                                });
-                              }
-                              setState(() {
-                                contactListHeight = 250;
-                                showBorder = true;
-                              });
-                            },
-                            controller: searchContactController,
-                            decoration: InputDecoration(
-                              suffixIcon:
-                                  searchContactController.text.isNotEmpty
-                                      ? IconButton(
-                                          style: IconButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                          ),
-                                          icon: const Icon(
-                                            Icons.close,
-                                            size: 20,
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              searchContactController.text = '';
-                                              isSearching = false;
-                                              contactListHeight = 250;
-                                              showBorder = true;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                              prefixIcon: const Icon(BoxIcons.bx_search),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.black45),
-                                  borderRadius: BorderRadius.circular(40)),
-                              border: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.black45),
-                                  borderRadius: BorderRadius.circular(40)),
-                            ),
-                          ),
-                          Visibility(
-                            visible: showBorder,
-                            child: Expanded(
-                              child: isSearching
-                                  ? ListView.builder(
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          onTap: () {
-                                            searchContactController.text =
-                                                filteredContacts[index]
-                                                    .displayName;
-                                            setState(() {
-                                              selectedContact =
-                                                  filteredContacts[index];
-                                              contactListHeight = 58;
-                                            });
-                                          },
-                                          leading: contacts[index].photo == null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 36,
-                                                    height: 36,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    alignment: Alignment.center,
-                                                    child: TextWidget(
-                                                      text: contacts[index]
-                                                          .displayName[0],
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Image.memory(
-                                                    contacts[index].photo!,
-                                                    width: 36,
-                                                    height: 36,
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                          title: TextWidget(
-                                            text: filteredContacts[index]
-                                                .displayName,
-                                            fontSize: 13,
-                                          ),
-                                          subtitle: TextWidget(
-                                            text: filteredContacts[index]
-                                                .phones
-                                                .first
-                                                .number,
-                                            fontSize: 13,
-                                          ),
-                                        );
-                                      },
-                                      itemCount: filteredContacts.length,
-                                    )
-                                  : ListView.builder(
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          onTap: () {
-                                            searchContactController.text =
-                                                contacts[index].displayName;
-                                            setState(() {
-                                              selectedContact = contacts[index];
-                                              contactListHeight = 58;
-                                            });
-                                          },
-                                          leading: contacts[index].photo == null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Container(
-                                                    width: 36,
-                                                    height: 36,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    alignment: Alignment.center,
-                                                    child: TextWidget(
-                                                      text: contacts[index]
-                                                          .displayName[0],
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Image.memory(
-                                                    contacts[index].photo!,
-                                                    width: 36,
-                                                    height: 36,
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                          title: TextWidget(
-                                            text: contacts[index].displayName,
-                                            fontSize: 13,
-                                          ),
-                                          subtitle: TextWidget(
-                                            text: contacts[index]
-                                                .phones
-                                                .first
-                                                .number,
-                                            fontSize: 13,
-                                          ),
-                                        );
-                                      },
-                                      itemCount: contacts.length,
-                                    ),
-                            ),
-                          )
-                        ],
+                      onTap: () async {
+                        final selectedContact =
+                            await showMoneyReceiverSelection(context);
+                        searchContactController.text =
+                            selectedContact?.contactName ?? '';
+
+                        setState(() {
+                          selectedPhoneNumber = selectedContact
+                              ?.contactPhoneNumber
+                              ?.replaceAll(" ", "");
+                        });
+                      },
+                      readOnly: true,
+                      controller: searchContactController,
+                      decoration: InputDecoration(
+                        suffixIcon: searchContactController.text.isNotEmpty
+                            ? IconButton(
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                ),
+                                icon: const Icon(
+                                  Icons.close,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    searchContactController.text = '';
+                                    selectedPhoneNumber = null;
+                                  });
+                                },
+                              )
+                            : null,
+                        prefixIcon: const Icon(BoxIcons.bx_search),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.black45),
+                            borderRadius: BorderRadius.circular(40)),
+                        border: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.black45),
+                            borderRadius: BorderRadius.circular(40)),
                       ),
                     ),
                   ),
@@ -1327,6 +1118,14 @@ class _SentTabState extends State<SentTab> {
                       }
                       return null;
                     },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 17),
@@ -1356,10 +1155,14 @@ class _SentTabState extends State<SentTab> {
                       }
                       return null;
                     },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^[0-9]*[]?[0-9]*$')),
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                     ],
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
@@ -1401,474 +1204,327 @@ class _SentTabState extends State<SentTab> {
     );
   }
 
+  _buidPaymentMethods() {
+    return BlocBuilder<PaymentCardBloc, PaymentCardState>(
+      builder: (context, state) {
+        if (state is PaymentCardLoading) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
+                const TextWidget(
+                  text: 'Payment Methods',
+                  weight: FontWeight.w700,
+                  type: TextType.small,
+                ),
+                const SizedBox(height: 10),
+                ...List.generate(4, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: CustomShimmer(
+                      width: 100.sw,
+                      height: 55,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          );
+        }
+        return Visibility(
+          visible: paymentCards.isNotEmpty,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 30),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: TextWidget(
+                  text: 'Payment Methods',
+                  weight: FontWeight.w700,
+                  type: TextType.small,
+                ),
+              ),
+              for (int i = 0; i < paymentCards.length; i++)
+                _buildPaymentMethodTile(
+                  id: i,
+                  iconPath: paymentCards[i].cardBrand == 'visa'
+                      ? Assets.images.visaCard.path
+                      : paymentCards[i].type == 'us_bank_account'
+                          ? Assets.images.svgs.bankLogo
+                          : Assets.images.masteredCard.path,
+                  title: paymentCards[i].cardBrand ??
+                      paymentCards[i].bankName ??
+                      '',
+                  subTitle:
+                      '${paymentCards[i].cardBrand ?? ''} ending **${paymentCards[i].last4Digits}',
+                ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  _buildPaymentMethodTile({
+    required int id,
+    required String iconPath,
+    required String title,
+    required String subTitle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+      child: CardWidget(
+          boxBorder: Border.all(
+            color: selectedPaymentMethodIndex == id
+                ? ColorName.primaryColor
+                : Colors.transparent,
+          ),
+          width: 100.sw,
+          borderRadius: BorderRadius.circular(14),
+          child: ListTile(
+            splashColor: Colors.white,
+            onTap: () {
+              if (selectedPaymentMethodIndex == id) {
+                setState(() {
+                  selectedPaymentMethodIndex = -1;
+                  isScrolledDown = false;
+                });
+              } else {
+                setState(() {
+                  selectedPaymentMethodIndex = id;
+                });
+              }
+            },
+            leading: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconPath == Assets.images.svgs.bankLogo
+                      ? ColorName.primaryColor
+                      : null,
+                  shape: BoxShape.circle,
+                  image: iconPath == Assets.images.svgs.bankLogo
+                      ? null
+                      : DecorationImage(
+                          image: AssetImage(iconPath), fit: BoxFit.cover),
+                ),
+                child: iconPath == Assets.images.svgs.bankLogo
+                    ? Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SvgPicture.asset(
+                          iconPath,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : null),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+            trailing: Checkbox(
+              activeColor: ColorName.primaryColor,
+              shape: const CircleBorder(),
+              value: selectedPaymentMethodIndex == id,
+              onChanged: (value) {
+                if (selectedPaymentMethodIndex == id) {
+                  setState(() {
+                    selectedPaymentMethodIndex = -1;
+                  });
+                } else {
+                  setState(() {
+                    selectedPaymentMethodIndex = id;
+                  });
+                }
+              },
+            ),
+            title: TextWidget(
+              text: title,
+              fontSize: 15,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextWidget(
+                  text: subTitle,
+                  fontSize: 11,
+                  weight: FontWeight.w400,
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          )),
+    );
+  }
+
   _builPaymentMethodSelection() {
-    return Visibility(
-      visible: index == 2,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
+    return BlocListener<PaymentCardBloc, PaymentCardState>(
+      listener: (context, state) {
+        if (state is PaymentCardSuccess) {
+          setState(() {
+            paymentCards = state.paymentCards;
+          });
+        } else if (state is PaymentCardFail) {
+          showSnackbar(
+            context,
+            description: state.reason,
+          );
+        }
+      },
+      child: Visibility(
+        visible: index == 2,
         child: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
+                controller: scrollController,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CardWidget(
-                      width: 100.sw,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 30),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const TextWidget(
-                            text: 'Select Payment Method',
-                            type: TextType.small,
-                          ),
-                          const SizedBox(height: 10),
-                          CardWidget(
-                              width: 100.sw,
-                              borderRadius: BorderRadius.circular(14),
-                              child: ListTile(
-                                onTap: () {
-                                  setState(() {
-                                    selectedPaymentMethodIndex = 0;
-                                  });
-                                },
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: ColorName.primaryColor,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: const Center(
-                                    child: TextWidget(
-                                      text: 'B',
-                                      color: ColorName.white,
-                                      weight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                trailing: Checkbox(
-                                  activeColor: ColorName.primaryColor,
-                                  shape: const CircleBorder(),
-                                  value: selectedPaymentMethodIndex == 0,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPaymentMethodIndex = 0;
-                                    });
-                                  },
-                                ),
-                                title: Row(
-                                  children: [
-                                    const TextWidget(
-                                      text: 'Bank Account',
-                                      fontSize: 15,
-                                    ),
-                                    Container(
-                                      margin: const EdgeInsets.only(left: 10),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 7, vertical: 2),
-                                      decoration: BoxDecoration(
-                                          color: ColorName.green,
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      child: const TextWidget(
-                                        text: 'Free',
-                                        fontSize: 11,
-                                        color: ColorName.white,
-                                        weight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: const TextWidget(
-                                  text: 'Free service charge ',
-                                  fontSize: 11,
-                                  weight: FontWeight.w400,
-                                ),
-                              )),
-                          const SizedBox(height: 15),
-                          CardWidget(
-                              width: 100.sw,
-                              borderRadius: BorderRadius.circular(14),
-                              child: ListTile(
-                                onTap: () {
-                                  setState(() {
-                                    selectedPaymentMethodIndex = 1;
-                                  });
-                                },
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: ColorName.primaryColor,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: const Center(
-                                    child: TextWidget(
-                                      text: 'D',
-                                      color: ColorName.white,
-                                      weight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                trailing: Checkbox(
-                                  activeColor: ColorName.primaryColor,
-                                  shape: const CircleBorder(),
-                                  value: selectedPaymentMethodIndex == 1,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPaymentMethodIndex = 1;
-                                    });
-                                  },
-                                ),
-                                title: Row(
-                                  children: [
-                                    const TextWidget(
-                                      text: 'Debit Card',
-                                      fontSize: 15,
-                                    ),
-                                    BlocBuilder<BankFeeBloc, BankFeeState>(
-                                      builder: (context, state) {
-                                        if (state is BankFeeSuccess) {
-                                          return state.bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Debit Card fee')
-                                                  .isEmpty
-                                              ? const SizedBox.shrink()
-                                              : Container(
-                                                  margin: const EdgeInsets.only(
-                                                      left: 10),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 7,
-                                                      vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.4),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)),
-                                                  child: TextWidget(
-                                                    text:
-                                                        '+${state.bankFees.where((bf) => bf.label == 'Debit Card fee').first.amount}%',
-                                                    fontSize: 11,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    weight: FontWeight.w400,
-                                                  ),
-                                                );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                subtitle: const TextWidget(
-                                  text: '',
-                                  fontSize: 11,
-                                  weight: FontWeight.w400,
-                                ),
-                              )),
-                          const SizedBox(height: 15),
-                          CardWidget(
-                              width: 100.sw,
-                              borderRadius: BorderRadius.circular(14),
-                              child: ListTile(
-                                onTap: () {
-                                  setState(() {
-                                    selectedPaymentMethodIndex = 2;
-                                  });
-                                },
-                                leading: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: ColorName.primaryColor,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: const Center(
-                                    child: TextWidget(
-                                      text: 'C',
-                                      color: ColorName.white,
-                                      weight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                trailing: Checkbox(
-                                  activeColor: ColorName.primaryColor,
-                                  shape: const CircleBorder(),
-                                  value: selectedPaymentMethodIndex == 2,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPaymentMethodIndex = 2;
-                                    });
-                                  },
-                                ),
-                                title: Row(
-                                  children: [
-                                    const TextWidget(
-                                      text: 'Credit Card',
-                                      fontSize: 15,
-                                    ),
-                                    BlocBuilder<BankFeeBloc, BankFeeState>(
-                                      builder: (context, state) {
-                                        if (state is BankFeeSuccess) {
-                                          return state.bankFees
-                                                  .where((bf) =>
-                                                      bf.label ==
-                                                      'Credit Card fee')
-                                                  .isEmpty
-                                              ? const SizedBox.shrink()
-                                              : Container(
-                                                  margin: const EdgeInsets.only(
-                                                      left: 10),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 7,
-                                                      vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.4),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)),
-                                                  child: TextWidget(
-                                                    text:
-                                                        '+${state.bankFees.where((bf) => bf.label == 'Credit Card fee').first.amount}%',
-                                                    fontSize: 11,
-                                                    color:
-                                                        ColorName.primaryColor,
-                                                    weight: FontWeight.w400,
-                                                  ),
-                                                );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                subtitle: const TextWidget(
-                                  text: '',
-                                  fontSize: 11,
-                                  weight: FontWeight.w400,
-                                ),
-                              )),
-                          // for (int i = 0;
-                          //     i < state.paymentCards.length;
-                          //     i++)
-                          //   _buildPaymentMethodTile(
-                          //     id: 0 + 3,
-                          //     iconPath: Assets.images.masteredCard.path,
-                          //     title: state.paymentCards[i].cardBrand,
-                          //     subTitle:
-                          //         '${state.paymentCards[i].cardBrand} ending   ** ${state.paymentCards[i].last4Digits}',
-                          //   ),
-                        ],
-                      ),
-                    ),
+                    _buidPaymentMethods(),
+                    _buildAddPaymentMethods(),
                     const SizedBox(height: 10),
-                    CardWidget(
-                      width: 100.sw,
-                      padding: const EdgeInsets.all(15),
-                      child: Container(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      child: CardWidget(
                         width: 100.sw,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 15),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: ColorName.borderColor,
+                        padding: const EdgeInsets.all(15),
+                        child: Container(
+                          width: 100.sw,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 15),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(
+                              color: ColorName.borderColor,
+                            ),
                           ),
-                        ),
-                        child: BlocBuilder<BankFeeBloc, BankFeeState>(
-                          builder: (context, state) {
-                            if (state is BankFeeLoading) {
-                              return Column(
-                                children: [
-                                  CustomShimmer(
-                                    width: 100.sw,
-                                    height: 34,
-                                  ),
-                                  const Divider(
-                                    color: ColorName.borderColor,
-                                  ),
-                                  CustomShimmer(
-                                    width: 100.sw,
-                                    height: 34,
-                                  ),
-                                  const Divider(
-                                    color: ColorName.borderColor,
-                                  ),
-                                  CustomShimmer(
-                                    width: 100.sw,
-                                    height: 34,
-                                  ),
-                                ],
-                              );
-                            } else if (state is BankFeeSuccess) {
-                              return Column(
-                                children: [
-                                  for (var bankFee in state.bankFees)
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 34,
-                                          child: Row(
+                          child: BlocBuilder<BankFeeBloc, BankFeeState>(
+                            builder: (context, state) {
+                              if (state is BankFeeLoading) {
+                                return Column(
+                                  children: [
+                                    CustomShimmer(
+                                      width: 100.sw,
+                                      height: 34,
+                                    ),
+                                    const Divider(
+                                      color: ColorName.borderColor,
+                                    ),
+                                    CustomShimmer(
+                                      width: 100.sw,
+                                      height: 34,
+                                    ),
+                                    const Divider(
+                                      color: ColorName.borderColor,
+                                    ),
+                                    CustomShimmer(
+                                      width: 100.sw,
+                                      height: 34,
+                                    ),
+                                  ],
+                                );
+                              } else if (state is BankFeeSuccess) {
+                                return Column(
+                                  children: [
+                                    for (var fee in state.bankFees)
+                                      Column(
+                                        children: [
+                                          Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                              Row(
                                                 children: [
                                                   TextWidget(
-                                                    text: bankFee.label,
-                                                    color:
-                                                        const Color(0xFF7B7B7B),
+                                                    text: fee.label,
                                                     fontSize: 14,
-                                                    weight: FontWeight.w400,
                                                   ),
-                                                  // const Row(
-                                                  //   children: [
-                                                  //     Icon(
-                                                  //       Icons.info_outline,
-                                                  //       color: ColorName.yellow,
-                                                  //       size: 12,
-                                                  //     ),
-                                                  //     SizedBox(width: 3),
-                                                  //     TextWidget(
-                                                  //       text:
-                                                  //           'Included by the bank',
-                                                  //       fontSize: 9,
-                                                  //       weight: FontWeight.w400,
-                                                  //       color: ColorName.yellow,
-                                                  //     ),
-                                                  //   ],
-                                                  // ),
+                                                  Visibility(
+                                                    visible: fee.type ==
+                                                        'PERCENTAGE',
+                                                    child: TextWidget(
+                                                      text:
+                                                          '  ${NumberFormat('##,###.##').format(fee.amount.roundToDouble())}%',
+                                                      fontSize: 14,
+                                                      weight: FontWeight.w600,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                               Row(
                                                 children: [
                                                   TextWidget(
-                                                    text:
-                                                        '\$${(double.parse(usdController.text) * (bankFee.amount / 100)).toStringAsFixed(2)}',
+                                                    text: fee.type ==
+                                                            'PERCENTAGE'
+                                                        ? "\$${((fee.amount) / 100) * (double.tryParse(usdController.text) ?? 0)}"
+                                                        : "\$${NumberFormat('##,###.##').format((fee.amount))}",
+                                                    weight: FontWeight.w600,
                                                     fontSize: 14,
-                                                    weight: FontWeight.w500,
                                                   ),
-                                                  IconButton(
-                                                    style: IconButton.styleFrom(
-                                                      padding: EdgeInsets.zero,
-                                                    ),
-                                                    onPressed: () {
-                                                      //
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons.info_outline,
-                                                      size: 17,
-                                                      color: Color(0xFFD0D0D0),
-                                                    ),
-                                                  )
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Icon(
+                                                    Icons.info_outline,
+                                                    color: ColorName.grey
+                                                        .withOpacity(0.5),
+                                                    size: 20,
+                                                  ),
                                                 ],
-                                              )
+                                              ),
                                             ],
                                           ),
-                                        ),
-                                        const Divider(
-                                          color: ColorName.borderColor,
-                                        ),
-                                      ],
-                                    ),
-                                  SizedBox(
-                                    height: 34,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const TextWidget(
-                                          text: 'Total Fee',
-                                          fontSize: 16,
-                                          weight: FontWeight.w500,
-                                        ),
-                                        BlocBuilder<FeeBloc, FeeState>(
-                                          builder: (context, feeState) {
-                                            final creditCardAmount = state
-                                                    .bankFees
-                                                    .where((bf) =>
-                                                        bf.label ==
-                                                        'Credit Card fee')
-                                                    .isEmpty
-                                                ? 0
-                                                : state.bankFees
-                                                    .where((bf) =>
-                                                        bf.label ==
-                                                        'Credit Card fee')
-                                                    .first
-                                                    .amount;
-                                            final debitCardAmount = state
-                                                    .bankFees
-                                                    .where((bf) =>
-                                                        bf.label ==
-                                                        'Debit Card fee')
-                                                    .isEmpty
-                                                ? 0
-                                                : state.bankFees
-                                                    .where((bf) =>
-                                                        bf.label ==
-                                                        'Debit Card fee')
-                                                    .first
-                                                    .amount;
-
-                                            return Row(
-                                              children: [
-                                                if (feeState is FeeSuccess)
+                                          const Divider(
+                                            color: ColorName.borderColor,
+                                          ),
+                                        ],
+                                      ),
+                                    SizedBox(
+                                      height: 34,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const TextWidget(
+                                            text: 'Total Fee',
+                                            fontSize: 16,
+                                            weight: FontWeight.w500,
+                                          ),
+                                          BlocBuilder<FeeBloc, FeeState>(
+                                            builder: (context, feeState) {
+                                              return Row(
+                                                children: [
                                                   TextWidget(
                                                     text:
-                                                        '\$${((feeState.fees.where((f) => f.type == 'FIXED').map((f) => f.amount).reduce((value, element) => value + element)) + (feeState.fees.where((f) => f.type == 'PERCENTAGE').map((f) => (f.label == 'Service Fee' && whoPayFee == 'RECEIVER') ? 0 : (((double.tryParse(usdController.text) ?? 0) * (f.amount / 100)))).reduce((value, element) => value + element)) + (selectedPaymentMethodIndex == 1 ? ((double.tryParse(usdController.text) ?? 0) * (debitCardAmount / 100)) : selectedPaymentMethodIndex == 2 ? creditCardAmount : 0)).toStringAsFixed(2)}',
+                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
                                                     fontSize: 16,
-                                                    weight: FontWeight.w500,
-                                                  )
-                                                else
-                                                  const TextWidget(
-                                                    text: '\$--',
-                                                    fontSize: 16,
-                                                    weight: FontWeight.w500,
+                                                    weight: FontWeight.w700,
                                                   ),
-                                                IconButton(
-                                                  style: IconButton.styleFrom(
-                                                    padding: EdgeInsets.zero,
+                                                  const SizedBox(
+                                                    width: 5,
                                                   ),
-                                                  onPressed: () {
-                                                    //
-                                                  },
-                                                  icon: const Icon(
+                                                  Icon(
                                                     Icons.info_outline,
-                                                    size: 17,
-                                                    color: Color(0xFFD0D0D0),
+                                                    color: ColorName.grey
+                                                        .withOpacity(0.5),
+                                                    size: 20,
                                                   ),
-                                                )
-                                              ],
-                                            );
-                                          },
-                                        )
-                                      ],
+                                                ],
+                                              );
+                                            },
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -1877,265 +1533,96 @@ class _SentTabState extends State<SentTab> {
                 ),
               ),
             ),
-            BlocConsumer<PaymentIntentBloc, PaymentIntentState>(
-              listener: (context, paymentState) async {
-                if (paymentState is PaymentIntentFail) {
-                  showSnackbar(context,
-                      title: 'Error', description: paymentState.reason);
-                } else if (paymentState is PaymentIntentSuccess) {
-                  /// Initializes and presents a Stripe payment sheet for processing a payment.
-                  ///
-                  /// Retrieves the `clientSecret` and `customerId` from the `paymentState`.
-                  /// Initializes the Stripe payment sheet with the retrieved information and merchant display name.
-                  /// Calls `displayPaymentSheet()` to present the payment sheet to the user.
-                  /// Logs any errors encountered during the process.
-                  try {
-                    final clientSecret = paymentState.clientSecret;
+            BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
+              listener: (context, state) async {
+                if (state is MoneyTransferFail) {
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
+                  );
+                } else if (state is MoneyTransferSuccess) {
+                  String? lastDigit;
+                  final state = context.read<PaymentCardBloc>().state;
+                  if (state is PaymentCardSuccess) {
+                    final card = state.paymentCards[selectedPaymentMethodIndex];
 
-                    await Stripe.instance.initPaymentSheet(
-                      paymentSheetParameters: SetupPaymentSheetParameters(
-                          paymentIntentClientSecret: clientSecret,
-                          customerId: paymentState.customerId,
-                          merchantDisplayName: 'Mela Fi',
-                          appearance: const PaymentSheetAppearance(
-                            colors: PaymentSheetAppearanceColors(
-                              primary: ColorName.primaryColor,
-                            ),
-                          )),
-                    );
-
-                    displayPaymentSheet(clientSecret);
-                  } catch (error) {
-                    log(error.toString());
+                    lastDigit = card.last4Digits;
                   }
+                  context.pushNamed(
+                    RouteName.receipt,
+                    extra: receiverInfo?.copyWith(
+                      lastDigit: lastDigit,
+                    ),
+                  );
+
+                  clearSendInfo();
                 }
               },
-              builder: (context, paymentState) =>
-                  BlocConsumer<MoneyTransferBloc, MoneyTransferState>(
-                listener: (context, state) async {
-                  if (state is MoneyTransferFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  } else if (state is MoneyTransferSuccess) {
-                    context.pushNamed(
-                      RouteName.receipt,
-                      extra: receiverInfo,
-                    );
-
-                    clearSendInfo();
-                  }
-                },
-                builder: (context, state) {
-                  return BlocConsumer<PlaidBloc, PlaidState>(
-                    listener: (context, state) async {
-                      if (state is PlaidLinkTokenFail) {
-                        showSnackbar(
-                          context,
-                          title: 'Error',
-                          description: state.reason,
-                        );
-                      } else if (state is PlaidLinkTokenSuccess) {
-                        _createLinkTokenConfiguration(state.linkToken);
-                        await PlaidLink.create(configuration: _configuration!);
-                        await PlaidLink.open();
-                      } else if (state is PlaidPublicTokenFail) {
-                        showSnackbar(
-                          context,
-                          title: 'Error',
-                          description: state.reason,
-                        );
-                      } else if (state is PlaidPublicTokenSuccess) {
-                        final feeState = context.read<FeeBloc>().state;
-                        final bankState = context.read<BankFeeBloc>().state;
-                        double totalFee = 0;
-                        if (feeState is FeeSuccess &&
-                            bankState is BankFeeSuccess) {
-                          final creditCardAmount = bankState.bankFees
-                                  .where((bf) => bf.label == 'Credit Card fee')
-                                  .isEmpty
-                              ? 0
-                              : bankState.bankFees
-                                  .where((bf) => bf.label == 'Credit Card fee')
-                                  .first
-                                  .amount;
-                          final debitCardAmount = bankState.bankFees
-                                  .where((bf) => bf.label == 'Debit Card fee')
-                                  .isEmpty
-                              ? 0
-                              : bankState.bankFees
-                                  .where((bf) => bf.label == 'Debit Card fee')
-                                  .first
-                                  .amount;
-                          totalFee = (feeState.fees
-                                  .where((f) => f.type == 'FIXED')
-                                  .map((f) => f.amount)
-                                  .reduce(
-                                      (value, element) => value + element)) +
-                              (feeState.fees
-                                  .where((f) => f.type == 'PERCENTAGE')
-                                  .map((f) => (f.label == 'Service Fee' &&
-                                          whoPayFee == 'RECEIVER')
-                                      ? 0
-                                      : (((double.tryParse(
-                                                  usdController.text) ??
-                                              0) *
-                                          (f.amount / 100))))
-                                  .reduce(
-                                      (value, element) => value + element)) +
-                              (selectedPaymentMethodIndex == 1
-                                  ? ((double.tryParse(usdController.text) ??
-                                          0) *
-                                      (debitCardAmount / 100))
-                                  : selectedPaymentMethodIndex == 2
-                                      ? creditCardAmount
-                                      : 0);
-                        }
-                        receiverInfo = ReceiverInfo(
-                          receiverName: receiverName.text,
-                          receiverPhoneNumber: isPermissionDenied
-                              ? phoneNumberController.text
-                              : selectedContact!.phones.first.number,
-                          receiverBankName: selectedBank,
-                          receiverAccountNumber: bankAcocuntController.text,
-                          paymentType: 'PLAID_ACH',
-                          amount: double.parse(usdController.text) + totalFee,
-                          serviceChargePayer: whoPayFee,
-                          publicToken: publicToken,
-                        );
-                        //                 final paymentIntent =
-                        // await Stripe.instance.retrievePaymentIntent(clientSecret);
-                        context.read<MoneyTransferBloc>().add(SendMoney(
-                            receiverInfo: receiverInfo!,
-                            paymentId: '',
-                            savedPaymentId: ''));
-                      }
-                    },
-                    builder: (context, plaidState) {
-                      return ButtonWidget(
-                        child: state is MoneyTransferLoading ||
-                                paymentState is PaymentIntentLoading ||
-                                plaidState is PlaidLinkTokenLoading ||
-                                plaidState is PlaidPublicTokenLoading
+              builder: (context, state) {
+                return BlocBuilder<PlaidBloc, PlaidState>(
+                  builder: (context, plaidState) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      child: ButtonWidget(
+                        child: state is MoneyTransferLoading
                             ? const LoadingWidget()
-                            : const TextWidget(
-                                text: 'Next',
+                            : TextWidget(
+                                text:
+                                    isScrolledDown ? 'Confirm Payment' : 'Next',
                                 type: TextType.small,
                                 color: Colors.white,
                               ),
                         onPressed: () async {
-                          // if (await showPincode(context)) {
-                          if (selectedPaymentMethodIndex != 0) {
-                            final feeState = context.read<FeeBloc>().state;
-                            final bankState = context.read<BankFeeBloc>().state;
-                            double totalFee = 0;
-                            if (feeState is FeeSuccess &&
-                                bankState is BankFeeSuccess) {
-                              final creditCardAmount = bankState.bankFees
-                                      .where(
-                                          (bf) => bf.label == 'Credit Card fee')
-                                      .isEmpty
-                                  ? 0
-                                  : bankState.bankFees
-                                      .where(
-                                          (bf) => bf.label == 'Credit Card fee')
-                                      .first
-                                      .amount;
-                              final debitCardAmount = bankState.bankFees
-                                      .where(
-                                          (bf) => bf.label == 'Debit Card fee')
-                                      .isEmpty
-                                  ? 0
-                                  : bankState.bankFees
-                                      .where(
-                                          (bf) => bf.label == 'Debit Card fee')
-                                      .first
-                                      .amount;
-                              totalFee = (feeState.fees
-                                      .where((f) => f.type == 'FIXED')
-                                      .map((f) => f.amount)
-                                      .reduce((value, element) =>
-                                          value + element)) +
-                                  (feeState.fees
-                                      .where((f) => f.type == 'PERCENTAGE')
-                                      .map((f) => (f.label == 'Service Fee' &&
-                                              whoPayFee == 'RECEIVER')
-                                          ? 0
-                                          : (((double.tryParse(
-                                                      usdController.text) ??
-                                                  0) *
-                                              (f.amount / 100))))
-                                      .reduce((value, element) =>
-                                          value + element)) +
-                                  (selectedPaymentMethodIndex == 1
-                                      ? ((double.tryParse(usdController.text) ??
-                                              0) *
-                                          (debitCardAmount / 100))
-                                      : selectedPaymentMethodIndex == 2
-                                          ? creditCardAmount
-                                          : 0);
-                            }
-                            final paymentCardState =
-                                context.read<PaymentCardBloc>().state;
-                            if (paymentCardState.paymentCards.isEmpty) {
-                              context.read<PaymentIntentBloc>().add(
-                                    FetchClientSecret(
-                                      currency: 'USD',
-                                      amount: double.parse(usdController.text) +
-                                          totalFee,
-                                    ),
-                                  );
-                            } else {
+                          if (selectedPaymentMethodIndex != -1) {
+                            if (isScrolledDown) {
+                              final cards = context
+                                  .read<PaymentCardBloc>()
+                                  .state
+                                  .paymentCards;
+                              setState(() {
+                                selectedPaymentCardId =
+                                    cards[selectedPaymentMethodIndex].id;
+                              });
+
                               receiverInfo = ReceiverInfo(
                                 receiverName: receiverName.text,
                                 receiverPhoneNumber: isPermissionDenied
-                                    ? phoneNumberController.text
-                                    : selectedContact!.phones.first.number,
+                                    ? phoneNumberController.text.trim()
+                                    : selectedPhoneNumber?.trim() ?? '',
                                 receiverBankName: selectedBank,
                                 receiverAccountNumber:
                                     bankAcocuntController.text,
-                                amount:
-                                    double.parse(usdController.text) + totalFee,
-                                serviceChargePayer: whoPayFee,
                                 paymentType: 'SAVED_PAYMENT',
+                                amount: double.parse(usdController.text),
+                                serviceChargePayer: whoPayFee,
+                                publicToken: publicToken,
                               );
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: Colors.white,
-                                isScrollControlled: true,
-                                shape: const ContinuousRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  topRight: Radius.circular(30),
-                                )),
-                                builder: (_) => PaymentCardSelection(
-                                  receiverInfo: receiverInfo!,
-                                  paymentCards: paymentCardState.paymentCards,
-                                  onAddNewCardPressed: () {
-                                    context.read<PaymentIntentBloc>().add(
-                                          FetchClientSecret(
-                                            currency: 'USD',
-                                            amount: double.parse(
-                                                    usdController.text) +
-                                                totalFee,
-                                          ),
-                                        );
-                                  },
-                                ),
-                              );
+                              //                 final paymentIntent =
+                              // await Stripe.instance.retrievePaymentIntent(clientSecret);
+                              context.read<MoneyTransferBloc>().add(SendMoney(
+                                    receiverInfo: receiverInfo!,
+                                    paymentId: selectedPaymentCardId,
+                                    savedPaymentId: selectedPaymentCardId,
+                                  ));
+                            } else {
+                              scrollDown();
+                              setState(() {
+                                isScrolledDown = true;
+                              });
                             }
                           } else {
-                            context.read<PlaidBloc>().add(CreateLinkToken());
+                            showSnackbar(context,
+                                description: 'Select Payment Method');
                           }
-                          // }
                         },
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
             const SizedBox(height: 10),
           ],
@@ -2144,228 +1631,472 @@ class _SentTabState extends State<SentTab> {
     );
   }
 
+  _buildAddPaymentMethods() {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PaymentCardBloc, PaymentCardState>(
+          listener: (context, state) {
+            if (state is PaymentCardSuccess) {
+              setState(() {
+                paymentCards = state.paymentCards;
+              });
+            } else if (state is PaymentCardFail) {
+              showSnackbar(
+                context,
+                description: state.reason,
+              );
+            }
+          },
+        ),
+        BlocListener<PlaidBloc, PlaidState>(listener: (context, state) async {
+          if (state is PlaidLinkTokenFail) {
+            context.pop();
+            showSnackbar(
+              context,
+              title: 'Error',
+              description: state.reason,
+            );
+          } else if (state is PlaidLinkTokenLoading) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const SizedBox(
+                child: Center(
+                  child: LoadingWidget(
+                    color: ColorName.primaryColor,
+                  ),
+                ),
+              ),
+            );
+          } else if (state is PlaidLinkTokenSuccess) {
+            context.pop();
+          }
+        }),
+        BlocListener<WalletBloc, WalletState>(listener: (context, state) {
+          if (state is AddFundToWalletFail) {
+            showSnackbar(context, description: state.reason);
+          } else if (state is AddFundToWalletSuccess) {
+            context.read<WalletBloc>().add(FetchWallets());
+            context.pop();
+          }
+        }),
+      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 30),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextWidget(
+                  text: 'Add Payment Methods',
+                  weight: FontWeight.w700,
+                  type: TextType.small,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: CardWidget(
+                width: 100.sw,
+                borderRadius: BorderRadius.circular(14),
+                child: ListTile(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  onTap: () {
+                    context.read<PlaidBloc>().add(CreateLinkToken());
+                  },
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: ColorName.primaryColor,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: SvgPicture.asset(Assets.images.svgs.bankLogo),
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                  title: Row(
+                    children: [
+                      const TextWidget(
+                        text: 'Bank Account',
+                        fontSize: 15,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: ColorName.green,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: const TextWidget(
+                          text: 'Free',
+                          fontSize: 11,
+                          color: ColorName.white,
+                          weight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: const TextWidget(
+                    text: 'Free service charge ',
+                    fontSize: 11,
+                    weight: FontWeight.w400,
+                  ),
+                )),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: CardWidget(
+                width: 100.sw,
+                borderRadius: BorderRadius.circular(14),
+                child: ListTile(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      scrollControlDisabledMaxHeightRatio: 1,
+                      builder: (_) => const AddPaymentMethodWidget(),
+                    );
+                  },
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: Assets.images.masteredCard.image(
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                  title: const TextWidget(
+                    text: 'Debit Card',
+                    fontSize: 15,
+                  ),
+                  subtitle: const TextWidget(
+                    text: 'Additional charge is going to be included',
+                    fontSize: 11,
+                    weight: FontWeight.w400,
+                    color: ColorName.yellow,
+                  ),
+                )),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: CardWidget(
+                width: 100.sw,
+                borderRadius: BorderRadius.circular(14),
+                child: ListTile(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      scrollControlDisabledMaxHeightRatio: 1,
+                      builder: (_) => const AddPaymentMethodWidget(),
+                    );
+                  },
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: Assets.images.visaCard.image(
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+                  title: const TextWidget(
+                    text: 'Credit Card',
+                    fontSize: 15,
+                  ),
+                  subtitle: const TextWidget(
+                    text: 'Additional charge is going to be included',
+                    fontSize: 11,
+                    weight: FontWeight.w400,
+                    color: ColorName.yellow,
+                  ),
+                )),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
   _buildExchangeInputs() {
     return Stack(
       children: [
-        Column(
-          children: [
-            TextFormField(
-              controller: usdController,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Enter amount';
-                }
-                return null;
-              },
-              onChanged: (value) {
-                try {
-                  final money = double.parse(value);
-                  etbController.text =
-                      (money * exchangeRate).toStringAsFixed(3);
-                } catch (error) {
-                  etbController.text = '';
-                }
-                setState(() {});
-              },
-              style: const TextStyle(
-                fontSize: 22,
-              ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^[0-9]*[.,]?[0-9]*$'),
-                ),
-                LengthLimitingTextInputFormatter(10),
-              ],
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                hintText: '0.00',
-                hintStyle: const TextStyle(
-                  fontSize: 24,
-                  color: Color(0xFFD0D0D0),
-                ),
-                suffixIcon: Container(
-                  width: 90,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black45,
+        BlocBuilder<FeeBloc, FeeState>(
+          builder: (context, state) {
+            if (state is RemittanceExchangeRateLoading) {
+              return Column(
+                children: [
+                  CustomShimmer(
+                    borderRadius: BorderRadius.circular(20),
+                    width: 100.sw,
+                    height: 55,
+                  ),
+                  const SizedBox(height: 14),
+                  CustomShimmer(
+                    borderRadius: BorderRadius.circular(20),
+                    width: 100.sw,
+                    height: 55,
+                  ),
+                ],
+              );
+            }
+            if (state is RemittanceExchangeRateSuccess) {
+              return Column(
+                children: [
+                  TextFormField(
+                    controller: usdController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Enter amount';
+                      }
+                      return null;
+                    },
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
+                    onChanged: (value) {
+                      try {
+                        final money = double.parse(value);
+                        etbController.text =
+                            (money * _getExchangeRate(fromCurrency, toCurrency))
+                                .toStringAsFixed(3);
+                      } catch (error) {
+                        etbController.text = '';
+                      }
+                      setState(() {});
+                    },
+                    style: const TextStyle(
+                      fontSize: 22,
+                    ),
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^[0-9]*[.,]?[0-9]*$'),
+                      ),
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      hintText: '0.00',
+                      hintStyle: const TextStyle(
+                        fontSize: 24,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      suffixIcon: Container(
+                        width: 90,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.black45,
+                          ),
+                        ),
+                        child: Center(
+                          child: DropdownButton(
+                              value: fromCurrency,
+                              elevation: 0,
+                              underline: const SizedBox.shrink(),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              items: [
+                                for (var currency in state.walletCurrencies
+                                    .map((w) => w.fromCurrency)
+                                    .toSet())
+                                  DropdownMenuItem(
+                                    value: currency.code,
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: Image.asset(
+                                            'icons/currency/${currency.code.toLowerCase()}.png',
+                                            width: 20,
+                                            height: 20,
+                                            package: 'currency_icons',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        TextWidget(
+                                          text: currency.code,
+                                          fontSize: 12,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  fromCurrency = value ?? 'USD';
+                                });
+                                etbController.clear();
+                                etbController.text =
+                                    ((double.tryParse(usdController.text) ??
+                                                0) *
+                                            _getExchangeRate(
+                                                fromCurrency, toCurrency))
+                                        .toStringAsFixed(3);
+                                context.read<CheckDetailsBloc>().add(
+                                      FetchTransferFeeFromCurrencies(
+                                        toCurrency: toCurrency,
+                                        fromCurrency: fromCurrency,
+                                      ),
+                                    );
+                              }),
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      border: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
                     ),
                   ),
-                  child: Center(
-                    child: DropdownButton(
-                        value: 'usd',
-                        elevation: 0,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'usd',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.usaFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'USD',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
-                          ),
-                          // DropdownMenuItem(
-                          //   value: 'etb',
-                          //   child: Row(
-                          //     children: [
-                          //       ClipRRect(
-                          //         borderRadius: BorderRadius.circular(100),
-                          //         child: Assets.images.ethiopianFlag.image(
-                          //           width: 20,
-                          //           height: 20,
-                          //           fit: BoxFit.cover,
-                          //         ),
-                          //       ),
-                          //       const SizedBox(width: 5),
-                          //       const TextWidget(
-                          //         text: 'ETB',
-                          //         fontSize: 12,
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                        ],
-                        onChanged: (value) {
-                          //
-                        }),
-                  ),
-                ),
-                errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextFormField(
-              controller: etbController,
-              // validator: (value) {
-              //   if (value!.isEmpty) {
-              //     return 'Enter amount';
-              //   }
-              //   return null;
-              // },
-              onChanged: (value) {
-                try {
-                  final money = double.parse(value);
-                  usdController.text =
-                      (money / exchangeRate).toStringAsFixed(3);
-                } catch (error) {
-                  usdController.text = '';
-                }
-                setState(() {});
-              },
-              style: const TextStyle(
-                fontSize: 22,
-              ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(
-                    RegExp(r'^[0-9]*[.,]?[0-9]*$')),
-              ],
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                hintText: '0.00',
-                hintStyle: const TextStyle(
-                  fontSize: 24,
-                  color: Color(0xFFD0D0D0),
-                ),
-                suffixIcon: Container(
-                  width: 90,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black45,
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    controller: etbController,
+                    onTapOutside: (event) {
+                      if (Platform.isIOS) {
+                        Focus.of(context).unfocus();
+                      }
+                    },
+                    onChanged: (value) {
+                      try {
+                        final money = double.parse(value);
+                        usdController.text =
+                            (money / _getExchangeRate(fromCurrency, toCurrency))
+                                .toStringAsFixed(3);
+                      } catch (error) {
+                        usdController.text = '';
+                      }
+                      setState(() {});
+                    },
+                    style: const TextStyle(
+                      fontSize: 22,
                     ),
-                  ),
-                  child: Center(
-                    child: DropdownButton(
-                        value: 'etb',
-                        elevation: 0,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: [
-                          // DropdownMenuItem(
-                          //   value: 'usd',
-                          //   child: Row(
-                          //     children: [
-                          //       ClipRRect(
-                          //         borderRadius: BorderRadius.circular(100),
-                          //         child: Assets.images.usaFlag.image(
-                          //           width: 20,
-                          //           height: 20,
-                          //           fit: BoxFit.cover,
-                          //         ),
-                          //       ),
-                          //       const SizedBox(width: 5),
-                          //       const TextWidget(
-                          //         text: 'USD',
-                          //         fontSize: 12,
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          DropdownMenuItem(
-                            value: 'etb',
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Assets.images.ethiopianFlag.image(
-                                    width: 20,
-                                    height: 20,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const TextWidget(
-                                  text: 'ETB',
-                                  fontSize: 12,
-                                )
-                              ],
-                            ),
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^[0-9]*[.,]?[0-9]*$')),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      hintText: '0.00',
+                      hintStyle: const TextStyle(
+                        fontSize: 24,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      suffixIcon: Container(
+                        width: 90,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.black45,
                           ),
-                        ],
-                        onChanged: (value) {
-                          //
-                        }),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.black45),
-                    borderRadius: BorderRadius.circular(40)),
-              ),
-            )
-          ],
+                        ),
+                        child: Center(
+                          child: DropdownButton(
+                              value: toCurrency,
+                              elevation: 0,
+                              underline: const SizedBox.shrink(),
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              items: [
+                                for (var currency in state.walletCurrencies
+                                    .map((w) => w.toCurrency)
+                                    .toSet())
+                                  DropdownMenuItem(
+                                    value: currency.code,
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: Image.asset(
+                                            'icons/currency/${currency.code.toLowerCase()}.png',
+                                            width: 20,
+                                            height: 20,
+                                            package: 'currency_icons',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        TextWidget(
+                                          text: currency.code,
+                                          fontSize: 12,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  toCurrency = value ?? 'ETB';
+                                });
+                                usdController.clear();
+                                usdController.text =
+                                    ((double.tryParse(etbController.text) ??
+                                                0) /
+                                            _getExchangeRate(
+                                                fromCurrency, toCurrency))
+                                        .round()
+                                        .toStringAsFixed(1);
+                                context.read<CheckDetailsBloc>().add(
+                                      FetchTransferFeeFromCurrencies(
+                                        toCurrency: toCurrency,
+                                        fromCurrency: fromCurrency,
+                                      ),
+                                    );
+                              }),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                      border: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black45),
+                          borderRadius: BorderRadius.circular(40)),
+                    ),
+                  )
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
         Positioned(
           left: 0,

@@ -1,10 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:transaction_mobile_app/bloc/location/location_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -20,17 +18,14 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   checkStatus() async {
-    await Future.delayed(const Duration(seconds: 1));
     if (await isFirstTime() == false) {
       final isLoggedIN = await isLoggedIn();
       if (isLoggedIN) {
         context.goNamed(RouteName.loginPincode);
       } else {
-        context.read<LocationBloc>().add(GetLocation());
         context.goNamed(RouteName.signup);
       }
     } else {
-      context.read<LocationBloc>().add(GetLocation());
       context.goNamed(RouteName.welcome);
     }
   }
@@ -38,7 +33,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     checkStatus();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // WidgetsBinding.instance.removeObserver(this); // Remove the observer
+    super.dispose();
   }
 
   @override

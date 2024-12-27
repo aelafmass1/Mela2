@@ -52,4 +52,147 @@ class MoneyTransferRepository {
     }
     return processErrorResponse(data);
   }
+
+  /// Transfers money between own wallets
+  ///
+  /// [accessToken] is the authentication token required to make the request.
+  /// [fromWalletId] is the ID of the source wallet
+  /// [toWalletId] is the ID of the destination wallet
+  /// [amount] is the amount to transfer
+  ///
+  /// Returns a map with either a 'success' key containing the response data, or an 'error' key containing an error message.
+  Future<Map> transferToOwnWallet({
+    required String accessToken,
+    required int fromWalletId,
+    required int toWalletId,
+    required double amount,
+    required String note,
+  }) async {
+    try {
+      final res = await client.post(
+        Uri.parse(
+          '$baseUrl/api/wallet/transfer',
+        ),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "fromWalletId": fromWalletId,
+          "toWalletId": toWalletId,
+          "amount": amount,
+          "note": note,
+        }),
+      );
+      print("Transfer to walllet from today is ${res.statusCode} $fromWalletId $toWalletId $amount $note");
+
+      final data = jsonDecode(res.body);
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return data;
+      }
+      return processErrorResponse(data);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  Future<Map> transferToUnregisteredUser({
+    required String accessToken,
+    required int senderWalletId,
+    required String recipientPhoneNumber,
+    required double amount,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/transfer/unregistered',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "senderWalletId": senderWalletId,
+        "recipientPhoneNumber": recipientPhoneNumber,
+        "amount": amount,
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> requestMoney({
+    required String accessToken,
+    required int requesterWalletId,
+    required double amount,
+    required String note,
+    required int userId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "requesterWalletId": requesterWalletId,
+        "recipientId": userId,
+        "amount": amount,
+        "note": note
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> fetchRequestMoneyDetail({
+    required String accessToken,
+    required int requestId,
+  }) async {
+    final res = await client.get(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money/get/$requestId',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> rejectRequestMoney({
+    required String accessToken,
+    required int requestId,
+  }) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/api/wallet/request-money/reject/$requestId',
+      ),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      return data;
+    }
+    return processErrorResponse(data);
+  }
 }

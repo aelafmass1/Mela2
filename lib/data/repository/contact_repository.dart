@@ -1,33 +1,30 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 
 import '../../core/constants/url_constants.dart';
 
-class ContactRepository {
+abstract class ContactRepository {
+  Future<List> checkMyContacts({required List<Contact> contacts});
+  Future<List<Map<String, dynamic>>> searchContactsByTag(
+      {required String query});
+  Future<List<Contact>> fetchLocalContacts();
+}
+
+class ContactRepositoryImpl implements ContactRepository {
   final InterceptedClient client;
 
-  ContactRepository({required this.client});
+  ContactRepositoryImpl({required this.client});
 
-  /// Checks the contacts on the device against a list of contacts on the server.
-  ///
-  /// This method takes a list of [Contact] objects and an access token, and sends
-  /// the contact information to the server to check if the contacts exist on the
-  /// server. The server response is then returned as a list of dynamic objects.
-  ///
-  /// Parameters:
-  /// - `accessToken`: The access token to authenticate the request.
-  /// - `contacts`: The list of [Contact] objects to check against the server.
-  ///
-  /// Returns:
-  /// A list of dynamic objects containing the server response. If an error occurs,
-  /// the list will contain an object with an 'error' key and the error message.
+  @override
   Future<List> checkMyContacts({
-    required String accessToken,
     required List<Contact> contacts,
   }) async {
+    final token = await getToken();
     final body = [
       for (var contact in contacts)
         {
@@ -74,7 +71,7 @@ class ContactRepository {
     final res = await client.post(
       Uri.parse('$baseUrl/contact/check'),
       headers: {
-        'Authorization': 'Bearer $accessToken',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
       body: jsonEncode(
@@ -82,10 +79,39 @@ class ContactRepository {
       ),
     );
 
+
     final data = jsonDecode(res.body);
+
     if (res.statusCode == 200 || res.statusCode == 201) {
       return data;
     }
     return [processErrorResponse(data)];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> searchContactsByTag({
+    required String query,
+  }) async {
+    final token = await getToken();
+    debugPrint("token $token");
+    final res = await client.get(
+      Uri.parse('$baseUrl/search/user?prefix=$query'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return (data["response"] as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList();
+    }
+    return [processErrorResponse(data)];
+  }
+
+  @override
+  Future<List<Contact>> fetchLocalContacts() async {
+    return await FlutterContacts.getContacts(withProperties: true);
   }
 }

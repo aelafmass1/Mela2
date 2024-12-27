@@ -4,10 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:transaction_mobile_app/core/exceptions/server_exception.dart';
-import 'package:transaction_mobile_app/core/utils/check_connectivity.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/data/models/user_model.dart';
-import 'package:transaction_mobile_app/data/services/api/api_service.dart';
 
 import '../../data/repository/auth_repository.dart';
 
@@ -214,6 +212,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (res.containsKey('error')) {
           return emit(ResetFail(reason: res['error']));
         }
+        await deleteToken();
+        final data = res['successResponse'];
+        await storeToken(data['jwtToken']);
+        storeDisplayName('${data['firstName']} ${data['lastName']}');
         emit(ResetSuccess());
       }
     } on ServerException catch (error, stackTrace) {
@@ -252,7 +254,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(LoginWithPincodeFail(reason: res['error']));
         }
         final token = res['successResponse']['jwtToken'];
-        storeToken(token);
+
+        await storeToken(token);
         emit(LoginWithPincodeSuccess());
       }
     } on ServerException catch (error, stackTrace) {
@@ -355,7 +358,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         final data = res['successResponse'];
         final token = data['jwtToken'];
-
         await storeToken(token);
         storeDisplayName('${data['firstName']} ${data['lastName']}');
         storePhoneNumber(event.phoneNumber);
@@ -390,7 +392,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(RegisterUserFail(reason: res['error']));
         }
         final token = res['successResponse']['jwtToken'];
-        storeToken(token);
+        await deleteToken();
+        await storeToken(token);
         storeDisplayName(
           '${event.userModel.firstName} ${event.userModel.lastName}',
         );

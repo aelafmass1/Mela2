@@ -17,13 +17,3 @@ final class PlaidLinkTokenSuccess extends PlaidState {
 
   PlaidLinkTokenSuccess({required this.linkToken});
 }
-
-final class PlaidPublicTokenLoading extends PlaidState {}
-
-final class PlaidPublicTokenFail extends PlaidState {
-  final String reason;
-
-  PlaidPublicTokenFail({required this.reason});
-}
-
-final class PlaidPublicTokenSuccess extends PlaidState {}

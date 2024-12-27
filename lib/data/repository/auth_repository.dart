@@ -455,7 +455,7 @@ class AuthRepository {
     return processErrorResponse(data);
   }
 
-  checkEmailExists(String email) async {
+  Future<Map> checkEmailExists(String email) async {
     final res = await client.post(
       Uri.parse('$baseUrl/auth/email/exists?email=$email'),
       headers: {
@@ -471,6 +471,23 @@ class AuthRepository {
       }
       return data;
     }
+    return processErrorResponse(data);
+  }
+
+  Future<Map> fetchMe({required String accessToken}) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/user/me'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      return data;
+    }
+
     return processErrorResponse(data);
   }
 }

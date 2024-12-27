@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,54 +33,11 @@ class OTPScreen extends StatefulWidget {
 class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
   bool showResendButton = false;
   final pin1Controller = TextEditingController();
-  final pin2Controller = TextEditingController();
-  final pin3Controller = TextEditingController();
-  final pin4Controller = TextEditingController();
-  final pin5Controller = TextEditingController();
-  final pin6Controller = TextEditingController();
+
   bool isValid = false;
   int minute = 0;
   int second = 60;
   Timer? timer;
-
-  List<String> getAllPins() {
-    String pin1 = pin1Controller.text;
-    String pin2 = pin2Controller.text;
-    String pin3 = pin3Controller.text;
-    String pin4 = pin4Controller.text;
-    String pin5 = pin5Controller.text;
-    String pin6 = pin6Controller.text;
-    if (pin1.isNotEmpty &&
-        pin2.isNotEmpty &&
-        pin3.isNotEmpty &&
-        pin4.isNotEmpty &&
-        pin5.isNotEmpty &&
-        pin6.isNotEmpty) {
-      if (mounted) {
-        setState(() {
-          isValid = true;
-        });
-      }
-
-      return [pin1, pin2, pin3, pin4, pin5, pin6];
-    }
-    if (mounted) {
-      setState(() {
-        isValid = false;
-      });
-    }
-
-    return [];
-  }
-
-  clearPins() {
-    pin1Controller.clear();
-    pin2Controller.clear();
-    pin3Controller.clear();
-    pin4Controller.clear();
-    pin5Controller.clear();
-    pin6Controller.clear();
-  }
 
   void startTimer() {
     if (mounted) {
@@ -128,14 +86,8 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
   /// If the [code] parameter is null, this method does nothing.
   void codeUpdated() {
     if (code != null) {
-      final pins = code!.trim().split('');
       if (code!.trim().length == 6) {
-        pin1Controller.text = pins[0];
-        pin2Controller.text = pins[1];
-        pin3Controller.text = pins[2];
-        pin4Controller.text = pins[3];
-        pin5Controller.text = pins[4];
-        pin6Controller.text = pins[5];
+        pin1Controller.text = code?.trim() ?? '';
       }
     }
   }
@@ -194,11 +146,6 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildPinBox(controller: pin1Controller),
-                  _buildPinBox(controller: pin2Controller),
-                  _buildPinBox(controller: pin3Controller),
-                  _buildPinBox(controller: pin4Controller),
-                  _buildPinBox(controller: pin5Controller),
-                  _buildPinBox(controller: pin6Controller),
                 ],
               ),
             ),
@@ -214,7 +161,7 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                       ),
                       TextButton(
                         onPressed: () async {
-                          clearPins();
+                          pin1Controller.clear();
                           final signature = await SmsAutoFill().getAppSignature;
                           if (widget.userModel.toScreen == null) {
                             context.read<AuthBloc>().add(
@@ -292,7 +239,7 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                     context.pushNamed(
                       widget.userModel.toScreen!,
                       extra: widget.userModel.copyWith(
-                        otp: getAllPins().join(),
+                        otp: pin1Controller.text.trim(),
                       ),
                     );
                   }
@@ -325,7 +272,6 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                             color: Colors.white,
                           ),
                     onPressed: () {
-                      final pins = getAllPins();
                       if (isValid) {
                         context.read<AuthBloc>().add(
                               VerfiyOTP(
@@ -333,7 +279,7 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
                                         widget.userModel.phoneNumber!) ??
                                     0,
                                 conutryCode: widget.userModel.countryCode!,
-                                code: pins.join(),
+                                code: pin1Controller.text.trim(),
                               ),
                             );
                       }
@@ -349,12 +295,31 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
   Widget _buildPinBox({required TextEditingController controller}) {
     return SizedBox(
       height: 70,
-      width: 13.sw,
+      width: 90.sw,
       child: TextFormField(
+        autofocus: true,
         controller: controller,
         onChanged: (value) {
-          getAllPins();
-          if (value.length == 1) {
+          if (value.length == 6) {
+            setState(() {
+              isValid = true;
+            });
+            context.read<AuthBloc>().add(
+                  VerfiyOTP(
+                    phoneNumber:
+                        int.tryParse(widget.userModel.phoneNumber!) ?? 0,
+                    conutryCode: widget.userModel.countryCode!,
+                    code: pin1Controller.text.trim(),
+                  ),
+                );
+          } else {
+            setState(() {
+              isValid = false;
+            });
+          }
+        },
+        onTapOutside: (event) {
+          if (Platform.isIOS) {
             FocusScope.of(context).nextFocus();
           }
         },
@@ -365,16 +330,22 @@ class _OTPScreenState extends State<OTPScreen> with CodeAutoFill {
         textAlign: TextAlign.center,
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          LengthLimitingTextInputFormatter(1),
+          LengthLimitingTextInputFormatter(6),
         ],
         keyboardType: TextInputType.phone,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
+          hintText: 'verificaton code',
+          hintStyle: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF8E8E8E),
+            fontWeight: FontWeight.w500,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
           ),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(30),
               borderSide: const BorderSide(
                 color: ColorName.primaryColor,
                 width: 2,

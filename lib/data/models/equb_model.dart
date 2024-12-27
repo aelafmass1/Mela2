@@ -34,7 +34,7 @@ class EqubModel {
       numberOfMembers: numberOfMembers ?? this.numberOfMembers,
       contributionAmount: contributionAmount ?? this.contributionAmount,
       frequency: frequency ?? this.frequency,
-      startDate: startingDate ?? this.startDate,
+      startDate: startingDate ?? startDate,
       members: members ?? this.members,
     );
   }

@@ -15,12 +15,14 @@ import '../../gen/colors.gen.dart';
 class PaymentCardSelection extends StatefulWidget {
   final List<PaymentCardModel> paymentCards;
   final Function() onAddNewCardPressed;
-  final ReceiverInfo receiverInfo;
+  final ReceiverInfo? receiverInfo;
+  final void Function(PaymentCardModel selectedCard)? onTab;
   const PaymentCardSelection({
     super.key,
     required this.paymentCards,
     required this.onAddNewCardPressed,
-    required this.receiverInfo,
+    this.receiverInfo,
+    this.onTab,
   });
 
   @override
@@ -43,7 +45,7 @@ class _PaymentCardSelectionState extends State<PaymentCardSelection> {
               children: [
                 const Center(
                   child: TextWidget(
-                    text: 'Payment Method',
+                    text: 'Saved Payment Cards',
                     type: TextType.small,
                   ),
                 ),
@@ -76,7 +78,7 @@ class _PaymentCardSelectionState extends State<PaymentCardSelection> {
                             iconPath: widget.paymentCards[i].cardBrand == 'visa'
                                 ? Assets.images.visaCard.path
                                 : Assets.images.masteredCard.path,
-                            title: widget.paymentCards[i].cardBrand,
+                            title: widget.paymentCards[i].cardBrand ?? '---',
                             subTitle:
                                 '${widget.paymentCards[i].cardBrand} ending **${widget.paymentCards[i].last4Digits}',
                           )
@@ -106,22 +108,28 @@ class _PaymentCardSelectionState extends State<PaymentCardSelection> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: ButtonWidget(
+                onPressed: widget.receiverInfo == null && widget.onTab != null
+                    ? () {
+                        widget.onTab!(
+                            widget.paymentCards[selectedPaymentMethodIndex]);
+                      }
+                    : () {
+                        context.read<MoneyTransferBloc>().add(
+                              SendMoney(
+                                receiverInfo: widget.receiverInfo!,
+                                paymentId: '',
+                                savedPaymentId: widget
+                                    .paymentCards[selectedPaymentMethodIndex]
+                                    .id,
+                              ),
+                            );
+                        context.pop();
+                      },
                 child: const TextWidget(
                   text: 'Next',
                   type: TextType.small,
                   color: Colors.white,
-                ),
-                onPressed: () {
-                  context.read<MoneyTransferBloc>().add(
-                        SendMoney(
-                          receiverInfo: widget.receiverInfo,
-                          paymentId: '',
-                          savedPaymentId: widget
-                              .paymentCards[selectedPaymentMethodIndex].id,
-                        ),
-                      );
-                  context.pop();
-                }),
+                )),
           )
         ],
       ),
