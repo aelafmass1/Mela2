@@ -24,7 +24,6 @@ import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart'
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -149,7 +148,8 @@ class _SentTabState extends State<SentTab> {
       for (final fee in card.fees) {
         if (fee.type == "PERCENTAGE") {
           totalFee +=
-              (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+              (fee.amount * (double.tryParse(usdController.text) ?? 0)) /
+                  100;
         } else {
           totalFee += fee.amount;
         }
@@ -1008,7 +1008,6 @@ class _SentTabState extends State<SentTab> {
                           selectedPhoneNumber = selectedContact
                               ?.contactPhoneNumber
                               ?.replaceAll(" ", "");
-                          _recipientSelectionFormKey.currentState!.validate();
                         });
                       },
                       readOnly: true,
@@ -1120,7 +1119,6 @@ class _SentTabState extends State<SentTab> {
                               selectedBank = value;
                             });
                           }
-                          _recipientSelectionFormKey.currentState!.validate();
                         },
                       );
                     },
@@ -1143,9 +1141,6 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
-                    },
-                    onChanged: (_) {
-                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
@@ -1183,9 +1178,6 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
-                    },
-                    onChanged: (_) {
-                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
@@ -1751,10 +1743,9 @@ class _SentTabState extends State<SentTab> {
                   );
                 } else if (state is MoneyTransferSuccess) {
                   String? lastDigit;
-                  final cardWallet = context.read<PaymentCardBloc>().state;
-                  if (cardWallet is PaymentCardSuccess) {
-                    final card =
-                        cardWallet.paymentCards[selectedPaymentMethodIndex];
+                  final state = context.read<PaymentCardBloc>().state;
+                  if (state is PaymentCardSuccess) {
+                    final card = state.paymentCards[selectedPaymentMethodIndex];
 
                     lastDigit = card.last4Digits;
                   }
@@ -1762,10 +1753,12 @@ class _SentTabState extends State<SentTab> {
                   context
                       .read<WalletTransactionBloc>()
                       .add(FetchWalletTransaction());
-                  showWalletReceipt(
-                      context,
-                      state.walletTransactionModel!
-                          .copyWith(bankLastDigits: lastDigit));
+                  context.pushNamed(
+                    RouteName.receipt,
+                    extra: receiverInfo?.copyWith(
+                      lastDigit: lastDigit,
+                    ),
+                  );
 
                   clearSendInfo();
                 }
