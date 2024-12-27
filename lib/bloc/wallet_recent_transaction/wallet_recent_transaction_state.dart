@@ -1,5 +1,6 @@
 part of 'wallet_recent_transaction_bloc.dart';
 
+@immutable
 sealed class WalletRecentTransactionState {}
 
 final class WalletRecentTransactionInitial

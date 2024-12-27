@@ -1,5 +1,6 @@
 part of 'money_request_bloc.dart';
 
+@immutable
 sealed class MoneyRequestState extends Equatable {
   const MoneyRequestState();
 

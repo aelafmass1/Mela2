@@ -1,5 +1,6 @@
 part of 'notification_bloc.dart';
 
+@immutable
 sealed class NotificationState extends Equatable {
   const NotificationState();
 

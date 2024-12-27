@@ -1,5 +1,6 @@
 part of 'bank_currency_rate_bloc.dart';
 
+@immutable
 sealed class BankCurrencyRateState {}
 
 final class BankCurrencyRateInitial extends BankCurrencyRateState {}
