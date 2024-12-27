@@ -24,7 +24,6 @@ import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart'
 import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/core/utils/show_wallet_receipt.dart';
 import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
@@ -130,11 +129,27 @@ class _SentTabState extends State<SentTab> {
 
   double _calculateSecondTotalFee(PaymentCardSuccess state) {
     double totalFee = 0;
+    for (final fee in state
+        .paymentCards[
+            selectedPaymentMethodIndex == -1 ? 0 : selectedPaymentMethodIndex]
+        .fees) {
+      if (fee.type == "PERCENTAGE") {
+        totalFee +=
+            (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+      } else {
+        totalFee += fee.amount;
+      }
+    }
+    return totalFee;
+  }
+   double _calculateTotalFee(PaymentCardSuccess state) {
+   double totalFee = 0;
     for (final card in state.paymentCards) {
       for (final fee in card.fees) {
         if (fee.type == "PERCENTAGE") {
           totalFee +=
-              (fee.amount * (double.tryParse(usdController.text) ?? 0)) / 100;
+              (fee.amount * (double.tryParse(usdController.text) ?? 0)) /
+                  100;
         } else {
           totalFee += fee.amount;
         }
@@ -993,7 +1008,6 @@ class _SentTabState extends State<SentTab> {
                           selectedPhoneNumber = selectedContact
                               ?.contactPhoneNumber
                               ?.replaceAll(" ", "");
-                          _recipientSelectionFormKey.currentState!.validate();
                         });
                       },
                       readOnly: true,
@@ -1105,7 +1119,6 @@ class _SentTabState extends State<SentTab> {
                               selectedBank = value;
                             });
                           }
-                          _recipientSelectionFormKey.currentState!.validate();
                         },
                       );
                     },
@@ -1128,9 +1141,6 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
-                    },
-                    onChanged: (_) {
-                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
@@ -1168,9 +1178,6 @@ class _SentTabState extends State<SentTab> {
                       if (Platform.isIOS) {
                         Focus.of(context).unfocus();
                       }
-                    },
-                    onChanged: (_) {
-                      _recipientSelectionFormKey.currentState!.validate();
                     },
                     keyboardType: TextInputType.phone,
                     inputFormatters: <TextInputFormatter>[
@@ -1439,99 +1446,231 @@ class _SentTabState extends State<SentTab> {
                                   ],
                                 );
                               } else if (state is PaymentCardSuccess) {
-                                return Column(
-                                  children: [
-                                    for (var fee in state.paymentCards
-                                        .expand((card) => card.fees))
-                                      Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                PaymentCardModel paymentCardModel =
+                                    state.paymentCards[
+                                        selectedPaymentMethodIndex == -1
+                                            ? 0
+                                            : selectedPaymentMethodIndex];
+
+                                return selectedPaymentMethodIndex == -1
+                                    ? Column(
                                             children: [
-                                              Row(
-                                                children: [
-                                                  TextWidget(
-                                                    text: fee.label,
-                                                    fontSize: 14,
-                                                  ),
-                                                  Visibility(
-                                                    visible: fee.type ==
-                                                        'PERCENTAGE',
-                                                    child: TextWidget(
-                                                      text:
-                                                          '  ${NumberFormat('##,###.##').format(fee.amount)}%',
-                                                      fontSize: 14,
-                                                      weight: FontWeight.w600,
+                                              SizedBox(
+                                                height: 34,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    const TextWidget(
+                                                      text: 'Total Fee',
+                                                      fontSize: 16,
+                                                      weight: FontWeight.w500,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  TextWidget(
-                                                    text:
-                                                        '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
-                                                    fontSize: 16,
-                                                    weight: FontWeight.w700,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Icon(
-                                                    Icons.info_outline,
-                                                    color: ColorName.grey
-                                                        .withOpacity(0.5),
-                                                    size: 20,
-                                                  ),
-                                                ],
+                                                    BlocBuilder<FeeBloc,
+                                                        FeeState>(
+                                                      builder:
+                                                          (context, feeState) {
+                                                        return Row(
+                                                          children: [
+                                                            const TextWidget(
+                                                              text:
+                                                                  '\$ 0',
+                                                              fontSize: 16,
+                                                              weight: FontWeight
+                                                                  .w700,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Icon(
+                                                              Icons
+                                                                  .info_outline,
+                                                              color: ColorName
+                                                                  .grey
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              size: 20,
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    )
+                                                  ],
+                                                ),
                                               ),
                                             ],
-                                          ),
-                                          const Divider(
-                                            color: ColorName.borderColor,
-                                          ),
-                                        ],
-                                      ),
-                                    SizedBox(
-                                      height: 34,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const TextWidget(
-                                            text: 'Total Fee',
-                                            fontSize: 16,
-                                            weight: FontWeight.w500,
-                                          ),
-                                          BlocBuilder<FeeBloc, FeeState>(
-                                            builder: (context, feeState) {
-                                              return Row(
-                                                children: [
-                                                  TextWidget(
-                                                    text:
-                                                        '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
-                                                    fontSize: 16,
-                                                    weight: FontWeight.w700,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Icon(
-                                                    Icons.info_outline,
-                                                    color: ColorName.grey
-                                                        .withOpacity(0.5),
-                                                    size: 20,
-                                                  ),
-                                                ],
-                                              );
-                                            },
                                           )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
+                                    : paymentCardModel.fees.isEmpty
+                                        ? Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 34,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    const TextWidget(
+                                                      text: 'Total Fee',
+                                                      fontSize: 16,
+                                                      weight: FontWeight.w500,
+                                                    ),
+                                                    BlocBuilder<FeeBloc,
+                                                        FeeState>(
+                                                      builder:
+                                                          (context, feeState) {
+                                                        return Row(
+                                                          children: [
+                                                            TextWidget(
+                                                              text:
+                                                                  '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
+                                                              fontSize: 16,
+                                                              weight: FontWeight
+                                                                  .w700,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Icon(
+                                                              Icons
+                                                                  .info_outline,
+                                                              color: ColorName
+                                                                  .grey
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              size: 20,
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Column(
+                                            children: paymentCardModel.fees
+                                                .map((fee) => Column(
+                                                      children: [
+                                                        Column(
+                                                          children: [
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    TextWidget(
+                                                                      text: fee
+                                                                          .label,
+                                                                      fontSize:
+                                                                          14,
+                                                                    ),
+                                                                    Visibility(
+                                                                      visible: fee
+                                                                              .type ==
+                                                                          'PERCENTAGE',
+                                                                      child:
+                                                                          TextWidget(
+                                                                        text:
+                                                                            '  ${NumberFormat('##,###.##').format(fee.amount)}%',
+                                                                        fontSize:
+                                                                            14,
+                                                                        weight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    TextWidget(
+                                                                      text:
+                                                                          '\$${_calculateSecondTotalFee(state).toStringAsFixed(2)}',
+                                                                      fontSize:
+                                                                          16,
+                                                                      weight: FontWeight
+                                                                          .w700,
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 5,
+                                                                    ),
+                                                                    Icon(
+                                                                      Icons
+                                                                          .info_outline,
+                                                                      color: ColorName
+                                                                          .grey
+                                                                          .withOpacity(
+                                                                              0.5),
+                                                                      size: 20,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            const Divider(
+                                                              color: ColorName
+                                                                  .borderColor,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                          height: 34,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              const TextWidget(
+                                                                text:
+                                                                    'Total Fee',
+                                                                fontSize: 16,
+                                                                weight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                              BlocBuilder<
+                                                                  FeeBloc,
+                                                                  FeeState>(
+                                                                builder: (context,
+                                                                    feeState) {
+                                                                  return Row(
+                                                                    children: [
+                                                                      TextWidget(
+                                                                        text:
+                                                                            '\$${NumberFormat('##,###.##').format(_calculateSecondTotalFee(state))}',
+                                                                        fontSize:
+                                                                            16,
+                                                                        weight:
+                                                                            FontWeight.w700,
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            5,
+                                                                      ),
+                                                                      Icon(
+                                                                        Icons
+                                                                            .info_outline,
+                                                                        color: ColorName
+                                                                            .grey
+                                                                            .withOpacity(0.5),
+                                                                        size:
+                                                                            20,
+                                                                      ),
+                                                                    ],
+                                                                  );
+                                                                },
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ))
+                                                .toList(),
+                                          );
                               }
                               return const SizedBox.shrink();
                             },
@@ -1554,10 +1693,9 @@ class _SentTabState extends State<SentTab> {
                   );
                 } else if (state is MoneyTransferSuccess) {
                   String? lastDigit;
-                  final cardWallet = context.read<PaymentCardBloc>().state;
-                  if (cardWallet is PaymentCardSuccess) {
-                    final card =
-                        cardWallet.paymentCards[selectedPaymentMethodIndex];
+                  final state = context.read<PaymentCardBloc>().state;
+                  if (state is PaymentCardSuccess) {
+                    final card = state.paymentCards[selectedPaymentMethodIndex];
 
                     lastDigit = card.last4Digits;
                   }
@@ -1565,10 +1703,12 @@ class _SentTabState extends State<SentTab> {
                   context
                       .read<WalletTransactionBloc>()
                       .add(FetchWalletTransaction());
-                  showWalletReceipt(
-                      context,
-                      state.walletTransactionModel!
-                          .copyWith(bankLastDigits: lastDigit));
+                  context.pushNamed(
+                    RouteName.receipt,
+                    extra: receiverInfo?.copyWith(
+                      lastDigit: lastDigit,
+                    ),
+                  );
 
                   clearSendInfo();
                 }
