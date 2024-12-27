@@ -88,7 +88,6 @@ class MoneyTransferRepository {
       );
 
       final data = jsonDecode(res.body);
-
       if (res.statusCode == 200 || res.statusCode == 201) {
         return data;
       }
