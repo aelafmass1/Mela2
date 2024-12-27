@@ -17,3 +17,17 @@ final class FeeSuccess extends FeeState {
 
   FeeSuccess({required this.fees});
 }
+
+final class RemittanceExchangeRateLoading extends FeeState {}
+
+final class RemittanceExchangeRateFailed extends FeeState {
+  final String reason;
+
+  RemittanceExchangeRateFailed({required this.reason});
+}
+
+final class RemittanceExchangeRateSuccess extends FeeState {
+  final List<RemittanceExchangeRateModel> walletCurrencies;
+
+  RemittanceExchangeRateSuccess({required this.walletCurrencies});
+}

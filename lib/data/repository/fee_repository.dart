@@ -31,4 +31,21 @@ class FeeRepository {
     }
     return [processErrorResponse(jsonDecode(response.body))];
   }
+
+  Future<List> fetchRemittanceExchangeRate(
+    String accessToken,
+  ) async {
+    final res = await client.get(
+      Uri.parse('$baseUrl/api/exchange-rates/remittance/active'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200) {
+      return data;
+    }
+    return [processErrorResponse(data)];
+  }
 }

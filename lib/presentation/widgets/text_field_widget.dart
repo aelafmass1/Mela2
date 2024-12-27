@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,6 +22,13 @@ class TextFieldWidget extends StatelessWidget {
   final FocusNode? focusNode;
   final Key? globalKey;
   final Function(String)? onChanged;
+  final BorderRadius? borderRadius;
+  final double? fontSize;
+  final EdgeInsetsGeometry? contentPadding;
+  final InputBorder? border;
+  final bool? autoFocus;
+  final TextStyle? hintTextStyle;
+  final int? maxLine;
   const TextFieldWidget(
       {super.key,
       required this.controller,
@@ -37,14 +46,28 @@ class TextFieldWidget extends StatelessWidget {
       this.inputFormatters,
       this.focusNode,
       this.onChanged,
+      this.borderRadius,
+      this.fontSize,
+      this.contentPadding,
+      this.border,
+      this.autoFocus,
+      this.maxLine,
+      this.hintTextStyle,
       this.errorText});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: globalKey,
+      autofocus: autoFocus ?? false,
       focusNode: focusNode,
       onTap: onTab,
+      onTapOutside: (p) {
+        if (Platform.isIOS) {
+          FocusScope.of(context).unfocus();
+        }
+      },
+      maxLines: maxLine ?? 1,
       onChanged: onChanged,
       obscureText: obscurePassword,
       controller: controller,
@@ -52,40 +75,43 @@ class TextFieldWidget extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       cursorColor: ColorName.primaryColor,
-      style: const TextStyle(
-        fontSize: 15,
+      style: TextStyle(
+        fontSize: fontSize ?? 15,
         fontWeight: FontWeight.w500,
       ),
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
         errorText: errorText,
-        contentPadding:
+        contentPadding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         hintText: hintText,
-        hintStyle: const TextStyle(
-          fontSize: 15,
-          color: Color(0xFF8E8E8E),
-          fontWeight: FontWeight.w500,
-        ),
+        hintStyle: hintTextStyle ??
+            TextStyle(
+              fontSize: fontSize ?? 15,
+              color: const Color(0xFF8E8E8E),
+              fontWeight: FontWeight.w500,
+            ),
         prefixText: prefixText != null ? '$prefixText ' : null,
         prefixIcon: prefix,
         suffixIcon: suffix,
-        prefixStyle: const TextStyle(
-          fontSize: 15,
+        prefixStyle: TextStyle(
+          fontSize: fontSize ?? 15,
           fontWeight: FontWeight.w500,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-          borderSide: enableFocusColor
-              ? const BorderSide(
-                  color: ColorName.primaryColor,
-                  width: 2,
-                )
-              : const BorderSide(),
-        ),
+        border: border ??
+            OutlineInputBorder(
+              borderRadius: borderRadius ?? BorderRadius.circular(40),
+            ),
+        focusedBorder: border ??
+            OutlineInputBorder(
+              borderRadius: borderRadius ?? BorderRadius.circular(40),
+              borderSide: enableFocusColor
+                  ? const BorderSide(
+                      color: ColorName.primaryColor,
+                      width: 2,
+                    )
+                  : const BorderSide(),
+            ),
       ),
     );
   }

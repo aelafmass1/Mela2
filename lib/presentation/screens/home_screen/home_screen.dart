@@ -13,7 +13,7 @@ import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/equb_tab.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/home_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/send_tab.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';

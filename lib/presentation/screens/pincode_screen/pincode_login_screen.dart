@@ -6,7 +6,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/reset_app_state.dart';
+import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 
 import '../../../core/utils/settings.dart';
 import '../../../core/utils/show_snackbar.dart';
@@ -45,6 +48,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   bool isAuthenticated = false;
 
   String firstPincode = '';
+  String displayName = '';
 
   List<String> getAllPins() {
     String pin1 = pin1Controller.text;
@@ -63,6 +67,11 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
         setState(() {
           isValid = true;
         });
+        context.read<AuthBloc>().add(
+              LoginWithPincode(
+                pincode: [pin1, pin2, pin3, pin4, pin5, pin6].join(),
+              ),
+            );
       }
 
       return [pin1, pin2, pin3, pin4, pin5, pin6];
@@ -150,6 +159,15 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
 
   @override
   void initState() {
+    getDisplayName().then((name) {
+      final names = name?.trim().split(' ');
+      if (names?.isNotEmpty == true) {
+        setState(() {
+          displayName = names?.first ?? '';
+        });
+      }
+    });
+    deleteToken();
     pin1Node.requestFocus();
     super.initState();
   }
@@ -182,23 +200,23 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
         toolbarHeight: 70,
         leading: const SizedBox.shrink(),
         actions: [
-          IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                deleteToken();
-                deleteDisplayName();
-                deletePhoneNumber();
-                deleteLogInStatus();
-                deleteCountryCode();
-                context.goNamed(RouteName.signup);
-              }),
-          const Spacer(),
           Padding(
             padding: const EdgeInsets.only(right: 15),
-            child: SvgPicture.asset(
-              Assets.images.svgs.horizontalMelaLogo,
-              width: 130,
-            ),
+            child: TextButton(
+                child: const TextWidget(
+                  text: 'Logout',
+                  type: TextType.small,
+                  color: ColorName.primaryColor,
+                ),
+                onPressed: () {
+                  resetAppState(context);
+                  deleteToken();
+                  deleteDisplayName();
+                  deletePhoneNumber();
+                  deleteLogInStatus();
+                  deleteCountryCode();
+                  context.goNamed(RouteName.signup);
+                }),
           ),
         ],
       ),
@@ -208,18 +226,14 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TextWidget(
-                text: 'Enter Your Pin',
-                color: ColorName.primaryColor,
-                fontSize: 20,
-                weight: FontWeight.w700,
-              ),
-              const SizedBox(height: 5),
-              const TextWidget(
-                text: 'Enter your pin to confirm your Identity.',
-                fontSize: 14,
-                color: ColorName.grey,
-                weight: FontWeight.w400,
+              const SizedBox(height: 30),
+              Align(
+                alignment: Alignment.center,
+                child: TextWidget(
+                  text: 'Hi, welcome $displayName',
+                  fontSize: 24,
+                  weight: FontWeight.w700,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 40),
@@ -241,7 +255,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 60),
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if (state is LoginWithPincodeFail) {
@@ -251,6 +265,13 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                       description: state.reason,
                     );
                   } else if (state is LoginWithPincodeSuccess) {
+                    if (FCMService.fcmToken.isNotEmpty) {
+                      context.read<NotificationBloc>().add(
+                            SaveFCMToken(
+                              fcmToken: FCMService.fcmToken,
+                            ),
+                          );
+                    }
                     setIsLoggedIn(true);
                     context.goNamed(RouteName.home);
                   }
@@ -280,7 +301,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
                 },
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.only(top: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -317,7 +338,7 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   // Build the custom numeric keypad
   Widget _buildKeypad() {
     return Padding(
-      padding: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.only(top: 10),
       child: Column(
         children: [
           Row(
@@ -397,19 +418,24 @@ class _PincodeLoginScreenState extends State<PincodeLoginScreen> {
   // Build each button of the keypad
   Widget _buildKey(String value) {
     return SizedBox(
-      width: 100,
-      height: 60,
-      child: ButtonWidget(
-        elevation: 0,
-        horizontalPadding: 0,
-        topPadding: 0,
-        verticalPadding: 0,
-        color: Colors.grey[100],
-        child: TextWidget(
-          text: value,
-          fontSize: 25,
+      width: 105,
+      height: 65,
+      child: GestureDetector(
+        onTap: () => _onKeyPressed(value),
+        onVerticalDragStart: (e) => _onKeyPressed(value),
+        onHorizontalDragStart: (e) => _onKeyPressed(value),
+        child: ButtonWidget(
+          elevation: 0,
+          horizontalPadding: 0,
+          topPadding: 0,
+          verticalPadding: 0,
+          color: Colors.grey[100],
+          onPressed: null,
+          child: TextWidget(
+            text: value,
+            fontSize: 25,
+          ),
         ),
-        onPressed: () => _onKeyPressed(value),
       ),
     );
   }

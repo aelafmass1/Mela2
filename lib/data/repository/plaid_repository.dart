@@ -47,4 +47,24 @@ class PlaidRepository {
     }
     return processErrorResponse(jsonDecode(res.body));
   }
+
+  Future<Map> addBankAccount(String accessToken, String publicToken) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/payment-methods/add-bank-account'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(
+        {
+          "publicToken": publicToken,
+        },
+      ),
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    }
+    return processErrorResponse(jsonDecode(res.body));
+  }
 }

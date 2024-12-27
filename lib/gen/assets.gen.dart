@@ -64,6 +64,10 @@ class $AssetsImagesGen {
   AssetGenImage get dashnBankLogo =>
       const AssetGenImage('assets/images/dashn_bank_logo.png');
 
+  /// File path: assets/images/discover_logo.png
+  AssetGenImage get discoverLogo =>
+      const AssetGenImage('assets/images/discover_logo.png');
+
   /// File path: assets/images/dollar.png
   AssetGenImage get dollar => const AssetGenImage('assets/images/dollar.png');
 
@@ -82,9 +86,17 @@ class $AssetsImagesGen {
   AssetGenImage get equbImage =>
       const AssetGenImage('assets/images/equb_image.png');
 
+  /// File path: assets/images/ethiopian_circular_flag.png
+  AssetGenImage get ethiopianCircularFlag =>
+      const AssetGenImage('assets/images/ethiopian_circular_flag.png');
+
   /// File path: assets/images/ethiopian_flag.png
   AssetGenImage get ethiopianFlag =>
       const AssetGenImage('assets/images/ethiopian_flag.png');
+
+  /// File path: assets/images/eur_circular.png
+  AssetGenImage get eurCircular =>
+      const AssetGenImage('assets/images/eur_circular.png');
 
   /// File path: assets/images/geda_bank_logo.png
   AssetGenImage get gedaBankLogo =>
@@ -118,6 +130,10 @@ class $AssetsImagesGen {
   AssetGenImage get masteredCard =>
       const AssetGenImage('assets/images/mastered_card.png');
 
+  /// File path: assets/images/mela_logo.png
+  AssetGenImage get melaLogo =>
+      const AssetGenImage('assets/images/mela_logo.png');
+
   /// File path: assets/images/news_background.png
   AssetGenImage get newsBackground =>
       const AssetGenImage('assets/images/news_background.png');
@@ -130,9 +146,21 @@ class $AssetsImagesGen {
   AssetGenImage get nibBankLogo =>
       const AssetGenImage('assets/images/nib_bank_logo.png');
 
+  /// File path: assets/images/no_notification.png
+  AssetGenImage get noNotification =>
+      const AssetGenImage('assets/images/no_notification.png');
+
+  /// File path: assets/images/no_transaction.png
+  AssetGenImage get noTransaction =>
+      const AssetGenImage('assets/images/no_transaction.png');
+
   /// File path: assets/images/oromia_bank_logo.png
   AssetGenImage get oromiaBankLogo =>
       const AssetGenImage('assets/images/oromia_bank_logo.png');
+
+  /// File path: assets/images/paypal_logo.png
+  AssetGenImage get paypalLogo =>
+      const AssetGenImage('assets/images/paypal_logo.png');
 
   /// File path: assets/images/profile_image.png
   AssetGenImage get profileImage =>
@@ -170,6 +198,10 @@ class $AssetsImagesGen {
   AssetGenImage get tsehayBankLogo =>
       const AssetGenImage('assets/images/tsehay_bank_logo.png');
 
+  /// File path: assets/images/usa_circular_flag.png
+  AssetGenImage get usaCircularFlag =>
+      const AssetGenImage('assets/images/usa_circular_flag.png');
+
   /// File path: assets/images/usa_flag.png
   AssetGenImage get usaFlag =>
       const AssetGenImage('assets/images/usa_flag.png');
@@ -201,12 +233,15 @@ class $AssetsImagesGen {
         checkedLogo,
         contactPageImage,
         dashnBankLogo,
+        discoverLogo,
         dollar,
         doodles,
         enatBankLogo,
         equbIcon,
         equbImage,
+        ethiopianCircularFlag,
         ethiopianFlag,
+        eurCircular,
         gedaBankLogo,
         globalBankLogo,
         hibretBankLogo,
@@ -215,10 +250,14 @@ class $AssetsImagesGen {
         homeIcon,
         increaseArrow,
         masteredCard,
+        melaLogo,
         newsBackground,
         nextArrow,
         nibBankLogo,
+        noNotification,
+        noTransaction,
         oromiaBankLogo,
+        paypalLogo,
         profileImage,
         receipt,
         reward,
@@ -228,6 +267,7 @@ class $AssetsImagesGen {
         transactionIcon,
         tsedeyBankLogo,
         tsehayBankLogo,
+        usaCircularFlag,
         usaFlag,
         visaCard,
         wegagenBankLogo,
@@ -238,14 +278,26 @@ class $AssetsImagesGen {
 class $AssetsImagesSvgsGen {
   const $AssetsImagesSvgsGen();
 
+  /// File path: assets/images/svgs/add_money.svg
+  String get addMoney => 'assets/images/svgs/add_money.svg';
+
+  /// File path: assets/images/svgs/add_money_fail_icon.svg
+  String get addMoneyFailIcon => 'assets/images/svgs/add_money_fail_icon.svg';
+
   /// File path: assets/images/svgs/admin_icon.svg
   String get adminIcon => 'assets/images/svgs/admin_icon.svg';
 
   /// File path: assets/images/svgs/amount_icon.svg
   String get amountIcon => 'assets/images/svgs/amount_icon.svg';
 
+  /// File path: assets/images/svgs/back_arrow.svg
+  String get backArrow => 'assets/images/svgs/back_arrow.svg';
+
   /// File path: assets/images/svgs/back_space.svg
   String get backSpace => 'assets/images/svgs/back_space.svg';
+
+  /// File path: assets/images/svgs/bank_logo.svg
+  String get bankLogo => 'assets/images/svgs/bank_logo.svg';
 
   /// File path: assets/images/svgs/camera_icon.svg
   String get cameraIcon => 'assets/images/svgs/camera_icon.svg';
@@ -255,6 +307,9 @@ class $AssetsImagesSvgsGen {
 
   /// File path: assets/images/svgs/checkmark_icon.svg
   String get checkmarkIcon => 'assets/images/svgs/checkmark_icon.svg';
+
+  /// File path: assets/images/svgs/circular_user_icon.svg
+  String get circularUserIcon => 'assets/images/svgs/circular_user_icon.svg';
 
   /// File path: assets/images/svgs/complete_logo.svg
   String get completeLogo => 'assets/images/svgs/complete_logo.svg';
@@ -271,8 +326,15 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/equb_icon.svg
   String get equbIcon => 'assets/images/svgs/equb_icon.svg';
 
+  /// File path: assets/images/svgs/equb_saving_icon.svg
+  String get equbSavingIcon => 'assets/images/svgs/equb_saving_icon.svg';
+
   /// File path: assets/images/svgs/exchange_icon.svg
   String get exchangeIcon => 'assets/images/svgs/exchange_icon.svg';
+
+  /// File path: assets/images/svgs/exchange_rate_change_icon.svg
+  String get exchangeRateChangeIcon =>
+      'assets/images/svgs/exchange_rate_change_icon.svg';
 
   /// File path: assets/images/svgs/face_id.svg
   String get faceId => 'assets/images/svgs/face_id.svg';
@@ -302,8 +364,23 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/mela_logo.svg
   String get melaLogo => 'assets/images/svgs/mela_logo.svg';
 
+  /// File path: assets/images/svgs/qrcode_logo.svg
+  String get qrcodeLogo => 'assets/images/svgs/qrcode_logo.svg';
+
+  /// File path: assets/images/svgs/request_logo.svg
+  String get requestLogo => 'assets/images/svgs/request_logo.svg';
+
+  /// File path: assets/images/svgs/request_money_icon.svg
+  String get requestMoneyIcon => 'assets/images/svgs/request_money_icon.svg';
+
+  /// File path: assets/images/svgs/search.svg
+  String get search => 'assets/images/svgs/search.svg';
+
   /// File path: assets/images/svgs/send_icon.svg
   String get sendIcon => 'assets/images/svgs/send_icon.svg';
+
+  /// File path: assets/images/svgs/share.svg
+  String get share => 'assets/images/svgs/share.svg';
 
   /// File path: assets/images/svgs/spin_wheel.svg
   String get spinWheel => 'assets/images/svgs/spin_wheel.svg';
@@ -311,20 +388,49 @@ class $AssetsImagesSvgsGen {
   /// File path: assets/images/svgs/transaction_icon.svg
   String get transactionIcon => 'assets/images/svgs/transaction_icon.svg';
 
+  /// File path: assets/images/svgs/transaction_icon_vertical.svg
+  String get transactionIconVertical =>
+      'assets/images/svgs/transaction_icon_vertical.svg';
+
+  /// File path: assets/images/svgs/user_group.svg
+  String get userGroup => 'assets/images/svgs/user_group.svg';
+
+  /// File path: assets/images/svgs/wallet_02.svg
+  String get wallet02 => 'assets/images/svgs/wallet_02.svg';
+
+  /// File path: assets/images/svgs/wallet_logo.svg
+  String get walletLogo => 'assets/images/svgs/wallet_logo.svg';
+
+  /// File path: assets/images/svgs/wallet_pattern.svg
+  String get walletPattern => 'assets/images/svgs/wallet_pattern.svg';
+
+  /// File path: assets/images/svgs/warning_icon.svg
+  String get warningIcon => 'assets/images/svgs/warning_icon.svg';
+
+  /// File path: assets/images/svgs/withdraw_logo.svg
+  String get withdrawLogo => 'assets/images/svgs/withdraw_logo.svg';
+
   /// List of all assets
   List<String> get values => [
+        addMoney,
+        addMoneyFailIcon,
         adminIcon,
         amountIcon,
+        backArrow,
         backSpace,
+        bankLogo,
         cameraIcon,
         cardPattern,
         checkmarkIcon,
+        circularUserIcon,
         completeLogo,
         discovery,
         editIcon,
         endTimeIcon,
         equbIcon,
+        equbSavingIcon,
         exchangeIcon,
+        exchangeRateChangeIcon,
         faceId,
         filterIcon,
         frequencyIcon,
@@ -334,9 +440,21 @@ class $AssetsImagesSvgsGen {
         horizontalMelaLogo,
         increaseArrow,
         melaLogo,
+        qrcodeLogo,
+        requestLogo,
+        requestMoneyIcon,
+        search,
         sendIcon,
+        share,
         spinWheel,
-        transactionIcon
+        transactionIcon,
+        transactionIconVertical,
+        userGroup,
+        wallet02,
+        walletLogo,
+        walletPattern,
+        warningIcon,
+        withdrawLogo
       ];
 }
 

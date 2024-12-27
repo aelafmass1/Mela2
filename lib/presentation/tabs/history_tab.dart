@@ -1,16 +1,24 @@
+import 'dart:developer';
+
+import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:transaction_mobile_app/bloc/transaction/transaction_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:transaction_mobile_app/bloc/wallet_transaction/wallet_transaction_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
-import 'package:transaction_mobile_app/data/models/receiver_info_model.dart';
+import 'package:transaction_mobile_app/data/models/wallet_transaction_detail_model.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/loading_widget.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
+
+import '../../core/utils/show_wallet_receipt.dart';
+import '../../data/models/receiver_info_model.dart';
+import '../../data/models/wallet_transaction_model.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
@@ -21,10 +29,62 @@ class HistoryTab extends StatefulWidget {
 
 class _HistoryTabState extends State<HistoryTab> {
   String selectedFilter = 'all';
+
+  List<Contact> contacts = [];
+
+  _fetchContacts() async {
+    try {
+      if (await Permission.contacts.isGranted) {
+        contacts = await FastContacts.getAllContacts();
+        setState(() {
+          contacts = contacts;
+        });
+      } else {
+        await Permission.contacts.request();
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  _getContactName(WalletTransactionDetailModel transaction) {
+    if (transaction.transactionType == 'PENDING_TRANSFER') {
+      final contact = contacts.where((c) {
+        if (c.phones.isEmpty == true) {
+          return false;
+        }
+        if (transaction.pendingTransfer?['recipientPhoneNumber'] != null) {
+          return c.phones.first.number ==
+              transaction.pendingTransfer!['recipientPhoneNumber'];
+        }
+        return false;
+      });
+      if (contact.isNotEmpty) {
+        return contact.first.displayName;
+      } else {
+        return "Unregistered User";
+      }
+    }
+    return transaction.receiverName ??
+        (transaction.toWallet == null
+            ? 'Unregistered User'
+            : '${transaction.toWallet?.holder?.firstName ?? ''} ${transaction.toWallet?.holder?.lastName ?? ''}');
+  }
+
   @override
   void initState() {
-    context.read<TransactionBloc>().add(FetchTrasaction());
+    _fetchContacts();
+    final state = context.read<WalletTransactionBloc>().state;
+    if (state is! WalletTransactionSuccess) {
+      context.read<WalletTransactionBloc>().add(FetchWalletTransaction());
+    }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    contacts.clear();
+    super.dispose();
   }
 
   @override
@@ -37,6 +97,8 @@ class _HistoryTabState extends State<HistoryTab> {
         toolbarHeight: 50,
         title: const TextWidget(
           text: 'Transaction History',
+          fontSize: 20,
+          weight: FontWeight.w700,
         ),
         actions: [
           // IconButton(
@@ -119,34 +181,6 @@ class _HistoryTabState extends State<HistoryTab> {
                           });
                         }),
                   ),
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 75,
-                    height: 30,
-                    child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: selectedFilter == 'equb'
-                              ? ColorName.primaryColor
-                              : null,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: selectedFilter == 'equb'
-                                ? BorderSide.none
-                                : const BorderSide(),
-                          ),
-                        ),
-                        child: TextWidget(
-                          text: 'Equb',
-                          fontSize: 12,
-                          color: selectedFilter == 'equb' ? Colors.white : null,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            selectedFilter = 'equb';
-                          });
-                        }),
-                  )
                 ],
               ),
             ),
@@ -156,79 +190,86 @@ class _HistoryTabState extends State<HistoryTab> {
                 color: ColorName.borderColor,
               ),
             ),
-            Expanded(
-              child: BlocConsumer<TransactionBloc, TransactionState>(
-                listener: (context, state) {
-                  if (state is TransactionFail) {
-                    showSnackbar(
-                      context,
-                      title: 'Error',
-                      description: state.reason,
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is TransactionLoading) {
-                    return const Center(
+            BlocConsumer<WalletTransactionBloc, WalletTransactionState>(
+              listener: (context, state) {
+                if (state is WalletTransactionFail) {
+                  showSnackbar(
+                    context,
+                    title: 'Error',
+                    description: state.reason,
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is WalletTransactionLoading) {
+                  return const Expanded(
+                    child: Align(
+                      alignment: Alignment.center,
                       child: LoadingWidget(
                         color: ColorName.primaryColor,
                       ),
-                    );
-                  } else if (state is TransactionSuccess) {
-                    if (state.data.isNotEmpty) {
-                      return Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            context
-                                .read<TransactionBloc>()
-                                .add(FetchTrasaction());
-                          },
-                          child: ListView.separated(
+                    ),
+                  );
+                } else if (state is WalletTransactionSuccess) {
+                  if (state.walletTransactions.isNotEmpty) {
+                    return Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          context
+                              .read<WalletTransactionBloc>()
+                              .add(FetchWalletTransaction());
+                        },
+                        child: ListView.separated(
                             separatorBuilder: (context, index) => const Divider(
-                              color: ColorName.borderColor,
-                            ),
-                            itemCount: state.data.length,
-                            itemBuilder: (context, index) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextWidget(
-                                  text: DateFormat('yyyy-MM-dd')
-                                              .format(DateTime.now()) ==
-                                          state.data.keys.elementAt(index)
-                                      ? 'Today'
-                                      : (DateTime.parse(state.data.keys
-                                                          .elementAt(index))
-                                                      .day -
-                                                  1) ==
-                                              DateTime.now().day
-                                          ? 'Yesterday'
-                                          : DateFormat('d-MMMM yyyy').format(
-                                              DateTime.parse(state.data.keys
-                                                  .elementAt(index))),
-                                  color: ColorName.primaryColor,
-                                  fontSize: 14,
-                                  weight: FontWeight.w600,
+                                  color: ColorName.borderColor,
                                 ),
-                                for (var transaction
-                                    in state.data.values.elementAt(index))
-                                  _buildTrasactionTile(transaction),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return const Center(
-                      child: TextWidget(
-                        text: 'Transaction history is empty',
-                        type: TextType.small,
-                        weight: FontWeight.w300,
+                            itemCount: state.walletTransactions.length,
+                            itemBuilder: (context, index) {
+                              var key = state.walletTransactions.keys
+                                  .elementAt(index);
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextWidget(
+                                    text: DateFormat('yyyy-MM-dd')
+                                                .format(DateTime.now()) ==
+                                            key
+                                        ? 'Today'
+                                        : (DateTime.parse(key).day - 1) ==
+                                                DateTime.now().day
+                                            ? 'Yesterday'
+                                            : DateFormat('d-MMMM yyyy')
+                                                .format(DateTime.parse(key)),
+                                    color: ColorName.primaryColor,
+                                    fontSize: 14,
+                                    weight: FontWeight.w600,
+                                  ),
+                                  for (var transaction
+                                      in state.walletTransactions[key]!)
+                                    _buildTrasactionTile(transaction),
+                                ],
+                              );
+                            }),
                       ),
                     );
                   }
-                  return const SizedBox.shrink();
-                },
-              ),
+                  return Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      Assets.images.noTransaction.image(
+                        width: 350,
+                        height: 350,
+                      ),
+                      const TextWidget(
+                        text: 'oops, You don’t have any History.',
+                        weight: FontWeight.w600,
+                        fontSize: 16,
+                      )
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             )
           ],
         ),
@@ -236,13 +277,40 @@ class _HistoryTabState extends State<HistoryTab> {
     );
   }
 
-  _buildTrasactionTile(ReceiverInfo receiverInfo) {
+  _buildTrasactionTile(WalletTransactionDetailModel transaction) {
     return ListTile(
       onTap: () {
-        context.pushNamed(
-          RouteName.receipt,
-          extra: receiverInfo,
-        );
+        if (transaction.transactionType == 'REMITTANCE') {
+          final receiverInfo = ReceiverInfo(
+            receiverName: _getContactName(transaction),
+            receiverPhoneNumber: transaction.receiverPhoneNumber ?? '',
+            receiverBankName: transaction.receiverBank ?? '',
+            receiverAccountNumber: transaction.receiverAccountNumber ?? '',
+            amount: transaction.amount?.toDouble() ?? 0,
+            paymentType: transaction.transactionType,
+          );
+          context.pushNamed(
+            RouteName.receipt,
+            extra: receiverInfo,
+          );
+        } else {
+          showWalletReceipt(
+            context,
+            WalletTransactionModel(
+              amount: transaction.amount ?? 0,
+              note: transaction.note,
+              fromWalletBalance: transaction.convertedAmount,
+              fromWalletId: transaction.fromWallet?.walletId ?? 0,
+              timestamp: transaction.timestamp,
+              toWalletId: transaction.toWallet?.walletId,
+              transactionId: transaction.transactionId ?? 0,
+              transactionType: transaction.transactionType,
+              from:
+                  "${transaction.fromWallet?.holder?.firstName} ${transaction.fromWallet?.holder?.lastName}",
+              to: _getContactName(transaction),
+            ),
+          );
+        }
       },
       leading: Container(
         width: 34,
@@ -264,24 +332,27 @@ class _HistoryTabState extends State<HistoryTab> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           TextWidget(
-            text: '\$${receiverInfo.amount}',
+            text: '\$${transaction.amount}',
             fontSize: 14,
             weight: FontWeight.w600,
           ),
           TextWidget(
-            text: DateFormat('hh:mm a').format(receiverInfo.transactionDate!),
+            text: DateFormat('hh:mm a').format(transaction.timestamp.toLocal()),
             fontSize: 10,
             weight: FontWeight.w400,
           )
         ],
       ),
       title: TextWidget(
-        text: receiverInfo.receiverName,
+        text: _getContactName(transaction),
         fontSize: 14,
         weight: FontWeight.w400,
       ),
       subtitle: TextWidget(
-        text: receiverInfo.receiverPhoneNumber,
+        text: transaction.receiverPhoneNumber ??
+            (transaction.toWallet == null
+                ? '${transaction.pendingTransfer?['recipientPhoneNumber'] ?? ''}'
+                : ("+${transaction.toWallet?.holder?.countryCode ?? ''} ${transaction.toWallet?.holder?.phoneNumber ?? ''}")),
         fontSize: 10,
         weight: FontWeight.w400,
       ),

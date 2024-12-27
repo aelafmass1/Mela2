@@ -7,7 +7,7 @@ class EqubMemberModel {
   final String? username;
   final String role;
   final String status;
-  final EqubUser? user;
+  final MelaUser? user;
   EqubMemberModel({
     required this.id,
     this.userId,
@@ -23,7 +23,7 @@ class EqubMemberModel {
     String? username,
     String? role,
     String? status,
-    EqubUser? user,
+    MelaUser? user,
   }) {
     return EqubMemberModel(
       id: id ?? this.id,
@@ -54,7 +54,7 @@ class EqubMemberModel {
       role: map['role'] as String,
       status: map['status'] as String,
       user: map['user'] != null
-          ? EqubUser.fromMap(map['user'] as Map<String, dynamic>)
+          ? MelaUser.fromMap(map['user'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -92,25 +92,25 @@ class EqubMemberModel {
   }
 }
 
-class EqubUser {
+class MelaUser {
   final String? firstName;
   final String? lastName;
   final int phoneNumber;
   final int countryCode;
-  EqubUser({
+  MelaUser({
     this.firstName,
     this.lastName,
     required this.phoneNumber,
     required this.countryCode,
   });
 
-  EqubUser copyWith({
+  MelaUser copyWith({
     String? firstName,
     String? lastName,
     int? phoneNumber,
     int? countryCode,
   }) {
-    return EqubUser(
+    return MelaUser(
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -127,8 +127,8 @@ class EqubUser {
     };
   }
 
-  factory EqubUser.fromMap(Map<String, dynamic> map) {
-    return EqubUser(
+  factory MelaUser.fromMap(Map map) {
+    return MelaUser(
       firstName: map['firstName'] != null ? map['firstName'] as String : null,
       lastName: map['lastName'] != null ? map['lastName'] as String : null,
       phoneNumber: map['phoneNumber'] as int,
@@ -138,8 +138,8 @@ class EqubUser {
 
   String toJson() => json.encode(toMap());
 
-  factory EqubUser.fromJson(String source) =>
-      EqubUser.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory MelaUser.fromJson(String source) =>
+      MelaUser.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -147,7 +147,7 @@ class EqubUser {
   }
 
   @override
-  bool operator ==(covariant EqubUser other) {
+  bool operator ==(covariant MelaUser other) {
     if (identical(this, other)) return true;
 
     return other.firstName == firstName &&

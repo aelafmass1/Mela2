@@ -6,6 +6,38 @@ import '../../../../data/models/curruncy_model.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/text_widget.dart';
 
+class DashedLinePainter extends CustomPainter {
+  final Color color;
+  final double dashLength;
+  final double dashSpace;
+
+  DashedLinePainter({
+    this.color = Colors.amber,
+    this.dashLength = 5,
+    this.dashSpace = 3,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double startY = 0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+
+    while (startY < size.height) {
+      canvas.drawLine(
+        Offset(0, startY),
+        Offset(0, startY + dashLength),
+        paint,
+      );
+      startY += dashLength + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
 class ExchangeRateCard extends StatelessWidget {
   final CurrencyModel currencyModel;
   const ExchangeRateCard({super.key, required this.currencyModel});
@@ -13,7 +45,7 @@ class ExchangeRateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 190,
+      width: 200,
       height: 90,
       margin: const EdgeInsets.symmetric(horizontal: 5),
       padding: const EdgeInsets.all(7),
@@ -34,62 +66,87 @@ class ExchangeRateCard extends StatelessWidget {
   }
 
   _buildLeft() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 10,
-              backgroundImage: Assets.images.usaFlag.provider(),
+        Positioned(
+          left: 10,
+          top: 9,
+          child: CustomPaint(
+            size: const Size(1, 65),
+            painter: DashedLinePainter(
+              color: ColorName.grey,
+              dashLength: 2,
+              dashSpace: 3,
             ),
-            const SizedBox(width: 7),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextWidget(
-                  text: currencyModel.currencyCode,
-                  fontSize: 8,
-                  weight: FontWeight.w500,
-                  color: ColorName.primaryColor,
-                ),
-                TextWidget(
-                  text: '1 ${currencyModel.currencyCode}',
-                  fontSize: 12,
-                  color: ColorName.primaryColor,
-                )
-              ],
-            )
-          ],
+          ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              radius: 10,
-              backgroundImage: Assets.images.ethiopianFlag.provider(),
-            ),
-            const SizedBox(width: 7),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const TextWidget(
-                  text: 'ET Birr',
-                  fontSize: 8,
-                  weight: FontWeight.w500,
-                  color: ColorName.primaryColor,
+                Container(
+                  width: 20,
+                  height: 20,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'icons/currency/${currencyModel.currencyCode.toLowerCase()}.png',
+                    package: 'currency_icons',
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                TextWidget(
-                  text: '${currencyModel.rate} ETB',
-                  fontSize: 12,
-                  color: ColorName.primaryColor,
+                const SizedBox(width: 7),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextWidget(
+                      text: currencyModel.currencyCode,
+                      fontSize: 8,
+                      weight: FontWeight.w500,
+                      color: ColorName.primaryColor,
+                    ),
+                    TextWidget(
+                      text: '1 ${currencyModel.currencyCode}',
+                      fontSize: 12,
+                      color: ColorName.primaryColor,
+                    )
+                  ],
                 )
               ],
-            )
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 10,
+                  backgroundImage: Assets.images.ethiopianFlag.provider(),
+                ),
+                const SizedBox(width: 7),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const TextWidget(
+                      text: 'ET Birr',
+                      fontSize: 8,
+                      weight: FontWeight.w500,
+                      color: ColorName.primaryColor,
+                    ),
+                    TextWidget(
+                      text: '${currencyModel.rate} ETB',
+                      fontSize: 12,
+                      color: ColorName.primaryColor,
+                    )
+                  ],
+                )
+              ],
+            ),
           ],
         ),
       ],
@@ -98,35 +155,16 @@ class ExchangeRateCard extends StatelessWidget {
 
   _buildRight() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40),
-            border: Border.all(
-              color: ColorName.borderColor,
-            ),
-          ),
-          child: Row(
-            children: [
-              const TextWidget(
-                text: 'CBE',
-                fontSize: 8,
-              ),
-              const SizedBox(width: 5),
-              Assets.images.cbeLogo.image(
-                width: 14,
-                height: 14,
-              ),
-            ],
-          ),
-        ),
         TextWidget(
           text: '${currencyModel.rate} ETB',
           fontSize: 14,
+          color: ColorName.primaryColor,
+          weight: FontWeight.w600,
         ),
+        const SizedBox(height: 10),
         Row(
           children: [
             SvgPicture.asset(
