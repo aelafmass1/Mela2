@@ -288,8 +288,6 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                                   .read<PaymentCardBloc>()
                                   .state
                                   .paymentCards;
-                              print("+++++");
-                              print(cards[selectedAccountIndex].id);
                               setState(() {
                                 selectedPaymentCardId =
                                     cards[selectedAccountIndex].id;
