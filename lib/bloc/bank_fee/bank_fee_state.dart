@@ -1,5 +1,6 @@
 part of 'bank_fee_bloc.dart';
 
+@immutable
 sealed class BankFeeState {}
 
 final class BankFeeInitial extends BankFeeState {}

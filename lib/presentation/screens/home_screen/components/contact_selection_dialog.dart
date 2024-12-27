@@ -7,6 +7,8 @@ import 'package:transaction_mobile_app/presentation/widgets/back_button.dart';
 import 'package:transaction_mobile_app/presentation/widgets/text_widget.dart';
 
 class ContactSelectionDialog extends StatefulWidget {
+  const ContactSelectionDialog({super.key});
+
   @override
   _ContactSelectionDialogState createState() => _ContactSelectionDialogState();
 }

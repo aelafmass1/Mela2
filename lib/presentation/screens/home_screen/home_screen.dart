@@ -8,12 +8,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:transaction_mobile_app/core/utils/contact_utils.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/tabs/account_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/equb_tab.dart';
-import 'package:transaction_mobile_app/presentation/tabs/home_tab.dart';
+import 'package:transaction_mobile_app/presentation/tabs/home_tab/home_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/history_tab.dart';
 import 'package:transaction_mobile_app/presentation/tabs/send_tab.dart';
 import 'package:transaction_mobile_app/presentation/widgets/button_widget.dart';
@@ -65,21 +66,16 @@ class _HomeScreenState extends State<HomeScreen>
             UpdateAvailability.updateAvailable) {
           ///Update available
           if (appUpdateInfo.immediateAllowed) {
-            debugPrint('Start an immediate update');
             String? message =
                 await manager.startAnUpdate(type: AppUpdateType.immediate);
 
             ///message return null when run update success
           } else if (appUpdateInfo.flexibleAllowed) {
-            debugPrint('Start an flexible update');
             String? message =
                 await manager.startAnUpdate(type: AppUpdateType.flexible);
 
             ///message return null when run update success
-          } else {
-            debugPrint(
-                'Update available. Immediate & Flexible Update Flow not allow');
-          }
+          } else {}
         }
       } else if (Platform.isIOS) {
         VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(
@@ -89,9 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
           _showUpdateBottomSheet(versionInfo.appStoreLink);
         }
       }
-    } catch (e) {
-      print('Failed to check for update: $e');
-    }
+    } catch (e) {}
   }
 
   // Method to show the BottomSheet
@@ -183,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen>
     });
     reviewTheApp();
     context.read<NavigationBloc>().add(NavigateTo(index: 0));
+    fetchContacts(context);
     // getPackageData().then((value) {
     //   _checkForUpdate();
     // });

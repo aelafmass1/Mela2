@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http_interceptor/http/intercepted_client.dart';
 import 'package:transaction_mobile_app/core/constants/url_constants.dart';
 import 'package:transaction_mobile_app/core/utils/process_error_response_.dart';
+import 'package:transaction_mobile_app/core/utils/settings.dart';
 
 class PaymentCardRepository {
   final InterceptedClient client;
@@ -24,10 +25,11 @@ class PaymentCardRepository {
   ///
   /// Returns:
   /// A `Future<Map<String, dynamic>>` containing the payment card data or an error response.
-  Future<Map<String, dynamic>> addPaymentCard({
-    required String accessToken,
+  Future<Map> addPaymentCard({
     required String token,
   }) async {
+    final accessToken = await getToken();
+
     final res = await client.post(
       Uri.parse('$baseUrl/payment-methods/add-card'),
       headers: {
@@ -46,6 +48,28 @@ class PaymentCardRepository {
       return data;
     }
     return processErrorResponse(data);
+  }
+
+  Future<Map> addBankAccount(String publicToken) async {
+    final token = await getToken();
+
+    final res = await client.post(
+      Uri.parse('$baseUrl/payment-methods/add-bank-account'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(
+        {
+          "publicToken": publicToken,
+        },
+      ),
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    }
+    return processErrorResponse(jsonDecode(res.body));
   }
 
   /// Fetches a list of payment cards associated with the provided access token.

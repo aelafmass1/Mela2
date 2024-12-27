@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../core/exceptions/server_exception.dart';

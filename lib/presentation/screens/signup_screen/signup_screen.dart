@@ -1,10 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -68,6 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
         });
       }
     });
+
     super.initState();
   }
 
@@ -206,7 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           }
                           return null;
                         },
-                        obscurePassword: showPassword,
+                        obscurePassword: !showPassword,
                         controller: passwordController,
                         hintText: 'Password',
                         suffix: Padding(

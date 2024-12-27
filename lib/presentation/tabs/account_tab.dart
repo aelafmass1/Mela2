@@ -4,10 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:transaction_mobile_app/bloc/auth/auth_bloc.dart';
+import 'package:transaction_mobile_app/bloc/notification/notification_bloc.dart';
+import 'package:transaction_mobile_app/bloc/payment_card/payment_card_bloc.dart';
 import 'package:transaction_mobile_app/config/routing.dart';
+import 'package:transaction_mobile_app/core/utils/reset_app_state.dart';
 import 'package:transaction_mobile_app/core/utils/responsive_util.dart';
 import 'package:transaction_mobile_app/core/utils/settings.dart';
 import 'package:transaction_mobile_app/core/utils/show_snackbar.dart';
+import 'package:transaction_mobile_app/data/services/firebase/fcm_service.dart';
 import 'package:transaction_mobile_app/gen/assets.gen.dart';
 import 'package:transaction_mobile_app/gen/colors.gen.dart';
 import 'package:transaction_mobile_app/presentation/widgets/card_widget.dart';
@@ -45,6 +49,7 @@ class _AccountTabState extends State<AccountTab> {
         });
       });
     });
+
     super.initState();
   }
 
@@ -60,33 +65,68 @@ class _AccountTabState extends State<AccountTab> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (mounted) {
-              if (context.mounted) {
-                if (state is DeleteUserLoading) {
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (mounted) {
+                  if (context.mounted) {
+                    if (state is DeleteUserLoading) {
+                      showDialog(
+                        context: context,
+                        builder: (_) => const Align(
+                          child: LoadingWidget(),
+                        ),
+                      );
+                    } else if (state is DeleteUserSucess) {
+                      resetAppState(context);
+                      deleteToken();
+                      deleteDisplayName();
+                      deletePhoneNumber();
+                      deleteLogInStatus();
+                      deleteCountryCode();
+                      context.goNamed(RouteName.signup);
+                    } else if (state is DeleteUserFail) {
+                      context.pop();
+                      showSnackbar(
+                        context,
+                        title: 'Error',
+                        description: state.reason,
+                      );
+                    }
+                  }
+                }
+              },
+            ),
+            BlocListener<NotificationBloc, NotificationState>(
+              listener: (context, state) {
+                if (state is DeleteFcmTokenLoading) {
                   showDialog(
                     context: context,
-                    builder: (_) => const Align(child: LoadingWidget()),
+                    builder: (_) => const Align(
+                      child: LoadingWidget(),
+                    ),
                   );
-                } else if (state is DeleteUserSucess) {
+                } else if (state is DeleteFcmTokenSuccess) {
+                  context.read<PaymentCardBloc>().add(ResetPaymentCard());
+
+                  context.pop();
                   deleteToken();
                   deleteDisplayName();
                   deletePhoneNumber();
                   deleteLogInStatus();
                   deleteCountryCode();
                   context.goNamed(RouteName.signup);
-                } else if (state is DeleteUserFail) {
+                } else if (state is DeleteFcmTokenFailure) {
                   context.pop();
                   showSnackbar(
                     context,
-                    title: 'Error',
                     description: state.reason,
                   );
                 }
-              }
-            }
-          },
+              },
+            ),
+          ],
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -277,12 +317,11 @@ class _AccountTabState extends State<AccountTab> {
                         title: 'Logout',
                         isLogout: true,
                         onTab: () {
-                          deleteToken();
-                          deleteDisplayName();
-                          deletePhoneNumber();
-                          deleteLogInStatus();
-                          deleteCountryCode();
-                          context.goNamed(RouteName.signup);
+                          context.read<NotificationBloc>().add(
+                                DeleteFCMToken(
+                                  fcmToken: FCMService.fcmToken,
+                                ),
+                              );
                         },
                       ),
                     ],

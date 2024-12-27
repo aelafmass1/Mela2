@@ -392,10 +392,10 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
   }
 
   _buildTitle() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextWidget(
@@ -1235,7 +1235,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     SizedBox(width: 5),
                   ],
                 ),
-                const SizedBox(
+                SizedBox(
                   height: 15,
                 ),
               ],
@@ -1243,8 +1243,8 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
           else
             const Column(
               children: [
-                const SizedBox(height: 10),
-                const Row(
+                SizedBox(height: 10),
+                Row(
                   children: [
                     TextWidget(
                       text: 'All Members (0)',
@@ -1265,7 +1265,7 @@ class _EqubAdminDetailScreenState extends State<EqubAdminDetailScreen>
                     SizedBox(width: 5),
                   ],
                 ),
-                const SizedBox(
+                SizedBox(
                   height: 15,
                 ),
               ],
